@@ -10,8 +10,7 @@ export const REFRESH_COOKIE = 'mp_refresh';
 /** 백엔드 Refresh Token의 수명(14일). 백엔드가 응답으로 알려주지 않아 상수로 맞춘다. */
 const REFRESH_MAX_AGE_SECONDS = 14 * 24 * 60 * 60;
 
-// Access는 API 중계 요청(/bff/api)에만, Refresh는 세션 경로(/bff/session)에서만 전송되도록 Path를 나눈다.
-// Refresh가 일반 API 요청에 실려 다니지 않게 하려는 것이다.
+/** Access는 /bff 전체에, Refresh는 세션 경로로만 보내 일반 API 요청에 실리지 않게 한다. */
 const ACCESS_PATH = BFF_BASE;
 const REFRESH_PATH = `${BFF_BASE}/session`;
 
@@ -22,7 +21,7 @@ export type Tokens = {
   expiresIn: number;
 };
 
-// 요청 시점의 NODE_ENV를 읽는다. 로컬(http)에서는 Secure 쿠키가 저장되지 않기 때문이다.
+/** 로컬(http)에서는 Secure 쿠키가 저장되지 않으므로 운영에서만 Secure를 붙인다. */
 function baseOptions() {
   return {
     httpOnly: true,

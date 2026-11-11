@@ -1,3 +1,6 @@
+import type { QueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
+
 import { toApiError } from '@/lib/api/errors';
 import { BFF_BASE } from '@/lib/api/paths';
 import { getQueryClient } from '@/lib/query-client';
@@ -6,8 +9,8 @@ import { parseOAuthCallbackHash } from './oauth';
 
 type CallbackOptions = {
   baseUrl?: string;
-  /** 주소창에서 fragment를 지운다. 기본은 현재 경로와 쿼리만 남기고 교체한다. */
   clearFragment?: () => void;
+  queryClient?: QueryClient;
 };
 
 function clearLocationFragment() {
@@ -18,19 +21,16 @@ function clearLocationFragment() {
   );
 }
 
-/**
- * OAuth 콜백 페이지가 호출한다. fragment의 토큰을 BFF에 한 번 넘겨 httpOnly 쿠키로 바꾸고, 주소창에서
- * 토큰을 지운다. 이 순간을 빼면 토큰은 JavaScript가 접근할 수 있는 곳에 남지 않는다.
- */
+/** 콜백의 토큰을 BFF에 한 번 넘겨 쿠키로 바꾸고 쿼리 캐시를 비운다. 성공·실패와 관계없이 먼저 주소창의 fragment를 지운다. */
 export async function completeOAuthCallback(
   hash: string,
   {
     baseUrl = BFF_BASE,
     clearFragment = clearLocationFragment,
+    queryClient = getQueryClient(),
   }: CallbackOptions = {},
 ): Promise<{ ok: true } | { ok: false; code: string }> {
   const parsed = parseOAuthCallbackHash(hash);
-  // 성공이든 실패든 토큰이 주소창·방문 기록에 남지 않도록 먼저 지운다.
   clearFragment();
   if (!parsed.ok) return parsed;
 
@@ -48,34 +48,38 @@ export async function completeOAuthCallback(
   if (!response.ok) {
     return { ok: false, code: (await toApiError(response)).code };
   }
+  queryClient.clear();
   return { ok: true };
 }
 
+const sessionSchema = z.object({ authenticated: z.boolean() });
+
 export type SessionState = 'authenticated' | 'anonymous' | 'unavailable';
 
-/** 로그인 여부. 새로고침 직후에는 BFF가 Refresh로 조용히 이어 준다. */
 export async function getSession(baseUrl = BFF_BASE): Promise<SessionState> {
   try {
     const response = await fetch(`${baseUrl}/session`, {
       credentials: 'same-origin',
     });
     if (!response.ok) return 'unavailable';
-    const body = (await response.json()) as { authenticated?: boolean };
-    return body.authenticated ? 'authenticated' : 'anonymous';
+    const parsed = sessionSchema.safeParse(await response.json());
+    if (!parsed.success) return 'unavailable';
+    return parsed.data.authenticated ? 'authenticated' : 'anonymous';
   } catch {
     return 'unavailable';
   }
 }
 
-/** 로그아웃. 서버 요청이 실패해도 이 브라우저의 캐시는 비워 이전 사용자의 데이터가 남지 않게 한다. */
-export async function signOut(baseUrl = BFF_BASE) {
+/** 서버 요청이 실패해도 쿼리 캐시는 비운다. 이전 사용자의 데이터가 남으면 안 된다. */
+export async function signOut(
+  baseUrl = BFF_BASE,
+  queryClient = getQueryClient(),
+) {
   try {
     await fetch(`${baseUrl}/session`, {
       method: 'DELETE',
       credentials: 'same-origin',
     });
-  } catch {
-    // 쿠키는 BFF가 지운다. 연결 실패 시 남은 쿠키는 만료로 사라진다.
-  }
-  getQueryClient().clear();
+  } catch {}
+  queryClient.clear();
 }

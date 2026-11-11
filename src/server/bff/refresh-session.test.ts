@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest';
 
 import { API, server } from '@/test/server';
 
-import { refreshSession } from './refresh-session';
+import { ACCESS_COOKIE, REFRESH_COOKIE } from './cookies';
+import { refreshResponse, refreshSession } from './refresh-session';
+import { errorResponse } from './responses';
 
 const newTokens = {
   accessToken: 'new-access',
@@ -78,5 +80,44 @@ describe('refreshSession', () => {
     );
 
     expect(await refreshSession('r')).toEqual({ status: 'unavailable' });
+  });
+});
+
+describe('refreshResponse', () => {
+  const rejected = () =>
+    errorResponse(401, 'UNAUTHORIZED', '인증이 필요합니다.');
+
+  it('성공하면 로그인 상태와 새 쿠키 두 개를 돌려준다', async () => {
+    const response = refreshResponse(
+      {
+        status: 'ok',
+        tokens: { accessToken: 'a2', refreshToken: 'r2', expiresIn: 3600 },
+      },
+      rejected,
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ authenticated: true });
+    const cookies = response.headers.getSetCookie();
+    expect(cookies.some((c) => c.startsWith(`${ACCESS_COOKIE}=a2`))).toBe(true);
+    expect(cookies.some((c) => c.startsWith(`${REFRESH_COOKIE}=r2`))).toBe(
+      true,
+    );
+  });
+
+  it('거부되면 호출한 쪽이 정한 응답에 쿠키 삭제를 붙인다', async () => {
+    const response = refreshResponse({ status: 'unauthenticated' }, rejected);
+
+    expect(response.status).toBe(401);
+    const cookies = response.headers.getSetCookie();
+    expect(cookies).toHaveLength(2);
+    expect(cookies.every((c) => /Max-Age=0/i.test(c))).toBe(true);
+  });
+
+  it('장애면 502이고 쿠키는 건드리지 않는다', async () => {
+    const response = refreshResponse({ status: 'unavailable' }, rejected);
+
+    expect(response.status).toBe(502);
+    expect(response.headers.getSetCookie()).toEqual([]);
   });
 });

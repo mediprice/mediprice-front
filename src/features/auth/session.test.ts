@@ -1,3 +1,4 @@
+import { QueryClient } from '@tanstack/react-query';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -77,6 +78,59 @@ describe('completeOAuthCallback', () => {
   });
 });
 
+describe('로그인 상태 전환 시 쿼리 캐시', () => {
+  function cachedClient() {
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(['hospitals', 'detail', 'H1'], { mine: false });
+    return queryClient;
+  }
+
+  it('로그인에 성공하면 비로그인 때 받은 캐시를 비운다', async () => {
+    server.use(
+      http.post(`${BASE}/session`, () =>
+        HttpResponse.json({ authenticated: true }),
+      ),
+    );
+    const queryClient = cachedClient();
+
+    await completeOAuthCallback(hash, {
+      baseUrl: BASE,
+      clearFragment: vi.fn(),
+      queryClient,
+    });
+
+    expect(
+      queryClient.getQueryData(['hospitals', 'detail', 'H1']),
+    ).toBeUndefined();
+  });
+
+  it('로그인에 실패하면 캐시를 그대로 둔다', async () => {
+    server.use(http.post(`${BASE}/session`, () => HttpResponse.error()));
+    const queryClient = cachedClient();
+
+    await completeOAuthCallback(hash, {
+      baseUrl: BASE,
+      clearFragment: vi.fn(),
+      queryClient,
+    });
+
+    expect(
+      queryClient.getQueryData(['hospitals', 'detail', 'H1']),
+    ).toBeDefined();
+  });
+
+  it('로그아웃하면 서버 요청이 실패해도 캐시를 비운다', async () => {
+    server.use(http.delete(`${BASE}/session`, () => HttpResponse.error()));
+    const queryClient = cachedClient();
+
+    await signOut(BASE, queryClient);
+
+    expect(
+      queryClient.getQueryData(['hospitals', 'detail', 'H1']),
+    ).toBeUndefined();
+  });
+});
+
 describe('getSession', () => {
   it.each([
     [true, 'authenticated'],
@@ -96,6 +150,12 @@ describe('getSession', () => {
         () => new HttpResponse(null, { status: 502 }),
       ),
     );
+
+    expect(await getSession(BASE)).toBe('unavailable');
+  });
+
+  it('응답이 약속된 형식이 아니면 unavailable이다', async () => {
+    server.use(http.get(`${BASE}/session`, () => HttpResponse.json({ ok: 1 })));
 
     expect(await getSession(BASE)).toBe('unavailable');
   });
