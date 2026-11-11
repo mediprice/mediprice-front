@@ -60,5 +60,6 @@ export default defineConfig([
     'dist/**',
     'coverage/**',
     'next-env.d.ts',
+    'src/lib/api/schema.d.ts',
   ]),
 ]);
