@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { NextResponse } from 'next/server';
 
 // 세션 응답은 사용자마다 다르므로 어떤 캐시도 저장하지 않게 한다.

@@ -1,3 +1,5 @@
+import 'server-only';
+
 import type { NextRequest, NextResponse } from 'next/server';
 
 import { BFF_BASE } from '@/lib/api/paths';
