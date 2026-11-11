@@ -35,11 +35,10 @@ pnpm dev
 
 ```
 src/
-  app/bff/            BFF 라우트(api 중계, session, session/refresh)
-  lib/bff/            쿠키, 업스트림 호출, 재발급(서버 전용)
-  lib/api/            타입(schema.d.ts, 생성물), 클라이언트, 에러, 쿼리 직렬화
-  lib/auth/           로그인 시작 주소, 콜백 해석, 세션 헬퍼, 세션 만료 이벤트
-  features/<도메인>/  쿼리 옵션(queryOptions)과 쿼리 키
+  app/bff/            BFF 라우트(api 중계, session, session/refresh). 핸들러는 얇게
+  server/bff/         서버 전용: 쿠키, 업스트림 호출, 재발급, 응답 헬퍼
+  lib/api/            타입(schema.d.ts, 생성물), 클라이언트, 에러, 쿼리 직렬화, 세션 만료 이벤트
+  features/<도메인>/  쿼리 옵션(queryOptions)과 쿼리 키. auth는 로그인 시작·콜백·세션 헬퍼
 ```
 
 ### 호출하는 법
@@ -68,18 +67,22 @@ const { data: hospitals } = useQuery(
 
 > 콜백 페이지와 로그인 버튼 UI는 아직 없다. 위 함수를 호출하는 얇은 페이지를 화면 작업에서 추가한다.
 
+## 코딩 컨벤션
+
+폴더 구조, 의존 방향, 이름, 주석 규칙은 [`docs/coding-convention.md`](docs/coding-convention.md)에 있다. 의존 방향과 `server` 경계는 ESLint와 `server-only`가 강제한다.
+
 ## 새 도메인(쿼리) 추가하기
 
 1. 백엔드가 바뀌었으면 `pnpm api:generate`로 타입을 갱신한다(생성 파일은 커밋한다).
 2. `src/features/<도메인>/queries.ts`를 만든다.
    - 키 팩토리: `all` → `lists()` / `list(params)` / `details()` / `detail(id)`처럼 도메인에서 항목으로 좁혀지는 계층. 한 번에 무효화할 수 있다.
    - `queryOptions({ queryKey, queryFn })`를 export한다. `queryFn`은 `unwrap(apiClient.GET(…))`다(에러를 `ApiError`로 던짐).
-   - 훅은 만들지 않는다. 서버 prefetch에서도 같은 옵션을 쓴다.
+   - 훅은 만들지 않는다. 화면에서 `useQuery(옵션)`으로 쓴다.
 3. `queries.test.ts`를 만든다. `src/features/regions/queries.test.ts`를 따라 `apiClient`를 절대 주소로 바꾸고 msw로 백엔드를 대신한다.
 4. 상태를 바꾸는 요청(POST/PUT/PATCH/DELETE)은 같은 출처에서 보낸 것만 BFF가 받는다. `useMutation`의 `mutationFn`에서 `unwrap(apiClient.POST(…))`를 쓰고, 성공하면 관련 키를 무효화한다.
 
 ## 알아둘 점
 
-- `apiClient`는 상대 주소(`/bff`)를 쓰는 **브라우저 전용**이다. 서버 컴포넌트에서 호출하려면 쿠키를 읽어 백엔드로 직접 보내는 별도 경로가 필요하다(아직 없음).
+- `apiClient`와 이를 쓰는 쿼리 옵션은 상대 주소(`/bff`)를 쓰는 **브라우저 전용**이다. 서버 컴포넌트에서 prefetch하려면 쿠키를 읽어 백엔드로 직접 보내는 서버용 호출 경로를 따로 만들어야 한다(아직 없음).
 - `NEXT_PUBLIC_API_URL`은 빌드에도 필요하다. 배포(Vercel)에 설정해야 한다.
 - 로그인이 끝나면 백엔드가 돌려보낼 주소(`OAUTH2_REDIRECT_URI`)는 이 앱의 `/oauth/callback`과 같아야 한다.

@@ -28,7 +28,7 @@
 | 브라우저 통신 | 브라우저는 같은 출처의 `/bff/**`만 호출하고, Next가 쿠키의 토큰을 붙여 백엔드로 중계한다      | CORS 설정이 필요 없고, 토큰이 JS를 거치지 않음                                          |
 | 만료 처리     | 401이면 `/bff/session/refresh`를 호출(브라우저에서 single-flight)한 뒤 원래 요청을 1회 재시도 | Refresh가 회전되므로 재발급을 한 곳에서 한 번만 수행해야 경쟁 상태가 없음               |
 | 에러          | zod로 검증해 `ApiError`로 변환                                                                | 스펙에 없는 형식이라 런타임 검증이 필요                                                 |
-| 쿼리          | 도메인별 `queryOptions`와 쿼리 키 팩토리                                                      | 캐시 키 일관성, 서버·클라이언트 공용                                                    |
+| 쿼리          | 도메인별 `queryOptions`와 쿼리 키 팩토리                                                      | 캐시 키 일관성(브라우저 전용 — 서버 prefetch는 후속)                                    |
 
 ## 요청 흐름
 
@@ -51,12 +51,12 @@ src/
       api/[...path]/route.ts      백엔드 /api/** 중계 (모든 HTTP 메서드)
       session/route.ts            POST: 쿠키 설정(로그인), GET: 상태, DELETE: 로그아웃
       session/refresh/route.ts    POST: 쿠키의 Refresh로 재발급 후 쿠키 갱신
+  server/bff/                     서버 전용(server-only)
+    cookies.ts                    쿠키 이름·옵션, 읽기·쓰기·삭제
+    upstream.ts                   백엔드 호출, 요청 헤더 정리, Origin 검사
+    refresh-session.ts            Refresh로 재발급, 결과 → 쿠키·응답 변환(두 라우트가 공유)
+    responses.ts                  no-store 응답과 공통 에러 응답
   lib/
-    bff/
-      cookies.ts                  쿠키 이름·옵션, 읽기·쓰기·삭제
-      upstream.ts                 백엔드 호출, 요청 헤더 정리, Origin 검사
-      session.ts                  Refresh로 재발급(세션·재발급 라우트가 공유)
-      responses.ts                no-store 응답과 공통 에러 응답
     api/
       schema.d.ts                 생성물 (pnpm api:generate)
       client.ts                   openapi-fetch 클라이언트(baseUrl '/bff') + 401 재시도
@@ -64,16 +64,17 @@ src/
       errors.ts                   ErrorResponse zod 스키마, ApiError, NetworkError
       unwrap.ts                   openapi-fetch 결과를 데이터 또는 예외로 변환
       query.ts                    쿼리 직렬화(조건 객체를 평평하게, 배열은 쉼표)
+      paths.ts                    BFF_BASE('/bff')
+      session-events.ts           세션 만료 이벤트(subscribeSessionExpired)
+  features/
     auth/
       oauth.ts                    loginUrl(), parseOAuthCallbackHash()
       session.ts                  completeOAuthCallback(), signOut(), getSession()
-      events.ts                   세션 만료 이벤트(subscribeSessionExpired)
-  features/
     regions/queries.ts            쿼리 규칙의 예시 (시도·시군구)
     hospitals/queries.ts          쿼리 규칙의 예시 (검색·상세)
 ```
 
-### 쿠키 (`lib/bff/cookies.ts`)
+### 쿠키 (`server/bff/cookies.ts`)
 
 | 쿠키         | 값      | 속성                                                               | 수명                   |
 | ------------ | ------- | ------------------------------------------------------------------ | ---------------------- |
@@ -152,7 +153,7 @@ BFF 라우트는 `Request` 객체를 직접 넘겨 핸들러를 호출하고, �
 ## 범위 밖
 
 - 화면, 라우트 UI, OAuth 콜백 페이지(위 함수를 호출하는 얇은 페이지는 화면 작업에서 추가)
-- 서버 컴포넌트에서의 인증 호출. 쿠키가 같은 출처에 있으므로 `cookies()`로 같은 토큰을 읽어 prefetch할 수 있는 구조지만 이번에는 구현하지 않는다.
+- 서버 컴포넌트에서의 prefetch와 인증 호출(`apiClient`는 브라우저 전용). 쿠키가 같은 출처에 있으므로 `cookies()`로 같은 토큰을 읽어 prefetch할 수 있는 구조지만 이번에는 구현하지 않는다.
 - 백엔드가 직접 httpOnly 쿠키를 내려주는 방식
 - 후기·마이페이지·관리자 쿼리(화면 작업에서 같은 패턴으로 추가)
 
