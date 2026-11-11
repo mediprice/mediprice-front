@@ -5,7 +5,7 @@ export function loginUrl() {
   return new URL('/oauth2/authorization/google', env.NEXT_PUBLIC_API_URL).href;
 }
 
-export type CallbackTokens = {
+type CallbackTokens = {
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
