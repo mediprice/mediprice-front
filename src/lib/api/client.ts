@@ -2,6 +2,7 @@ import createClient from 'openapi-fetch';
 
 import { emitSessionExpired } from '@/lib/auth/events';
 
+import { serializeQuery } from './query';
 import { createRefresher } from './refresh';
 import type { paths } from './schema';
 
@@ -51,6 +52,7 @@ export function createApiClient(options: Options) {
   return createClient<paths>({
     baseUrl: options.baseUrl,
     fetch: createApiFetch(options),
+    querySerializer: serializeQuery,
   });
 }
 
