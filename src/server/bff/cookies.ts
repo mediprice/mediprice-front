@@ -1,5 +1,7 @@
 import type { NextRequest, NextResponse } from 'next/server';
 
+import { BFF_BASE } from '@/lib/api/paths';
+
 export const ACCESS_COOKIE = 'mp_access';
 export const REFRESH_COOKIE = 'mp_refresh';
 
@@ -8,8 +10,8 @@ const REFRESH_MAX_AGE_SECONDS = 14 * 24 * 60 * 60;
 
 // Access는 API 중계 요청(/bff/api)에만, Refresh는 세션 경로(/bff/session)에서만 전송되도록 Path를 나눈다.
 // Refresh가 일반 API 요청에 실려 다니지 않게 하려는 것이다.
-const ACCESS_PATH = '/bff';
-const REFRESH_PATH = '/bff/session';
+const ACCESS_PATH = BFF_BASE;
+const REFRESH_PATH = `${BFF_BASE}/session`;
 
 export type Tokens = {
   accessToken: string;

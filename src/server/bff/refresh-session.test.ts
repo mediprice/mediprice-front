@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { API, server } from '@/test/server';
 
-import { refreshSession } from './session';
+import { refreshSession } from './refresh-session';
 
 const newTokens = {
   accessToken: 'new-access',

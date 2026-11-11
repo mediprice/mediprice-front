@@ -2,6 +2,8 @@ import type { NextRequest } from 'next/server';
 
 import { env } from '@/env';
 
+import { unavailable } from './responses';
+
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 /**
@@ -64,13 +66,6 @@ export async function callBackend(url: URL, init: RequestInit) {
   try {
     return await fetch(url, init);
   } catch {
-    return Response.json(
-      {
-        code: 'UPSTREAM_UNAVAILABLE',
-        message: '서버에 연결할 수 없습니다.',
-        errors: [],
-      },
-      { status: 502 },
-    );
+    return unavailable();
   }
 }

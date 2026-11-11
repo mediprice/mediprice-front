@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
-import { ACCESS_COOKIE, REFRESH_COOKIE } from '@/lib/bff/cookies';
+import { ACCESS_COOKIE, REFRESH_COOKIE } from '@/server/bff/cookies';
 import { bffRequest } from '@/test/request';
 import { API, server } from '@/test/server';
 

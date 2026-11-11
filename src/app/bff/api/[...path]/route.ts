@@ -1,13 +1,13 @@
 import type { NextRequest } from 'next/server';
 
-import { readTokens } from '@/lib/bff/cookies';
-import { errorResponse, forbidden } from '@/lib/bff/responses';
+import { readTokens } from '@/server/bff/cookies';
+import { errorResponse, forbidden } from '@/server/bff/responses';
 import {
   callBackend,
   forwardHeaders,
   isSameOrigin,
   resolveBackendUrl,
-} from '@/lib/bff/upstream';
+} from '@/server/bff/upstream';
 
 const METHODS_WITHOUT_BODY = new Set(['GET', 'HEAD']);
 

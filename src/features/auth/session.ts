@@ -1,9 +1,8 @@
 import { toApiError } from '@/lib/api/errors';
+import { BFF_BASE } from '@/lib/api/paths';
 import { getQueryClient } from '@/lib/query-client';
 
 import { parseOAuthCallbackHash } from './oauth';
-
-const BFF = '/bff';
 
 type CallbackOptions = {
   baseUrl?: string;
@@ -26,7 +25,7 @@ function clearLocationFragment() {
 export async function completeOAuthCallback(
   hash: string,
   {
-    baseUrl = BFF,
+    baseUrl = BFF_BASE,
     clearFragment = clearLocationFragment,
   }: CallbackOptions = {},
 ): Promise<{ ok: true } | { ok: false; code: string }> {
@@ -55,7 +54,7 @@ export async function completeOAuthCallback(
 export type SessionState = 'authenticated' | 'anonymous' | 'unavailable';
 
 /** 로그인 여부. 새로고침 직후에는 BFF가 Refresh로 조용히 이어 준다. */
-export async function getSession(baseUrl = BFF): Promise<SessionState> {
+export async function getSession(baseUrl = BFF_BASE): Promise<SessionState> {
   try {
     const response = await fetch(`${baseUrl}/session`, {
       credentials: 'same-origin',
@@ -69,7 +68,7 @@ export async function getSession(baseUrl = BFF): Promise<SessionState> {
 }
 
 /** 로그아웃. 서버 요청이 실패해도 이 브라우저의 캐시는 비워 이전 사용자의 데이터가 남지 않게 한다. */
-export async function signOut(baseUrl = BFF) {
+export async function signOut(baseUrl = BFF_BASE) {
   try {
     await fetch(`${baseUrl}/session`, {
       method: 'DELETE',

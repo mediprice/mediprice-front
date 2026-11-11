@@ -6,15 +6,15 @@ import {
   clearSessionCookies,
   readTokens,
   setSessionCookies,
-} from '@/lib/bff/cookies';
+} from '@/server/bff/cookies';
+import { refreshSession } from '@/server/bff/refresh-session';
 import {
   errorResponse,
   forbidden,
   jsonNoStore,
   unavailable,
-} from '@/lib/bff/responses';
-import { refreshSession } from '@/lib/bff/session';
-import { callBackend, isSameOrigin } from '@/lib/bff/upstream';
+} from '@/server/bff/responses';
+import { callBackend, isSameOrigin } from '@/server/bff/upstream';
 
 const signInSchema = z.object({
   accessToken: z.string().min(1),

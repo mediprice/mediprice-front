@@ -1,7 +1,8 @@
 import createClient from 'openapi-fetch';
 
-import { emitSessionExpired } from '@/lib/auth/events';
+import { emitSessionExpired } from '@/lib/api/session-events';
 
+import { BFF_BASE } from './paths';
 import { serializeQuery } from './query';
 import { createRefresher } from './refresh';
 import type { paths } from './schema';
@@ -58,6 +59,6 @@ export function createApiClient(options: Options) {
 
 /** 앱에서 쓰는 API 클라이언트. 브라우저 전용이다(상대 경로 `/bff`를 쓴다). */
 export const apiClient = createApiClient({
-  baseUrl: '/bff',
+  baseUrl: BFF_BASE,
   onSessionExpired: emitSessionExpired,
 });

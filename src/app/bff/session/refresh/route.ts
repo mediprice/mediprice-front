@@ -4,15 +4,15 @@ import {
   clearSessionCookies,
   readTokens,
   setSessionCookies,
-} from '@/lib/bff/cookies';
+} from '@/server/bff/cookies';
+import { refreshSession } from '@/server/bff/refresh-session';
 import {
   forbidden,
   jsonNoStore,
   unauthenticated,
   unavailable,
-} from '@/lib/bff/responses';
-import { refreshSession } from '@/lib/bff/session';
-import { isSameOrigin } from '@/lib/bff/upstream';
+} from '@/server/bff/responses';
+import { isSameOrigin } from '@/server/bff/upstream';
 
 /**
  * 쿠키의 Refresh Token으로 두 토큰을 새로 받아 쿠키를 교체한다. 브라우저의 API 클라이언트가 401을 받았을 때
