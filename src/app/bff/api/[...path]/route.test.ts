@@ -22,7 +22,7 @@ describe('GET /bff/api/**', () => {
 
     const response = await GET(
       bffRequest('/bff/api/hospitals/H1', { cookies: withAccess }),
-      ctx('api', 'hospitals', 'H1'),
+      ctx('hospitals', 'H1'),
     );
 
     expect(response.status).toBe(200);
@@ -41,10 +41,7 @@ describe('GET /bff/api/**', () => {
       }),
     );
 
-    await GET(
-      bffRequest('/bff/api/regions/sido'),
-      ctx('api', 'regions', 'sido'),
-    );
+    await GET(bffRequest('/bff/api/regions/sido'), ctx('regions', 'sido'));
 
     expect(seen?.has('authorization')).toBe(false);
   });
@@ -60,7 +57,7 @@ describe('GET /bff/api/**', () => {
 
     await GET(
       bffRequest('/bff/api/hospitals?keyword=%EB%B3%91%EC%9B%90&size=5'),
-      ctx('api', 'hospitals'),
+      ctx('hospitals'),
     );
 
     expect(new URL(seenUrl).search).toBe('?keyword=%EB%B3%91%EC%9B%90&size=5');
@@ -76,7 +73,7 @@ describe('GET /bff/api/**', () => {
         http.get(`${API}/api/x`, () => HttpResponse.json(body, { status })),
       );
 
-      const response = await GET(bffRequest('/bff/api/x'), ctx('api', 'x'));
+      const response = await GET(bffRequest('/bff/api/x'), ctx('x'));
 
       expect(response.status).toBe(status);
       expect(await response.json()).toEqual(body);
@@ -93,7 +90,7 @@ describe('GET /bff/api/**', () => {
       ),
     );
 
-    const response = await GET(bffRequest('/bff/api/x'), ctx('api', 'x'));
+    const response = await GET(bffRequest('/bff/api/x'), ctx('x'));
 
     expect(response.headers.getSetCookie()).toEqual([]);
   });
@@ -101,7 +98,7 @@ describe('GET /bff/api/**', () => {
   it('백엔드에 닿지 못하면 502다', async () => {
     server.use(http.get(`${API}/api/x`, () => HttpResponse.error()));
 
-    const response = await GET(bffRequest('/bff/api/x'), ctx('api', 'x'));
+    const response = await GET(bffRequest('/bff/api/x'), ctx('x'));
 
     expect(response.status).toBe(502);
     expect(await response.json()).toMatchObject({
@@ -128,7 +125,7 @@ describe('상태를 바꾸는 메서드', () => {
         cookies: withAccess,
         body: { rating: 5, content: '좋아요' },
       }),
-      ctx('api', 'hospitals', 'H1', 'reviews'),
+      ctx('hospitals', 'H1', 'reviews'),
     );
 
     expect(response.status).toBe(201);
@@ -151,7 +148,7 @@ describe('상태를 바꾸는 메서드', () => {
 
     const response = await handler(
       bffRequest('/bff/api/x', { method }),
-      ctx('api', 'x'),
+      ctx('x'),
     );
 
     expect(response.status).toBe(204);
@@ -165,7 +162,7 @@ describe('상태를 바꾸는 메서드', () => {
         body: {},
         origin: 'https://evil.example',
       }),
-      ctx('api', 'x'),
+      ctx('x'),
     );
 
     expect(response.status).toBe(403);
@@ -173,15 +170,30 @@ describe('상태를 바꾸는 메서드', () => {
 });
 
 describe('경로 제한', () => {
+  // 라우트는 `/bff/api/` 뒤의 경로만 받는다. 백엔드의 `/api/` 밖으로 나가려는 시도는 거부한다.
   it.each([
-    ['api가 아닌 경로', ['admin', 'x']],
-    ['경로 이탈', ['api', '..', 'x']],
-    ['이중 인코딩', ['api', '%2e%2e', 'x']],
-    ['빈 경로', []],
+    ['경로 이탈', ['..', 'x']],
+    ['현재 경로', ['.', 'x']],
+    ['이중 인코딩', ['%2e%2e', 'x']],
+    ['슬래시를 품은 세그먼트', ['a/b']],
   ])('%s는 404이고 백엔드를 부르지 않는다', async (_name, path) => {
     const response = await GET(bffRequest('/bff/api/x'), ctx(...path));
 
     expect(response.status).toBe(404);
     expect(await response.json()).toMatchObject({ code: 'NOT_FOUND' });
+  });
+
+  it('정상 경로는 백엔드의 /api/ 아래로 전달한다', async () => {
+    let pathname = '';
+    server.use(
+      http.get(`${API}/api/regions/sido`, ({ request }) => {
+        pathname = new URL(request.url).pathname;
+        return HttpResponse.json([]);
+      }),
+    );
+
+    await GET(bffRequest('/bff/api/regions/sido'), ctx('regions', 'sido'));
+
+    expect(pathname).toBe('/api/regions/sido');
   });
 });

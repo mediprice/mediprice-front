@@ -23,7 +23,8 @@ async function relay(
   if (!isSameOrigin(request)) return forbidden();
 
   const { path } = await context.params;
-  const url = resolveBackendUrl(path, request.nextUrl.search);
+  // 라우트가 `/bff/api/` 뒤의 경로만 넘겨주므로 백엔드의 `/api/`를 다시 붙인다.
+  const url = resolveBackendUrl(['api', ...path], request.nextUrl.search);
   if (!url) return errorResponse(404, 'NOT_FOUND', '존재하지 않는 경로입니다.');
 
   const upstream = await callBackend(url, {

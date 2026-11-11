@@ -10,7 +10,9 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
  */
 export function resolveBackendUrl(segments: string[], search: string) {
   const [root, ...rest] = segments;
-  if (root !== 'api' || !rest.every(isSafeSegment)) return null;
+  if (root !== 'api' || rest.length === 0 || !rest.every(isSafeSegment)) {
+    return null;
+  }
 
   const url = new URL(env.NEXT_PUBLIC_API_URL);
   url.pathname = `/${segments.map(encodeURIComponent).join('/')}`;

@@ -26,6 +26,7 @@ describe('resolveBackendUrl', () => {
   it.each([
     ['api가 아닌 첫 세그먼트', ['admin', 'x']],
     ['빈 경로', []],
+    ['api만 있는 경로', ['api']],
     ['..', ['api', '..', 'x']],
     ['.', ['api', '.', 'x']],
     ['빈 세그먼트', ['api', '', 'x']],
