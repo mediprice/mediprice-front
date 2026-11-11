@@ -55,14 +55,19 @@ src/
     bff/
       cookies.ts                  쿠키 이름·옵션, 읽기·쓰기·삭제
       upstream.ts                 백엔드 호출, 요청 헤더 정리, Origin 검사
+      session.ts                  Refresh로 재발급(세션·재발급 라우트가 공유)
+      responses.ts                no-store 응답과 공통 에러 응답
     api/
       schema.d.ts                 생성물 (pnpm api:generate)
       client.ts                   openapi-fetch 클라이언트(baseUrl '/bff') + 401 재시도
       refresh.ts                  브라우저 single-flight 재발급
-      errors.ts                   ErrorResponse zod 스키마, ApiError
+      errors.ts                   ErrorResponse zod 스키마, ApiError, NetworkError
+      unwrap.ts                   openapi-fetch 결과를 데이터 또는 예외로 변환
+      query.ts                    쿼리 직렬화(조건 객체를 평평하게, 배열은 쉼표)
     auth/
       oauth.ts                    loginUrl(), parseOAuthCallbackHash()
-      session.ts                  signIn(tokens), signOut(), getSession()
+      session.ts                  completeOAuthCallback(), signOut(), getSession()
+      events.ts                   세션 만료 이벤트(subscribeSessionExpired)
   features/
     regions/queries.ts            쿼리 규칙의 예시 (시도·시군구)
     hospitals/queries.ts          쿼리 규칙의 예시 (검색·상세)
@@ -80,7 +85,7 @@ src/
 
 ### 중계 (`app/bff/api/[...path]/route.ts`)
 
-- 허용 경로는 `/bff/api/**`만이며 백엔드의 `{API_URL}/api/**`로만 전달한다(`..`, 인코딩된 경로 우회, 다른 호스트로의 전달을 막는다).
+- 허용 경로는 `/bff/api/**`만이며 백엔드의 `{API_URL}/api/**`로만 전달한다(라우트의 `params.path`는 `/bff/api/` 뒤의 경로이므로 `api`를 다시 붙여 해석한다)(`..`, 인코딩된 경로 우회, 다른 호스트로의 전달을 막는다).
 - 요청 메서드·쿼리·본문·`Content-Type`을 그대로 전달한다. 브라우저의 `Cookie`는 백엔드에 전달하지 않고, `mp_access`가 있으면 `Authorization: Bearer`로 바꿔 붙는다.
 - 응답은 상태 코드와 본문을 그대로 돌려주고 `Set-Cookie` 등 hop-by-hop 헤더는 제외한다.
 - CSRF 방어: `SameSite=Lax` 쿠키에 더해, GET·HEAD가 아닌 요청은 `Origin`이 현재 호스트와 같을 때만 처리한다. 다르면 403.
@@ -89,7 +94,7 @@ src/
 ### 세션 (`app/bff/session/*`)
 
 - `POST /bff/session` `{accessToken, refreshToken, expiresIn}`: 두 쿠키를 설정한다. 값이 비었거나 형식이 맞지 않으면 400.
-- `GET /bff/session`: `{authenticated: boolean}`. `mp_access`가 있으면 true. 없고 `mp_refresh`만 있으면 재발급을 시도해서 성공하면 true(새로고침 직후 복원).
+- `GET /bff/session`: `{authenticated: boolean}`. `mp_access`가 있으면 true. 없고 `mp_refresh`만 있으면 재발급을 시도해서 성공하면 true(새로고침 직후 복원), 거부되면 쿠키를 지우고 false, 백엔드에 닿지 못하면 쿠키를 유지한 채 502.
 - `POST /bff/session/refresh`: `mp_refresh`로 백엔드 `/api/auth/refresh`를 호출하고 두 쿠키를 새 값으로 교체한다. Refresh가 없거나 `INVALID_REFRESH_TOKEN`, `EXPIRED_REFRESH_TOKEN`이면 쿠키를 지우고 401. 백엔드 연결 실패는 쿠키를 유지한 채 502.
 - `DELETE /bff/session`: `mp_refresh`가 있으면 백엔드 `/api/auth/logout`을 호출(실패해도 무시)하고 두 쿠키를 지운다.
 
@@ -98,7 +103,8 @@ src/
 - `createClient<paths>({ baseUrl: '/bff' })`. 스펙의 경로가 `/api/...`이므로 실제 요청은 `/bff/api/...`가 된다. 브라우저가 쿠키를 자동으로 보내므로 클라이언트는 토큰을 알지 못한다(`credentials: 'same-origin'`).
 - 응답이 401이고 요청이 인증 엔드포인트가 아니면 `refresh()`를 기다린 뒤 원래 요청을 한 번만 다시 보낸다. 재시도가 다시 401이면 그대로 돌려준다. 재발급이 401이면 세션 상태를 `anonymous`로 바꾼다.
 - `refresh()`는 진행 중인 Promise가 있으면 같은 Promise를 돌려준다(single-flight). 백엔드가 Refresh를 새로 발급(회전)하므로, 동시 만료에도 재발급은 1회만 호출되어야 한다. 서버 쪽 BFF가 동시에 여러 재발급을 받는 경우는 이 브라우저 측 합치기로 방지한다.
-- 다른 4xx·5xx는 `ApiError`로 변환해 호출부에 전달한다.
+- 다른 4xx·5xx는 `unwrap()`이 `ApiError`로 변환해 호출부에 전달한다. 연결 실패는 `NetworkError`다.
+- 쿼리 직렬화(`query.ts`): 백엔드는 조건 객체를 `condition`, 페이지를 `pageQuery`라는 하나의 파라미터로 문서화하지만 실제 요청은 `?keyword=삼성&page=0`처럼 평평하다. 객체 값은 한 단계 풀어서 보내고, 배열은 쉼표로 이어 붙인다(`ykihos=A,B`).
 
 ### 에러 (`errors.ts`)
 
@@ -108,9 +114,10 @@ src/
 ### 인증 (`auth/`)
 
 - `parseOAuthCallbackHash(hash)`: `{ ok: true, accessToken, refreshToken, expiresIn }` 또는 `{ ok: false, code }`를 돌려주는 순수 함수. 값이 빠졌거나 형식이 맞지 않으면 `ok: false`.
-- `signIn(tokens)`: `POST /bff/session`을 호출하고 주소창의 fragment를 지운다(`history.replaceState`).
+- `completeOAuthCallback(hash)`: fragment를 해석하고, 성공·실패와 관계없이 먼저 주소창의 fragment를 지운 뒤(`history.replaceState`) `POST /bff/session`으로 토큰을 한 번 넘긴다. 결과는 `{ok: true}` 또는 `{ok: false, code}`다.
 - `signOut()`: `DELETE /bff/session`을 호출하고 쿼리 캐시를 비운다.
-- `getSession()`: `GET /bff/session`. 앱 시작 시 로그인 여부를 판단하는 데 쓴다.
+- `getSession()`: `GET /bff/session`. 앱 시작 시 로그인 여부를 판단하는 데 쓴다. 결과는 `authenticated` | `anonymous` | `unavailable`.
+- `subscribeSessionExpired(listener)`: Refresh까지 거부되었을 때 알림을 받는다. 로그인 화면 이동이나 캐시 정리는 구독한 쪽이 한다.
 - `loginUrl()`: `{API_URL}/oauth2/authorization/google`.
 
 ### 쿼리 규칙 (`features/*/queries.ts`)
@@ -122,10 +129,10 @@ src/
 
 ### 설정
 
-- `NEXT_PUBLIC_API_URL`을 필수로 바꾸고 `.env.example`에 예시(`http://localhost:8080`)를 넣는다. 서버(BFF)의 중계·재발급, 로그인 시작 주소, 타입 생성에 모두 쓴다.
-- `package.json` 스크립트: `api:generate`는 `openapi-typescript {API_URL}/api-docs -o src/lib/api/schema.d.ts`. 로컬 백엔드 또는 dev 서버를 대상으로 실행한다.
-- 의존성 추가: `openapi-fetch`, `openapi-typescript`(dev), `vitest`(dev). `msw`, `zod`, `@tanstack/react-query`는 이미 설치돼 있다. `zustand`는 이번에 쓰지 않으므로 knip 예외를 유지한다.
-- `msw`를 쓰므로 knip 예외 목록에서 제거한다.
+- `NEXT_PUBLIC_API_URL`을 필수로 바꾸고 `.env.example`에 예시(`http://localhost:8080`)를 넣는다. 서버(BFF)의 중계·재발급, 로그인 시작 주소, 타입 생성에 모두 쓴다. `typecheck`와 `knip`은 `.env.example`을 읽어 실행하므로 로컬 `.env` 없이도 통과한다.
+- `package.json` 스크립트: `api:generate`는 `scripts/generate-api.mjs`가 `{API_URL}/api-docs`에서 `src/lib/api/schema.d.ts`를 만든다(운영체제와 무관하게 동작). 로컬 백엔드 또는 dev 서버를 대상으로 실행한다.
+- 의존성 추가: `openapi-fetch`, `openapi-typescript`(dev), `vitest`(dev). `msw`, `zod`, `@tanstack/react-query`는 이미 설치돼 있다. `zustand`는 이번에 쓰지 않으므로 knip 예외를 유지하고, `msw`는 테스트에서 쓰므로 예외에서 제거했다.
+- `msw` 3은 미처리 요청 옵션 이름이 `onUnhandledFrame`이다. 테스트는 처리하지 않은 요청을 오류로 만든다.
 
 ## 테스트 (vitest + msw)
 
