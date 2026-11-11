@@ -9,6 +9,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts'],
+    setupFiles: ['src/test/setup.ts'],
     env: { NEXT_PUBLIC_API_URL: 'http://api.test' },
   },
 });
