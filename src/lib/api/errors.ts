@@ -32,18 +32,20 @@ export class NetworkError extends Error {
   }
 }
 
-/** 실패 응답을 `ApiError`로 바꾼다. 본문이 약속된 형식이 아니면 code는 `UNKNOWN`이다. */
-export async function toApiError(response: Response): Promise<ApiError> {
-  const parsed = errorResponseSchema.safeParse(
-    await response.json().catch(() => null),
-  );
+/** 이미 읽은 에러 본문을 `ApiError`로 바꾼다. 본문이 약속된 형식이 아니면 code는 `UNKNOWN`이다. */
+export function fromErrorBody(status: number, body: unknown): ApiError {
+  const parsed = errorResponseSchema.safeParse(body);
   if (!parsed.success) {
-    return new ApiError(
-      response.status,
-      'UNKNOWN',
-      '알 수 없는 오류가 발생했습니다.',
-    );
+    return new ApiError(status, 'UNKNOWN', '알 수 없는 오류가 발생했습니다.');
   }
   const { code, message, errors } = parsed.data;
-  return new ApiError(response.status, code, message, errors);
+  return new ApiError(status, code, message, errors);
+}
+
+/** 아직 본문을 읽지 않은 실패 응답을 `ApiError`로 바꾼다. */
+export async function toApiError(response: Response): Promise<ApiError> {
+  return fromErrorBody(
+    response.status,
+    await response.json().catch(() => null),
+  );
 }

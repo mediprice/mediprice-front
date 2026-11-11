@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ApiError, NetworkError, toApiError } from './errors';
+import { ApiError, fromErrorBody, NetworkError, toApiError } from './errors';
 
 function json(status: number, body: unknown) {
   return new Response(JSON.stringify(body), {
@@ -70,5 +70,23 @@ describe('NetworkError', () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(error.cause).toBe(cause);
+  });
+});
+
+describe('fromErrorBody', () => {
+  it('이미 읽은 본문을 ApiError로 바꾼다', () => {
+    const error = fromErrorBody(409, {
+      code: 'ALREADY_REPORTED',
+      message: '이미 신고했습니다.',
+      errors: [],
+    });
+
+    expect(error.status).toBe(409);
+    expect(error.code).toBe('ALREADY_REPORTED');
+  });
+
+  it('형식이 맞지 않으면 UNKNOWN이다', () => {
+    expect(fromErrorBody(500, 'oops').code).toBe('UNKNOWN');
+    expect(fromErrorBody(500, undefined).code).toBe('UNKNOWN');
   });
 });
