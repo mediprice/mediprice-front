@@ -1,7 +1,9 @@
 {
   "metadata": {
     "title": "항목별 가격",
-    "description": "병원마다 다른 비급여 진료비를 건강보험심사평가원 공개 가격으로 비교해요."
+    "description": "병원마다 다른 비급여 진료비를 건강보험심사평가원 공개 가격으로 비교해요.",
+    "documentTitle": "{name} 병원별 가격 | MediPrice",
+    "notFoundTitle": "찾을 수 없는 항목 | MediPrice"
   },
   "topBar": {
     "title": "항목별 가격"
@@ -15,17 +17,12 @@
     "description": "주소가 바뀌었거나 더 이상 공개되지 않는 항목일 수 있어요.",
     "search": "다른 항목 찾기"
   },
-  "regions": {
-    "all": "전체 지역",
-    "seoul": "서울",
-    "gyeonggi": "경기"
-  },
   "summary": {
-    "label": "공개 가격 범위",
-    "average": "평균",
+    "label": "공개 가격",
     "regionWithSggu": "{region} {sggu}",
     "scopeWithInstitution": "{scope} · {institution}",
-    "basis": "{scope} · {hospitals, number}곳의 가격 {prices, number}건 기준"
+    "scope": "{scope} 기준",
+    "counts": "병원 {hospitals, number}곳 · 가격 {prices, number}건"
   },
   "filters": {
     "title": "필터",
@@ -36,16 +33,11 @@
     "region": "지역",
     "sggu": "시·군·구",
     "sgguAll": "전체 시·군·구",
-    "sgguNeedsRegion": "지역을 서울이나 경기로 고르면 시·군·구를 고를 수 있어요.",
+    "sgguNeedsRegion": "지역을 서울이나 경기 하나로 고르면 시·군·구를 고를 수 있어요.",
     "institution": "기관 종별",
     "institutionAll": "전체 종별",
     "loading": "불러오는 중",
-    "loadError": "목록을 불러오지 못했어요.",
-    "regionOptions": {
-      "all": "전체",
-      "seoul": "서울",
-      "gyeonggi": "경기"
-    }
+    "loadError": "목록을 불러오지 못했어요."
   },
   "chips": {
     "remove": "{label} 조건 해제",
@@ -60,8 +52,8 @@
   },
   "list": {
     "title": "병원별 공개 가격",
-    "count": "결과 {count, number}건",
-    "progress": "전체 {total, number}건 중 {shown, number}건",
+    "count": "병원 {count, number}곳",
+    "progress": "전체 {total, number}곳 중 {shown, number}곳",
     "loadMoreError": "다음 목록을 불러오지 못했어요."
   },
   "empty": {
@@ -75,8 +67,14 @@
   },
   "card": {
     "meta": "{kind} · {region}",
-    "region": "{sido} {sggu}",
     "startDate": "{date}부터 적용",
-    "startDateUnknown": "적용일 미확인"
+    "startDateUnknown": "적용일 미확인",
+    "showVariants": "세부 {count, number}건 보기",
+    "hideVariants": "세부 접기",
+    "variantsLabel": "{hospital}의 세부 가격",
+    "moreVariants": "외 {count, number}건"
+  },
+  "breadcrumb": {
+    "home": "홈"
   }
 }

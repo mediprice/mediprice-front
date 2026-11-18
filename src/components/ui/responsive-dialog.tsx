@@ -34,6 +34,8 @@ export function ResponsiveDialogContent({
         {...(!description && { 'aria-describedby': undefined })}
         className={cn(
           'fixed inset-x-0 bottom-0 z-(--z-overlay) flex max-h-[88dvh] flex-col rounded-t-3xl bg-bg pb-safe shadow-sheet outline-none',
+          /** 낮은 화면(가로 모드·큰 글자)에서는 머리·바닥이 본문을 가리지 않게 시트 전체를 한 번에 스크롤한다. */
+          '[@media(max-height:40rem)]:overflow-y-auto',
           'duration-200 ease-standard data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom',
           'lg:inset-x-auto lg:top-1/2 lg:bottom-auto lg:left-1/2 lg:max-h-[80dvh] lg:w-[calc(100%-4rem)] lg:max-w-lg lg:-translate-1/2 lg:rounded-xl lg:pb-0 lg:shadow-float',
           'lg:data-[state=closed]:fade-out-0 lg:data-[state=closed]:slide-out-to-bottom-4 lg:data-[state=open]:fade-in-0 lg:data-[state=open]:slide-in-from-bottom-4',
@@ -59,11 +61,11 @@ export function ResponsiveDialogContent({
             {description}
           </Dialog.Description>
         )}
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-4 lg:px-6 lg:pb-6">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-4 lg:px-6 lg:pb-6 [@media(max-height:40rem)]:flex-none [@media(max-height:40rem)]:overflow-visible">
           {children}
         </div>
         {footer && (
-          <div className="flex shrink-0 gap-2 border-t border-hairline bg-bg px-4 py-3 lg:rounded-b-xl lg:px-6 lg:py-4">
+          <div className="flex shrink-0 flex-wrap gap-2 border-t border-hairline bg-bg px-4 py-3 lg:rounded-b-xl lg:px-6 lg:py-4">
             {footer}
           </div>
         )}

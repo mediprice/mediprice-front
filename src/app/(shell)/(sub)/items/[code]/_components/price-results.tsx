@@ -7,17 +7,24 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
-import { HospitalPriceCard } from '@/features/npay/components/hospital-price-card';
+import { HospitalPriceGroupCard } from '@/features/npay/components/hospital-price-group-card';
+import { groupPricesByHospital } from '@/features/npay/group-prices';
 import { npayQueries } from '@/features/npay/queries';
 import { errorMessageKey } from '@/lib/api/error-message';
 
 import { ActiveFilterChips } from './active-filter-chips';
-import { type PriceFilters, toPriceCondition } from './price-filters';
-import { SortControl } from './sort-control';
+import {
+  buildPriceFiltersQuery,
+  type PriceFilters,
+  toPriceConditions,
+} from './price-filters';
+import { SortMenu } from './sort-menu';
 import { RESULTS_HEADING_ID } from './use-apply-filters';
+import { useItemReady } from './use-item-ready';
+import { usePriceSummary } from './use-price-summary';
 import { ZeroResults } from './zero-results';
 
-/** 결과 수·정렬과 병원별 가격 목록. "더 보기"로 20건씩 이어 붙인다. */
+/** 병원 수·적용된 조건·정렬과 병원별 가격 카드. "더 보기"로 읽은 행은 기존 병원 카드에 합쳐진다. */
 export function PriceResults({
   code,
   filters,
@@ -28,14 +35,24 @@ export function PriceResults({
   const t = useTranslations('items.list');
   const tErrors = useTranslations('errors');
   const tActions = useTranslations('common.actions');
-  const query = useInfiniteQuery(
-    npayQueries.priceList(code, {
-      condition: toPriceCondition(filters),
-      sortCondition: { sort: filters.sort },
+  const isReady = useItemReady(code);
+  const summary = usePriceSummary(code, filters);
+  const query = useInfiniteQuery({
+    ...npayQueries.priceList(code, {
+      conditions: toPriceConditions(filters),
+      sort: filters.sort,
     }),
+    enabled: isReady,
+  });
+  const groups = groupPricesByHospital(
+    query.data?.pages.flatMap((page) => page.rows) ?? [],
   );
-  const rows = query.data?.pages.flatMap((page) => page.content) ?? [];
-  const total = query.data?.pages[0]?.totalElements;
+  const total = summary.data?.hospitalCount;
+  const backQuery = buildPriceFiltersQuery(filters);
+  const hospitalQuery = new URLSearchParams({
+    item: code,
+    ...(backQuery && { back: backQuery }),
+  }).toString();
 
   return (
     <section
@@ -49,17 +66,17 @@ export function PriceResults({
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 lg:gap-3">
           <p
             aria-live="polite"
-            className="text-label text-text-primary lg:text-heading"
+            className="text-label-bold text-text-primary lg:text-heading"
           >
             {total !== undefined
               ? t('count', { count: total })
-              : query.isPending && <Skeleton className="h-5.5 w-24 lg:h-7" />}
+              : summary.isPending && <Skeleton className="h-5.5 w-24 lg:h-7" />}
           </p>
-          <div className="hidden flex-wrap gap-2 lg:flex">
-            <ActiveFilterChips code={code} filters={filters} />
-          </div>
+          <ActiveFilterChips code={code} filters={filters} />
         </div>
-        <SortControl code={code} filters={filters} />
+        <div className="hidden lg:block">
+          <SortMenu code={code} filters={filters} />
+        </div>
       </div>
 
       {query.isPending ? (
@@ -96,23 +113,27 @@ export function PriceResults({
             </Button>
           }
         />
-      ) : rows.length === 0 ? (
+      ) : groups.length === 0 && !query.hasNextPage ? (
         <ZeroResults code={code} filters={filters} />
       ) : (
         <>
           <ul className="flex flex-col gap-3">
-            {query.data.pages.map((page) =>
-              page.content.map((price, index) => (
-                <li key={`${page.page}-${index}`}>
-                  <HospitalPriceCard price={price} itemCode={code} />
-                </li>
-              )),
-            )}
+            {groups.map((group) => (
+              <li key={group.ykiho}>
+                <HospitalPriceGroupCard
+                  group={group}
+                  href={`/hospitals/${encodeURIComponent(group.ykiho)}?${hospitalQuery}`}
+                />
+              </li>
+            ))}
           </ul>
           <div className="flex flex-col items-center gap-3 pt-2">
             {total !== undefined && (
               <p className="text-caption text-text-tertiary tabular-nums">
-                {t('progress', { total, shown: rows.length })}
+                {t('progress', {
+                  total: Math.max(total, groups.length),
+                  shown: groups.length,
+                })}
               </p>
             )}
             {query.isFetchNextPageError && (

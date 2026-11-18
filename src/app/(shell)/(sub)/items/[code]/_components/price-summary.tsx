@@ -1,19 +1,17 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
-import { PriceRange } from '@/components/ui/price-range';
 import { Skeleton } from '@/components/ui/skeleton';
-import { npayQueries } from '@/features/npay/queries';
 import { errorMessageKey } from '@/lib/api/error-message';
 import { cn } from '@/lib/utils';
 
-import { type PriceFilters, toPriceCondition } from './price-filters';
+import type { PriceFilters } from './price-filters';
 import { useFilterLabels } from './use-filter-labels';
+import { usePriceSummary } from './use-price-summary';
 
-/** 현재 조건의 공개 가격 범위와 평균. 모바일은 머리 영역의 흰 카드, 데스크톱은 목록 위 회색 띠다. */
+/** 현재 조건의 평균을 크게, 최저·최고와 병원·가격 수를 작게 보여 준다(극단값을 머리로 쓰지 않는다). */
 export function PriceSummary({
   code,
   filters,
@@ -28,8 +26,9 @@ export function PriceSummary({
   const tErrors = useTranslations('errors');
   const tActions = useTranslations('common.actions');
   const { scope } = useFilterLabels(filters);
-  const { data, isPending, isError, error, refetch } = useQuery(
-    npayQueries.summary(code, toPriceCondition(filters)),
+  const { data, isPending, isError, error, refetch } = usePriceSummary(
+    code,
+    filters,
   );
 
   return (
@@ -41,20 +40,10 @@ export function PriceSummary({
     >
       <div className="flex min-w-0 flex-col gap-1">
         <p className="text-caption-strong text-text-secondary">
-          {isPending ? (
-            <Skeleton className="h-4.75 w-56 max-w-full" />
-          ) : isError ? (
-            t('label')
-          ) : (
-            t('basis', {
-              scope,
-              hospitals: data.hospitalCount,
-              prices: data.priceCount,
-            })
-          )}
+          {t('scope', { scope })}
         </p>
         {isPending ? (
-          <Skeleton className="h-9 w-60 max-w-full" />
+          <Skeleton className="h-9 w-52 max-w-full" />
         ) : isError ? (
           <div className="flex flex-wrap items-center gap-2" role="alert">
             <p className="text-body-sm text-text-secondary">
@@ -65,19 +54,36 @@ export function PriceSummary({
             </Button>
           </div>
         ) : (
-          <p className="text-price-xl">
-            <span className="sr-only">{t('label')}</span>
-            <PriceRange min={data.minPrice} max={data.maxPrice} />
+          <p
+            className={cn(
+              'text-price-xl tabular-nums',
+              data.avgPrice == null && 'text-text-tertiary',
+            )}
+          >
+            {data.avgPrice == null
+              ? tPrice('none')
+              : tPrice('average', { amount: data.avgPrice })}
           </p>
         )}
       </div>
-      {data?.avgPrice != null && (
-        <p className="flex items-baseline gap-1.5 text-caption-strong text-text-secondary lg:flex-col lg:items-end lg:gap-0.5">
-          {t('average')}
-          <span className="text-label-bold text-text-primary tabular-nums lg:text-price-lg">
-            {tPrice('won', { amount: data.avgPrice })}
-          </span>
-        </p>
+      {isPending ? (
+        <Skeleton className="h-11 w-56 max-w-full" />
+      ) : (
+        data && (
+          <div className="flex flex-col gap-0.5 text-body-sm tabular-nums lg:items-end lg:text-right">
+            {data.minPrice != null && data.maxPrice != null && (
+              <p className="text-text-secondary">
+                {tPrice('minMax', { min: data.minPrice, max: data.maxPrice })}
+              </p>
+            )}
+            <p className="text-text-tertiary">
+              {t('counts', {
+                hospitals: data.hospitalCount,
+                prices: data.priceCount,
+              })}
+            </p>
+          </div>
+        )
       )}
     </div>
   );

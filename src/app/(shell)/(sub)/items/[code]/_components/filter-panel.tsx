@@ -8,14 +8,10 @@ import { type ComponentProps, useId } from 'react';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { institutionQueries } from '@/features/institutions/queries';
 import { regionQueries } from '@/features/regions/queries';
+import { SERVICE_REGIONS } from '@/features/regions/service-region';
 import { cn } from '@/lib/utils';
 
-import {
-  type PriceFilters,
-  REGIONS,
-  sidoCodeOf,
-  withRegion,
-} from './price-filters';
+import { type PriceFilters, sgguSidoOf, withRegion } from './price-filters';
 
 /** 지역·시군구·종별 입력. 값은 부모가 쥔다(데스크톱 열은 바로 적용, 모바일 시트는 임시 선택). */
 export function FilterPanel({
@@ -26,8 +22,9 @@ export function FilterPanel({
   onChange: (next: PriceFilters) => void;
 }) {
   const t = useTranslations('items');
+  const tRegion = useTranslations('common.region');
   const id = useId();
-  const sidoCode = sidoCodeOf(value.region);
+  const sidoCode = sgguSidoOf(value.region);
   const sggu = useQuery({
     ...regionQueries.sggu(sidoCode ?? ''),
     enabled: sidoCode !== undefined,
@@ -46,9 +43,9 @@ export function FilterPanel({
           aria-labelledby={`${id}-region`}
           name={`${id}-region`}
           value={value.region}
-          options={REGIONS.map((region) => ({
+          options={SERVICE_REGIONS.map((region) => ({
             value: region,
-            label: t(`filters.regionOptions.${region}`),
+            label: tRegion(region),
           }))}
           onValueChange={(region) => onChange(withRegion(value, region))}
         />

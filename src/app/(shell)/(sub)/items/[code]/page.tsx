@@ -7,12 +7,12 @@ import { SubTopBar } from '@/components/layout/sub-top-bar';
 import { FilterColumn } from './_components/filter-column';
 import { ItemGate } from './_components/item-gate';
 import { ItemHeader } from './_components/item-header';
-import { MobileFilterBar } from './_components/mobile-filter-bar';
+import { MobileToolbar } from './_components/mobile-toolbar';
 import { parsePriceFilters } from './_components/price-filters';
 import { PriceResults } from './_components/price-results';
 import { PriceSummary } from './_components/price-summary';
 
-/** 항목 이름은 브라우저 전용 apiClient로만 가져올 수 있어 제목은 공통 문구를 쓴다. */
+/** 항목 이름은 브라우저 전용 apiClient로만 가져올 수 있어 공통 제목을 두고, ItemGate가 받은 뒤 바꾼다. */
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('items.metadata');
   return { title: t('title'), description: t('description') };
@@ -32,7 +32,7 @@ export default async function ItemPricePage({
       <ItemGate code={code}>
         <div className="rounded-b-4xl bg-linear-to-b from-primary-tint via-hero via-60% to-bg lg:rounded-none">
           <PageContainer className="flex flex-col gap-5 py-6 lg:py-10">
-            <ItemHeader code={code} />
+            <ItemHeader code={code} region={filters.region} />
             <PriceSummary
               code={code}
               filters={filters}
@@ -40,6 +40,7 @@ export default async function ItemPricePage({
             />
           </PageContainer>
         </div>
+        <MobileToolbar code={code} filters={filters} />
         <PageContainer className="flex flex-col gap-4 pt-4 pb-section lg:flex-row lg:items-start lg:gap-8 lg:pt-8">
           <FilterColumn code={code} filters={filters} />
           <div className="flex min-w-0 flex-1 flex-col gap-4 lg:gap-6">
@@ -48,7 +49,6 @@ export default async function ItemPricePage({
               filters={filters}
               className="hidden lg:flex"
             />
-            <MobileFilterBar code={code} filters={filters} />
             <PriceResults code={code} filters={filters} />
           </div>
         </PageContainer>

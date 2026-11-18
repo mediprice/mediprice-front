@@ -1,21 +1,24 @@
 import { z } from 'zod';
 
 import type { NpayPriceCondition } from '@/features/npay/queries';
+import {
+  DEFAULT_REGION,
+  parseServiceRegion,
+  regionQuery,
+  type ServiceRegion,
+  sidoCodesOf,
+} from '@/features/regions/service-region';
 
-/** 홈·검색 링크와 같은 region 값(all|seoul|gyeonggi)을 쓴다. 코드는 백엔드 시도 코드다. */
-const SIDO_CODE_BY_REGION = {
-  seoul: '110000',
-  gyeonggi: '310000',
-} as const;
-
-export const REGIONS = ['all', 'seoul', 'gyeonggi'] as const;
 export const SORTS = ['price_asc', 'price_desc'] as const;
-
-export type PriceRegion = (typeof REGIONS)[number];
 export type PriceSort = (typeof SORTS)[number];
 
+export const SORT_LABEL_KEY = {
+  price_asc: 'priceAsc',
+  price_desc: 'priceDesc',
+} as const satisfies Record<PriceSort, string>;
+
 export type PriceFilters = {
-  region: PriceRegion;
+  region: ServiceRegion;
   sggu?: string;
   institution?: string;
   sort: PriceSort;
@@ -24,7 +27,6 @@ export type PriceFilters = {
 const first = (value: unknown) => (Array.isArray(value) ? value[0] : value);
 
 const searchSchema = z.object({
-  region: z.preprocess(first, z.enum(REGIONS).catch('all')),
   sggu: z.preprocess(
     first,
     z
@@ -44,13 +46,15 @@ const searchSchema = z.object({
   sort: z.preprocess(first, z.enum(SORTS).catch('price_asc')),
 });
 
-export function sidoCodeOf(region: PriceRegion) {
-  return region === 'all' ? undefined : SIDO_CODE_BY_REGION[region];
+/** 시군구는 서울·경기 하나를 골랐을 때만 쓴다. 시군구 코드 앞 두 자리가 시도 코드와 같다. */
+export function sgguSidoOf(region: ServiceRegion) {
+  return region === 'seoul' || region === 'gyeonggi'
+    ? sidoCodesOf(region)[0]
+    : undefined;
 }
 
-/** 시군구 코드 앞 두 자리는 시도 코드와 같다. 다른 시도의 시군구나 지역 없이 온 시군구는 버린다. */
-function belongsTo(sggu: string, region: PriceRegion) {
-  const sido = sidoCodeOf(region);
+function belongsTo(sggu: string, region: ServiceRegion) {
+  const sido = sgguSidoOf(region);
   return sido !== undefined && sggu.slice(0, 2) === sido.slice(0, 2);
 }
 
@@ -58,13 +62,12 @@ function belongsTo(sggu: string, region: PriceRegion) {
 export function parsePriceFilters(
   search: Record<string, string | string[] | undefined>,
 ): PriceFilters {
+  const region = parseServiceRegion(search.region);
   const parsed = searchSchema.parse(search);
   const sggu =
-    parsed.sggu && belongsTo(parsed.sggu, parsed.region)
-      ? parsed.sggu
-      : undefined;
+    parsed.sggu && belongsTo(parsed.sggu, region) ? parsed.sggu : undefined;
   return {
-    region: parsed.region,
+    region,
     sort: parsed.sort,
     ...(sggu && { sggu }),
     ...(parsed.institution && { institution: parsed.institution }),
@@ -73,8 +76,7 @@ export function parsePriceFilters(
 
 /** 기본값은 빼서 공유하기 좋은 짧은 쿼리 문자열을 만든다. */
 export function buildPriceFiltersQuery(filters: PriceFilters) {
-  const search = new URLSearchParams();
-  if (filters.region !== 'all') search.set('region', filters.region);
+  const search = new URLSearchParams(regionQuery(filters.region));
   if (filters.sggu && belongsTo(filters.sggu, filters.region)) {
     search.set('sggu', filters.sggu);
   }
@@ -83,19 +85,24 @@ export function buildPriceFiltersQuery(filters: PriceFilters) {
   return search.toString();
 }
 
-export function toPriceCondition(filters: PriceFilters): NpayPriceCondition {
-  const sidoCode = sidoCodeOf(filters.region);
-  return {
-    ...(sidoCode && { sidoCode }),
-    ...(sidoCode && filters.sggu && { sgguCode: filters.sggu }),
+/** 백엔드는 시도 하나만 받으므로 서울·경기는 조건 두 개가 된다. 빈 배열은 전국이다. */
+export function toPriceConditions(filters: PriceFilters): NpayPriceCondition[] {
+  const extra = {
+    ...(filters.sggu &&
+      belongsTo(filters.sggu, filters.region) && { sgguCode: filters.sggu }),
     ...(filters.institution && { institutionCode: filters.institution }),
   };
+  const sidoCodes = sidoCodesOf(filters.region);
+  if (sidoCodes.length === 0) {
+    return Object.keys(extra).length > 0 ? [extra] : [];
+  }
+  return sidoCodes.map((sidoCode) => ({ sidoCode, ...extra }));
 }
 
 /** 정렬을 뺀 조건(지역·시군구·종별) 수. 필터 버튼의 숫자에 쓴다. */
 export function countActiveFilters(filters: PriceFilters) {
   return [
-    filters.region !== 'all',
+    filters.region !== DEFAULT_REGION,
     Boolean(filters.sggu),
     Boolean(filters.institution),
   ].filter(Boolean).length;
@@ -103,12 +110,12 @@ export function countActiveFilters(filters: PriceFilters) {
 
 /** 정렬은 남기고 조건만 비운다. */
 export function clearConditions(filters: PriceFilters): PriceFilters {
-  return { region: 'all', sort: filters.sort };
+  return { region: DEFAULT_REGION, sort: filters.sort };
 }
 
 export function withRegion(
   filters: PriceFilters,
-  region: PriceRegion,
+  region: ServiceRegion,
 ): PriceFilters {
   if (region === filters.region) return filters;
   const { sggu: _sggu, ...rest } = filters;

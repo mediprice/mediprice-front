@@ -51,12 +51,16 @@ export function FilterSheet({
             <Button
               variant="tint"
               size="lg"
-              className="flex-1"
+              className="min-w-fit flex-1"
               onClick={() => setDraft(clearConditions(draft))}
             >
               {tActions('reset')}
             </Button>
-            <Button size="lg" className="flex-1" onClick={handleApply}>
+            <Button
+              size="lg"
+              className="min-w-fit flex-1"
+              onClick={handleApply}
+            >
               {tActions('apply')}
             </Button>
           </>
