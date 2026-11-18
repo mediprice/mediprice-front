@@ -19,20 +19,22 @@ export function Composer({
   textareaRef,
   isSending,
   isDisabled,
+  disabledPlaceholder,
   onSend,
   onMic,
 }: {
   textareaRef: RefObject<HTMLTextAreaElement | null>;
   isSending: boolean;
-  /** 대화가 끝나 더 보낼 수 없을 때. */
+  /** 대화가 끝났거나 오늘 한도를 다 써서 더 보낼 수 없을 때. */
   isDisabled: boolean;
+  /** 막혔을 때 입력창에 보일 이유. */
+  disabledPlaceholder?: string;
   /** 보냈으면 true. 입력창은 그때만 비운다. */
   onSend: (text: string) => boolean;
   /** 음성 입력을 쓸 수 없는 브라우저면 넘기지 않는다. */
   onMic?: () => void;
 }) {
   const t = useTranslations('ai.composer');
-  const tEnded = useTranslations('ai.ended');
   const inputId = useId();
   const counterId = useId();
   const { register, handleSubmit, reset, control } = useForm({
@@ -75,7 +77,9 @@ export function Composer({
           enterKeyHint="send"
           autoComplete="off"
           disabled={isDisabled}
-          placeholder={isDisabled ? tEnded('placeholder') : t('placeholder')}
+          placeholder={
+            isDisabled ? (disabledPlaceholder ?? t('placeholder')) : t('placeholder')
+          }
           aria-describedby={
             value.length >= COUNTER_FROM ? counterId : undefined
           }

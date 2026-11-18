@@ -3,13 +3,11 @@ import { useTranslations } from 'next-intl';
 
 import { openLoginDialog } from '@/features/auth/login-dialog-store';
 
-import { SESSION_TURN_LIMIT } from '../conversation';
-import { AI_DAILY_LIMIT } from '../usage-limits';
 import { AssistantBubble } from './assistant-bubble';
 
 const EXAMPLES = ['manualTherapy', 'shoulder', 'implant', 'shingles'] as const;
 
-/** 시작 화면. 예시를 누르면 그 문장을 바로 보낸다. */
+/** 시작 화면. 예시를 누르면 그 문장을 바로 보낸다. 로그인 안내 줄은 세션 확인 전에도 자리를 잡아 화면이 밀리지 않게 한다. */
 export function ChatIntro({
   onPick,
   isAnonymous,
@@ -44,14 +42,9 @@ export function ChatIntro({
               </li>
             ))}
           </ul>
-          <p className="text-caption text-text-tertiary">
-            {t('intro.turnLimit', { count: SESSION_TURN_LIMIT })}
-          </p>
-          {isAnonymous && (
-            <p className="text-caption text-text-tertiary">
-              {t.rich('usage.anonymousHint', {
-                anonymous: AI_DAILY_LIMIT.anonymous,
-                member: AI_DAILY_LIMIT.member,
+          <p className="min-h-5 text-caption text-text-tertiary">
+            {isAnonymous &&
+              t.rich('usage.anonymousHint', {
                 login: (chunks) => (
                   <button
                     type="button"
@@ -62,8 +55,7 @@ export function ChatIntro({
                   </button>
                 ),
               })}
-            </p>
-          )}
+          </p>
         </>
       )}
     </AssistantBubble>

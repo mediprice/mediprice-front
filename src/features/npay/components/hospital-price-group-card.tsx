@@ -127,7 +127,7 @@ export function HospitalPriceGroupCard<T extends string>({
                   address: null,
                   phone: null,
                 }}
-                variant="icon"
+                variant="labeled"
               />
               <CompareToggle
                 ykiho={group.ykiho}

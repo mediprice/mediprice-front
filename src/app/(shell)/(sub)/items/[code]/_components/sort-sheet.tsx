@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowDownUp, Check, ChevronDown } from 'lucide-react';
+import { ArrowDownUp, Check } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
@@ -30,11 +30,10 @@ export function SortSheet({
     <ResponsiveDialog open={isOpen} onOpenChange={setIsOpen}>
       <ResponsiveDialogTrigger
         aria-label={t('current', { label: currentLabel })}
-        className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-1 text-label text-text-secondary active:bg-surface"
+        className="touch-target inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border border-border-strong bg-bg px-3 text-label text-text-primary active:bg-surface"
       >
         <ArrowDownUp aria-hidden="true" className="size-4" strokeWidth={1.75} />
         {currentLabel}
-        <ChevronDown aria-hidden="true" className="size-4" strokeWidth={1.75} />
       </ResponsiveDialogTrigger>
       <ResponsiveDialogContent title={t('title')}>
         <ul className="-mx-4 flex flex-col">

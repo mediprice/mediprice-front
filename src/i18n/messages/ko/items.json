@@ -37,7 +37,8 @@
     "institution": "기관 종별",
     "institutionAll": "전체 종별",
     "loading": "불러오는 중",
-    "loadError": "목록을 불러오지 못했어요."
+    "loadError": "목록을 불러오지 못했어요.",
+    "mapShort": "지도"
   },
   "chips": {
     "remove": "{label} 조건 해제",
