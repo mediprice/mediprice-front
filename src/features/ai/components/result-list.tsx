@@ -48,7 +48,7 @@ export function ResultList({
           </li>
         ))}
       </ul>
-      <p className="flex gap-2 rounded-lg bg-hero px-4 py-3 text-body-sm text-text-secondary">
+      <p className="flex gap-2 rounded-lg bg-surface px-4 py-3 text-body-sm text-text-secondary">
         <Info
           aria-hidden="true"
           className="mt-0.5 size-4 shrink-0"

@@ -30,7 +30,7 @@ export default async function ItemPricePage({
     <>
       <SubTopBar title={t('topBar.title')} backHref="/" />
       <ItemGate code={code}>
-        <div className="rounded-b-4xl bg-linear-to-b from-primary-tint via-hero via-60% to-bg lg:rounded-none">
+        <div className="rounded-b-4xl bg-primary-tint lg:rounded-none">
           <PageContainer className="flex flex-col gap-5 py-6 lg:py-10">
             <ItemHeader code={code} region={filters.region} />
             <PriceSummary

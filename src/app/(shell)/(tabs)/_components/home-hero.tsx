@@ -1,4 +1,4 @@
-import { ArrowRight, ShieldCheck } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
@@ -12,17 +12,9 @@ export function HomeHero() {
   return (
     <section
       aria-labelledby="home-title"
-      className="rounded-b-4xl bg-linear-to-b from-primary-tint via-hero via-60% to-bg lg:rounded-none"
+      className="rounded-b-4xl bg-primary-tint lg:rounded-none"
     >
       <PageContainer className="flex flex-col gap-4 py-8 lg:items-center lg:gap-5 lg:py-16 lg:text-center">
-        <p className="inline-flex w-fit max-w-full items-center gap-1.5 rounded-full border border-border bg-bg px-2.5 py-1 text-body-sm text-text-secondary">
-          <ShieldCheck
-            aria-hidden="true"
-            className="size-4 text-primary"
-            strokeWidth={1.75}
-          />
-          {t('hero.badge')}
-        </p>
         <h1 id="home-title" className="text-hero">
           {t('hero.title')}
         </h1>

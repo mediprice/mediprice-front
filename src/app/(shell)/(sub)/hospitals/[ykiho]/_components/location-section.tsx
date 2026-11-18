@@ -22,7 +22,7 @@ export function LocationSection({ hospital }: { hospital: Hospital }) {
       className="flex scroll-mt-14 flex-col gap-4"
     >
       <SectionHeader id="location-title" title={t('title')} />
-      <div className="flex items-start gap-4 rounded-xl bg-hero px-5 py-5 lg:px-6">
+      <div className="flex items-start gap-4 rounded-xl bg-surface px-5 py-5 lg:px-6">
         <span
           aria-hidden="true"
           className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary shadow-float"

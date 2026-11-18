@@ -9,7 +9,7 @@ export function DetailSkeleton() {
   return (
     <div role="status" aria-busy="true" className="min-h-dvh">
       <span className="sr-only">{t('loading')}</span>
-      <div className="bg-hero">
+      <div className="bg-primary-tint">
         <PageContainer className="flex flex-col gap-3 pt-6 pb-5 lg:pt-8 lg:pb-7">
           <Skeleton className="h-5 w-32" />
           <Skeleton className="h-9 w-64 max-w-full" />

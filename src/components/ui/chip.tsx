@@ -17,7 +17,7 @@ const chipVariants = cva(
       selected: {
         true: 'border-primary bg-primary-tint text-label text-primary-text',
         false:
-          'border-border bg-bg text-body-sm text-text-secondary hover:bg-surface active:bg-surface-strong',
+          'border-border-strong bg-bg text-body-sm text-text-secondary hover:bg-surface active:bg-surface-strong',
       },
     },
     defaultVariants: { selected: false },

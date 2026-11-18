@@ -191,7 +191,7 @@ export function PriceList({
                     className={cn(
                       'border-b border-border last:border-b-0',
                       row.npayCode === selectedItem &&
-                        '-ml-2 border-l-2 border-l-primary pl-1.5 lg:-ml-3 lg:pl-2.5',
+                        '-mx-2 rounded-lg border-b-transparent bg-primary-tint px-2 lg:-mx-3 lg:px-3',
                     )}
                   >
                     <PriceRowButton

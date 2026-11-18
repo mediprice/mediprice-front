@@ -46,7 +46,7 @@ export function HospitalHeader<T extends string>({
   const homepage = toHomepageUrl(hospital.homepage);
 
   return (
-    <div className="bg-hero">
+    <div className="bg-primary-tint">
       <PageContainer className="flex flex-col gap-2.5 pt-6 pb-5 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-x-8 lg:pt-4 lg:pb-7">
         <div className="hidden lg:col-span-2 lg:block">
           <Breadcrumb>

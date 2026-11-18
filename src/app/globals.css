@@ -43,18 +43,16 @@
   --color-positive-tint: #e2f4ec;
   --color-warning: #8a6410;
   --color-warning-tint: #fbf5e4;
-  --color-danger: #b4302a;
-  --color-danger-hover: #a22b26;
-  --color-danger-pressed: #902621;
+  /* 초록(positive)과 색상만이 아니라 명도로도 구분되도록 어둡게 했다(대비 1.43:1). */
+  --color-danger: #9b2a25;
+  --color-danger-hover: #8b2621;
+  --color-danger-pressed: #7a221d;
   --color-danger-tint: #fcebea;
 
   --color-overlay: rgb(10 31 64 / 0.55);
   --color-focus-ring: #016cbf;
   /* 파란 면 위에서는 기본 링이 보이지 않으므로 focus-inverse로 바꿔 쓴다. */
   --color-focus-ring-inverse: #ffffff;
-
-  /* bg-hero만 만든다. text-hero는 타이포 토큰이다. */
-  --background-color-hero: #edf7ff;
 
   --font-sans:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
@@ -166,6 +164,19 @@
     --text-title--line-height: 2.125rem;
     --text-section: 1.625rem;
     --text-section--line-height: 2.125rem;
+    /* 데스크톱은 읽는 거리가 멀어 작은 글자를 한 단계 키운다(고령 사용자). */
+    --text-caption: 0.875rem;
+    --text-caption--line-height: 1.25rem;
+    --text-caption-strong: 0.875rem;
+    --text-caption-strong--line-height: 1.25rem;
+    --text-caption-bold: 0.875rem;
+    --text-caption-bold--line-height: 1.25rem;
+    --text-body-sm: 1rem;
+    --text-body-sm--line-height: 1.5rem;
+    --text-label: 1rem;
+    --text-label--line-height: 1.5rem;
+    --text-label-bold: 1rem;
+    --text-label-bold--line-height: 1.5rem;
     --text-price-lg: 1.5rem;
     --text-price-lg--line-height: 2rem;
     --text-price-xl: 1.875rem;

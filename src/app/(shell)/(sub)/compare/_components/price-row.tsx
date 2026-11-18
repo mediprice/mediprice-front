@@ -41,7 +41,7 @@ export function PriceRow({
     <tr
       className={cn(
         'border-b border-hairline',
-        isEmphasized && 'bg-linear-to-b from-primary-tint to-bg',
+        isEmphasized && 'bg-primary-tint',
       )}
     >
       <th scope="row" className={LABEL_CELL}>

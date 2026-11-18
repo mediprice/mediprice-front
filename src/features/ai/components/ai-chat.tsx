@@ -181,7 +181,7 @@ export function AiChat() {
             dailyRemaining={dailyRemaining(conversation, scope)}
             onRestart={messages.length > 0 ? handleRestart : undefined}
           />
-          <p className="bg-hero py-2 px-page text-body-sm text-text-secondary lg:mx-8 lg:mt-4 lg:rounded-lg lg:px-4 lg:py-2.5">
+          <p className="bg-surface py-2 px-page text-body-sm text-text-secondary lg:mx-8 lg:mt-4 lg:rounded-lg lg:px-4 lg:py-2.5">
             {t('header.disclaimer')}
           </p>
           {hasEmergency && (

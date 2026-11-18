@@ -11,7 +11,7 @@ export function FaqSection() {
   const t = useTranslations('home.faq');
   return (
     <section aria-labelledby="home-faq">
-      <PageContainer className="grid gap-4 py-section lg:grid-cols-[1fr_2fr] lg:gap-16">
+      <PageContainer className="grid gap-4 py-section lg:grid-cols-[1fr_2fr] lg:items-start lg:gap-16">
         <SectionHeader id="home-faq" title={t('title')} />
         <div className="border-t border-border">
           {QUESTIONS.map((id, index) => (

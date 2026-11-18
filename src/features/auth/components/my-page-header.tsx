@@ -12,7 +12,7 @@ export function MyPageHeader({
   children: ReactNode;
 }) {
   return (
-    <div className={cn('bg-linear-to-b from-hero to-bg', className)}>
+    <div className={cn('bg-primary-tint', className)}>
       <PageContainer className="flex flex-col gap-2 py-6 md:max-w-2xl lg:max-w-page lg:py-10">
         {children}
       </PageContainer>

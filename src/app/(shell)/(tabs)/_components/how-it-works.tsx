@@ -1,4 +1,3 @@
-import { Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { PageContainer } from '@/components/layout/page-container';
@@ -6,61 +5,34 @@ import { SectionHeader } from '@/components/ui/section-header';
 
 const STEPS = ['find', 'compare', 'decide'] as const;
 
-/** 이용 순서 3단계. 그림은 실제 입력창으로 오해하지 않도록 기기 화면 안의 장식으로 그린다. */
+/** 이용 순서 3단계. 장식용 화면 그림 없이 번호와 설명만 보여 준다. */
 export function HowItWorks() {
   const t = useTranslations('home.howItWorks');
 
   return (
     <section aria-labelledby="home-how">
-      <PageContainer className="grid grid-cols-1 gap-6 py-section lg:grid-cols-2 lg:items-center lg:gap-16 [&>*]:min-w-0">
-        <div className="space-y-6">
-          <SectionHeader id="home-how" title={t('title')} />
-          <ol className="space-y-5">
-            {STEPS.map((step, index) => (
-              <li key={step} className="flex gap-3">
-                <span
-                  aria-hidden="true"
-                  className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-tint text-caption-bold text-primary-text"
-                >
-                  {index + 1}
+      <PageContainer className="space-y-6 py-section">
+        <SectionHeader id="home-how" title={t('title')} />
+        <ol className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
+          {STEPS.map((step, index) => (
+            <li key={step} className="flex gap-3 md:flex-col">
+              <span
+                aria-hidden="true"
+                className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary-tint text-label-bold text-primary-text"
+              >
+                {index + 1}
+              </span>
+              <span className="space-y-1">
+                <span className="block text-subheading">
+                  {t(`steps.${step}.title`)}
                 </span>
-                <span className="space-y-0.5">
-                  <span className="block text-label-bold">
-                    {t(`steps.${step}.title`)}
-                  </span>
-                  <span className="block text-body-sm text-text-secondary">
-                    {t(`steps.${step}.description`)}
-                  </span>
+                <span className="block text-body-sm text-text-secondary">
+                  {t(`steps.${step}.description`)}
                 </span>
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        <div
-          aria-hidden="true"
-          className="pointer-events-none order-last flex justify-center rounded-xl bg-surface px-4 pt-6 select-none md:px-12 md:pt-10 lg:order-none"
-        >
-          <div className="w-full max-w-72 rounded-t-4xl border-8 border-b-0 border-text-primary bg-bg px-4 pt-6 pb-4">
-            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-surface-strong" />
-            <div className="flex h-10 items-center gap-2 rounded-lg bg-surface px-3 text-body-sm text-text-secondary">
-              <Search className="size-4 shrink-0" strokeWidth={1.75} />
-              {t('demo.query')}
-            </div>
-            <ul className="mt-2 space-y-1">
-              {(['suggestion1', 'suggestion2', 'suggestion3'] as const).map(
-                (key) => (
-                  <li
-                    key={key}
-                    className="flex h-9 items-center rounded-md px-2.5 text-body-sm first:bg-primary-tint first:text-primary-text"
-                  >
-                    {t(`demo.${key}`)}
-                  </li>
-                ),
-              )}
-            </ul>
-          </div>
-        </div>
+              </span>
+            </li>
+          ))}
+        </ol>
       </PageContainer>
     </section>
   );

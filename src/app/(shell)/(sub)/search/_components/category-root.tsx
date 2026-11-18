@@ -45,7 +45,7 @@ const HOME_CODES = HOME_CATEGORIES.flatMap(({ categoryCodes }) => [
 ]);
 
 const TILE =
-  'flex h-full min-h-18 items-center gap-3 rounded-xl bg-bg py-3 pr-3 pl-4 shadow-card transition-colors hover:bg-hero lg:bg-surface lg:shadow-none lg:hover:bg-primary-tint';
+  'flex h-full min-h-18 items-center gap-3 rounded-xl bg-bg py-3 pr-3 pl-4 shadow-card transition-colors hover:bg-primary-tint lg:bg-surface lg:shadow-none lg:hover:bg-primary-tint';
 
 /** 전체 분류(category=all). 홈 분야 다섯 개를 먼저 크게, 나머지 공식 대분류는 가나다순으로 보여 준다. */
 export function CategoryRoot({
@@ -89,7 +89,7 @@ export function CategoryRoot({
                       pathname: '/search',
                       query: { category: id, ...regionQuery(region) },
                     }}
-                    className="flex h-full min-h-28 flex-col justify-between gap-3 rounded-xl bg-bg p-4 shadow-card transition-colors hover:bg-hero lg:items-center lg:bg-surface lg:py-6 lg:shadow-none lg:hover:bg-primary-tint"
+                    className="flex h-full min-h-28 flex-col justify-between gap-3 rounded-xl bg-bg p-4 shadow-card transition-colors hover:bg-primary-tint lg:items-center lg:bg-surface lg:py-6 lg:shadow-none lg:hover:bg-primary-tint"
                   >
                     <span
                       aria-hidden="true"

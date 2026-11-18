@@ -27,7 +27,7 @@ export function CompareHeader({
         : t('title', { count });
 
   return (
-    <div className="bg-linear-to-b from-primary-tint via-hero to-bg">
+    <div className="bg-primary-tint">
       <PageContainer className="flex flex-col gap-2.5 pt-6 pb-5 lg:pt-6 lg:pb-8">
         <Breadcrumb>
           <BreadcrumbLink href="/">{t('breadcrumbHome')}</BreadcrumbLink>

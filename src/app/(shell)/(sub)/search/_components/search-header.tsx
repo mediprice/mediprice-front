@@ -29,10 +29,7 @@ export function SearchHeader({
   const t = useTranslations('search.breadcrumb');
   return (
     <div
-      className={cn(
-        'rounded-b-4xl bg-linear-to-b from-primary-tint via-hero via-60% to-bg lg:rounded-none lg:from-hero',
-        className,
-      )}
+      className={cn('rounded-b-4xl bg-primary-tint lg:rounded-none', className)}
     >
       <PageContainer className="py-3.5 md:py-6 lg:pt-2 lg:pb-9">
         {current && (

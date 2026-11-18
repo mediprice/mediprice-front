@@ -1,4 +1,3 @@
-import { Info } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
@@ -58,14 +57,6 @@ export function TrustSection() {
             </span>
           </li>
         </ul>
-        <p className="flex items-start gap-1.5 text-caption text-text-tertiary">
-          <Info
-            aria-hidden="true"
-            className="mt-0.5 size-4 shrink-0"
-            strokeWidth={1.5}
-          />
-          {t('sourceLine')}
-        </p>
       </PageContainer>
     </section>
   );
