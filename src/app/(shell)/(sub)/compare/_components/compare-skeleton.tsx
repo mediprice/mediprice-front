@@ -7,7 +7,7 @@ export function CompareSkeleton({ columns }: { columns: number }) {
   return (
     <div
       aria-busy="true"
-      className="flex flex-col gap-4 rounded-xl border border-hairline p-4 lg:p-6"
+      className="flex flex-col gap-4 rounded-2xl border border-border p-4 lg:p-6"
     >
       <span className="sr-only">{t('loading')}</span>
       {Array.from({ length: 5 }, (_, row) => (

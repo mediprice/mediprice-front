@@ -7,6 +7,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { type CSSProperties, type ReactNode, type Ref, useId } from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { CompareNumber } from '@/features/comparison/components/compare-number';
 import type {
   ComparisonHospital,
   ComparisonItem,
@@ -15,7 +16,7 @@ import { toTelHref } from '@/features/hospitals/detail-links';
 import { formatLocation } from '@/features/regions/format-location';
 
 import { CommonItemRows } from './common-item-rows';
-import { LABEL_CELL, PriceRow } from './price-row';
+import { hasStripRow, LABEL_CELL, PriceRow } from './price-row';
 
 /**
  * 병원 비교표. 데스크톱은 190px 이름 열 + 같은 폭의 병원 열 3개(빈 칸은 "병원 추가"),
@@ -58,7 +59,10 @@ export function CompareTable<T extends string>({
   const format = useFormatter();
   const captionId = useId();
   const columnCount = 1 + hospitals.length + slots;
-  const infoRows = 3 + (itemRow ? 2 : 0);
+  const infoRows =
+    3 +
+    (itemRow ? 2 : 0) +
+    (itemRow && hasStripRow(itemRow, hospitals) ? 1 : 0);
   const detailQuery = item ? `?item=${item}` : '';
 
   return (
@@ -74,7 +78,7 @@ export function CompareTable<T extends string>({
         role="region"
         aria-labelledby={headingId}
         tabIndex={0}
-        className="overflow-x-auto overscroll-x-contain rounded-xl border border-hairline bg-bg outline-offset-2"
+        className="overflow-x-auto overscroll-x-contain rounded-2xl border border-border bg-bg outline-offset-2"
       >
         <table
           style={{ '--cols': hospitals.length } as CSSProperties}
@@ -95,13 +99,18 @@ export function CompareTable<T extends string>({
           <tbody>
             <tr className="border-b border-hairline">
               <td className={LABEL_CELL}>{t('hospital')}</td>
-              {hospitals.map((hospital) => (
+              {hospitals.map((hospital, index) => (
                 <th
                   key={hospital.ykiho}
                   scope="col"
                   className="p-3 align-top lg:px-6 lg:py-5"
                 >
-                  <div className="flex items-start gap-1">
+                  <div className="flex items-start gap-2">
+                    <CompareNumber
+                      value={index + 1}
+                      size="sm"
+                      className="lg:h-7 lg:min-w-7"
+                    />
                     <span className="min-w-0 flex-1 pt-0.5 text-label-bold text-text-primary lg:text-heading">
                       {hospital.name}
                     </span>
@@ -144,7 +153,7 @@ export function CompareTable<T extends string>({
                 >
                   <Link
                     href={addHref}
-                    className="absolute inset-4 flex flex-col items-center justify-center gap-1.5 rounded-xl bg-primary-tint text-label-bold text-primary-text hover:bg-primary-tint-hover active:bg-primary-tint-pressed"
+                    className="absolute inset-4 flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border-strong text-label-bold text-primary-text transition-colors duration-200 ease-standard hover:bg-surface active:bg-surface-strong"
                   >
                     <Plus
                       aria-hidden="true"

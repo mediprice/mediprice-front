@@ -21,6 +21,7 @@ import {
   orderHospitals,
 } from '@/features/comparison/compare-rows';
 import { useCompareStore } from '@/features/comparison/compare-store';
+import { summarizeComparison } from '@/features/comparison/compare-strip';
 import { comparisonQueries } from '@/features/comparison/queries';
 import { hospitalQueries } from '@/features/hospitals/queries';
 import { errorMessageKey } from '@/lib/api/error-message';
@@ -103,6 +104,10 @@ export function CompareView({
       selected.data?.items.find((row) => row.npayCode === activeItem)) ||
       null);
   const itemName = itemRow ? formatComparisonItemName(itemRow) : null;
+  const summary =
+    itemRow && !error && !isPending
+      ? summarizeComparison(itemRow, hospitals)
+      : null;
 
   const datesQueries = useQueries({
     queries: hospitals.map((hospital) => {
@@ -223,7 +228,7 @@ export function CompareView({
         />
         {isItemMissing && <Notice>{t('page.itemNotFound')}</Notice>}
         {hospitals.length < 2 && (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-warning-tint px-4 py-3 text-body-sm text-warning">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-warning-tint px-4 py-3 text-body-sm text-warning">
             <span className="flex items-start gap-2">
               <CircleAlert
                 aria-hidden="true"
@@ -295,17 +300,19 @@ export function CompareView({
         item={activeItem}
         itemName={itemName}
         count={base.data && !error ? hospitals.length : null}
+        summary={summary}
+        isSummaryLoading={hasHospitals && item != null && isPending && !error}
+        itemRow={itemRow}
+        hospitals={hospitals}
       />
-      <PageContainer className="pt-2 pb-section lg:pt-4">
-        {renderBody()}
-      </PageContainer>
+      <PageContainer className="pb-section">{renderBody()}</PageContainer>
     </>
   );
 }
 
 function Notice({ children }: { children: string }) {
   return (
-    <p className="flex items-start gap-2 rounded-lg bg-primary-tint px-4 py-3 text-body-sm text-primary-text">
+    <p className="flex items-start gap-2 rounded-2xl bg-primary-tint px-4 py-3 text-body-sm text-primary-text">
       <Info
         aria-hidden="true"
         className="mt-0.5 size-4 shrink-0"

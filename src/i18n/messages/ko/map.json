@@ -19,7 +19,8 @@
     "label": "보기 방식",
     "list": "목록",
     "map": "지도",
-    "showList": "목록으로 보기"
+    "showList": "목록으로 보기",
+    "expandList": "목록 크게 보기"
   },
   "radius": {
     "label": "검색 반경",
@@ -55,13 +56,11 @@
     "distance": "직선 {distance}",
     "meters": "{value, number}m",
     "kilometers": "{value, number, ::.#}km",
-    "minPrice": "최저 {amount, number}원",
+    "priceLabel": "최저가",
     "showOnMap": "지도에서 보기",
     "showOnMapLabel": "{name} 지도에서 보기",
     "noPosition": "지도 위치 정보 없음",
-    "selected": "지도에서 선택됨",
-    "selectedHeading": "선택한 병원",
-    "clearSelection": "선택 해제"
+    "selected": "지도에서 선택됨"
   },
   "location": {
     "promptTitle": "현재 위치를 사용할까요?",

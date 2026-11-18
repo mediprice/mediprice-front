@@ -92,7 +92,7 @@ export function HospitalMap({
       {handle && (
         <div className="absolute right-3 bottom-10 flex flex-col items-end gap-3">
           {controls}
-          <div className="flex flex-col overflow-hidden rounded-lg bg-bg shadow-card">
+          <div className="flex flex-col overflow-hidden rounded-xl border border-border-strong bg-bg shadow-float">
             <button
               type="button"
               aria-label={t('zoomIn')}

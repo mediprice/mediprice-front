@@ -8,11 +8,13 @@ import { type CSSProperties, useEffect, useRef, useState } from 'react';
 
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 import { MAX_COMPARE } from '../compare-params';
 import { buildBasketHref, useCompareStore } from '../compare-store';
 import { ClearCompareDialog } from './clear-compare-dialog';
 import { CompareAnnouncer } from './compare-announcer';
+import { CompareNumber } from './compare-number';
 import { useCoveredHeight } from './use-covered-height';
 
 const FULL_NOTICE_MS = 5000;
@@ -69,7 +71,7 @@ export function CompareTray() {
           <aside
             ref={barRef}
             aria-label={t('label')}
-            className="fixed inset-x-0 bottom-0 z-(--z-bottom-cta) border-t border-hairline bg-bg pb-safe shadow-bar lg:pointer-events-none lg:bottom-6 lg:border-0 lg:bg-transparent lg:pb-0 lg:shadow-none"
+            className="fixed inset-x-0 bottom-0 z-(--z-bottom-cta) border-t border-border bg-bg pb-safe shadow-bar lg:pointer-events-none lg:bottom-6 lg:border-0 lg:bg-transparent lg:pb-0 lg:shadow-none"
           >
             <PageContainer className="lg:px-page">
               {isFull && (
@@ -82,35 +84,51 @@ export function CompareTray() {
                   {t('full', { max: MAX_COMPARE })}
                 </p>
               )}
-              <div className="flex items-center gap-2 py-3 lg:pointer-events-auto lg:gap-4 lg:rounded-xl lg:border lg:border-primary lg:bg-bg lg:py-3 lg:pr-3 lg:pl-6 lg:shadow-float">
-                <div className="flex min-w-0 flex-1 flex-col lg:flex-row lg:items-center lg:gap-4">
-                  <p
-                    ref={countRef}
-                    tabIndex={-1}
-                    className="shrink-0 text-label-bold text-text-primary tabular-nums outline-none"
-                  >
-                    {t('count', {
-                      count: hospitals.length,
-                      max: MAX_COMPARE,
-                    })}
-                  </p>
+              <div className="flex items-center gap-2 py-3 lg:pointer-events-auto lg:gap-4 lg:rounded-2xl lg:border lg:border-border lg:bg-bg lg:py-3 lg:pr-3 lg:pl-5 lg:shadow-float">
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5 lg:flex-row lg:items-center lg:gap-4">
+                  <div className="flex shrink-0 items-center gap-2">
+                    <p
+                      ref={countRef}
+                      tabIndex={-1}
+                      className="text-label-bold text-text-primary tabular-nums outline-none"
+                    >
+                      {t('count', {
+                        count: hospitals.length,
+                        max: MAX_COMPARE,
+                      })}
+                    </p>
+                    <span aria-hidden="true" className="flex gap-1">
+                      {Array.from({ length: MAX_COMPARE }, (_, index) => (
+                        <span
+                          key={index}
+                          className={cn(
+                            'h-1.5 w-4 rounded-full',
+                            index < hospitals.length
+                              ? 'bg-primary'
+                              : 'bg-surface-strong',
+                          )}
+                        />
+                      ))}
+                    </span>
+                  </div>
                   <p className="truncate text-body-sm text-text-secondary lg:hidden">
                     {canCompare
                       ? hospitals.map((hospital) => hospital.name).join(' · ')
                       : t('needMore', { count: 2 - hospitals.length })}
                   </p>
                   <ul className="hidden min-w-0 flex-wrap items-center gap-2 lg:flex">
-                    {hospitals.map((hospital) => (
+                    {hospitals.map((hospital, index) => (
                       <li
                         key={hospital.ykiho}
-                        className="inline-flex h-9 max-w-60 items-center gap-0.5 rounded-full border border-border bg-bg pr-1 pl-3.5 text-body-sm text-text-primary"
+                        className="inline-flex h-10 max-w-64 items-center gap-2 rounded-full bg-surface pr-1 pl-1.5 text-body-sm text-text-primary"
                       >
+                        <CompareNumber value={index + 1} size="sm" />
                         <span className="truncate">{hospital.name}</span>
                         <button
                           type="button"
                           aria-label={t('remove', { name: hospital.name })}
                           onClick={() => handleRemove(hospital.ykiho)}
-                          className="touch-target flex size-7 shrink-0 items-center justify-center rounded-full text-text-secondary hover:bg-surface active:bg-surface-strong"
+                          className="touch-target flex size-8 shrink-0 items-center justify-center rounded-full text-text-secondary hover:bg-surface-strong active:bg-border"
                         >
                           <X
                             aria-hidden="true"

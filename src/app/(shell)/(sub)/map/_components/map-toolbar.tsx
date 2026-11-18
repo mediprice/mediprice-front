@@ -38,7 +38,7 @@ export function MapToolbar({
   return (
     <div className="border-b border-hairline bg-bg">
       <div className="flex flex-col gap-3 py-3 px-page md:flex-row md:flex-wrap md:items-center md:gap-4 lg:py-4">
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
           {item && (
             <Link
               href={itemListHref(item, region)}
@@ -52,7 +52,7 @@ export function MapToolbar({
               {t('header.backToList')}
             </Link>
           )}
-          <h1 className="min-w-0 flex-1 text-heading">
+          <h1 className="min-w-0 flex-1 basis-40 text-heading text-balance">
             {item ? <ItemTitle code={item} /> : t('header.title')}
           </h1>
           <span id="map-view-label" className="sr-only">

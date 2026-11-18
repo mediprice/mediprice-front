@@ -39,7 +39,18 @@
     "single": "병원을 1곳 더 추가하면 나란히 비교할 수 있어요.",
     "itemNotFound": "선택한 항목을 찾을 수 없어 함께 공개한 항목만 비교해요.",
     "addHospital": "병원 추가",
-    "loading": "비교표를 불러오는 중"
+    "loading": "비교표를 불러오는 중",
+    "eyebrow": "{item} · 병원 {count, number}곳 비교",
+    "summary": "{count, number}곳 중 {name}{particle, select, consonant {이} vowel {가} other {이(가)}} 가장 저렴해요",
+    "summaryTie": "{count, number}곳 중 {tied, number}곳이 같은 최저가예요",
+    "summarySame": "{count, number}곳 모두 최저가가 같아요",
+    "lowestPrice": "가장 낮은 세부 가격",
+    "gap": "가장 높은 곳보다 <nb>{amount, number}원</nb> 낮아요",
+    "regionAverage": "{region} 평균 {amount, number}원",
+    "regionNote": "막대는 {region} 병원 {count, number}곳의 가격 범위예요. 번호는 비교표의 병원 순서와 같아요.",
+    "hospitalsNote": "막대는 비교한 병원들의 가격 범위예요. 번호는 비교표의 병원 순서와 같아요.",
+    "legendLabel": "병원별 가장 낮은 가격",
+    "lowestTag": "최저가"
   },
   "table": {
     "caption": "{item} 가격과 병원 정보 비교",
