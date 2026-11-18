@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { errorMessageKey } from '@/lib/api/error-message';
@@ -49,9 +49,13 @@ export function RequiredConsentForm({ onDecline }: { onDecline: () => void }) {
       setNotice(
         fresh.data && hasNewerDocuments(fresh.data) ? 'reload' : 'outdated',
       );
-      document.getElementById(`${id}-notice`)?.focus();
     },
   });
+
+  // 안내가 그려진 뒤에 포커스를 옮긴다(그리기 전에는 빈 칸이 숨어 있어 포커스가 가지 않는다).
+  useEffect(() => {
+    if (notice) document.getElementById(`${id}-notice`)?.focus();
+  }, [notice, id]);
   const isVersionError =
     save.error instanceof ApiError &&
     save.error.code === 'CONSENT_VERSION_OUTDATED';

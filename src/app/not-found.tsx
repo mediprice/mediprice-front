@@ -29,6 +29,7 @@ export default async function NotFound() {
         className="flex flex-1 items-center justify-center py-section outline-none"
       >
         <EmptyState
+          titleAs="h1"
           icon={<SearchX />}
           title={t('title')}
           description={t('description')}

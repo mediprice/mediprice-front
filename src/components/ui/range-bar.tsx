@@ -28,6 +28,8 @@ type RangeBarProps = {
   size?: Size;
   /** sm에서 평균 눈금 아래에 작은 "평균" 라벨을 붙인다. 목록에서 한 번만 켠다. */
   showAverageTick?: boolean;
+  /** 평균과 비교하기 어려운 값(구성이 다른 세부 항목)이면 false로 넘겨 화면 낭독 문장에서 높다·낮다를 뺀다. */
+  isComparable?: boolean;
   className?: string;
 };
 
@@ -75,6 +77,7 @@ function RangeBarBody({
   valueLabel,
   size = 'md',
   showAverageTick = false,
+  isComparable = true,
   className,
 }: Omit<RangeBarProps, 'min' | 'max'> & { min: number; max: number }) {
   const t = useTranslations('common.rangeBar');
@@ -83,7 +86,7 @@ function RangeBarBody({
   const label = valueLabel ?? t('valueLabel');
   const hasAverage = average != null;
   const scale = { min, max, average };
-  const comparison = compareToAverage(value, average);
+  const comparison = isComparable ? compareToAverage(value, average) : null;
 
   const valueSentence = comparison
     ? t('valueComparison', {

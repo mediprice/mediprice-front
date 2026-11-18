@@ -63,7 +63,7 @@
       "exportAction": "내려받기",
       "exportDone": "{fileName} 파일을 저장했어요.",
       "exportUnsupported": "아직 내려받기를 준비하고 있어요. 지금은 아래 개인정보 문의로 열람을 요청해 주세요.",
-      "requestTitle": "개인정보 문의·열람 요청",
+      "requestTitle": "개인정보 문의\u2060·\u2060열람 요청",
       "requestDescription": "열람, 정정·삭제, 처리정지는 개인정보 보호책임자에게 요청할 수 있어요.",
       "officerLabel": "개인정보 보호책임자",
       "officerName": "성명",

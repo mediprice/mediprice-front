@@ -27,6 +27,7 @@ export function RouteError({
   return (
     <PageContainer className="flex flex-1 items-center justify-center py-section">
       <EmptyState
+        titleAs="h1"
         icon={<CircleAlert />}
         title={t('title')}
         description={t('description')}

@@ -341,6 +341,7 @@ function RegionComparison({
         max={data.maxPrice}
         average={data.avgPrice}
         value={price}
+        isComparable={verdict.kind !== 'incomparable'}
         className="w-full max-w-xl"
       />
       <p className="text-caption text-text-tertiary">
