@@ -79,7 +79,7 @@ export function VoicePanel(props: VoicePanelProps) {
   return (
     <section
       aria-labelledby={titleId}
-      className="flex flex-col gap-4 rounded-t-3xl bg-bg px-4 pt-2 pb-4 shadow-sheet lg:mx-8 lg:mb-7 lg:rounded-xl lg:p-5 lg:shadow-none"
+      className="flex flex-col gap-4 rounded-t-3xl bg-bg pt-2 px-page pb-4 shadow-sheet lg:mx-8 lg:mb-7 lg:rounded-xl lg:p-5 lg:px-5 lg:shadow-none"
     >
       <span
         aria-hidden="true"

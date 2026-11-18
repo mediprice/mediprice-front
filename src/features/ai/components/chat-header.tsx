@@ -26,7 +26,7 @@ export function ChatHeader({
         ? t('usage.remainingToday', { count: dailyRemaining })
         : t('usage.chip', { count: dailyLimit });
   return (
-    <div className="flex min-h-15 items-center gap-2 px-4 py-2 lg:px-8 lg:pt-7 lg:pb-0">
+    <div className="flex min-h-15 items-center gap-2 py-2 px-page lg:px-8 lg:pt-7 lg:pb-0">
       <h1 id={titleId} className="min-w-0 flex-1 text-subheading lg:text-title">
         {t('header.title')}
       </h1>

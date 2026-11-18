@@ -26,9 +26,11 @@ export function QuotaDialog({
           <p className="text-body text-text-secondary">
             {isMember ? t('member') : t('anonymous')}
           </p>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             {!isMember && (
               <Button
+                variant="tint"
+                size="md"
                 className="w-full"
                 onClick={() => {
                   onOpenChange(false);
@@ -40,7 +42,8 @@ export function QuotaDialog({
             )}
             <Button
               asChild
-              variant={isMember ? 'primary' : 'tint'}
+              variant={isMember ? 'tint' : 'ghost'}
+              size="md"
               className="w-full"
             >
               <Link href="/search">{t('search')}</Link>

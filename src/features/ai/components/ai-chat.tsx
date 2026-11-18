@@ -162,7 +162,7 @@ export function AiChat() {
           onMouseDown={keepTypingFocus}
           onBlur={handleBlur}
           className={cn(
-            'flex min-w-0 flex-1 flex-col bg-surface',
+            'flex min-w-0 flex-1 flex-col bg-surface md:mx-auto md:max-w-2xl lg:mx-0 lg:max-w-none',
             /** 모바일은 상단 바와 하단 탭바 사이를 채운다. 입력 중에는 탭바가 숨으므로(globals.css) 그 높이까지 쓴다. 키보드가 열리면 dvh가 줄어든다. */
             'h-[calc(100dvh-var(--spacing-top-bar)-var(--spacing-tab-bar)-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))]',
             'max-lg:has-[textarea:focus]:h-[calc(100dvh-var(--spacing-top-bar)-env(safe-area-inset-top,0px))]',
@@ -181,11 +181,11 @@ export function AiChat() {
             dailyRemaining={dailyRemaining(conversation, scope)}
             onRestart={messages.length > 0 ? handleRestart : undefined}
           />
-          <p className="bg-hero px-4 py-2 text-body-sm text-text-secondary lg:mx-8 lg:mt-4 lg:rounded-lg lg:px-4 lg:py-2.5">
+          <p className="bg-hero py-2 px-page text-body-sm text-text-secondary lg:mx-8 lg:mt-4 lg:rounded-lg lg:px-4 lg:py-2.5">
             {t('header.disclaimer')}
           </p>
           {hasEmergency && (
-            <div className="px-4 pt-3 lg:px-8">
+            <div className="pt-3 px-page lg:px-8">
               <EmergencyBanner />
             </div>
           )}
@@ -196,7 +196,7 @@ export function AiChat() {
             tabIndex={-1}
             className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain outline-none"
           >
-            <div className="flex min-h-full flex-col justify-end gap-4 px-4 py-4 lg:px-8 lg:py-5">
+            <div className="flex min-h-full flex-col justify-end gap-4 py-4 px-page lg:px-8 lg:py-5">
               <div data-chat-item>
                 <ChatIntro
                   onPick={messages.length === 0 ? handlePick : undefined}

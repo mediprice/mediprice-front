@@ -59,7 +59,7 @@ export function Composer({
   return (
     <form
       onSubmit={(event) => void submit(event)}
-      className="flex items-end gap-2 border-t border-border bg-bg px-4 py-2.5 lg:mx-8 lg:mb-7 lg:rounded-lg lg:border-t-0 lg:p-2.5"
+      className="flex items-end gap-2 border-t border-border bg-bg py-2.5 px-page lg:mx-8 lg:mb-7 lg:rounded-lg lg:border-t-0 lg:p-2.5 lg:px-2.5"
     >
       <label htmlFor={inputId} className="sr-only">
         {t('label')}
