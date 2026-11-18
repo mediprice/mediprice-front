@@ -134,7 +134,7 @@ export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
           : t('notSaved')}
       </p>
       {/** 긴 폼이라 모바일은 저장 바를 화면 아래에 붙인다. 폼 안에서만 붙어 있어 끝에 오면 제자리에 놓이고 내용을 가리지 않는다. */}
-      <div className="sticky bottom-0 z-(--z-bottom-cta) -mx-(--page-gutter) flex flex-col gap-2 border-t border-hairline bg-bg px-(--page-gutter) pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-bar lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
+      <div className="sticky bottom-0 z-(--z-bottom-cta) mx-[calc(50%-50vw)] flex flex-col gap-2 border-t border-hairline bg-bg px-[calc(50vw-50%)] pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-bar lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
         {save.isError && !isFieldRejection(save.error) && (
           <p role="alert" className="text-body-sm text-danger">
             {tErrors(errorMessageKey(save.error))}

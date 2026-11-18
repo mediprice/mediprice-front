@@ -81,11 +81,12 @@ export function FavoriteList() {
     return (
       <EmptyState
         icon={<Heart />}
+        className="rounded-xl bg-bg"
         title={t('errorTitle')}
         description={tErrors(errorMessageKey(favorites.error))}
         action={
           <Button
-            variant="outline"
+            variant="tint"
             size="md"
             isLoading={favorites.isRefetching}
             onClick={() => void favorites.refetch()}
@@ -114,7 +115,7 @@ export function FavoriteList() {
   );
 
   return (
-    <section aria-labelledby="favorites-heading" className="pt-4 lg:pt-0">
+    <section aria-labelledby="favorites-heading">
       <h2
         id="favorites-heading"
         ref={headingRef}
@@ -137,16 +138,17 @@ export function FavoriteList() {
       {items.length === 0 && !undoRow ? (
         <EmptyState
           icon={<Heart />}
+          className="rounded-xl bg-bg"
           title={t('emptyTitle')}
           description={t('emptyDescription')}
           action={
-            <Button asChild size="md">
+            <Button asChild variant="tint" size="md">
               <Link href="/search?type=hospital">{t('browse')}</Link>
             </Button>
           }
         />
       ) : (
-        <ul className="mt-3 flex flex-col gap-3 lg:mt-4 lg:gap-4">
+        <ul className="mt-3 grid gap-3 md:grid-cols-2 lg:mt-4 lg:gap-4">
           {items.map((favorite, index) => (
             <Fragment key={favorite.ykiho}>
               {undoRow && index === undoIndex && renderUndo(undoRow)}

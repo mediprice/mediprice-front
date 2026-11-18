@@ -41,7 +41,7 @@ export function MedicalProfileView() {
         </h1>
         <p className="text-body-sm text-text-secondary">{t('description')}</p>
       </MyPageHeader>
-      <PageContainer className="pt-4 pb-section lg:grid lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8 lg:pt-0">
+      <PageContainer className="pt-4 pb-section md:max-w-2xl lg:grid lg:max-w-page lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8 lg:pt-0">
         <MySideNav />
         <LoginRequired reason="medicalProfile" fallback={<ProfileSkeleton />}>
           <ProfileLoader />
@@ -66,7 +66,7 @@ function ProfileLoader() {
         description={tErrors(errorMessageKey(profile.error))}
         action={
           <Button
-            variant="outline"
+            variant="tint"
             size="md"
             isLoading={profile.isRefetching}
             onClick={() => void profile.refetch()}

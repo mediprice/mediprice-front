@@ -1,22 +1,22 @@
-import { ChevronRight, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
 import { Tag } from '@/components/ui/tag';
+import { FavoriteButton } from '@/features/favorites/components/favorite-button';
 import type { FavoriteHospital } from '@/features/favorites/queries';
+import { HospitalIdentity } from '@/features/hospitals/components/hospital-identity';
 import { cn } from '@/lib/utils';
 
-/** 카드 전체가 병원 상세 링크다(제목 링크를 카드 크기로 넓힌다). 하트는 링크 위에 따로 놓여 관심에서 뺀다. */
+/** 카드 전체가 병원 상세 링크다(이름 링크를 카드 크기로 넓힌다). 하트는 링크 위에 따로 놓인다. */
 export function FavoriteCard({
   favorite,
   onRemove,
 }: {
   favorite: FavoriteHospital;
+  /** 하트를 누르면 부모가 빼고 되돌리기를 띄운다. */
   onRemove: () => void;
 }) {
   const t = useTranslations('library.favorites');
-  const tButton = useTranslations('library.favoriteButton');
   const isAvailable = favorite.available;
   const name = favorite.name ?? t('unavailableName');
   const meta = [favorite.className, favorite.address]
@@ -26,26 +26,30 @@ export function FavoriteCard({
   return (
     <article
       className={cn(
-        'relative flex items-center gap-2 rounded-xl py-4 pr-2 pl-4 lg:gap-6 lg:py-6 lg:pr-6 lg:pl-6',
+        'relative flex h-full items-start gap-1 rounded-xl bg-bg py-4 pr-1 pl-4 lg:py-5 lg:pl-5',
         isAvailable
-          ? 'bg-bg shadow-card transition-shadow duration-150 ease-standard has-[a:hover]:shadow-float'
-          : 'border border-hairline bg-surface',
+          ? 'pressable shadow-card'
+          : 'border border-dashed border-border-strong',
       )}
     >
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <h3 className="text-subheading break-keep">
-          {isAvailable ? (
+      <HospitalIdentity
+        as="h3"
+        className="flex-1 pt-0.5"
+        nameClassName={cn(!isAvailable && 'text-text-secondary')}
+        name={
+          isAvailable ? (
             <Link
               href={`/hospitals/${encodeURIComponent(favorite.ykiho)}`}
-              className="rounded-sm after:absolute after:inset-0 after:rounded-xl hover:underline lg:hover:no-underline"
+              className="rounded-sm after:absolute after:inset-0 after:rounded-xl"
             >
               {name}
             </Link>
           ) : (
-            <span className="text-text-secondary">{name}</span>
-          )}
-        </h3>
-        {meta && <p className="text-body-sm text-text-secondary">{meta}</p>}
+            name
+          )
+        }
+        meta={meta || undefined}
+      >
         {!isAvailable && (
           <p className="mt-1 flex flex-wrap items-center gap-2">
             <Tag>{t('unavailable')}</Tag>
@@ -54,28 +58,16 @@ export function FavoriteCard({
             </span>
           </p>
         )}
-      </div>
-      {isAvailable && (
-        <span
-          aria-hidden="true"
-          className="hidden shrink-0 items-center gap-0.5 text-label-bold text-primary-text lg:inline-flex"
-        >
-          {t('viewHospital')}
-          <ChevronRight className="size-4" strokeWidth={2} />
-        </span>
-      )}
-      <Button
-        variant="ghost"
-        size="icon"
-        aria-label={t('remove', { name })}
-        onClick={onRemove}
-        className="relative z-10 self-start text-primary lg:size-auto lg:min-h-11 lg:self-center lg:rounded-full lg:bg-primary-tint lg:px-4 lg:hover:bg-primary-tint-hover"
-      >
-        <Heart aria-hidden="true" fill="currentColor" />
-        <span aria-hidden="true" className="hidden lg:inline">
-          {tButton('added')}
-        </span>
-      </Button>
+      </HospitalIdentity>
+      <FavoriteButton
+        ykiho={favorite.ykiho}
+        hospital={{ ...favorite, name }}
+        variant="icon"
+        onToggle={(isFavorite) => {
+          if (!isFavorite) onRemove();
+        }}
+        className="relative -mt-2.5 shrink-0"
+      />
     </article>
   );
 }

@@ -51,7 +51,7 @@ export function RemovedFavoriteRow({
         setIsKeyboardFocused(event.target.matches(':focus-visible'))
       }
       onBlur={() => setIsKeyboardFocused(false)}
-      className="flex min-h-16 items-center gap-3 rounded-xl border border-dashed border-border-strong bg-surface py-2 pr-2 pl-4 lg:min-h-20 lg:pl-6"
+      className="flex min-h-16 items-center gap-3 rounded-xl border border-dashed border-border-strong bg-bg py-2 pr-2 pl-4 lg:min-h-20 lg:pl-6"
     >
       <p className="min-w-0 flex-1 text-body-sm text-text-secondary">
         {t.rich('removedInline', {

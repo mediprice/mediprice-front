@@ -28,6 +28,7 @@ export function FavoriteButton({
   hospital,
   variant = 'icon',
   onError,
+  onToggle,
   className,
 }: {
   ykiho: string;
@@ -37,6 +38,8 @@ export function FavoriteButton({
   variant?: 'icon' | 'labeled';
   /** 실패를 화면에 따로 알리고 싶을 때. 하트는 이미 원래대로 돌아가 있다. */
   onError?: (error: Error) => void;
+  /** 부모가 변경을 직접 처리할 때(관심 화면의 되돌리기처럼 카드가 사라져도 결과를 받아야 할 때). 주면 버튼은 요청을 보내지 않는다. */
+  onToggle?: (isFavorite: boolean) => void;
   className?: string;
 }) {
   const t = useTranslations('library.favoriteButton');
@@ -64,6 +67,10 @@ export function FavoriteButton({
   const handleClick = guard('favorite', () => {
     if (isBusy) return;
     const isFavorite = !isPressed;
+    if (onToggle) {
+      onToggle(isFavorite);
+      return;
+    }
     toggle.mutate(
       { ykiho, isFavorite, hospital },
       {

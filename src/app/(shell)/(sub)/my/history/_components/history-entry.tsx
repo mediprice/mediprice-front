@@ -38,8 +38,8 @@ export function HistoryEntry({
       className={cn(
         'relative flex items-start gap-2 rounded-xl py-4 pr-1 pl-4 lg:items-center lg:gap-4 lg:py-5 lg:pr-3 lg:pl-6',
         href
-          ? 'bg-bg shadow-card transition-shadow duration-150 ease-standard has-[a:hover]:shadow-float'
-          : 'border border-hairline bg-surface',
+          ? 'pressable bg-bg shadow-card'
+          : 'border border-dashed border-border-strong bg-bg',
       )}
     >
       <div className="flex min-w-0 flex-1 flex-col gap-1">

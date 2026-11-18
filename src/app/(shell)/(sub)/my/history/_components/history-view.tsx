@@ -11,6 +11,8 @@ import { PageContainer } from '@/components/layout/page-container';
 import { LoginRequired } from '@/features/auth/components/login-required';
 import { MyPageHeader } from '@/features/auth/components/my-page-header';
 import { MySideNav } from '@/features/auth/components/my-side-nav';
+import { useSession } from '@/features/auth/use-session';
+import { cn } from '@/lib/utils';
 
 import { HistoryList } from './history-list';
 import { HistoryListSkeleton } from './history-list-skeleton';
@@ -18,9 +20,11 @@ import { HistoryListSkeleton } from './history-list-skeleton';
 export function HistoryView() {
   const t = useTranslations('library.history');
   const tNav = useTranslations('nav');
+  const { status } = useSession();
+  const isListVisible = status === 'authenticated' || status === 'pending';
   return (
     <>
-      <MyPageHeader className="max-lg:bg-none max-lg:[&>div]:pt-4 max-lg:[&>div]:pb-0">
+      <MyPageHeader className="to-surface max-lg:bg-none max-lg:[&>div]:pt-4 max-lg:[&>div]:pb-4">
         <Breadcrumb>
           <BreadcrumbLink href="/my">{tNav('my')}</BreadcrumbLink>
           <BreadcrumbCurrent>{t('title')}</BreadcrumbCurrent>
@@ -28,12 +32,17 @@ export function HistoryView() {
         <h1 className="sr-only text-title lg:not-sr-only">{t('title')}</h1>
         <p className="text-body-sm text-text-secondary">{t('description')}</p>
       </MyPageHeader>
-      <PageContainer className="pt-4 pb-section lg:grid lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8 lg:pt-0">
-        <MySideNav />
-        <LoginRequired reason="history" fallback={<HistoryListSkeleton />}>
-          <HistoryList />
-        </LoginRequired>
-      </PageContainer>
+      {/** 흰 카드가 잘 보이도록 목록 영역을 회색 띠에 올린다. 로그인 안내처럼 카드가 없는 상태는 흰 판에 둔다. */}
+      <div className="flex-1 bg-surface">
+        <PageContainer className="pt-4 pb-section md:max-w-2xl lg:grid lg:max-w-page lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8 lg:pt-0">
+          <MySideNav />
+          <div className={cn(!isListVisible && 'rounded-xl bg-bg')}>
+            <LoginRequired reason="history" fallback={<HistoryListSkeleton />}>
+              <HistoryList />
+            </LoginRequired>
+          </div>
+        </PageContainer>
+      </div>
     </>
   );
 }

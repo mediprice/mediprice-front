@@ -51,11 +51,12 @@ export function HistoryList() {
     return (
       <EmptyState
         icon={<Clock />}
+        className="rounded-xl bg-bg"
         title={t('errorTitle')}
         description={tErrors(errorMessageKey(histories.error))}
         action={
           <Button
-            variant="outline"
+            variant="tint"
             size="md"
             isLoading={histories.isRefetching}
             onClick={() => void histories.refetch()}
@@ -110,10 +111,11 @@ export function HistoryList() {
       {entries.length === 0 ? (
         <EmptyState
           icon={<Clock />}
+          className="rounded-xl bg-bg"
           title={t('emptyTitle')}
           description={t('emptyDescription')}
           action={
-            <Button asChild size="md">
+            <Button asChild variant="tint" size="md">
               <Link href="/">{t('explore')}</Link>
             </Button>
           }
@@ -165,7 +167,7 @@ export function HistoryList() {
               clear.reset();
               setIsConfirming(true);
             }}
-            className="mt-6 w-full lg:w-auto"
+            className="mt-6 w-full bg-bg hover:bg-surface-strong lg:w-auto"
           >
             {t('clearAll')}
           </Button>
