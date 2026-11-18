@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown, Hospital } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import type { Route } from 'next';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -43,15 +43,10 @@ export function HospitalPriceGroupCard<T extends string>({
 
   return (
     <article className="relative flex flex-col gap-3 rounded-xl pressable bg-bg px-4 pt-4 pb-3.5 shadow-card md:px-6 md:py-5">
-      <div className="grid grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-x-3 gap-y-2.5 md:grid-cols-[2.75rem_minmax(0,1fr)_auto]">
-        <span
-          aria-hidden="true"
-          className="flex size-11 items-center justify-center rounded-lg bg-primary-tint text-primary"
-        >
-          <Hospital className="size-5.5" strokeWidth={1.75} />
-        </span>
+      <div className="flex flex-col gap-2.5 md:flex-row md:items-start md:justify-between md:gap-6">
         <HospitalIdentity
           as="h3"
+          className="min-w-0 md:flex-1"
           meta={meta}
           name={
             <Link
@@ -65,12 +60,12 @@ export function HospitalPriceGroupCard<T extends string>({
         <PriceRange
           min={group.minPrice}
           max={group.maxPrice}
-          className="col-span-2 text-price-lg md:col-span-1 md:text-right"
+          className="text-price-lg md:text-right"
         />
       </div>
 
       {firstVariant && (
-        <div className="flex flex-col gap-2 md:pl-14">
+        <div className="flex flex-col gap-2">
           {isExpanded ? (
             <ul
               id={listId}
