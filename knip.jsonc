@@ -1,8 +1,3 @@
 {
   "$schema": "https://unpkg.com/knip/schema.json",
-  // 리디자인 기반 단계에서 먼저 만든 공용 조각. 홈 화면이 쓰기 시작하면 이 목록을 지운다.
-  "entry": [
-    "src/components/ui/reveal.tsx",
-    "src/components/ui/rotation-controls.tsx",
-  ],
 }
