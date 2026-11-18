@@ -33,7 +33,8 @@
     "label": "AI와 나눈 대화",
     "user": "나:",
     "assistant": "AI:",
-    "typing": "답변을 준비하고 있어요"
+    "typing": "답변을 준비하고 있어요",
+    "avatar": "AI"
   },
   "questions": {
     "sendSelected": "고른 답 보내기"

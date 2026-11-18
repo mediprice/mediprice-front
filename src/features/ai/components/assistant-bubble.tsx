@@ -1,4 +1,3 @@
-import { Sparkles } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
@@ -20,9 +19,9 @@ export function AssistantBubble({
       <div className="flex items-end gap-2">
         <span
           aria-hidden="true"
-          className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary"
+          className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-caption-bold text-on-primary"
         >
-          <Sparkles className="size-4" strokeWidth={1.75} />
+          {t('avatar')}
         </span>
         <div className="max-w-[min(100%,36rem)] min-w-0 rounded-2xl rounded-bl-md border border-border bg-bg px-3.5 py-2.5 text-body whitespace-pre-line">
           <span className="sr-only">{t('assistant')} </span>

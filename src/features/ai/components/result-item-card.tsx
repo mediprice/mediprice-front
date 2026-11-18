@@ -39,7 +39,7 @@ export function ResultItemCard({
   );
 
   return (
-    <article className="flex flex-col gap-3 rounded-xl bg-bg p-4 shadow-card lg:flex-row lg:items-end lg:gap-6 lg:p-5">
+    <article className="flex flex-col gap-3 rounded-xl bg-bg p-4 shadow-card lg:p-5 xl:flex-row xl:items-end xl:gap-6">
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         {detail.mdivName && (
           <p className="text-caption-strong text-primary-text">
@@ -64,7 +64,7 @@ export function ResultItemCard({
           )}
         </div>
       </div>
-      <Button asChild variant="tint" size="md" className="w-full lg:w-auto">
+      <Button asChild variant="tint" size="md" className="w-full xl:w-auto">
         <Link href={`/items/${encodeURIComponent(item.code)}`}>
           {t('viewPrices')}
           <ChevronRight aria-hidden="true" />

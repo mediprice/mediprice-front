@@ -44,11 +44,11 @@ export function ResultList({
         ))}
         {Array.from({ length: pendingCount }, (_, index) => (
           <li key={`pending-${index}`}>
-            <Skeleton className="h-72 w-full rounded-xl lg:h-50" />
+            <Skeleton className="h-72 w-full rounded-xl xl:h-50" />
           </li>
         ))}
       </ul>
-      <p className="flex gap-2 rounded-lg bg-surface px-4 py-3 text-body-sm text-text-secondary">
+      <p className="flex gap-2 rounded-lg bg-surface-strong px-4 py-3 text-body-sm text-text-secondary">
         <Info
           aria-hidden="true"
           className="mt-0.5 size-4 shrink-0"
