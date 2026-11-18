@@ -1,11 +1,11 @@
 import type { QueryClient } from '@tanstack/react-query';
-import { z } from 'zod';
 
 import { toApiError } from '@/lib/api/errors';
 import { BFF_BASE } from '@/lib/api/paths';
 import { getQueryClient } from '@/lib/query-client';
 
 import { parseOAuthCallbackHash } from './oauth';
+import { markSignedOut } from './queries';
 
 type CallbackOptions = {
   baseUrl?: string;
@@ -29,10 +29,14 @@ export async function completeOAuthCallback(
     clearFragment = clearLocationFragment,
     queryClient = getQueryClient(),
   }: CallbackOptions = {},
-): Promise<{ ok: true } | { ok: false; code: string }> {
+): Promise<
+  | { ok: true; returnTo: string | null }
+  | { ok: false; code: string; returnTo: string | null }
+> {
   const parsed = parseOAuthCallbackHash(hash);
   clearFragment();
   if (!parsed.ok) return parsed;
+  const { returnTo } = parsed;
 
   let response: Response;
   try {
@@ -43,31 +47,17 @@ export async function completeOAuthCallback(
       body: JSON.stringify(parsed.tokens),
     });
   } catch {
-    return { ok: false, code: 'NETWORK_ERROR' };
+    return { ok: false, code: 'NETWORK_ERROR', returnTo };
   }
   if (!response.ok) {
-    return { ok: false, code: (await toApiError(response)).code };
+    return {
+      ok: false,
+      code: (await toApiError(response)).code,
+      returnTo,
+    };
   }
   queryClient.clear();
-  return { ok: true };
-}
-
-const sessionSchema = z.object({ authenticated: z.boolean() });
-
-export type SessionState = 'authenticated' | 'anonymous' | 'unavailable';
-
-export async function getSession(baseUrl = BFF_BASE): Promise<SessionState> {
-  try {
-    const response = await fetch(`${baseUrl}/session`, {
-      credentials: 'same-origin',
-    });
-    if (!response.ok) return 'unavailable';
-    const parsed = sessionSchema.safeParse(await response.json());
-    if (!parsed.success) return 'unavailable';
-    return parsed.data.authenticated ? 'authenticated' : 'anonymous';
-  } catch {
-    return 'unavailable';
-  }
+  return { ok: true, returnTo };
 }
 
 /** 서버 요청이 실패해도 쿼리 캐시는 비운다. 이전 사용자의 데이터가 남으면 안 된다. */
@@ -81,5 +71,5 @@ export async function signOut(
       credentials: 'same-origin',
     });
   } catch {}
-  queryClient.clear();
+  markSignedOut(queryClient);
 }

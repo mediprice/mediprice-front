@@ -39,7 +39,7 @@ src/
   app/bff/            BFF 라우트(api 중계, session, session/refresh). 핸들러는 얇게
   server/bff/         서버 전용: 쿠키, 업스트림 호출, 재발급, 응답 헬퍼
   lib/api/            타입(schema.d.ts, 생성물), 클라이언트, 에러, 쿼리 직렬화, 세션 만료 이벤트
-  features/<도메인>/  쿼리 옵션(queryOptions)과 쿼리 키. auth는 로그인 시작·콜백·세션 헬퍼
+  features/<도메인>/  쿼리 옵션(queryOptions)과 쿼리 키. auth는 로그인 창·콜백·세션 훅(`useSession`)
 ```
 
 ### 호출하는 법
@@ -62,11 +62,12 @@ const { data: hospitals } = useQuery(
 
 ### 로그인
 
-1. 로그인 버튼은 `loginUrl()`로 이동시킨다(백엔드가 구글 로그인을 진행).
-2. 백엔드가 `/oauth/callback#accessToken=…`로 돌려보내면, 콜백 페이지에서 `completeOAuthCallback(window.location.hash)`를 호출한다. 토큰을 쿠키로 바꾸고 주소창에서 지운다.
-3. 앱 시작 시 `getSession()`으로 로그인 여부를 확인하고, 로그아웃은 `signOut()`을 쓴다.
+1. 로그인이 필요한 동작은 `useLoginGuard()`로 감싸거나 `openLoginDialog({ reason })`를 부른다. 로그인 창(`LoginDialog`)은 `(shell)/layout.tsx`의 `<AuthDialogs/>`가 한 번만 렌더한다.
+2. "Google로 계속하기"는 `startGoogleLogin(returnTo)`로 백엔드 로그인 주소(`loginUrl`)로 이동한다. 이때 `redirect_uri`(이 앱의 `/oauth/callback`)와 `return_to`(돌아올 경로)를 붙이고, 같은 경로를 sessionStorage에도 저장해 둔다.
+3. 백엔드가 `/oauth/callback#accessToken=…[&returnTo=…]`로 돌려보내면 콜백 페이지가 토큰을 BFF 쿠키로 바꾸고 주소창에서 지운 뒤 `returnTo` → sessionStorage → `/` 순서로 돌아간다.
+4. 화면에서는 `useSession()`(`pending | authenticated | anonymous | error`)으로 로그인 상태를 읽는다. 로그인이 필요한 영역은 `<LoginRequired reason="…">`로 감싼다. 로그아웃은 `signOut()`.
 
-> 콜백 페이지와 로그인 버튼 UI는 아직 없다. 위 함수를 호출하는 얇은 페이지를 화면 작업에서 추가한다.
+> `redirect_uri`·`return_to`는 백엔드 `fix/frontend-integration` 브랜치에서 지원한다. 배포되기 전의 백엔드는 두 값을 무시하고 자기 기본 주소로 돌려보낸다.
 
 ## 코딩 컨벤션
 
@@ -93,4 +94,4 @@ const { data: hospitals } = useQuery(
 
 - `apiClient`와 이를 쓰는 쿼리 옵션은 상대 주소(`/bff`)를 쓰는 **브라우저 전용**이다. 서버 컴포넌트에서 prefetch하려면 쿠키를 읽어 백엔드로 직접 보내는 서버용 호출 경로를 따로 만들어야 한다(아직 없음).
 - `NEXT_PUBLIC_API_URL`은 빌드에도 필요하다. 배포(Vercel)에 설정해야 한다.
-- 로그인이 끝나면 백엔드가 돌려보낼 주소(`OAUTH2_REDIRECT_URI`)는 이 앱의 `/oauth/callback`과 같아야 한다.
+- 로그인이 끝나면 백엔드가 돌려보낼 기본 주소(`OAUTH2_REDIRECT_URI`)는 이 앱의 `/oauth/callback`이어야 한다. 다른 주소(로컬, 프리뷰)에서 로그인하려면 그 origin을 백엔드 `OAUTH2_ALLOWED_REDIRECT_ORIGINS`와 `CORS_ALLOWED_ORIGINS`에 넣는다.

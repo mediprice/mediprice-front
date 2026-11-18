@@ -1,0 +1,78 @@
+{
+  "toggle": {
+    "add": "비교함 담기",
+    "added": "비교함 담음"
+  },
+  "tray": {
+    "label": "비교함",
+    "count": "비교함 {count, number}/{max, number}",
+    "remove": "{name} 비교함에서 빼기",
+    "clear": "비우기",
+    "compare": "비교하기",
+    "needMore": "{count, plural, other {#곳}} 더 담아 주세요",
+    "full": "비교함은 {max, number}곳까지 담을 수 있어요. 병원을 빼고 담아 주세요."
+  },
+  "announce": {
+    "added": "비교함에 담았어요: {name} ({count, number}/{max, number})",
+    "removed": "비교함에서 뺐어요: {name} ({count, number}/{max, number})",
+    "full": "비교함이 가득 찼어요({max, number}곳). 담지 못한 병원: {name}",
+    "cleared": "비교함을 비웠어요."
+  },
+  "clearDialog": {
+    "title": "비교함을 비울까요?",
+    "description": "담아 둔 병원 {count, number}곳이 모두 빠져요.",
+    "confirm": "비우기"
+  },
+  "page": {
+    "metaTitle": "병원 비교",
+    "topBarTitle": "병원 비교",
+    "breadcrumbHome": "홈",
+    "breadcrumbCurrent": "병원 비교",
+    "title": "병원 {count, number}곳 비교",
+    "titleWithItem": "{item} · {count, number}곳 비교",
+    "fallbackTitle": "병원 비교",
+    "source": "건강보험심사평가원 공개 가격 기준",
+    "notice": "가격은 병원이 공개한 세부 항목의 최저~최고가예요. '최저' 표시는 각 병원의 가장 낮은 가격 기준이라 1회·1일 같은 세부 조건이 다를 수 있어요.",
+    "single": "병원을 1곳 더 추가하면 나란히 비교할 수 있어요.",
+    "itemNotFound": "선택한 항목을 찾을 수 없어 함께 공개한 항목만 비교해요.",
+    "addHospital": "병원 추가",
+    "loading": "비교표를 불러오는 중"
+  },
+  "table": {
+    "caption": "{item} 가격과 병원 정보 비교",
+    "captionNoItem": "병원 정보와 함께 공개한 항목 가격 비교",
+    "hospital": "병원",
+    "detail": "상세 보기",
+    "remove": "{name} 비교에서 빼기",
+    "price": "가격",
+    "variants": "세부 {count, number}건",
+    "lowest": "최저",
+    "startDate": "적용일",
+    "startDateUnknown": "적용일 미확인",
+    "region": "지역",
+    "address": "주소",
+    "phone": "전화",
+    "none": "정보 없음",
+    "info": "병원 정보",
+    "scrollHint": "표를 옆으로 밀어 다른 병원을 볼 수 있어요."
+  },
+  "common": {
+    "title": "함께 공개한 항목",
+    "count": "{count, number}개",
+    "showAll": "{count, number}개 모두 보기",
+    "showLess": "접기",
+    "truncated": "항목이 많아 앞의 {count, number}개만 보여요.",
+    "empty": "병원들이 함께 공개한 다른 항목이 없어요.",
+    "other": "기타"
+  },
+  "empty": {
+    "title": "비교할 병원을 골라 주세요",
+    "description": "항목별 가격 화면에서 '비교함 담기'로 병원을 2곳 이상 담으면 나란히 비교할 수 있어요.",
+    "fromBasket": "비교함의 {count, number}곳 비교하기",
+    "search": "진료 항목 찾기"
+  },
+  "notFound": {
+    "description": "주소에 있는 병원 중 찾을 수 없는 곳이 있어요. 병원을 다시 골라 주세요.",
+    "back": "병원 다시 고르기"
+  }
+}

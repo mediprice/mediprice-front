@@ -1,9 +1,12 @@
+import auth from './ko/auth.json';
 import common from './ko/common.json';
+import comparison from './ko/comparison.json';
 import errors from './ko/errors.json';
 import home from './ko/home.json';
 import hospitals from './ko/hospitals.json';
 import items from './ko/items.json';
 import metadata from './ko/metadata.json';
+import mypage from './ko/mypage.json';
 import nav from './ko/nav.json';
 import search from './ko/search.json';
 import validation from './ko/validation.json';
@@ -19,4 +22,7 @@ export const messages = {
   search,
   items,
   hospitals,
+  auth,
+  mypage,
+  comparison,
 };

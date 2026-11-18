@@ -6,6 +6,37 @@ describe('loginUrl', () => {
   it('백엔드의 구글 로그인 시작 주소다', () => {
     expect(loginUrl()).toBe('http://api.test/oauth2/authorization/google');
   });
+
+  it('이 앱의 콜백 주소와 돌아올 경로를 넘긴다', () => {
+    const url = new URL(
+      loginUrl({
+        origin: 'http://localhost:3000',
+        returnTo: '/items/A?region=seoul',
+      }),
+    );
+
+    expect(url.origin + url.pathname).toBe(
+      'http://api.test/oauth2/authorization/google',
+    );
+    expect(url.searchParams.get('redirect_uri')).toBe(
+      'http://localhost:3000/oauth/callback',
+    );
+    expect(url.searchParams.get('return_to')).toBe('/items/A?region=seoul');
+  });
+
+  it.each([
+    'https://evil.example/x',
+    '//evil.example',
+    '/\\evil',
+    `/${'a'.repeat(512)}`,
+  ])('안전하지 않은 돌아올 경로(%s)는 넘기지 않는다', (returnTo) => {
+    const url = new URL(
+      loginUrl({ origin: 'http://localhost:3000', returnTo }),
+    );
+
+    expect(url.searchParams.has('return_to')).toBe(false);
+    expect(url.searchParams.has('redirect_uri')).toBe(true);
+  });
 });
 
 describe('parseOAuthCallbackHash', () => {
@@ -17,6 +48,7 @@ describe('parseOAuthCallbackHash', () => {
     ).toEqual({
       ok: true,
       tokens: { accessToken: 'a.b.c', refreshToken: 'r+1', expiresIn: 3600 },
+      returnTo: null,
     });
   });
 
@@ -30,6 +62,7 @@ describe('parseOAuthCallbackHash', () => {
     expect(parseOAuthCallbackHash('#error=OAUTH2_LOGIN_FAILED')).toEqual({
       ok: false,
       code: 'OAUTH2_LOGIN_FAILED',
+      returnTo: null,
     });
   });
 
@@ -43,6 +76,7 @@ describe('parseOAuthCallbackHash', () => {
     expect(parseOAuthCallbackHash(hash)).toEqual({
       ok: false,
       code: 'MISSING_TOKENS',
+      returnTo: null,
     });
   });
 
@@ -53,7 +87,37 @@ describe('parseOAuthCallbackHash', () => {
         parseOAuthCallbackHash(
           `#accessToken=a&refreshToken=r&expiresIn=${expiresIn}`,
         ),
-      ).toEqual({ ok: false, code: 'INVALID_EXPIRES_IN' });
+      ).toEqual({ ok: false, code: 'INVALID_EXPIRES_IN', returnTo: null });
     },
   );
+
+  it('성공과 실패 모두 돌아올 경로를 읽는다', () => {
+    const returnTo = encodeURIComponent('/items/A?region=seoul');
+
+    expect(
+      parseOAuthCallbackHash(
+        `#accessToken=a&refreshToken=r&expiresIn=60&returnTo=${returnTo}`,
+      ),
+    ).toMatchObject({ ok: true, returnTo: '/items/A?region=seoul' });
+    expect(
+      parseOAuthCallbackHash(`#error=access_denied&returnTo=${returnTo}`),
+    ).toEqual({
+      ok: false,
+      code: 'access_denied',
+      returnTo: '/items/A?region=seoul',
+    });
+  });
+
+  it.each([
+    'https%3A%2F%2Fevil.example',
+    '%2F%2Fevil.example',
+    '%2F%5Cevil.example',
+    '%2Foauth%2Fcallback',
+  ])('안전하지 않은 돌아올 경로(%s)는 버린다', (returnTo) => {
+    expect(
+      parseOAuthCallbackHash(
+        `#accessToken=a&refreshToken=r&expiresIn=60&returnTo=${returnTo}`,
+      ),
+    ).toMatchObject({ ok: true, returnTo: null });
+  });
 });

@@ -4,7 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { server } from '@/test/server';
 
-import { completeOAuthCallback, getSession, signOut } from './session';
+import { sessionKeys } from './queries';
+import { completeOAuthCallback, signOut } from './session';
 
 const BASE = 'http://app.test/bff';
 const hash = '#accessToken=a1&refreshToken=r1&expiresIn=3600';
@@ -25,7 +26,7 @@ describe('completeOAuthCallback', () => {
       clearFragment,
     });
 
-    expect(result).toEqual({ ok: true });
+    expect(result).toEqual({ ok: true, returnTo: null });
     expect(received).toEqual({
       accessToken: 'a1',
       refreshToken: 'r1',
@@ -43,7 +44,11 @@ describe('completeOAuthCallback', () => {
       clearFragment,
     });
 
-    expect(result).toEqual({ ok: false, code: 'NETWORK_ERROR' });
+    expect(result).toEqual({
+      ok: false,
+      code: 'NETWORK_ERROR',
+      returnTo: null,
+    });
     expect(clearFragment).toHaveBeenCalledOnce();
   });
 
@@ -62,7 +67,11 @@ describe('completeOAuthCallback', () => {
       clearFragment: vi.fn(),
     });
 
-    expect(result).toEqual({ ok: false, code: 'INVALID_INPUT' });
+    expect(result).toEqual({
+      ok: false,
+      code: 'INVALID_INPUT',
+      returnTo: null,
+    });
   });
 
   it('백엔드 로그인 실패는 BFF를 부르지 않고 코드를 돌려준다', async () => {
@@ -73,7 +82,11 @@ describe('completeOAuthCallback', () => {
       clearFragment,
     });
 
-    expect(result).toEqual({ ok: false, code: 'OAUTH2_LOGIN_FAILED' });
+    expect(result).toEqual({
+      ok: false,
+      code: 'OAUTH2_LOGIN_FAILED',
+      returnTo: null,
+    });
     expect(clearFragment).toHaveBeenCalledOnce();
   });
 });
@@ -128,42 +141,7 @@ describe('로그인 상태 전환 시 쿼리 캐시', () => {
     expect(
       queryClient.getQueryData(['hospitals', 'detail', 'H1']),
     ).toBeUndefined();
-  });
-});
-
-describe('getSession', () => {
-  it.each([
-    [true, 'authenticated'],
-    [false, 'anonymous'],
-  ])('authenticated=%s이면 %s다', async (authenticated, expected) => {
-    server.use(
-      http.get(`${BASE}/session`, () => HttpResponse.json({ authenticated })),
-    );
-
-    expect(await getSession(BASE)).toBe(expected);
-  });
-
-  it('BFF가 502면 unavailable이다', async () => {
-    server.use(
-      http.get(
-        `${BASE}/session`,
-        () => new HttpResponse(null, { status: 502 }),
-      ),
-    );
-
-    expect(await getSession(BASE)).toBe('unavailable');
-  });
-
-  it('응답이 약속된 형식이 아니면 unavailable이다', async () => {
-    server.use(http.get(`${BASE}/session`, () => HttpResponse.json({ ok: 1 })));
-
-    expect(await getSession(BASE)).toBe('unavailable');
-  });
-
-  it('연결에 실패하면 unavailable이다', async () => {
-    server.use(http.get(`${BASE}/session`, () => HttpResponse.error()));
-
-    expect(await getSession(BASE)).toBe('unavailable');
+    expect(queryClient.getQueryData(sessionKeys.current())).toBeNull();
   });
 });
 
