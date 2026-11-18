@@ -116,12 +116,11 @@ export type CompareSummary =
       count: number;
       ykiho: string;
       name: string;
-      price: number;
-      /** 가장 높은 최저가와의 차이. */
+      /** 가장 높은 최저가와의 차이. 표·막대·번호 목록과 같은 병원별 최저가로 계산한다. */
       gap: number;
     }
-  | { kind: 'tie'; count: number; tied: number; price: number; gap: number }
-  | { kind: 'same'; count: number; price: number };
+  | { kind: 'tie'; count: number; tied: number; gap: number }
+  | { kind: 'same'; count: number };
 
 /** 선택 항목 한 줄로 머리 문장을 고른다. 가격을 낸 병원이 2곳 미만이면 결론을 내지 않는다(null). */
 export function summarizeComparison(
@@ -135,18 +134,15 @@ export function summarizeComparison(
   );
   if (cells.length < 2) return null;
   const prices = cells.map((cell) => cell.minPrice ?? 0);
-  const price = Math.min(...prices);
-  const gap = Math.max(...prices) - price;
+  const gap = Math.max(...prices) - Math.min(...prices);
   const count = hospitals.length;
   const lowest = findLowest(cells);
-  if (lowest.size === 0) return { kind: 'same', count, price };
-  if (lowest.size > 1) {
-    return { kind: 'tie', count, tied: lowest.size, price, gap };
-  }
+  if (lowest.size === 0) return { kind: 'same', count };
+  if (lowest.size > 1) return { kind: 'tie', count, tied: lowest.size, gap };
   const [ykiho] = [...lowest];
   const hospital = hospitals.find((h) => h.ykiho === ykiho);
   if (!ykiho || !hospital) return null;
-  return { kind: 'cheapest', count, ykiho, name: hospital.name, price, gap };
+  return { kind: 'cheapest', count, ykiho, name: hospital.name, gap };
 }
 
 export type SubjectParticle = 'consonant' | 'vowel' | 'unknown';

@@ -44,7 +44,6 @@
     "summary": "{count, number}곳 중 {name}{particle, select, consonant {이} vowel {가} other {이(가)}} 가장 저렴해요",
     "summaryTie": "{count, number}곳 중 {tied, number}곳이 같은 최저가예요",
     "summarySame": "{count, number}곳 모두 최저가가 같아요",
-    "lowestPrice": "가장 낮은 세부 가격",
     "gap": "가장 높은 곳보다 <nb>{amount, number}원</nb> 낮아요",
     "regionAverage": "{region} 평균 {amount, number}원",
     "regionNote": "막대는 {region} 병원 {count, number}곳의 가격 범위예요. 번호는 비교표의 병원 순서와 같아요.",

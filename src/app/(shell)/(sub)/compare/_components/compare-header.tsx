@@ -19,7 +19,7 @@ import type {
 
 import { CompareSummaryPanel } from './compare-summary-panel';
 
-/** 흰 머리. 선택 항목에서 결론을 낼 수 있으면 제목을 "3곳 중 OO병원이 가장 저렴해요" 같은 문장으로 쓰고 요약 묶음을 붙인다. */
+/** 흰 머리. 선택 항목에서 결론을 낼 수 있으면 제목을 "3곳 중 OO병원이 가장 저렴해요" 같은 문장으로, 그 아래 가장 높은 곳과의 차이를 쓰고 요약 묶음을 붙인다. */
 export function CompareHeader({
   item,
   itemName,
@@ -75,6 +75,16 @@ export function CompareHeader({
           </p>
         )}
         <h1 className="text-display text-balance">{sentence ?? plainTitle}</h1>
+        {summary && summary.kind !== 'same' && summary.gap > 0 && (
+          <p className="text-body-lg text-text-secondary">
+            {t.rich('gap', {
+              amount: summary.gap,
+              nb: (chunks) => (
+                <span className="whitespace-nowrap tabular-nums">{chunks}</span>
+              ),
+            })}
+          </p>
+        )}
         <p className="flex items-center gap-1.5 text-body-sm text-text-tertiary">
           <Info
             aria-hidden="true"
@@ -88,11 +98,7 @@ export function CompareHeader({
         <Skeleton className="h-64 w-full rounded-3xl lg:h-56" />
       )}
       {summary && itemRow && (
-        <CompareSummaryPanel
-          summary={summary}
-          row={itemRow}
-          hospitals={hospitals}
-        />
+        <CompareSummaryPanel row={itemRow} hospitals={hospitals} />
       )}
     </PageContainer>
   );

@@ -95,7 +95,6 @@ describe('summarizeComparison', () => {
       count: 3,
       ykiho: 'B',
       name: 'B병원',
-      price: 1000,
       gap: 2000,
     });
   });
@@ -106,13 +105,13 @@ describe('summarizeComparison', () => {
         row(['A', 1000], ['B', 1000], ['C', 2000]),
         hospitals,
       ),
-    ).toEqual({ kind: 'tie', count: 3, tied: 2, price: 1000, gap: 1000 });
+    ).toEqual({ kind: 'tie', count: 3, tied: 2, gap: 1000 });
   });
 
   it('모두 같은 가격이면 same이다', () => {
     expect(
       summarizeComparison(row(['A', 1000], ['B', 1000]), hospitals),
-    ).toEqual({ kind: 'same', count: 3, price: 1000 });
+    ).toEqual({ kind: 'same', count: 3 });
   });
 
   it('가격을 낸 병원이 2곳 미만이거나 비교 대상이 아니면 결론을 내지 않는다', () => {
