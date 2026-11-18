@@ -10,6 +10,8 @@ import {
 import { formatItemName } from '@/features/search/item-groups';
 import type { ItemResult } from '@/features/search/queries';
 
+import { KeepPhrase } from './keep-phrase';
+
 /** 그 지역에 공개 가격이 없는 항목. 목록 맨 아래에 접어 두고, 펼치면 흐린 한 줄씩 보여 준다. */
 export function UnpricedItems({
   items,
@@ -39,7 +41,10 @@ export function UnpricedItems({
         />
       </summary>
       <p className="px-4 text-body-sm text-text-tertiary lg:px-6">
-        {t('unpricedHint', { region: tRegion(region) })}
+        {t.rich('unpricedHint', {
+          region: tRegion(region),
+          nb: (chunks) => <span className="whitespace-nowrap">{chunks}</span>,
+        })}
       </p>
       <ul className="divide-y divide-hairline px-4 pt-1 pb-2 lg:px-6">
         {items.map((item) => (
@@ -56,7 +61,7 @@ export function UnpricedItems({
               </span>
               {item.mdivName && (
                 <span className="text-caption text-text-tertiary">
-                  {label(item.mdivCode, item.mdivName)}
+                  <KeepPhrase text={label(item.mdivCode, item.mdivName)} />
                   {item.sdivName &&
                     item.sdivName !== item.mdivName &&
                     ` · ${item.sdivName}`}

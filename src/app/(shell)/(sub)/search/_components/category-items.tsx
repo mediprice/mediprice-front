@@ -3,6 +3,8 @@ import { FolderOpen } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
+import { EmptyState } from '@/components/ui/empty-state';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   type ServiceRegion,
@@ -15,7 +17,6 @@ import { ListSkeleton } from './list-skeleton';
 import { LoadMore } from './load-more';
 import { ResultsError } from './results-error';
 import { ResultsLayout } from './results-layout';
-import { StatusPanel } from './status-panel';
 
 /**
  * 고른 분류의 항목. codes가 없으면(분류 목록을 불러오는 중) 같은 자리에 뼈대만 그린다.
@@ -44,16 +45,20 @@ export function CategoryItems({
   return (
     <ResultsLayout aside={query.isPending ? undefined : aside}>
       <section aria-labelledby="search-category-items" className="space-y-2">
-        <h2
+        <SectionHeader
           id="search-category-items"
-          className="flex min-h-7.5 items-center pt-2 text-label-bold text-text-secondary"
-        >
-          {total === undefined ? (
-            <Skeleton className="h-4 w-16" />
-          ) : (
-            t('category.itemCount', { count: total })
-          )}
-        </h2>
+          title={t('category.itemsTitle')}
+          className="items-center pt-2"
+          action={
+            total === undefined ? (
+              <Skeleton className="h-5 w-16" />
+            ) : (
+              <span className="text-label text-text-tertiary">
+                {t('category.itemCount', { count: total })}
+              </span>
+            )
+          }
+        />
         <p role="status" className="sr-only">
           {total === undefined ? '' : t('header.itemStatus', { count: total })}
         </p>
@@ -66,7 +71,7 @@ export function CategoryItems({
             onRetry={() => void query.refetch()}
           />
         ) : items.length === 0 ? (
-          <StatusPanel
+          <EmptyState
             icon={<FolderOpen />}
             title={t('empty.categoryTitle')}
             description={t('empty.categoryDescription')}

@@ -34,14 +34,14 @@ export function SearchHeader({
         className,
       )}
     >
-      <PageContainer className="py-3.5 lg:pt-2 lg:pb-9">
+      <PageContainer className="py-3.5 md:py-6 lg:pt-2 lg:pb-9">
         {current && (
           <Breadcrumb>
             <BreadcrumbLink href="/">{t('home')}</BreadcrumbLink>
             <BreadcrumbCurrent>{current}</BreadcrumbCurrent>
           </Breadcrumb>
         )}
-        <div className={cn('lg:flex lg:justify-center', !current && 'lg:pt-7')}>
+        <div className={cn(!current && 'lg:pt-7')}>
           <SearchForm
             key={`${type}:${keyword}:${region}`}
             type={type}

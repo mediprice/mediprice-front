@@ -32,7 +32,7 @@
     "viewPrices": "병원별 가격 보기",
     "priceError": "가격을 불러오지 못했어요",
     "unpricedTitle": "가격 정보 없는 항목 {count, plural, other {#개}}",
-    "unpricedHint": "{region}에 공개된 가격이 아직 없는 항목이에요."
+    "unpricedHint": "<nb>{region}</nb>에 공개된 가격이 아직 없는 항목이에요."
   },
   "hospital": {
     "notice": "병원 결과에는 가격이 없어요. 병원을 열고 항목을 고르면 가격을 볼 수 있어요.",
@@ -105,7 +105,8 @@
     "official": "공식 분류 · {names}",
     "others": "그 밖의 분류",
     "othersCount": "{count, plural, other {#개}}",
-    "breadcrumb": "현재 분류 경로"
+    "breadcrumb": "현재 분류 경로",
+    "itemsTitle": "이 분류의 항목"
   },
   "breadcrumb": {
     "home": "홈",

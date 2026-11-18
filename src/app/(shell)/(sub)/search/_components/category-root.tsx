@@ -17,6 +17,7 @@ import {
   BreadcrumbLink,
 } from '@/components/layout/breadcrumb';
 import { PageContainer } from '@/components/layout/page-container';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HOME_CATEGORIES, type HomeCategoryId } from '@/features/npay/catalog';
 import {
@@ -26,6 +27,7 @@ import {
 import { otherCategories } from '@/features/search/category-tree';
 import type { components } from '@/lib/api/schema';
 
+import { KeepPhrase } from './keep-phrase';
 import { ResultsError } from './results-error';
 
 type NpayCategory = components['schemas']['NpayCategoryResponse'];
@@ -72,15 +74,13 @@ export function CategoryRoot({
         </p>
       </PageContainer>
 
-      <div className="bg-surface lg:bg-bg">
+      <div className="flex-1 bg-surface lg:bg-bg">
         <PageContainer className="space-y-8 pt-5 pb-section lg:pt-2">
           <section
             aria-labelledby="search-home-categories"
             className="space-y-3"
           >
-            <h2 id="search-home-categories" className="text-subheading">
-              {t('popular')}
-            </h2>
+            <SectionHeader id="search-home-categories" title={t('popular')} />
             <ul className="grid grid-cols-2 gap-2.5 lg:grid-cols-5 lg:gap-4">
               {HOME_CATEGORIES.map(({ id }) => (
                 <li key={id}>
@@ -97,7 +97,9 @@ export function CategoryRoot({
                     >
                       {ICONS[id]}
                     </span>
-                    <span className="text-label-bold">{t(`home.${id}`)}</span>
+                    <span className="text-label-bold">
+                      <KeepPhrase text={t(`home.${id}`)} />
+                    </span>
                   </Link>
                 </li>
               ))}
@@ -108,15 +110,20 @@ export function CategoryRoot({
             aria-labelledby="search-other-categories"
             className="space-y-3"
           >
-            <h2
+            <SectionHeader
               id="search-other-categories"
-              className="flex items-center gap-2 text-subheading"
-            >
-              {t('others')}
-              <span className="text-label text-text-tertiary">
-                {others ? t('othersCount', { count: others.length }) : null}
-              </span>
-            </h2>
+              title={t('others')}
+              className="items-center"
+              action={
+                others ? (
+                  <span className="text-label text-text-tertiary">
+                    {t('othersCount', { count: others.length })}
+                  </span>
+                ) : (
+                  <Skeleton className="h-5 w-10" />
+                )
+              }
+            />
             {categories.isError ? (
               <ResultsError
                 error={categories.error}

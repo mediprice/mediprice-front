@@ -6,7 +6,7 @@ import type { ServiceRegion } from '@/features/regions/service-region';
 
 import { suggestionHref, type SuggestionId } from './suggestion-href';
 
-/** 결과 없음 패널의 다음 행동. 마지막은 AI 찾기다. */
+/** 결과 없음의 다음 행동. 첫 번째만 tint로 강조하고 나머지(마지막은 AI 찾기)는 ghost로 쌓는다. */
 export function SuggestionButtons({
   links,
   keyword,
@@ -19,14 +19,19 @@ export function SuggestionButtons({
   const t = useTranslations('search.suggestions');
   return (
     <>
-      {links.map((id) => (
-        <Button key={id} asChild size="md" variant="tint">
+      {links.map((id, index) => (
+        <Button
+          key={id}
+          asChild
+          size="md"
+          variant={index === 0 ? 'tint' : 'ghost'}
+        >
           <Link href={suggestionHref(id, keyword, region)}>
             {t(`${id}.title`)}
           </Link>
         </Button>
       ))}
-      <Button asChild size="md" variant="tint">
+      <Button asChild size="md" variant="ghost">
         <Link href="/ai">{t('ai.title')}</Link>
       </Button>
     </>

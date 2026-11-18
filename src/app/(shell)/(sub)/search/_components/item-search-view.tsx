@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
 import { PageContainer } from '@/components/layout/page-container';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   type ServiceRegion,
   sidoCodesOf,
@@ -18,7 +19,6 @@ import { LoadMore } from './load-more';
 import { ResultHeader } from './result-header';
 import { ResultsError } from './results-error';
 import { ResultsLayout } from './results-layout';
-import { StatusPanel } from './status-panel';
 
 /** S-02 A 항목 결과. 결과 없음·조회 실패에서는 오른쪽 열 대신 안내 패널의 버튼으로 이어 준다. */
 export function ItemSearchView({
@@ -86,11 +86,11 @@ export function ItemSearchView({
       <>
         {header}
         <PageContainer className="pb-section">
-          <StatusPanel
+          <EmptyState
             icon={<Search />}
             title={t('empty.itemTitle', { query: keyword })}
             description={t('empty.description')}
-            actions={emptyActions}
+            action={emptyActions}
           />
         </PageContainer>
       </>

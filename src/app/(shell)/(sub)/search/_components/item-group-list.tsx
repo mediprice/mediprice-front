@@ -6,6 +6,7 @@ import { groupItems, partitionByPrice } from '@/features/search/item-groups';
 import type { ItemResult } from '@/features/search/queries';
 
 import { ItemRow } from './item-row';
+import { KeepPhrase } from './keep-phrase';
 import { UnpricedItems } from './unpriced-items';
 
 /**
@@ -30,7 +31,9 @@ export function ItemGroupList({
         <section key={group.key} className="space-y-2 lg:space-y-3">
           <Heading className="flex min-h-6 flex-wrap items-center gap-x-1 pt-2 text-caption-bold text-text-secondary">
             {group.major && (
-              <span>{label(group.major.code, group.major.name)}</span>
+              <span>
+                <KeepPhrase text={label(group.major.code, group.major.name)} />
+              </span>
             )}
             {group.major && group.minor && (
               <ChevronRight

@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
 import { PageContainer } from '@/components/layout/page-container';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   type ServiceRegion,
   sidoCodesOf,
@@ -18,7 +19,6 @@ import { LoadMore } from './load-more';
 import { ResultHeader } from './result-header';
 import { ResultsError } from './results-error';
 import { ResultsLayout } from './results-layout';
-import { StatusPanel } from './status-panel';
 
 /** S-02 B 병원 결과. 병원 목록에는 가격이 없다는 안내를 목록 위에 둔다. */
 export function HospitalSearchView({
@@ -99,11 +99,11 @@ export function HospitalSearchView({
       <>
         {header}
         <PageContainer className="pb-section">
-          <StatusPanel
+          <EmptyState
             icon={<Search />}
             title={t('empty.hospitalTitle', { query: keyword })}
             description={t('empty.description')}
-            actions={emptyActions}
+            action={emptyActions}
           />
         </PageContainer>
       </>

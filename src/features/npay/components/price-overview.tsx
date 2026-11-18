@@ -23,13 +23,17 @@ export function PriceOverview({
   return (
     <div className={cn('space-y-0.5', className)}>
       <p className="text-price-md tabular-nums">
-        {t('average', { amount: summary.avgPrice })}
+        {t.rich('averageParts', {
+          amount: summary.avgPrice,
+          nb: (chunks) => <span className="whitespace-nowrap">{chunks}</span>,
+        })}
       </p>
       <p className="flex flex-wrap gap-x-1.5 text-caption text-text-tertiary tabular-nums [&>span]:whitespace-nowrap">
-        {summary.minPrice != null && summary.maxPrice != null && (
-          <span>
-            {t('minMax', { min: summary.minPrice, max: summary.maxPrice })}
-          </span>
+        {summary.minPrice != null && (
+          <span>{t('minimum', { amount: summary.minPrice })}</span>
+        )}
+        {summary.maxPrice != null && (
+          <span>{t('maximum', { amount: summary.maxPrice })}</span>
         )}
         <span>{t('hospitals', { count: summary.hospitalCount })}</span>
       </p>

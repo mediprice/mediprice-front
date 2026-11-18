@@ -19,6 +19,7 @@ import type { CategoryView } from '@/features/search/category-tree';
 
 import { categoryHref } from './category-href';
 import { ChipLinks, ChipLinksSkeleton } from './chip-links';
+import { KeepPhrase } from './keep-phrase';
 
 type Crumb = {
   key: string;
@@ -80,11 +81,15 @@ export function CategoryHeader({
         <BreadcrumbLink href="/">{t('breadcrumb.home')}</BreadcrumbLink>
         {parents.map((crumb) => (
           <BreadcrumbLink key={crumb.key} href={crumb.href}>
-            {crumb.label}
+            <KeepPhrase text={crumb.label} />
           </BreadcrumbLink>
         ))}
         <BreadcrumbCurrent>
-          {current?.label ?? <Skeleton className="inline-block h-5 w-20" />}
+          {current ? (
+            <KeepPhrase text={current.label} />
+          ) : (
+            <Skeleton className="inline-block h-5 w-20" />
+          )}
         </BreadcrumbCurrent>
       </Breadcrumb>
       <nav aria-label={t('category.breadcrumb')} className="lg:hidden">
@@ -95,7 +100,7 @@ export function CategoryHeader({
                 href={crumb.href}
                 className="inline-flex min-h-11 items-center rounded-sm hover:text-primary-text hover:underline"
               >
-                {crumb.label}
+                <KeepPhrase text={crumb.label} />
               </Link>
               <ChevronRight
                 aria-hidden="true"
@@ -105,13 +110,21 @@ export function CategoryHeader({
             </li>
           ))}
           <li aria-current="page" className="flex min-h-11 items-center">
-            {current?.label ?? <Skeleton className="h-4 w-16" />}
+            {current ? (
+              <KeepPhrase text={current.label} />
+            ) : (
+              <Skeleton className="h-4 w-16" />
+            )}
           </li>
         </ol>
       </nav>
 
       <h1 className="flex min-h-8 items-center text-title lg:min-h-8.5">
-        {current?.label ?? <Skeleton className="h-7 w-40" />}
+        {current ? (
+          <KeepPhrase text={current.label} />
+        ) : (
+          <Skeleton className="h-7 w-40" />
+        )}
       </h1>
       <p className="min-h-5.75 text-body-sm text-text-secondary">
         {view ? (

@@ -17,7 +17,10 @@
     "rangeParts": "<amount>{min, number}</amount>~<amount>{max, number}원</amount>",
     "average": "평균 {amount, number}원",
     "minMax": "최저 {min, number}원 · 최고 {max, number}원",
-    "hospitals": "병원 {count, number}곳"
+    "hospitals": "병원 {count, number}곳",
+    "averageParts": "평균 <nb>{amount, number}원</nb>",
+    "minimum": "최저 {amount, number}원",
+    "maximum": "최고 {amount, number}원"
   },
   "footer": {
     "source": "데이터 출처: 건강보험심사평가원 비급여 진료비 공개 자료",

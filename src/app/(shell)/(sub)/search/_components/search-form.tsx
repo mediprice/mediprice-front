@@ -24,9 +24,9 @@ export function SearchForm({
       action="/search"
       role="search"
       aria-label={t('label')}
-      className="w-full overflow-hidden rounded-xl bg-bg shadow-card lg:flex lg:max-w-190 lg:items-center lg:gap-2 lg:overflow-visible lg:p-2"
+      className="w-full overflow-hidden rounded-xl bg-bg shadow-card md:flex md:items-center md:gap-2 md:overflow-visible md:p-2"
     >
-      <div className="flex min-h-13 items-center gap-2 pr-2 pl-3.5 lg:order-2 lg:min-h-11 lg:flex-1 lg:pr-0 lg:pl-2">
+      <div className="flex min-h-13 items-center gap-2 pr-2 pl-3.5 md:order-2 md:min-h-11 md:flex-1 md:pr-0 md:pl-2">
         <label className="flex min-w-0 flex-1 items-center gap-2.5">
           <span className="sr-only">{t('keyword')}</span>
           <Search
@@ -50,18 +50,18 @@ export function SearchForm({
           size="icon"
           variant="tint"
           aria-label={t('submit')}
-          className="touch-target size-9 rounded-full lg:hidden"
+          className="touch-target size-9 rounded-full md:hidden"
         >
           <ArrowRight aria-hidden="true" />
         </Button>
       </div>
 
-      <div className="flex divide-x divide-hairline border-t border-hairline lg:contents">
-        <fieldset className="flex min-w-0 flex-1 flex-col gap-1 px-3.5 py-2.5 lg:order-1 lg:flex-none lg:p-0">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,8.5rem),1fr))] gap-px border-t border-hairline bg-hairline md:contents">
+        <fieldset className="flex min-w-0 flex-col gap-1 bg-bg px-3.5 py-2.5 md:order-1 md:p-0">
           <legend className="sr-only">{t('target')}</legend>
           <span
             aria-hidden="true"
-            className="text-caption text-text-tertiary lg:hidden"
+            className="text-caption text-text-tertiary md:hidden"
           >
             {t('target')}
           </span>
@@ -83,8 +83,8 @@ export function SearchForm({
           </div>
         </fieldset>
 
-        <label className="flex min-w-0 flex-1 flex-col px-3.5 pt-2.5 pb-1 lg:order-3 lg:w-36 lg:flex-none lg:p-0 lg:pl-3.5">
-          <span className="text-caption text-text-tertiary lg:sr-only">
+        <label className="flex min-w-0 flex-col bg-bg px-3.5 pt-2.5 pb-1 md:order-3 md:w-36 md:border-l md:border-hairline md:p-0 md:pl-3.5">
+          <span className="text-caption text-text-tertiary md:sr-only">
             {t('region')}
           </span>
           <span className="relative flex items-center">
@@ -112,7 +112,7 @@ export function SearchForm({
         type="submit"
         size="md"
         elevated
-        className="hidden lg:order-4 lg:inline-flex lg:px-6"
+        className="hidden md:order-4 md:inline-flex md:px-6"
       >
         {t('submit')}
       </Button>
