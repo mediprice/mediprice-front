@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { PageContainer } from '@/components/layout/page-container';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Tag } from '@/components/ui/tag';
 import { POPULAR_ITEMS } from '@/features/npay/catalog';
 import { PopularItemPrice } from '@/features/npay/components/popular-item-card';
@@ -23,23 +24,27 @@ export function PopularItems() {
   return (
     <section aria-labelledby="home-popular" className="bg-surface">
       <PageContainer className="space-y-4 py-section lg:space-y-6">
-        <div className="flex items-end justify-between gap-4">
-          <div className="space-y-1">
-            <h2 id="home-popular" className="text-section">
-              {t('popular.title')}
-            </h2>
-            <p className="hidden text-body-sm text-text-secondary lg:block">
-              {t('popular.description')}
-            </p>
-          </div>
-          <div className="hidden lg:block">{viewAll}</div>
-        </div>
-        <ul className="grid grid-cols-1 gap-4 lg:grid-cols-3 [&>li]:min-w-0">
+        <SectionHeader
+          id="home-popular"
+          title={t('popular.title')}
+          description={t('popular.description')}
+          action={<div className="hidden md:block">{viewAll}</div>}
+        />
+        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 [&>li]:min-w-0">
           {POPULAR_ITEMS.map((item, index) => (
-            <li key={item.id} className={index >= 3 ? 'hidden lg:block' : ''}>
+            <li
+              key={item.id}
+              className={
+                index >= 4
+                  ? 'hidden xl:block'
+                  : index >= 3
+                    ? 'hidden md:block'
+                    : ''
+              }
+            >
               <Link
                 href={`/items/${item.code}`}
-                className="flex h-full flex-col overflow-hidden rounded-xl bg-bg shadow-card transition-shadow hover:shadow-float"
+                className="flex h-full flex-col overflow-hidden rounded-xl pressable bg-bg shadow-card"
               >
                 <span className="flex flex-1 flex-col gap-1.5 px-4 pt-4 pb-3.5 lg:px-6 lg:pt-6">
                   <Tag className="w-fit">
@@ -53,7 +58,7 @@ export function PopularItems() {
                       strokeWidth={1.75}
                     />
                   </span>
-                  <span className="text-body-sm text-text-secondary">
+                  <span className="line-clamp-2 min-h-[2lh] text-body-sm text-text-secondary">
                     {t(`popular.items.${item.id}.description`)}
                   </span>
                 </span>
@@ -62,7 +67,7 @@ export function PopularItems() {
             </li>
           ))}
         </ul>
-        <div className="lg:hidden">{viewAll}</div>
+        <div className="md:hidden">{viewAll}</div>
       </PageContainer>
     </section>
   );

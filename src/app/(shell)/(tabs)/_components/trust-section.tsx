@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
 import { PageContainer } from '@/components/layout/page-container';
+import { SectionHeader } from '@/components/ui/section-header';
 
 /** Figma "07 신뢰 안내". 수치(항목·병원 수)는 백엔드에 통계 API가 생기면 추가한다. */
 export function TrustSection() {
@@ -10,13 +11,8 @@ export function TrustSection() {
   return (
     <section aria-labelledby="home-trust" className="bg-surface">
       <PageContainer className="space-y-4 py-section lg:space-y-6">
-        <div className="space-y-2">
-          <p className="text-caption-bold text-primary-text">{t('eyebrow')}</p>
-          <h2 id="home-trust" className="text-section">
-            {t('title')}
-          </h2>
-        </div>
-        <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4 [&_li>span:last-child]:min-w-0 [&>li]:min-w-0">
+        <SectionHeader id="home-trust" title={t('title')} />
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:gap-4 [&_li>span:last-child]:min-w-0 [&>li]:min-w-0">
           <li className="flex items-center gap-3 rounded-xl bg-bg p-4 shadow-card lg:p-6">
             <span className="relative size-15 shrink-0">
               <Image

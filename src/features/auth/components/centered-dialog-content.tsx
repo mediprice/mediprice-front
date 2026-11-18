@@ -13,7 +13,7 @@ export function CenteredDialogContent({
   return (
     <ResponsiveDialogContent
       className={cn(
-        'inset-x-auto top-1/2 bottom-auto left-1/2 max-h-[80dvh] w-[calc(100%-4rem)] max-w-100 -translate-1/2 rounded-xl pb-0 shadow-float lg:max-w-100',
+        'inset-x-auto top-1/2 bottom-auto left-1/2 max-h-[80dvh] w-[calc(100%-4rem)] max-w-100 -translate-1/2 rounded-xl pb-0 shadow-float md:max-w-100',
         '[&>span:first-child]:hidden',
         className,
       )}

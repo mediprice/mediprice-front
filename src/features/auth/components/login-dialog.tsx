@@ -31,7 +31,7 @@ export function LoginDialog() {
     >
       <ResponsiveDialogContent
         title={reason === 'general' ? t('titleGeneral') : t('title')}
-        className="lg:max-w-md"
+        className="md:max-w-md"
         onCloseAutoFocus={(event) => {
           if (!opener?.isConnected) return;
           event.preventDefault();

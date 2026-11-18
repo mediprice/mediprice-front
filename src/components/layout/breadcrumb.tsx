@@ -27,7 +27,7 @@ export function BreadcrumbLink<T extends string>({
     <li className="flex items-center gap-1">
       <Link
         href={href}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md px-1 hover:text-text-primary hover:underline"
+        className="touch-target inline-flex min-h-11 items-center rounded-md hover:text-text-primary hover:underline"
       >
         {children}
       </Link>

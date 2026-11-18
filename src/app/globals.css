@@ -255,6 +255,23 @@
   padding-right: max(var(--page-gutter), env(safe-area-inset-right, 0px));
 }
 
+/* 좌우 여백 밖까지 가로 스크롤 줄을 넓힐 때(칩 줄 등). px-page와 짝으로 쓴다. */
+@utility -mx-page {
+  margin-inline: calc(var(--page-gutter) * -1);
+}
+
+/* 누를 수 있는 카드의 공통 피드백. 마우스는 그림자, 터치는 바탕색으로 알려 준다. */
+@utility pressable {
+  transition-property: box-shadow, background-color;
+  transition-duration: 150ms;
+  &:hover {
+    box-shadow: var(--shadow-float);
+  }
+  &:active {
+    background-color: var(--color-surface);
+  }
+}
+
 @utility px-safe {
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);

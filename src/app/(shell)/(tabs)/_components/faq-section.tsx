@@ -2,6 +2,7 @@ import { ChevronDown } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { PageContainer } from '@/components/layout/page-container';
+import { SectionHeader } from '@/components/ui/section-header';
 
 const QUESTIONS = ['coverage', 'actualCost', 'aiAdvice', 'login'] as const;
 
@@ -11,9 +12,7 @@ export function FaqSection() {
   return (
     <section aria-labelledby="home-faq">
       <PageContainer className="grid gap-4 py-section lg:grid-cols-[1fr_2fr] lg:gap-16">
-        <h2 id="home-faq" className="text-section">
-          {t('title')}
-        </h2>
+        <SectionHeader id="home-faq" title={t('title')} />
         <div className="border-t border-border">
           {QUESTIONS.map((id, index) => (
             <details

@@ -32,7 +32,7 @@ const buttonVariants = cva(
         ghost:
           'text-primary-text hover:bg-primary-tint active:bg-primary-tint-hover',
         onTint:
-          'bg-bg text-primary-text hover:bg-surface active:bg-surface-strong',
+          'bg-bg text-primary-text hover:bg-surface active:bg-surface-strong inactive:bg-surface-strong',
       },
       size: {
         lg: 'min-h-13 px-5 py-3',

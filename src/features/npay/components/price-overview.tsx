@@ -25,11 +25,13 @@ export function PriceOverview({
       <p className="text-price-md tabular-nums">
         {t('average', { amount: summary.avgPrice })}
       </p>
-      <p className="text-caption text-text-tertiary tabular-nums">
-        {summary.minPrice != null &&
-          summary.maxPrice != null &&
-          `${t('minMax', { min: summary.minPrice, max: summary.maxPrice })} · `}
-        {t('hospitals', { count: summary.hospitalCount })}
+      <p className="flex flex-wrap gap-x-1.5 text-caption text-text-tertiary tabular-nums [&>span]:whitespace-nowrap">
+        {summary.minPrice != null && summary.maxPrice != null && (
+          <span>
+            {t('minMax', { min: summary.minPrice, max: summary.maxPrice })}
+          </span>
+        )}
+        <span>{t('hospitals', { count: summary.hospitalCount })}</span>
       </p>
     </div>
   );

@@ -11,14 +11,14 @@ export function HomeSearchForm() {
       action="/search"
       role="search"
       aria-label={t('label')}
-      className="flex w-full min-w-0 flex-col gap-4 lg:max-w-3xl lg:flex-row lg:items-center lg:gap-2 lg:rounded-xl lg:bg-bg lg:p-2 lg:shadow-card"
+      className="flex w-full min-w-0 flex-col gap-4 md:max-w-3xl md:flex-row md:items-center md:gap-2 md:rounded-xl md:bg-bg md:p-2 md:shadow-card"
     >
-      <div className="flex min-w-0 flex-col rounded-xl bg-bg shadow-card lg:flex-1 lg:flex-row lg:items-center lg:rounded-none lg:shadow-none">
-        <fieldset className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-4 py-3 lg:border-b-0 lg:p-0">
+      <div className="flex min-w-0 flex-col rounded-xl bg-bg shadow-card md:flex-1 md:flex-row md:items-center md:rounded-none md:shadow-none">
+        <fieldset className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-4 py-3 md:border-b-0 md:p-0">
           <legend className="sr-only">{t('target')}</legend>
           <span
             aria-hidden="true"
-            className="text-caption-strong text-text-tertiary lg:hidden"
+            className="text-caption-strong text-text-tertiary md:hidden"
           >
             {t('target')}
           </span>
@@ -35,7 +35,7 @@ export function HomeSearchForm() {
                   defaultChecked={type === 'item'}
                   className="peer sr-only"
                 />
-                <span className="flex min-h-10 items-center justify-center rounded-md px-3 text-label text-text-secondary peer-checked:bg-primary peer-checked:text-label-bold peer-checked:text-on-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus-ring lg:px-4">
+                <span className="flex min-h-10 items-center justify-center rounded-md px-3 text-label text-text-secondary peer-checked:bg-primary peer-checked:text-label-bold peer-checked:text-on-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus-ring md:px-4">
                   {type === 'item' ? t('targetItem') : t('targetHospital')}
                 </span>
               </label>
@@ -43,8 +43,8 @@ export function HomeSearchForm() {
           </div>
         </fieldset>
 
-        <label className="flex flex-col gap-1 border-b border-hairline px-4 py-3 lg:flex-1 lg:border-b-0 lg:py-0">
-          <span className="text-caption-strong text-text-tertiary lg:sr-only">
+        <label className="flex flex-col gap-1 border-b border-hairline px-4 py-3 md:flex-1 md:border-b-0 md:py-0">
+          <span className="text-caption-strong text-text-tertiary md:sr-only">
             {t('keyword')}
           </span>
           <span className="flex items-center gap-2.5">
@@ -65,8 +65,8 @@ export function HomeSearchForm() {
           </span>
         </label>
 
-        <label className="flex flex-col gap-1 px-4 py-3 lg:w-44 lg:border-l lg:border-hairline lg:py-0">
-          <span className="text-caption-strong text-text-tertiary lg:sr-only">
+        <label className="flex flex-col gap-1 px-4 py-3 md:w-44 md:border-l md:border-hairline md:py-0">
+          <span className="text-caption-strong text-text-tertiary md:sr-only">
             {t('region')}
           </span>
           <span className="relative flex items-center">
@@ -89,7 +89,7 @@ export function HomeSearchForm() {
         </label>
       </div>
 
-      <Button type="submit" elevated className="w-full lg:w-auto lg:px-8">
+      <Button type="submit" elevated className="w-full md:w-auto md:px-8">
         {t('submit')}
       </Button>
     </form>

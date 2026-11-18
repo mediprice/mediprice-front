@@ -37,17 +37,17 @@ export function ResponsiveDialogContent({
           /** 낮은 화면(가로 모드·큰 글자)에서는 머리·바닥이 본문을 가리지 않게 시트 전체를 한 번에 스크롤한다. */
           '[@media(max-height:40rem)]:overflow-y-auto',
           'duration-200 ease-standard data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom',
-          'lg:inset-x-auto lg:top-1/2 lg:bottom-auto lg:left-1/2 lg:max-h-[80dvh] lg:w-[calc(100%-4rem)] lg:max-w-lg lg:-translate-1/2 lg:rounded-xl lg:pb-0 lg:shadow-float',
-          'lg:data-[state=closed]:fade-out-0 lg:data-[state=closed]:slide-out-to-bottom-4 lg:data-[state=open]:fade-in-0 lg:data-[state=open]:slide-in-from-bottom-4',
+          'md:inset-x-auto md:top-1/2 md:bottom-auto md:left-1/2 md:max-h-[80dvh] md:w-[calc(100%-4rem)] md:max-w-lg md:-translate-1/2 md:rounded-xl md:pb-0 md:shadow-float',
+          'md:data-[state=closed]:fade-out-0 md:data-[state=closed]:slide-out-to-bottom-4 md:data-[state=open]:fade-in-0 md:data-[state=open]:slide-in-from-bottom-4',
           className,
         )}
         {...props}
       >
         <span
           aria-hidden="true"
-          className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-border-strong/50 lg:hidden"
+          className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-border-strong/50 md:hidden"
         />
-        <div className="flex shrink-0 items-center justify-between gap-2 pt-2 pr-2 pl-4 lg:pt-4 lg:pr-3 lg:pl-6">
+        <div className="flex shrink-0 items-center justify-between gap-2 pt-2 pr-2 pl-4 md:pt-4 md:pr-3 md:pl-6">
           <Dialog.Title className="text-heading">{title}</Dialog.Title>
           <Dialog.Close
             aria-label={t('close')}
@@ -61,11 +61,11 @@ export function ResponsiveDialogContent({
             {description}
           </Dialog.Description>
         )}
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-4 lg:px-6 lg:pb-6 [@media(max-height:40rem)]:flex-none [@media(max-height:40rem)]:overflow-visible">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-4 md:px-6 md:pb-6 [@media(max-height:40rem)]:flex-none [@media(max-height:40rem)]:overflow-visible">
           {children}
         </div>
         {footer && (
-          <div className="flex shrink-0 flex-wrap gap-2 border-t border-hairline bg-bg px-4 py-3 lg:rounded-b-xl lg:px-6 lg:py-4">
+          <div className="flex shrink-0 flex-wrap gap-2 border-t border-hairline bg-bg px-4 py-3 md:rounded-b-xl md:px-6 md:py-4">
             {footer}
           </div>
         )}

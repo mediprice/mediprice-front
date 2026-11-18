@@ -7,10 +7,16 @@ import { CompareTray } from '@/features/comparison/components/compare-tray';
 export default function SubLayout({ children }: { children: ReactNode }) {
   return (
     <>
-      <main id="main" tabIndex={-1} className="min-h-dvh outline-none">
-        {children}
-      </main>
-      <SiteFooter />
+      <div className="flex min-h-dvh flex-col">
+        <main
+          id="main"
+          tabIndex={-1}
+          className="flex flex-1 flex-col outline-none"
+        >
+          {children}
+        </main>
+        <SiteFooter />
+      </div>
       <CompareTray />
     </>
   );

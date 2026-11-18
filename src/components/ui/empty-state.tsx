@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
 
-/** 결과 없음·조회 실패·로그인 필요 같은 빈 화면. 문구는 호출하는 쪽이 번역해서 넘긴다. */
+/** 결과 없음·조회 실패·로그인 필요 같은 빈 화면의 유일한 형태. 행동은 tint md 버튼 하나를 주로, 더 있으면 ghost 버튼을 아래로 쌓는다. 문구는 호출하는 쪽이 번역해서 넘긴다. */
 export function EmptyState({
   icon,
   title,
@@ -37,7 +37,11 @@ export function EmptyState({
           {description}
         </p>
       )}
-      {action && <div className="mt-2">{action}</div>}
+      {action && (
+        <div className="mt-2 flex w-full max-w-xs flex-col items-stretch gap-2">
+          {action}
+        </div>
+      )}
     </div>
   );
 }

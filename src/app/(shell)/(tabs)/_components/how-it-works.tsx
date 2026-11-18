@@ -2,6 +2,7 @@ import { Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { PageContainer } from '@/components/layout/page-container';
+import { SectionHeader } from '@/components/ui/section-header';
 
 const STEPS = ['find', 'compare', 'decide'] as const;
 
@@ -13,14 +14,7 @@ export function HowItWorks() {
     <section aria-labelledby="home-how">
       <PageContainer className="grid grid-cols-1 gap-6 py-section lg:grid-cols-2 lg:items-center lg:gap-16 [&>*]:min-w-0">
         <div className="space-y-6">
-          <div className="space-y-2">
-            <p className="text-caption-bold text-primary-text">
-              {t('eyebrow')}
-            </p>
-            <h2 id="home-how" className="text-section">
-              {t('title')}
-            </h2>
-          </div>
+          <SectionHeader id="home-how" title={t('title')} />
           <ol className="space-y-5">
             {STEPS.map((step, index) => (
               <li key={step} className="flex gap-3">
@@ -45,7 +39,7 @@ export function HowItWorks() {
 
         <div
           aria-hidden="true"
-          className="pointer-events-none order-first flex justify-center rounded-xl bg-surface px-4 pt-6 select-none lg:order-none lg:px-12 lg:pt-10"
+          className="pointer-events-none order-last flex justify-center rounded-xl bg-surface px-4 pt-6 select-none md:px-12 md:pt-10 lg:order-none"
         >
           <div className="w-full max-w-72 rounded-t-4xl border-8 border-b-0 border-text-primary bg-bg px-4 pt-6 pb-4">
             <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-surface-strong" />

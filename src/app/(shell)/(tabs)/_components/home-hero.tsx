@@ -28,7 +28,7 @@ export function HomeHero() {
         </h1>
         <p className="text-body text-text-secondary">{t('hero.subtitle')}</p>
 
-        <div className="mt-2 w-full lg:flex lg:justify-center">
+        <div className="mt-2 w-full md:flex md:justify-center">
           <HomeSearchForm />
         </div>
 
