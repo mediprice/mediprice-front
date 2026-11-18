@@ -8,16 +8,16 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { useId, useState } from 'react';
 
 import { RangeBar } from '@/components/ui/range-bar';
+import {
+  type AverageComparison,
+  compareToAverage,
+} from '@/components/ui/range-position';
 import { CompareToggle } from '@/features/comparison/components/compare-toggle';
 import { FavoriteButton } from '@/features/favorites/components/favorite-button';
 import { HospitalIdentity } from '@/features/hospitals/components/hospital-identity';
 import { formatLocation } from '@/features/regions/format-location';
 import { cn } from '@/lib/utils';
 
-import {
-  type AverageComparison,
-  compareToAverage,
-} from '../average-comparison';
 import type { HospitalPriceGroup } from '../group-prices';
 import type { HospitalPrice, PriceSortOrder } from '../price-stream';
 import type { PriceSummary } from '../price-summary';
@@ -34,6 +34,7 @@ export function HospitalPriceGroupCard<T extends string>({
   href,
   summary,
   sort = 'price_asc',
+  showAverageTick = false,
 }: {
   group: HospitalPriceGroup;
   href: Route<T>;
@@ -41,6 +42,8 @@ export function HospitalPriceGroupCard<T extends string>({
   summary?: Pick<PriceSummary, 'minPrice' | 'maxPrice' | 'avgPrice'>;
   /** 목록 정렬. 대표 가격을 정렬 기준과 같은 쪽 끝으로 고른다. */
   sort?: PriceSortOrder;
+  /** 막대의 평균 눈금에 "평균" 라벨을 붙인다. 목록의 첫 행에서만 켠다. */
+  showAverageTick?: boolean;
 }) {
   const t = useTranslations('items.card');
   const tPrice = useTranslations('common.price');
@@ -56,11 +59,7 @@ export function HospitalPriceGroupCard<T extends string>({
   const [firstVariant] = group.variants;
   const extraCount = group.variants.length - 1;
   const { price, other } = representativePrice(group, sort);
-  const comparison = summary
-    ? compareToAverage(price, summary.avgPrice, {
-        sameWithinPercent: SAME_WITHIN_PERCENT,
-      })
-    : null;
+  const comparison = summary ? compareToAverage(price, summary.avgPrice) : null;
 
   return (
     <article className="relative flex flex-col gap-3 px-4 pt-5 pb-3 transition-colors duration-200 ease-standard hover:bg-surface active:bg-surface md:px-6 md:pt-6 md:pb-4">
@@ -103,6 +102,7 @@ export function HospitalPriceGroupCard<T extends string>({
               max={summary.maxPrice}
               average={summary.avgPrice}
               value={price}
+              showAverageTick={showAverageTick}
             />
           </div>
         </div>
@@ -182,9 +182,6 @@ export function HospitalPriceGroupCard<T extends string>({
     </article>
   );
 }
-
-/** 평균과 이만큼(%) 안쪽으로 차이 나면 "평균 수준"으로 쓴다. 몇 % 차이는 싼 편인지 판단하는 데 도움이 되지 않는다. */
-const SAME_WITHIN_PERCENT = 5;
 
 const TAG_STYLE = {
   below: { icon: ArrowDown, tone: 'bg-positive-tint text-positive' },

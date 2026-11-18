@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import type { CSSProperties } from 'react';
 
-import { rangePosition } from '@/components/ui/range-position';
+import { rangePosition, type RangeScale } from '@/components/ui/range-position';
 import { useFirstView } from '@/lib/motion/use-first-view';
 import { cn } from '@/lib/utils';
 
@@ -30,9 +30,9 @@ const fade =
 const anchoredLabel =
   'relative left-(--pos) block w-max max-w-full -translate-x-(--pos)';
 
-const at = (domain: StripDomain, value: number) =>
+const at = (scale: RangeScale, value: number) =>
   ({
-    '--pos': `${rangePosition(domain.min, domain.max, value) * 100}%`,
+    '--pos': `${rangePosition(scale, value) * 100}%`,
   }) as CSSProperties;
 
 /**
@@ -58,9 +58,10 @@ export function CompareStrip({
   const tPrice = useTranslations('common.price');
   const [ref, phase] = useFirstView<HTMLDivElement>({ playIfVisible: true });
   const layout = LAYOUT[size];
+  const scale = { ...domain, average };
   const groups = groupStripMarkers(markers);
   const lanes = assignLanes(
-    groups.map((marker) => rangePosition(domain.min, domain.max, marker.value)),
+    groups.map((marker) => rangePosition(scale, marker.value)),
     layout.gap,
   );
   const laneCount = Math.max(1, ...lanes.map((lane) => lane + 1));
@@ -92,7 +93,7 @@ export function CompareStrip({
             )}
             style={
               {
-                ...at(domain, marker.value),
+                ...at(scale, marker.value),
                 '--stem-h': `${(lanes[index] ?? 0) * layout.lane + layout.stem}px`,
               } as CSSProperties
             }
@@ -125,7 +126,7 @@ export function CompareStrip({
               size === 'md' ? 'h-4' : 'h-3',
               fade,
             )}
-            style={at(domain, average)}
+            style={at(scale, average)}
           />
         )}
       </div>
@@ -135,7 +136,7 @@ export function CompareStrip({
             <div className={inset}>
               <span
                 className={cn(anchoredLabel, 'text-caption-strong')}
-                style={at(domain, average)}
+                style={at(scale, average)}
               >
                 {averageLabel}
               </span>

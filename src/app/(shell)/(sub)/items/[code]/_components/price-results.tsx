@@ -127,13 +127,14 @@ export function PriceResults({
       ) : (
         <>
           <ul className={LIST}>
-            {groups.map((group) => (
+            {groups.map((group, index) => (
               <li key={group.ykiho}>
                 <HospitalPriceGroupCard
                   group={group}
                   href={`/hospitals/${encodeURIComponent(group.ykiho)}?${hospitalQuery}`}
                   summary={summary.data}
                   sort={filters.sort}
+                  showAverageTick={index === 0}
                 />
               </li>
             ))}
