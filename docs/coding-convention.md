@@ -394,7 +394,7 @@ export const hospitalQueries = {
 
 | 종류     | 클래스 예                                                                                                                                                                                                           |
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 색       | `bg-primary` `hover:bg-primary-hover` `active:bg-primary-pressed` `text-primary-text` `bg-primary-tint`(`-hover`, `-pressed`) `bg-hero` `bg-surface` `bg-surface-strong` `border-hairline`                          |
+| 색       | `bg-primary` `hover:bg-primary-hover` `active:bg-primary-pressed` `text-primary-text` `bg-primary-tint`(`-hover`, `-pressed`, 페이지 머리 띠) `bg-surface` `bg-surface-strong` `border-hairline`                    |
 | 글자색   | `text-text-primary` `text-text-secondary` `text-text-tertiary` `text-text-disabled` `text-on-primary`                                                                                                               |
 | 상태     | `text-positive` `bg-positive-tint` `text-warning` `bg-warning-tint` `text-danger` `bg-danger`(`-hover`, `-pressed`) `bg-danger-tint` `bg-overlay`                                                                   |
 | 선       | `border-border` `border-border-strong` `outline-focus-ring`, 파란 면 위는 `focus-inverse`                                                                                                                           |
@@ -405,7 +405,7 @@ export const hospitalQueries = {
 | 겹침     | `z-(--z-header)` `z-(--z-tab-bar)` `z-(--z-bottom-cta)` `z-(--z-overlay)` `z-(--z-toast)` `z-(--z-skip-link)`. 숫자 `z-40`을 직접 쓰지 않는다                                                                       |
 | 움직임   | `ease-standard`, 150–200ms. `prefers-reduced-motion`이면 전역에서 멈춘다(상태를 알리는 스피너만 `data-allow-motion`)                                                                                                |
 
-- 타이포는 모바일 우선이다. `hero` `display` `title` `price-lg` `price-xl`은 모바일 값(28·28·24·22·26px)이고 `lg`부터 데스크톱 값(34·32·26·24·30px)으로 자동으로 바뀐다. 화면에서 `lg:text-*`를 따로 붙이지 않는다.
+- 타이포는 모바일 우선이다. `hero` `display` `title` `price-lg` `price-xl`은 모바일 값(28·28·24·22·26px)이고 `lg`부터 데스크톱 값(34·32·26·24·30px)으로 자동으로 바뀐다. 읽는 거리가 먼 데스크톱에서는 `caption`(13→14px), `body-sm`·`label`(15→16px)도 한 단계 커진다. 배경 그라데이션과 왼쪽 선 강조는 쓰지 않는다(단색 띠, 옅은 바탕으로 구분). 화면에서 `lg:text-*`를 따로 붙이지 않는다.
 - 타이포 토큰 하나에 크기·행간·자간·굵기가 함께 들어 있다. `font-bold` 같은 굵기 클래스를 따로 붙이지 않는다(활성 상태처럼 굵기만 바꿀 때는 예외).
 - 본문은 16px(`text-body`)이 기본이다. 13px(`text-caption`)은 출처·날짜 같은 메타 정보에만 쓰고, 가격 조건("1회 기준")처럼 판단에 필요한 정보에는 쓰지 않는다.
 - 대비: 글자는 배경과 4.5:1 이상(큰 글자 3:1). `text-tertiary`까지는 흰색·surface·surface-strong 위에서 통과한다. 입력창처럼 테두리만으로 구분되는 컨트롤은 `border-border`(1.3:1)가 아니라 `border-border-strong`(3.3:1)을 쓴다.
