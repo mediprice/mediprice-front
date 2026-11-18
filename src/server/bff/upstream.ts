@@ -51,7 +51,7 @@ const CLIENT_IP_HEADER = 'x-mediprice-client-ip';
 const SECRET_HEADER = 'x-mediprice-bff-secret';
 
 /** 플랫폼(Vercel 등)이 붙인 사용자 IP. 형식이 IP가 아니면 버린다. */
-export function clientIpOf(incoming: Headers) {
+function clientIpOf(incoming: Headers) {
   const candidate =
     incoming.get('x-real-ip') ??
     incoming.get('x-forwarded-for')?.split(',')[0] ??
