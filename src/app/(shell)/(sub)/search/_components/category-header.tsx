@@ -10,6 +10,7 @@ import {
 import { PageContainer } from '@/components/layout/page-container';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { HomeCategoryId } from '@/features/npay/catalog';
+import { useCategoryLabel } from '@/features/npay/use-category-label';
 import {
   regionQuery,
   type ServiceRegion,
@@ -18,7 +19,6 @@ import type { CategoryView } from '@/features/search/category-tree';
 
 import { categoryHref } from './category-href';
 import { ChipLinks, ChipLinksSkeleton } from './chip-links';
-import { useCategoryLabel } from './use-category-label';
 
 type Crumb = {
   key: string;

@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tag } from '@/components/ui/tag';
 import { npayQueries } from '@/features/npay/queries';
+import { useCategoryLabel } from '@/features/npay/use-category-label';
 import {
   regionQuery,
   type ServiceRegion,
@@ -30,6 +31,7 @@ export function ItemHeader({
   region: ServiceRegion;
 }) {
   const t = useTranslations('items');
+  const categoryLabel = useCategoryLabel();
   const tErrors = useTranslations('errors');
   const tActions = useTranslations('common.actions');
   const { data, isPending, isError, error, refetch } = useQuery(
@@ -78,12 +80,16 @@ export function ItemHeader({
         <BreadcrumbLink href="/">{t('breadcrumb.home')}</BreadcrumbLink>
         {data.mdivCode && data.mdivName && (
           <BreadcrumbLink href={`/search?${categoryQuery}`}>
-            {data.mdivName}
+            {categoryLabel(data.mdivCode, data.mdivName)}
           </BreadcrumbLink>
         )}
         <BreadcrumbCurrent>{title}</BreadcrumbCurrent>
       </Breadcrumb>
-      {data.mdivName && <Tag className="w-fit lg:hidden">{data.mdivName}</Tag>}
+      {data.mdivName && (
+        <Tag className="w-fit lg:hidden">
+          {categoryLabel(data.mdivCode, data.mdivName)}
+        </Tag>
+      )}
       <h1 className="text-display">{title}</h1>
       <SourceLine />
     </div>

@@ -1,12 +1,12 @@
 import { ChevronRight } from 'lucide-react';
 
+import { useCategoryLabel } from '@/features/npay/use-category-label';
 import type { ServiceRegion } from '@/features/regions/service-region';
 import { groupItems, partitionByPrice } from '@/features/search/item-groups';
 import type { ItemResult } from '@/features/search/queries';
 
 import { ItemRow } from './item-row';
 import { UnpricedItems } from './unpriced-items';
-import { useCategoryLabel } from './use-category-label';
 
 /**
  * 가격이 있는 항목을 "분야 > 중분류" 머리 아래에 묶고, 그 지역에 가격이 없는 항목은 맨 아래 접힌 목록으로 모은다.

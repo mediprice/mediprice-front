@@ -122,7 +122,7 @@ app ──▶ features ──▶ components, lib
 - `lib`, `components`는 `features`, `app`, `server`를 import하지 않는다. 도메인을 알면 `features`에 둔다.
 - 클라이언트 코드(`features`, `components`, `lib`, `app`의 화면)는 `server`를 import하지 않는다. 예외는 `app/bff/**` 라우트와 테스트다.
 - `server/**`의 파일은 첫 줄에 `import 'server-only';`를 둔다.
-- 다른 feature의 코드는 `queries.ts`와 `components/`, 그리고 여러 화면이 함께 쓰도록 만든 공용 모듈(`regions/service-region.ts`, `regions/format-location.ts`, `npay/price-summary.ts`, `npay/catalog.ts`)만 import한다. 그 밖의 내부 파일을 직접 가져오지 않는다.
+- 다른 feature의 코드는 `queries.ts`와 `components/`, 그리고 여러 화면이 함께 쓰도록 만든 공용 모듈(`regions/service-region.ts`, `regions/format-location.ts`, `npay/price-summary.ts`, `npay/catalog.ts`, `npay/use-category-label.ts`)만 import한다. 그 밖의 내부 파일을 직접 가져오지 않는다.
 - 폴더를 넘나드는 import는 `@/` 절대 경로를 쓰고 `../..`는 쓰지 않는다.
 
 **나쁜 예**

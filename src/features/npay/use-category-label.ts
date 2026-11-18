@@ -14,7 +14,7 @@ function isFriendlyCode(code: string): code is FriendlyCode {
 
 /** 홈 분야에 든 대분류는 공식 이름("이학요법료") 대신 쉬운 이름("물리치료·재활")으로 보여 준다. */
 export function useCategoryLabel() {
-  const t = useTranslations('search.category.friendly');
+  const t = useTranslations('common.category');
   return (code: string | null | undefined, officialName: string) =>
     code && isFriendlyCode(code) ? t(code) : officialName;
 }

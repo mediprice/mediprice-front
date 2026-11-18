@@ -2,14 +2,13 @@ import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
+import { useCategoryLabel } from '@/features/npay/use-category-label';
 import {
   regionQuery,
   type ServiceRegion,
 } from '@/features/regions/service-region';
 import { formatItemName } from '@/features/search/item-groups';
 import type { ItemResult } from '@/features/search/queries';
-
-import { useCategoryLabel } from './use-category-label';
 
 /** 그 지역에 공개 가격이 없는 항목. 목록 맨 아래에 접어 두고, 펼치면 흐린 한 줄씩 보여 준다. */
 export function UnpricedItems({
