@@ -1,17 +1,17 @@
 'use client';
 
-import 'leaflet/dist/leaflet.css';
-
-import { latLngBounds, type Map as LeafletMap } from 'leaflet';
-import { Minus, Plus } from 'lucide-react';
+import { MapPinOff, Minus, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { type ReactNode, useEffect, useState } from 'react';
-import { Circle, CircleMarker, MapContainer, TileLayer } from 'react-leaflet';
+import { type ReactNode, useState } from 'react';
 
-import { KOREA_BOUNDS, type LatLng } from '../map-geo';
+import { Skeleton } from '@/components/ui/skeleton';
+
+import type { LatLng } from '../map-geo';
 import { useReducedMotion } from '../use-reduced-motion';
-import { HospitalMarkers, type MapMarker } from './hospital-markers';
-import { boundsOf, type MapSearchArea, MapViewSync } from './map-view-sync';
+import type { MapMarker } from './marker-icon';
+import { type MapSearchArea, useNaverMap } from './use-naver-map';
+import { useNaverMarkers } from './use-naver-markers';
+import { useNaverView } from './use-naver-view';
 
 export type HospitalMapProps = {
   /** 바뀌면 지도가 이 원이 보이게 맞춘다. 같은 객체를 다시 넘기면 움직이지 않는다. */
@@ -24,16 +24,12 @@ export type HospitalMapProps = {
   userPosition?: LatLng | null;
   /** 오른쪽 아래 확대 버튼 위에 쌓을 조작(내 위치 등). */
   controls?: ReactNode;
+  /** 지도를 못 불러왔을 때 안내 아래에 둘 행동(모바일 "목록 보기" 등). */
+  fallbackAction?: ReactNode;
 };
 
-const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-const MAX_BOUNDS = latLngBounds(
-  [KOREA_BOUNDS.south - 0.5, KOREA_BOUNDS.west - 0.5],
-  [KOREA_BOUNDS.north + 0.5, KOREA_BOUNDS.east + 0.5],
-);
-
 /**
- * 지도 라이브러리(Leaflet + OpenStreetMap)를 이 파일 안에만 둔다. 다른 지도(네이버 등)로 바꿀 때는 같은 props로
+ * 지도 SDK(네이버 지도 v3)는 이 컴포넌트와 use-naver-* 훅 안에만 둔다. 다른 지도로 바꿀 때는 같은 props로
  * 이 컴포넌트만 다시 만든다. 지도는 보조 수단이고 모든 정보는 목록에서도 볼 수 있다.
  */
 export function HospitalMap({
@@ -42,99 +38,85 @@ export function HospitalMap({
   selectedId,
   onSelect,
   onMoveEnd,
-  userPosition,
+  userPosition = null,
   controls,
+  fallbackAction,
 }: HospitalMapProps) {
   const t = useTranslations('map.mapControls');
   const isReducedMotion = useReducedMotion();
-  const [map, setMap] = useState<LeafletMap | null>(null);
-  const [initialBounds] = useState(() => boundsOf(search));
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const { handle, status } = useNaverMap(container, search);
+  useNaverMarkers(handle, markers, selectedId, onSelect);
+  useNaverView({
+    handle,
+    container,
+    search,
+    markers,
+    selectedId,
+    userPosition,
+    onMoveEnd,
+    isReducedMotion,
+  });
 
-  useEffect(() => {
-    if (!map) return;
-    const container = map.getContainer();
-    container.setAttribute('role', 'region');
-    container.setAttribute('aria-label', t('label'));
-  }, [map, t]);
+  if (status === 'unavailable') {
+    return (
+      <div
+        role="status"
+        className="flex size-full flex-col items-center justify-center gap-2 bg-surface px-6 text-center"
+      >
+        <MapPinOff
+          aria-hidden="true"
+          className="size-7 text-text-tertiary"
+          strokeWidth={1.75}
+        />
+        <p className="text-subheading">{t('unavailableTitle')}</p>
+        <p className="text-body-sm text-text-secondary">
+          {t('unavailableDescription')}
+        </p>
+        {fallbackAction && <div className="mt-2">{fallbackAction}</div>}
+      </div>
+    );
+  }
 
   return (
     <div className="relative isolate size-full">
-      <MapContainer
-        ref={setMap}
-        bounds={initialBounds}
-        maxBounds={MAX_BOUNDS}
-        maxBoundsViscosity={0.8}
-        minZoom={7}
-        zoomSnap={0.5}
-        maxZoom={19}
-        zoomControl={false}
-        zoomAnimation={!isReducedMotion}
-        fadeAnimation={!isReducedMotion}
-        markerZoomAnimation={!isReducedMotion}
-        className="isolate size-full bg-surface-strong font-sans"
-      >
-        <TileLayer
-          url={TILE_URL}
-          maxZoom={19}
-          attribution={`&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">${t('osmContributors')}</a>`}
-        />
-        <Circle
-          center={[search.center.lat, search.center.lng]}
-          radius={search.radius}
-          interactive={false}
-          pathOptions={{
-            weight: 1.5,
-            dashArray: '6 6',
-            className: 'fill-primary/8 stroke-primary/60',
-          }}
-        />
-        {userPosition && (
-          <CircleMarker
-            center={[userPosition.lat, userPosition.lng]}
-            radius={7}
-            interactive={false}
-            pathOptions={{
-              weight: 3,
-              fillOpacity: 1,
-              className: 'fill-primary stroke-bg',
-            }}
-          />
-        )}
-        <HospitalMarkers
-          markers={markers}
-          selectedId={selectedId}
-          onSelect={onSelect}
-        />
-        <MapViewSync
-          search={search}
-          markers={markers}
-          selectedId={selectedId}
-          onMoveEnd={onMoveEnd}
-          isReducedMotion={isReducedMotion}
-        />
-      </MapContainer>
-      <div className="absolute right-3 bottom-8 flex flex-col items-end gap-3">
-        {controls}
-        <div className="flex flex-col overflow-hidden rounded-lg bg-bg shadow-card">
-          <button
-            type="button"
-            aria-label={t('zoomIn')}
-            onClick={() => map?.zoomIn(1, { animate: !isReducedMotion })}
-            className="flex size-11 items-center justify-center text-text-primary hover:bg-surface active:bg-surface-strong"
-          >
-            <Plus aria-hidden="true" className="size-5" strokeWidth={1.75} />
-          </button>
-          <span aria-hidden="true" className="h-px bg-hairline" />
-          <button
-            type="button"
-            aria-label={t('zoomOut')}
-            onClick={() => map?.zoomOut(1, { animate: !isReducedMotion })}
-            className="flex size-11 items-center justify-center text-text-primary hover:bg-surface active:bg-surface-strong"
-          >
-            <Minus aria-hidden="true" className="size-5" strokeWidth={1.75} />
-          </button>
+      <div
+        ref={setContainer}
+        role="region"
+        aria-label={t('label')}
+        className="size-full bg-surface-strong"
+      />
+      {status === 'loading' && (
+        <Skeleton className="absolute inset-0 size-full rounded-none" />
+      )}
+      {handle && (
+        <div className="absolute right-3 bottom-10 flex flex-col items-end gap-3">
+          {controls}
+          <div className="flex flex-col overflow-hidden rounded-lg bg-bg shadow-card">
+            <button
+              type="button"
+              aria-label={t('zoomIn')}
+              onClick={() =>
+                handle.map.setZoom(handle.map.getZoom() + 1, !isReducedMotion)
+              }
+              className="flex size-11 items-center justify-center text-text-primary hover:bg-surface active:bg-surface-strong"
+            >
+              <Plus aria-hidden="true" className="size-5" strokeWidth={1.75} />
+            </button>
+            <span aria-hidden="true" className="h-px bg-hairline" />
+            <button
+              type="button"
+              aria-label={t('zoomOut')}
+              onClick={() =>
+                handle.map.setZoom(handle.map.getZoom() - 1, !isReducedMotion)
+              }
+              className="flex size-11 items-center justify-center text-text-primary hover:bg-surface active:bg-surface-strong"
+            >
+              <Minus aria-hidden="true" className="size-5" strokeWidth={1.75} />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

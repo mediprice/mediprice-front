@@ -10,7 +10,7 @@ function subscribe(onChange: () => void) {
   return () => media.removeEventListener('change', onChange);
 }
 
-/** 지도 이동 애니메이션은 CSS가 아니라 Leaflet이 JS로 그려서 전역 reduced-motion 규칙이 닿지 않는다. */
+/** 지도 이동 애니메이션은 CSS가 아니라 지도 SDK가 JS로 그려서 전역 reduced-motion 규칙이 닿지 않는다. */
 export function useReducedMotion() {
   return useSyncExternalStore(
     subscribe,

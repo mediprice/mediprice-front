@@ -1,85 +1,33 @@
 'use client';
 
-import { useInfiniteQuery } from '@tanstack/react-query';
 import { LocateFixed, RotateCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/features/history/components/confirm-dialog';
-import type { MapMarker } from '@/features/map/components/hospital-markers';
 import { LazyHospitalMap } from '@/features/map/components/lazy-hospital-map';
 import type { MapParams } from '@/features/map/map-params';
-import { mapQueries, type NearbyHospital } from '@/features/map/queries';
 import { cn } from '@/lib/utils';
 
+import { isDesktop, scrollListTo } from './list-scroll';
 import { LocationNoticeBanner } from './location-notice-banner';
 import { MapToolbar, type MobileView } from './map-toolbar';
 import { hospitalCardId, NearbyList } from './nearby-list';
 import { SelectedHospitalPanel } from './selected-hospital-panel';
 import { useMapSearch } from './use-map-search';
-
-const isDesktop = () => window.matchMedia('(min-width: 64rem)').matches;
-const PLACEHOLDER_SEARCH = { lat: 0, lng: 0, radius: 0 };
+import { useNearbyResults } from './use-nearby-results';
 
 /** S-07 지도 탐색. 목록이 주 수단이고 지도는 위치를 보여 주는 보조 수단이다. 선택은 지도와 목록이 함께 쓴다. */
 export function MapView({ initialParams }: { initialParams: MapParams }) {
   const t = useTranslations('map');
-  const tPrice = useTranslations('common.price');
   const item = initialParams.item;
   const state = useMapSearch(initialParams);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   /** 모바일은 지도와 목록을 함께 두면 화면을 넘기다 지도가 끌려가서 하나씩 보여 준다. 항목을 골라 왔으면 가격 목록부터. */
   const [view, setView] = useState<MobileView>(item ? 'list' : 'map');
 
-  const query = useInfiniteQuery({
-    ...mapQueries.nearby({
-      ...(state.search
-        ? { ...state.search.center, radius: state.search.radius }
-        : PLACEHOLDER_SEARCH),
-      ...(item && { npayCode: item }),
-    }),
-    enabled: state.search !== null,
-  });
-
-  const hospitals = useMemo(() => {
-    const seen = new Set<string>();
-    const list: NearbyHospital[] = [];
-    for (const hospital of query.data?.pages.flatMap((page) => page.content) ??
-      []) {
-      if (seen.has(hospital.ykiho)) continue;
-      seen.add(hospital.ykiho);
-      list.push(hospital);
-    }
-    return list;
-  }, [query.data]);
-
-  const markers = useMemo<MapMarker[]>(
-    () =>
-      hospitals.flatMap((hospital) => {
-        if (hospital.latitude === null || hospital.longitude === null)
-          return [];
-        const label = !item
-          ? hospital.name
-          : hospital.minPrice === null
-            ? tPrice('none')
-            : tPrice('won', { amount: hospital.minPrice });
-        const kind = !item
-          ? 'plain'
-          : hospital.minPrice === null
-            ? 'noPrice'
-            : 'price';
-        return [
-          {
-            id: hospital.ykiho,
-            position: { lat: hospital.latitude, lng: hospital.longitude },
-            kind,
-            label,
-          },
-        ];
-      }),
-    [hospitals, item, tPrice],
-  );
+  const { query, hospitals, markers } = useNearbyResults(state.search, item);
 
   const activeId = hospitals.some((hospital) => hospital.ykiho === selectedId)
     ? selectedId
@@ -91,11 +39,7 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
   const handleMarkerSelect = useCallback((id: string) => {
     setSelectedId(id);
     if (!isDesktop()) return;
-    requestAnimationFrame(() => {
-      document
-        .getElementById(hospitalCardId(id))
-        ?.scrollIntoView({ block: 'nearest' });
-    });
+    requestAnimationFrame(() => scrollListTo(hospitalCardId(id)));
   }, []);
 
   /** 데스크톱은 지도가 옆에 있어 켜고 끄는 토글이고, 모바일은 고른 뒤 지도 보기로 넘어간다. */
@@ -175,6 +119,16 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
                   className="rounded-full shadow-card"
                 >
                   <LocateFixed aria-hidden="true" />
+                </Button>
+              }
+              fallbackAction={
+                <Button
+                  variant="tint"
+                  size="md"
+                  onClick={() => handleViewChange('list')}
+                  className="lg:hidden"
+                >
+                  {t('view.showList')}
                 </Button>
               }
             />

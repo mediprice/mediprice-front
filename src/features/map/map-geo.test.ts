@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  boundsAround,
   clampRadius,
   clampToKorea,
   defaultRadius,
   distanceBetween,
   hasMovedAway,
   isInKorea,
+  isWithinView,
   regionCenter,
   roundLatLng,
   SEOUL_CITY_HALL,
@@ -83,5 +85,33 @@ describe('regionCenter', () => {
     expect(regionCenter('all')).toEqual(SEOUL_CITY_HALL);
     expect(regionCenter('gyeonggi')).not.toEqual(SEOUL_CITY_HALL);
     expect(isInKorea(regionCenter('gyeonggi'))).toBe(true);
+  });
+});
+
+describe('boundsAround', () => {
+  it('서울시청 반경 1km는 위도 약 ±0.009°, 경도 약 ±0.0113°다', () => {
+    const bounds = boundsAround(SEOUL_CITY_HALL, 1000);
+    expect(bounds.north - SEOUL_CITY_HALL.lat).toBeCloseTo(0.00898, 4);
+    expect(SEOUL_CITY_HALL.lng - bounds.west).toBeCloseTo(0.01133, 4);
+    expect(
+      distanceBetween(SEOUL_CITY_HALL, {
+        lat: bounds.north,
+        lng: SEOUL_CITY_HALL.lng,
+      }),
+    ).toBeCloseTo(1000, -1);
+  });
+});
+
+describe('isWithinView', () => {
+  const center = { x: 500, y: 300 };
+  const size = { width: 1000, height: 600 };
+
+  it('가장자리에서 여백 안쪽이면 그대로 둔다', () => {
+    expect(isWithinView({ x: 900, y: 500 }, center, size, 48)).toBe(true);
+  });
+
+  it('여백 안으로 들어가거나 화면 밖이면 옮겨야 한다', () => {
+    expect(isWithinView({ x: 980, y: 300 }, center, size, 48)).toBe(false);
+    expect(isWithinView({ x: 500, y: -20 }, center, size, 48)).toBe(false);
   });
 });

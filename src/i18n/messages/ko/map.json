@@ -18,7 +18,8 @@
   "view": {
     "label": "보기 방식",
     "list": "목록",
-    "map": "지도"
+    "map": "지도",
+    "showList": "목록으로 보기"
   },
   "radius": {
     "label": "검색 반경",
@@ -28,7 +29,8 @@
     "label": "병원 위치 지도. 같은 병원을 목록에서도 볼 수 있어요.",
     "zoomIn": "지도 확대",
     "zoomOut": "지도 축소",
-    "osmContributors": "OpenStreetMap 기여자"
+    "unavailableTitle": "지도를 불러오지 못했어요",
+    "unavailableDescription": "병원 목록은 그대로 볼 수 있어요."
   },
   "actions": {
     "searchHere": "이 지역에서 다시 찾기",

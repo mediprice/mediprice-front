@@ -1,15 +1,24 @@
-import { divIcon } from 'leaflet';
-
 import { cn } from '@/lib/utils';
 
+import type { LatLng } from '../map-geo';
+
 export type MapMarkerKind = 'price' | 'noPrice' | 'plain';
+
+export type MapMarker = {
+  id: string;
+  position: LatLng;
+  kind: MapMarkerKind;
+  /** 마커에 보일 짧은 문구(가격, 또는 고른 병원의 이름). 번역한 문자열을 넘긴다. */
+  label: string;
+};
+
 /** label: 글자 알약(항목이 없으면 점), dot: 겹쳐서 점으로 줄임, hover: 마우스를 올림, selected: 목록과 함께 고른 것. */
 export type MarkerDisplay = 'label' | 'dot' | 'hover' | 'selected';
 
 const PILL =
-  'absolute top-0 left-0 inline-flex min-h-8 -translate-x-1/2 -translate-y-1/2 items-center rounded-full border px-3 whitespace-nowrap text-caption-bold tabular-nums shadow-card';
+  'absolute top-0 left-0 inline-flex min-h-8 -translate-x-1/2 -translate-y-1/2 items-center rounded-full border px-3 whitespace-nowrap text-caption-bold tabular-nums shadow-card cursor-pointer';
 const DOT =
-  'absolute top-0 left-0 block size-4 -translate-1/2 rounded-full border-2 border-bg shadow-card';
+  'absolute top-0 left-0 block size-4 -translate-1/2 rounded-full border-2 border-bg shadow-card cursor-pointer';
 
 const PILL_KIND: Record<MapMarkerKind, string> = {
   price: 'border-border bg-bg text-text-primary',
@@ -28,10 +37,10 @@ const SELECTED =
 const HOVER = 'border-primary text-primary-text shadow-float';
 
 /**
- * 마커는 이미지 대신 DOM으로 그린다(번들러에서 Leaflet 기본 이미지 경로가 깨진다). 같은 내용이 목록에 있어
+ * 마커는 지도 SDK의 HTML 마커 내용으로 쓸 DOM이다. 기준점(0,0)에 두고 스스로 가운데로 옮긴다. 같은 내용이 목록에 있어
  * 스크린 리더에서는 숨긴다. 문구는 textContent로 넣어 HTML로 해석되지 않는다.
  */
-export function createMarkerIcon({
+export function createMarkerContent({
   kind,
   label,
   display,
@@ -54,5 +63,5 @@ export function createMarkerIcon({
     );
     element.textContent = label;
   }
-  return divIcon({ html: element, className: '', iconSize: [0, 0] });
+  return element;
 }

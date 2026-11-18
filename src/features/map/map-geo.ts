@@ -77,3 +77,30 @@ export function distanceBetween(a: LatLng, b: LatLng) {
 export function hasMovedAway(from: LatLng, to: LatLng, radius: number) {
   return distanceBetween(from, to) > radius / 4;
 }
+
+const METERS_PER_DEGREE_LAT = 111320;
+
+/** 중심에서 반경만큼 떨어진 사각형(원을 감싸는 영역). 지도가 검색 원 전체를 보이게 맞출 때 쓴다. */
+export function boundsAround({ lat, lng }: LatLng, radius: number) {
+  const dLat = radius / METERS_PER_DEGREE_LAT;
+  const dLng = radius / (METERS_PER_DEGREE_LAT * Math.cos(toRadians(lat)));
+  return {
+    south: lat - dLat,
+    west: lng - dLng,
+    north: lat + dLat,
+    east: lng + dLng,
+  };
+}
+
+/** 화면 좌표(px)의 점이 지도 가장자리에서 padding 안쪽에 있는지. 밖이면 그쪽으로 옮겨야 한다. */
+export function isWithinView(
+  point: { x: number; y: number },
+  center: { x: number; y: number },
+  size: { width: number; height: number },
+  padding: number,
+) {
+  return (
+    Math.abs(point.x - center.x) <= size.width / 2 - padding &&
+    Math.abs(point.y - center.y) <= size.height / 2 - padding
+  );
+}
