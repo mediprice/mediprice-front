@@ -8,7 +8,6 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
-import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ReviewNoticeBanner } from '@/features/reviews/components/review-notice-banner';
 import { reviewQueries } from '@/features/reviews/queries';
@@ -38,10 +37,17 @@ export function MyReviewList() {
 
   if (reviews.isPending) {
     return (
-      <div role="status" className="flex flex-col gap-4">
+      <div role="status" className="flex flex-col gap-3">
         <Skeleton className="h-7 w-40" />
-        <Skeleton className="h-36 rounded-xl" />
-        <Skeleton className="h-36 rounded-xl" />
+        <div className="flex flex-col divide-y divide-hairline border-y border-hairline">
+          {[0, 1].map((index) => (
+            <div key={index} className="flex flex-col gap-2.5 py-5">
+              <Skeleton className="h-6 w-1/2" />
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ))}
+        </div>
         <span className="sr-only">{t('title')}</span>
       </div>
     );
@@ -75,7 +81,6 @@ export function MyReviewList() {
           icon={<MessageSquareText />}
           title={t('emptyTitle')}
           description={t('emptyDescription')}
-          className="py-16"
           action={
             <Button asChild variant="tint" size="md">
               <Link href="/">{t('browse')}</Link>
@@ -87,15 +92,12 @@ export function MyReviewList() {
   }
 
   return (
-    <section aria-labelledby="my-reviews-count" className="flex flex-col gap-4">
+    <section aria-labelledby="my-reviews-count" className="flex flex-col gap-3">
       {banner}
-      <SectionHeader
-        id="my-reviews-count"
-        title={t('count', { count: total })}
-        description={t('description')}
-        className="lg:[&_p]:hidden"
-      />
-      <ul className="flex flex-col gap-3 lg:gap-4">
+      <h2 id="my-reviews-count" className="text-heading">
+        {t('count', { count: total })}
+      </h2>
+      <ul className="flex flex-col divide-y divide-hairline border-y border-hairline">
         {items.map((review) => (
           <li key={review.id}>
             <MyReviewCard review={review} onDeleted={handleDeleted} />
@@ -105,8 +107,8 @@ export function MyReviewList() {
       {reviews.hasNextPage && (
         <Button
           variant="outline"
-          size="md"
-          className="w-full"
+          size="lg"
+          className="mt-3 w-full"
           isLoading={reviews.isFetchingNextPage}
           onClick={() => void reviews.fetchNextPage()}
         >

@@ -81,7 +81,6 @@ export function FavoriteList() {
     return (
       <EmptyState
         icon={<Heart />}
-        className="rounded-xl bg-bg"
         title={t('errorTitle')}
         description={tErrors(errorMessageKey(favorites.error))}
         action={
@@ -121,7 +120,7 @@ export function FavoriteList() {
         ref={headingRef}
         tabIndex={-1}
         className={cn(
-          'text-subheading outline-none',
+          'pb-3 text-heading outline-none',
           items.length === 0 && !undoRow && 'sr-only',
         )}
       >
@@ -130,7 +129,7 @@ export function FavoriteList() {
       {failure && (
         <p
           role="alert"
-          className="mt-3 rounded-lg bg-danger-tint px-4 py-3 text-body-sm text-danger"
+          className="mb-3 rounded-xl bg-danger-tint px-4 py-3 text-body text-danger"
         >
           {failure}
         </p>
@@ -138,7 +137,6 @@ export function FavoriteList() {
       {items.length === 0 && !undoRow ? (
         <EmptyState
           icon={<Heart />}
-          className="rounded-xl bg-bg"
           title={t('emptyTitle')}
           description={t('emptyDescription')}
           action={
@@ -148,7 +146,7 @@ export function FavoriteList() {
           }
         />
       ) : (
-        <ul className="mt-3 grid gap-3 md:grid-cols-2 lg:mt-4 lg:gap-4">
+        <ul className="flex flex-col divide-y divide-hairline border-y border-hairline">
           {items.map((favorite, index) => (
             <Fragment key={favorite.ykiho}>
               {undoRow && index === undoIndex && renderUndo(undoRow)}

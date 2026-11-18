@@ -3,13 +3,14 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Clock } from 'lucide-react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import { groupHistoryByDay } from '@/features/history/history-groups';
 import {
   countHistoryByFilter,
   filterHistory,
@@ -18,6 +19,7 @@ import {
 } from '@/features/history/history-target';
 import { historyMutations, historyQueries } from '@/features/history/queries';
 import { errorMessageKey } from '@/lib/api/error-message';
+import { cn } from '@/lib/utils';
 
 import { HistoryEntry } from './history-entry';
 import { HistoryListSkeleton } from './history-list-skeleton';
@@ -28,6 +30,7 @@ export function HistoryList() {
   const t = useTranslations('library.history');
   const tCommon = useTranslations('common.actions');
   const tErrors = useTranslations('errors');
+  const format = useFormatter();
   const headingRef = useRef<HTMLHeadingElement>(null);
   const histories = useQuery(historyQueries.list());
   const [filter, setFilter] = useState<HistoryFilter>('all');
@@ -51,7 +54,6 @@ export function HistoryList() {
     return (
       <EmptyState
         icon={<Clock />}
-        className="rounded-xl bg-bg"
         title={t('errorTitle')}
         description={tErrors(errorMessageKey(histories.error))}
         action={
@@ -73,6 +75,15 @@ export function HistoryList() {
   /** 고른 종류를 모두 지우면 전체로 돌아간다. */
   const activeFilter = counts[filter] > 0 ? filter : 'all';
   const visible = filterHistory(entries, activeFilter);
+  const groups = groupHistoryByDay(visible);
+  const dayLabel = (group: (typeof groups)[number]) =>
+    group.day === 'earlier'
+      ? format.dateTime(new Date(`${group.date}T00:00:00+09:00`), {
+          month: 'long',
+          day: 'numeric',
+          weekday: 'short',
+        })
+      : t(`day.${group.day}`);
   const filters = HISTORY_FILTERS.filter(
     (value) => value === 'all' || counts[value] > 0,
   );
@@ -104,14 +115,16 @@ export function HistoryList() {
         id="history-heading"
         ref={headingRef}
         tabIndex={-1}
-        className="sr-only"
+        className={cn(
+          'pb-4 text-heading outline-none',
+          entries.length === 0 && 'sr-only',
+        )}
       >
         {t('listLabel', { count: visible.length })}
       </h2>
       {entries.length === 0 ? (
         <EmptyState
           icon={<Clock />}
-          className="rounded-xl bg-bg"
           title={t('emptyTitle')}
           description={t('emptyDescription')}
           action={
@@ -126,7 +139,7 @@ export function HistoryList() {
             <div
               role="group"
               aria-label={t('filterLabel')}
-              className="flex flex-wrap gap-2 pt-1 pb-3"
+              className="flex flex-wrap gap-2 pb-5"
             >
               {filters.map((value) => (
                 <Chip
@@ -145,21 +158,39 @@ export function HistoryList() {
           {failure && (
             <p
               role="alert"
-              className="mb-3 rounded-lg bg-danger-tint px-4 py-3 text-body-sm text-danger"
+              className="mb-4 rounded-xl bg-danger-tint px-4 py-3 text-body text-danger"
             >
               {failure}
             </p>
           )}
-          <ul className="flex flex-col gap-3 lg:gap-4">
-            {visible.map((entry) => (
-              <li key={entry.id}>
-                <HistoryEntry
-                  entry={entry}
-                  onRemove={() => handleRemove(entry.id)}
-                />
-              </li>
-            ))}
-          </ul>
+          <div className="flex flex-col gap-8">
+            {groups.map((group) => {
+              const label = dayLabel(group);
+              return (
+                <section
+                  key={group.date}
+                  aria-labelledby={`history-day-${group.date}`}
+                >
+                  <h3
+                    id={`history-day-${group.date}`}
+                    className="pb-2 text-label-bold text-text-secondary"
+                  >
+                    {label}
+                  </h3>
+                  <ul className="flex flex-col divide-y divide-hairline border-y border-hairline">
+                    {group.entries.map((entry) => (
+                      <li key={entry.id}>
+                        <HistoryEntry
+                          entry={entry}
+                          onRemove={() => handleRemove(entry.id)}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              );
+            })}
+          </div>
           <Button
             variant="dangerText"
             size="md"
@@ -167,7 +198,7 @@ export function HistoryList() {
               clear.reset();
               setIsConfirming(true);
             }}
-            className="mt-6 w-full bg-bg hover:bg-surface-strong lg:w-auto"
+            className="mt-8 w-full md:w-auto"
           >
             {t('clearAll')}
           </Button>

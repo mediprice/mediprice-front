@@ -1,6 +1,7 @@
-import { ChevronRight, X } from 'lucide-react';
+import { Building2, ReceiptText, Search, X } from 'lucide-react';
 import Link from 'next/link';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import type { ReactNode } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { StatusChip } from '@/components/ui/status-chip';
@@ -8,10 +9,17 @@ import {
   historyTargetHref,
   isTargetGone,
 } from '@/features/history/history-target';
-import type { ViewHistory } from '@/features/history/queries';
+import type { ViewHistory, ViewTargetType } from '@/features/history/queries';
 import { cn } from '@/lib/utils';
 
-/** 줄 전체가 다시 보기 링크다(제목 링크를 카드 크기로 넓힌다). 삭제는 링크 위에 따로 놓인 아이콘 버튼이다. */
+const icon = { 'aria-hidden': true, strokeWidth: 1.75 } as const;
+const TYPE_ICONS: Record<ViewTargetType, ReactNode> = {
+  HOSPITAL: <Building2 {...icon} />,
+  NPAY_ITEM: <ReceiptText {...icon} />,
+  KEYWORD: <Search {...icon} />,
+};
+
+/** 기록 한 줄. 줄 전체가 다시 보기 링크다(제목 링크를 줄 크기로 넓힌다). 삭제는 링크 위에 따로 놓인 아이콘 버튼이다. */
 export function HistoryEntry({
   entry,
   onRemove,
@@ -20,29 +28,33 @@ export function HistoryEntry({
   onRemove: () => void;
 }) {
   const t = useTranslations('library.history');
-  const format = useFormatter();
   const href = historyTargetHref(entry);
   const isGone = isTargetGone(entry);
   const title =
     entry.type === 'KEYWORD'
       ? (entry.title ?? entry.targetKey)
       : (entry.title ?? t(`goneTitle.${entry.type}`));
-  const viewedAt = (
-    <time dateTime={entry.viewedAt}>
-      {format.dateTime(new Date(entry.viewedAt), 'dateShort')}
-    </time>
-  );
 
   return (
     <article
       className={cn(
-        'relative flex items-start gap-2 rounded-xl py-4 pr-1 pl-4 lg:items-center lg:gap-4 lg:py-5 lg:pr-3 lg:pl-6',
-        href
-          ? 'pressable bg-bg shadow-card'
-          : 'border border-dashed border-border-strong bg-bg',
+        'relative -mx-3 flex items-center gap-3 rounded-xl py-3.5 pr-1 pl-3 lg:gap-4',
+        href &&
+          'transition-colors duration-200 ease-standard hover:bg-surface active:bg-surface-strong',
       )}
     >
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
+      <span
+        aria-hidden="true"
+        className={cn(
+          'flex size-11 shrink-0 items-center justify-center rounded-xl [&_svg]:size-5',
+          isGone
+            ? 'bg-surface text-text-tertiary'
+            : 'bg-primary-tint text-primary',
+        )}
+      >
+        {TYPE_ICONS[entry.type]}
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <h3
           className={cn(
             'text-subheading break-all',
@@ -62,34 +74,15 @@ export function HistoryEntry({
         </h3>
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-body-sm text-text-secondary">
           <span>{t(`type.${entry.type}`)}</span>
-          <span aria-hidden="true" className="text-text-tertiary lg:hidden">
-            ·
-          </span>
-          <span className="text-text-tertiary tabular-nums lg:hidden">
-            {viewedAt}
-          </span>
           {isGone && <StatusChip status="warning">{t('gone')}</StatusChip>}
         </p>
       </div>
-      <span className="hidden shrink-0 text-body-sm text-text-tertiary tabular-nums lg:block">
-        {viewedAt}
-      </span>
-      {href && (
-        <span
-          aria-hidden="true"
-          className="hidden w-22 shrink-0 items-center justify-end gap-0.5 text-label-bold text-primary-text lg:inline-flex"
-        >
-          {t('revisit')}
-          <ChevronRight className="size-4" strokeWidth={2} />
-        </span>
-      )}
-      {!href && <span aria-hidden="true" className="hidden w-22 lg:block" />}
       <Button
         variant="ghost"
         size="icon"
         aria-label={t('removeLabel', { title })}
         onClick={onRemove}
-        className="relative z-10 -my-2.5 shrink-0 text-text-tertiary hover:bg-danger-tint hover:text-danger active:bg-danger-tint lg:my-0"
+        className="relative z-10 shrink-0 text-text-tertiary hover:bg-danger-tint hover:text-danger active:bg-danger-tint"
       >
         <X aria-hidden="true" />
       </Button>

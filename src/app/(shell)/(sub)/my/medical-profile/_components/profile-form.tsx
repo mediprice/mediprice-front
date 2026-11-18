@@ -102,7 +102,7 @@ export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
       noValidate
       aria-labelledby="medical-profile-title"
       onSubmit={handleSubmit(handleSave)}
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-8"
     >
       <ConsentField
         id={`${id}-consent`}
@@ -115,18 +115,31 @@ export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
         register={register}
         errors={errors}
       />
-      {TEXT_FIELDS.map((field, index) => (
-        <ProfileTextField
-          key={field}
-          id={`${id}-${field}`}
-          label={t(`field.${field}`)}
-          placeholder={t(`placeholder.${field}`)}
-          text={texts[index] ?? ''}
-          error={errors[field]?.message}
-          {...register(field)}
-        />
-      ))}
-      <p className="text-caption text-text-tertiary">
+      <section
+        aria-labelledby={`${id}-health`}
+        className="flex flex-col gap-6 border-t border-hairline pt-8"
+      >
+        <div className="flex flex-col gap-1">
+          <h2 id={`${id}-health`} className="text-heading">
+            {t('healthTitle')}
+          </h2>
+          <p className="text-body text-text-secondary">
+            {t('healthDescription')}
+          </p>
+        </div>
+        {TEXT_FIELDS.map((field, index) => (
+          <ProfileTextField
+            key={field}
+            id={`${id}-${field}`}
+            label={t(`field.${field}`)}
+            placeholder={t(`placeholder.${field}`)}
+            text={texts[index] ?? ''}
+            error={errors[field]?.message}
+            {...register(field)}
+          />
+        ))}
+      </section>
+      <p className="-mt-4 text-body-sm text-text-secondary">
         {profile
           ? t('updatedAt', {
               date: format.dateTime(new Date(profile.updatedAt), 'date'),
@@ -134,13 +147,13 @@ export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
           : t('notSaved')}
       </p>
       {/** 긴 폼이라 모바일은 저장 바를 화면 아래에 붙인다. 폼 안에서만 붙어 있어 끝에 오면 제자리에 놓이고 내용을 가리지 않는다. */}
-      <div className="sticky bottom-0 z-(--z-bottom-cta) mx-[calc(50%-50vw)] flex flex-col gap-2 border-t border-hairline bg-bg px-[calc(50vw-50%)] pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-bar lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
+      <div className="sticky bottom-0 z-(--z-bottom-cta) mx-[calc(50%-50vw)] -mt-4 flex flex-col gap-2 border-t border-hairline bg-bg px-[calc(50vw-50%)] pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-bar lg:static lg:mx-0 lg:mt-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
         {save.isError && !isFieldRejection(save.error) && (
           <p role="alert" className="text-body-sm text-danger">
             {tErrors(errorMessageKey(save.error))}
           </p>
         )}
-        <p role="status" className="text-body-sm text-positive empty:hidden">
+        <p role="status" className="text-body text-positive empty:hidden">
           {status && !isDirty && t(status)}
         </p>
         <div className="flex items-center gap-3">
@@ -148,7 +161,7 @@ export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
             type="submit"
             size="lg"
             isLoading={save.isPending}
-            className="w-full lg:w-auto lg:min-w-30"
+            className="w-full lg:w-auto lg:min-w-40"
           >
             {t('save')}
           </Button>
@@ -161,7 +174,7 @@ export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
         </div>
       </div>
       {profile && (
-        <DeleteButton onClick={openDelete} className="w-full lg:hidden" />
+        <DeleteButton onClick={openDelete} className="-mt-4 w-full lg:hidden" />
       )}
       <ProfileDialogs
         isDeleting={isDeleting}

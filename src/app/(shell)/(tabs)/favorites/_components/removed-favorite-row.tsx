@@ -51,21 +51,19 @@ export function RemovedFavoriteRow({
         setIsKeyboardFocused(event.target.matches(':focus-visible'))
       }
       onBlur={() => setIsKeyboardFocused(false)}
-      className="flex min-h-16 items-center gap-3 rounded-xl border border-dashed border-border-strong bg-bg py-2 pr-2 pl-4 lg:min-h-20 lg:pl-6"
+      className="-mx-3 my-2 flex min-h-16 items-center gap-3 rounded-xl bg-surface py-2 pr-2 pl-3"
     >
-      <p className="min-w-0 flex-1 text-body-sm text-text-secondary">
+      <p className="min-w-0 flex-1 text-body text-text-secondary">
         {t.rich('removedInline', {
           name,
           strong: (chunks) => (
-            <strong className="text-label-bold text-text-primary">
-              {chunks}
-            </strong>
+            <strong className="font-bold text-text-primary">{chunks}</strong>
           ),
         })}
       </p>
       <Button
         ref={undoRef}
-        variant="ghost"
+        variant="outline"
         size="md"
         aria-label={t('undoLabel', { name })}
         onClick={onUndo}

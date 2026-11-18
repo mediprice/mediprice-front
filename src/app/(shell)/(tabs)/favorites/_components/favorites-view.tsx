@@ -10,9 +10,8 @@ import {
 import { PageContainer } from '@/components/layout/page-container';
 import { LoginRequired } from '@/features/auth/components/login-required';
 import { MyPageHeader } from '@/features/auth/components/my-page-header';
+import { MyPageTitle } from '@/features/auth/components/my-page-title';
 import { MySideNav } from '@/features/auth/components/my-side-nav';
-import { useSession } from '@/features/auth/use-session';
-import { cn } from '@/lib/utils';
 
 import { FavoriteList } from './favorite-list';
 import { FavoriteListSkeleton } from './favorite-list-skeleton';
@@ -20,32 +19,23 @@ import { FavoriteListSkeleton } from './favorite-list-skeleton';
 export function FavoritesView() {
   const t = useTranslations('library.favorites');
   const tNav = useTranslations('nav');
-  const { status } = useSession();
-  const isListVisible = status === 'authenticated' || status === 'pending';
   return (
     <>
-      <MyPageHeader className="to-surface">
+      <MyPageHeader>
         <Breadcrumb>
           <BreadcrumbLink href="/my">{tNav('my')}</BreadcrumbLink>
           <BreadcrumbCurrent>{t('title')}</BreadcrumbCurrent>
         </Breadcrumb>
-        <h1 className="text-title">{t('title')}</h1>
-        <p className="text-body-sm text-text-secondary">{t('description')}</p>
+        <MyPageTitle title={t('heading')} description={t('description')} />
       </MyPageHeader>
-      {/** 흰 카드가 잘 보이도록 목록 영역을 회색 띠에 올린다. 로그인 안내처럼 카드가 없는 상태는 흰 판에 둔다. */}
-      <div className="flex-1 bg-surface">
-        <PageContainer className="pt-4 pb-section md:max-w-2xl lg:grid lg:max-w-page lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8 lg:pt-0">
-          <MySideNav />
-          <div className={cn(!isListVisible && 'rounded-xl bg-bg')}>
-            <LoginRequired
-              reason="favorite"
-              fallback={<FavoriteListSkeleton />}
-            >
-              <FavoriteList />
-            </LoginRequired>
-          </div>
-        </PageContainer>
-      </div>
+      <PageContainer className="pb-section md:max-w-2xl lg:grid lg:max-w-page lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-10">
+        <MySideNav />
+        <div className="min-w-0 lg:max-w-3xl">
+          <LoginRequired reason="favorite" fallback={<FavoriteListSkeleton />}>
+            <FavoriteList />
+          </LoginRequired>
+        </div>
+      </PageContainer>
     </>
   );
 }

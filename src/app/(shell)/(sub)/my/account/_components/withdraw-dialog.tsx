@@ -1,23 +1,13 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import { TriangleAlert } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
-import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
-import { CenteredDialogContent } from '@/features/auth/components/centered-dialog-content';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { withdrawAccount } from '@/features/auth/queries';
 import { signOut } from '@/features/auth/session';
 import { errorMessageKey } from '@/lib/api/error-message';
-
-const DELETED_ITEMS = [
-  'medicalProfile',
-  'favorites',
-  'history',
-  'reviews',
-] as const;
 
 export function WithdrawDialog({
   open,
@@ -40,57 +30,19 @@ export function WithdrawDialog({
   });
 
   return (
-    <ResponsiveDialog
+    <ConfirmDialog
       open={open}
       onOpenChange={(next) => {
-        if (withdraw.isPending) return;
         if (!next) withdraw.reset();
         onOpenChange(next);
       }}
-    >
-      <CenteredDialogContent title={t('title')}>
-        <div className="flex flex-col gap-4">
-          <div className="rounded-lg bg-warning-tint p-4">
-            <p className="flex items-center gap-2 text-label-bold text-text-primary">
-              <TriangleAlert
-                aria-hidden="true"
-                className="size-5 shrink-0 text-warning"
-                strokeWidth={1.75}
-              />
-              {t('deletedTitle')}
-            </p>
-            <ul className="mt-2 flex list-disc flex-col gap-1 pl-12 text-body-sm text-text-secondary">
-              {DELETED_ITEMS.map((item) => (
-                <li key={item}>{t(`items.${item}`)}</li>
-              ))}
-            </ul>
-          </div>
-          <p className="text-body-sm text-text-secondary">{t('note')}</p>
-          {withdraw.isError && (
-            <p role="alert" className="text-body-sm text-danger">
-              {tErrors(errorMessageKey(withdraw.error))}
-            </p>
-          )}
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              variant="neutral"
-              size="md"
-              disabled={withdraw.isPending}
-              onClick={() => onOpenChange(false)}
-            >
-              {tCommon('cancel')}
-            </Button>
-            <Button
-              variant="danger"
-              size="md"
-              isLoading={withdraw.isPending}
-              onClick={() => withdraw.mutate()}
-            >
-              {t('confirm')}
-            </Button>
-          </div>
-        </div>
-      </CenteredDialogContent>
-    </ResponsiveDialog>
+      title={t('title')}
+      description={t('description')}
+      cancelLabel={tCommon('cancel')}
+      confirmLabel={t('confirm')}
+      onConfirm={() => withdraw.mutate()}
+      isPending={withdraw.isPending}
+      error={withdraw.isError ? tErrors(errorMessageKey(withdraw.error)) : null}
+    />
   );
 }

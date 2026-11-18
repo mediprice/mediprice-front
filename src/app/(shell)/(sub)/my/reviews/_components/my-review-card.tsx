@@ -23,15 +23,15 @@ export function MyReviewCard({
   const hospitalName = review.hospitalName ?? t('unknownHospital');
 
   return (
-    <article className="flex flex-col gap-2.5 rounded-xl bg-bg px-4 py-4 shadow-card lg:px-6 lg:py-5">
+    <article className="flex flex-col gap-2.5 py-5">
       <div className="flex items-start gap-2">
         <h3 className="min-w-0 flex-1 text-subheading">
           <Link
             href={`/hospitals/${encodeURIComponent(review.ykiho)}`}
             aria-label={t('viewHospital', { name: hospitalName })}
-            className="-my-2.5 inline-flex min-h-11 items-center gap-0.5 rounded-md break-keep hover:underline"
+            className="-my-2.5 inline-flex min-h-11 max-w-full items-center gap-0.5 rounded-md hover:underline"
           >
-            {hospitalName}
+            <span className="min-w-0 wrap-anywhere">{hospitalName}</span>
             <ChevronRight
               aria-hidden="true"
               className="size-4.5 shrink-0 text-text-secondary"
@@ -55,7 +55,7 @@ export function MyReviewCard({
         />
         <span
           aria-hidden="true"
-          className="text-caption text-text-secondary tabular-nums"
+          className="text-body-sm text-text-secondary tabular-nums"
         >
           {t('meta', {
             rating: review.rating,
@@ -69,7 +69,7 @@ export function MyReviewCard({
           {isHidden ? t('hidden') : t('public')}
         </StatusChip>
       </div>
-      <p className="text-body-sm whitespace-pre-line text-text-primary">
+      <p className="text-body whitespace-pre-line text-text-primary">
         {review.content}
       </p>
       {isHidden && (

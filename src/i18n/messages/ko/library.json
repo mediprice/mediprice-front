@@ -14,7 +14,7 @@
   },
   "favorites": {
     "title": "관심",
-    "description": "저장한 병원이에요. 병원을 열면 최신 가격을 볼 수 있어요.",
+    "description": "병원을 열면 최신 가격을 볼 수 있어요.",
     "count": "병원 {count, plural, other {#곳}}",
     "viewHospital": "병원 보기",
     "remove": "{name} 관심 병원에서 빼기",
@@ -31,11 +31,12 @@
     "undo": "되돌리기",
     "undoLabel": "{name} 관심 병원 되돌리기",
     "restored": "{name}을(를) 다시 관심 병원에 저장했어요.",
-    "restoreFailed": "관심 병원에 다시 저장하지 못했어요."
+    "restoreFailed": "관심 병원에 다시 저장하지 못했어요.",
+    "heading": "저장해 둔 병원이에요"
   },
   "history": {
     "title": "최근 기록",
-    "description": "최근에 본 병원·진료 항목과 병원 검색어예요. 최근 100개까지 남아요.",
+    "description": "병원 검색어도 함께 남고, 최근 100개까지 보관해요.",
     "filterLabel": "기록 종류",
     "filter": {
       "all": "전체",
@@ -69,14 +70,19 @@
     "emptyTitle": "최근 기록이 없어요",
     "emptyDescription": "병원이나 진료 항목을 보거나 병원을 검색하면 여기에 남아요.",
     "explore": "가격 찾아보기",
-    "errorTitle": "최근 기록을 불러오지 못했어요"
+    "errorTitle": "최근 기록을 불러오지 못했어요",
+    "heading": "최근에 본 병원과 항목이에요",
+    "day": {
+      "today": "오늘",
+      "yesterday": "어제"
+    }
   },
   "medicalProfile": {
     "title": "의료 프로필",
     "heading": "AI 찾기에 쓸 내 정보",
     "description": "진료 이력·복용 약·알레르기를 직접 입력하고 언제든 지울 수 있어요.",
     "consentLabel": "저장 목적을 확인했고, 건강 정보 저장에 동의해요",
-    "consentPurpose": "저장 목적: AI가 내 상황을 더 정확히 이해하도록 돕기 위해서예요. 모든 칸은 선택이에요.",
+    "consentPurpose": "AI가 내 상황을 더 정확히 이해하도록 돕기 위해 저장해요. 언제든 지울 수 있어요.",
     "basicTitle": "기본 정보",
     "birthYear": "출생 연도",
     "birthYearHint": "네 자리 숫자로 입력해요. 예: 1985",
@@ -123,6 +129,9 @@
       "tooLong": "1,000자 이내로 입력해 주세요.",
       "invalid": "입력한 값을 다시 확인해 주세요."
     },
-    "errorTitle": "의료 프로필을 불러오지 못했어요"
+    "errorTitle": "의료 프로필을 불러오지 못했어요",
+    "healthTitle": "건강 정보",
+    "healthDescription": "아는 것만 적어도 돼요. 모든 칸은 선택이에요.",
+    "consentTitle": "저장 전에 확인해 주세요"
   }
 }

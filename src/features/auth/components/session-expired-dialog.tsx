@@ -21,7 +21,10 @@ export function SessionExpiredDialog({
       <CenteredDialogContent title={t('title')}>
         <div className="flex flex-col gap-5">
           <p className="text-body text-text-secondary">{t('description')}</p>
-          <GoogleLoginButton className="w-full" />
+          <GoogleLoginButton
+            size="lg"
+            className="min-h-14 w-full text-subheading"
+          />
         </div>
       </CenteredDialogContent>
     </ResponsiveDialog>

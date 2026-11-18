@@ -85,10 +85,10 @@ function CallbackFailure({
         action={
           <>
             <GoogleLoginButton
-              variant="tint"
-              size="md"
+              size="lg"
               label={t('retry')}
               returnTo={returnTo}
+              className="min-h-14 text-subheading"
             />
             <Button asChild variant="ghost" size="md">
               <Link href="/" replace>

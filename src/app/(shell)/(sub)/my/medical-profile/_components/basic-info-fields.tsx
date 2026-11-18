@@ -32,14 +32,14 @@ export function BasicInfoFields({
   return (
     <section
       aria-labelledby={`${id}-basic`}
-      className="flex flex-col gap-4 rounded-xl bg-surface p-4 lg:p-6"
+      className="flex flex-col gap-5 border-t border-hairline pt-8"
     >
-      <h2 id={`${id}-basic`} className="text-subheading">
+      <h2 id={`${id}-basic`} className="text-heading">
         {t('basicTitle')}
       </h2>
-      <div className="flex flex-col gap-4 lg:flex-row lg:gap-8">
+      <div className="flex flex-col gap-6 md:flex-row md:gap-8">
         <div className="flex flex-col gap-2">
-          <label htmlFor={`${id}-birthYear`} className="text-label-bold">
+          <label htmlFor={`${id}-birthYear`} className="text-subheading">
             {t('birthYear')}
           </label>
           <input
@@ -50,7 +50,7 @@ export function BasicInfoFields({
             maxLength={4}
             aria-invalid={birthYearError ? true : undefined}
             aria-describedby={`${id}-birthYear-hint${birthYearError ? ` ${id}-birthYear-error` : ''}`}
-            className="h-12 w-full rounded-lg border border-border-strong bg-bg px-4 text-field tabular-nums aria-invalid:border-danger lg:w-40"
+            className="h-13 w-full rounded-xl border border-border-strong bg-bg px-4 text-field tabular-nums transition-colors duration-200 ease-standard hover:border-text-tertiary aria-invalid:border-danger md:w-44"
             {...register('birthYear')}
           />
           <p
@@ -69,7 +69,7 @@ export function BasicInfoFields({
           )}
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <span id={`${id}-gender`} className="text-label-bold">
+          <span id={`${id}-gender`} className="text-subheading">
             {t('gender')}
           </span>
           <Controller
@@ -88,7 +88,7 @@ export function BasicInfoFields({
                   value,
                   label: t(`genderOption.${value || 'none'}`),
                 }))}
-                className="lg:max-w-96"
+                className="md:max-w-96"
               />
             )}
           />

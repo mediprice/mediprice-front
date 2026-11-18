@@ -39,27 +39,39 @@ export function LoginDialog() {
         }}
       >
         <div className="flex flex-col gap-5">
-          <p className="text-body text-text-secondary">
+          <p className="text-body-lg text-text-secondary">
             {t(`reason.${reason}`)}
           </p>
-          <div className="rounded-lg bg-surface p-4">
-            <p className="text-label-bold text-text-primary">
+          <section aria-labelledby="login-benefits">
+            <h3
+              id="login-benefits"
+              className="pb-1 text-label-bold text-text-secondary"
+            >
               {t('benefitsTitle')}
-            </p>
-            <ul className="mt-3 flex flex-col gap-2.5">
+            </h3>
+            <ul className="flex flex-col divide-y divide-hairline">
               {benefits.map((benefit) => (
                 <li
                   key={benefit.key}
-                  className="flex items-start gap-2.5 text-body-sm text-text-secondary [&_svg]:mt-0.5 [&_svg]:size-4.5 [&_svg]:shrink-0 [&_svg]:text-primary"
+                  className="flex min-h-14 items-center gap-3 py-2.5 text-body text-text-primary"
                 >
-                  {benefit.icon}
+                  <span
+                    aria-hidden="true"
+                    className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-tint text-primary [&_svg]:size-4.5"
+                  >
+                    {benefit.icon}
+                  </span>
                   {t(`benefits.${benefit.key}`)}
                 </li>
               ))}
             </ul>
-          </div>
-          <GoogleLoginButton returnTo={returnTo} className="w-full" />
-          <p className="text-body-sm text-text-tertiary">{t('terms')}</p>
+          </section>
+          <GoogleLoginButton
+            returnTo={returnTo}
+            size="lg"
+            className="min-h-14 w-full text-subheading"
+          />
+          <p className="text-body-sm text-text-secondary">{t('terms')}</p>
         </div>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
