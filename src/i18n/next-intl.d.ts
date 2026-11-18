@@ -1,5 +1,5 @@
 import type { formats } from './formats';
-import type messages from './messages/ko.json';
+import type { messages } from './messages/ko';
 
 declare module 'next-intl' {
   interface AppConfig {

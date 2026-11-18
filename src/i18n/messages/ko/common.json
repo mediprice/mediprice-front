@@ -1,0 +1,27 @@
+{
+  "brand": "MediPrice",
+  "actions": {
+    "close": "닫기",
+    "cancel": "취소",
+    "confirm": "확인",
+    "reset": "초기화",
+    "apply": "적용",
+    "more": "더 보기",
+    "retry": "다시 시도",
+    "back": "뒤로 가기"
+  },
+  "price": {
+    "won": "{amount, number}원",
+    "range": "{min, number}~{max, number}원",
+    "none": "가격 정보 없음",
+    "rangeParts": "<amount>{min, number}</amount>~<amount>{max, number}원</amount>"
+  },
+  "footer": {
+    "source": "데이터 출처: 건강보험심사평가원 비급여 진료비 공개 자료",
+    "notice": "공개 가격은 병원이 신고한 기준 가격이며, 실제 진료비와 다를 수 있어요.",
+    "copyright": "© MediPrice"
+  },
+  "status": {
+    "loading": "불러오는 중"
+  }
+}

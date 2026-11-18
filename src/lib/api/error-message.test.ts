@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import ko from '@/i18n/messages/ko.json';
+import { messages } from '@/i18n/messages/ko';
 
 import { errorMessageKey } from './error-message';
 import { ApiError, NetworkError } from './errors';
@@ -62,6 +62,6 @@ describe('errorMessageKey', () => {
       errorMessageKey(new NetworkError(null)),
       errorMessageKey(null),
     ];
-    for (const key of keys) expect(ko.errors).toHaveProperty(key);
+    for (const key of keys) expect(messages.errors).toHaveProperty(key);
   });
 });
