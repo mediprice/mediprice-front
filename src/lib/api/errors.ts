@@ -25,7 +25,7 @@ export class ApiError extends Error {
 
 export class NetworkError extends Error {
   constructor(cause: unknown) {
-    super('네트워크 오류가 발생했습니다.', { cause });
+    super('Network request failed', { cause });
     this.name = 'NetworkError';
   }
 }
@@ -33,7 +33,7 @@ export class NetworkError extends Error {
 export function fromErrorBody(status: number, body: unknown): ApiError {
   const parsed = errorResponseSchema.safeParse(body);
   if (!parsed.success) {
-    return new ApiError(status, 'UNKNOWN', '알 수 없는 오류가 발생했습니다.');
+    return new ApiError(status, 'UNKNOWN', 'Unrecognized error response');
   }
   const { code, message, errors } = parsed.data;
   return new ApiError(status, code, message, errors);
