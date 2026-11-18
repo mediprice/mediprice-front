@@ -10,7 +10,9 @@ export default function TabsLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <MobileTopBar />
-      <div className="pb-tab-bar lg:pb-0">{children}</div>
+      <main id="main" tabIndex={-1} className="pb-tab-bar outline-none lg:pb-0">
+        {children}
+      </main>
       <BottomTabBar items={navItems} />
     </>
   );
