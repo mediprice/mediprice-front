@@ -39,21 +39,25 @@ export function AccountView() {
         </Breadcrumb>
         <h1 className="sr-only text-title lg:not-sr-only">{t('title')}</h1>
       </MyPageHeader>
-      <PageContainer className="pt-4 pb-section lg:grid lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8 lg:pt-0">
+      <PageContainer className="pt-4 pb-section md:max-w-2xl lg:grid lg:max-w-page lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8 lg:pt-0">
         <MySideNav />
         <LoginRequired>
           {(user) => (
-            <div className="flex flex-col gap-4 lg:gap-5">
-              <AccountInfoCard user={user} />
-              <Button
-                variant="neutral"
-                size="md"
-                isLoading={logout.isPending}
-                onClick={() => logout.mutate()}
-                className="w-full lg:w-fit lg:self-start"
-              >
-                {t('logout')}
-              </Button>
+            <div className="flex max-w-2xl flex-col gap-8">
+              <AccountInfoCard
+                user={user}
+                footer={
+                  <Button
+                    variant="neutral"
+                    size="md"
+                    isLoading={logout.isPending}
+                    onClick={() => logout.mutate()}
+                    className="w-full md:w-fit"
+                  >
+                    {t('logout')}
+                  </Button>
+                }
+              />
               <WithdrawSection />
             </div>
           )}

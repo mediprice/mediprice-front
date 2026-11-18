@@ -59,6 +59,11 @@ async function findMyReview(reviewId: number): Promise<Review | null> {
   }
 }
 
+/** 후기는 부가 정보라 5xx에도 한 번만 다시 시도해 빨리 실패를 보여 준다(기본 3번이면 스켈레톤이 6초 넘게 남는다). */
+function retryOnce(failureCount: number, error: unknown) {
+  return shouldRetryQuery(failureCount, error) && failureCount < 1;
+}
+
 export const reviewQueries = {
   hospital: (ykiho: string, sort: ReviewSort = 'latest') =>
     infiniteQueryOptions({
@@ -75,9 +80,7 @@ export const reviewQueries = {
             },
           }),
         ),
-      /** 후기는 부가 정보라 5xx에도 한 번만 다시 시도해 빨리 실패를 보여 준다. */
-      retry: (failureCount, error) =>
-        shouldRetryQuery(failureCount, error) && failureCount < 1,
+      retry: retryOnce,
       initialPageParam: 0,
       getNextPageParam: (last) =>
         last.page + 1 < last.totalPages ? last.page + 1 : undefined,
@@ -88,6 +91,7 @@ export const reviewQueries = {
       queryKey: reviewKeys.myList(),
       queryFn: ({ pageParam }) =>
         fetchMyReviews(pageParam, MY_REVIEW_PAGE_SIZE),
+      retry: retryOnce,
       initialPageParam: 0,
       getNextPageParam: (last) =>
         last.page + 1 < last.totalPages ? last.page + 1 : undefined,
@@ -97,6 +101,7 @@ export const reviewQueries = {
     queryOptions({
       queryKey: reviewKeys.myReview(reviewId),
       queryFn: () => findMyReview(reviewId),
+      retry: retryOnce,
     }),
 };
 

@@ -61,7 +61,8 @@
     "deleted": "후기를 삭제했어요."
   },
   "section": {
-    "write": "후기 쓰기"
+    "write": "후기 쓰기",
+    "count": "후기 {count, plural, other {#건}}"
   },
   "menu": {
     "title": "후기 메뉴",

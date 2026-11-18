@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLoginGuard, useSession } from '@/features/auth/use-session';
 import { ReviewNoticeBanner } from '@/features/reviews/components/review-notice-banner';
@@ -37,26 +38,25 @@ export function ReviewSection({ ykiho }: { ykiho: string }) {
       aria-labelledby="reviews-title"
       className="flex scroll-mt-14 flex-col gap-4"
     >
-      <div className="flex items-center gap-3">
-        <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2">
-          <h2 id="reviews-title" className="text-heading">
-            {t('title')}
-          </h2>
-          {total != null && total > 0 && (
-            <span className="text-body-sm text-text-secondary tabular-nums">
-              {t('count', { count: total })}
-            </span>
-          )}
-        </div>
-        <Button
-          variant="tint"
-          size="sm"
-          onClick={guard('review', () => router.push(reviewWriteHref(ykiho)))}
-        >
-          <PenLine aria-hidden="true" />
-          {tReviews('write')}
-        </Button>
-      </div>
+      <SectionHeader
+        id="reviews-title"
+        title={t('title')}
+        description={
+          total != null && total > 0
+            ? tReviews('count', { count: total })
+            : undefined
+        }
+        action={
+          <Button
+            variant="tint"
+            size="sm"
+            onClick={guard('review', () => router.push(reviewWriteHref(ykiho)))}
+          >
+            <PenLine aria-hidden="true" />
+            {tReviews('write')}
+          </Button>
+        }
+      />
       {status === 'anonymous' && (
         <p className="flex items-center gap-1.5 text-caption text-text-secondary">
           <Lock aria-hidden="true" className="size-3.5" strokeWidth={1.5} />

@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { PageContainer } from '@/components/layout/page-container';
 import { SubTopBar } from '@/components/layout/sub-top-bar';
+import { EmptyState } from '@/components/ui/empty-state';
 import { findHomeCategory } from '@/features/npay/catalog';
 import { parseSearchParams } from '@/features/search/search-params';
 
@@ -12,7 +13,6 @@ import { HospitalSearchView } from './_components/hospital-search-view';
 import { ItemSearchView } from './_components/item-search-view';
 import { SearchHeader } from './_components/search-header';
 import { SearchSuggestions } from './_components/search-suggestions';
-import { StatusPanel } from './_components/status-panel';
 import { SuggestionButtons } from './_components/suggestion-buttons';
 
 export async function generateMetadata({
@@ -120,8 +120,8 @@ export default async function SearchPage({
 
       {state.mode === 'prompt' && (
         <PageContainer className="pt-4 pb-section lg:pt-10">
-          <StatusPanel
-            titleAs="h1"
+          <h1 className="sr-only">{t('topBar.search')}</h1>
+          <EmptyState
             icon={<Search />}
             title={t('prompt.title')}
             description={
@@ -129,7 +129,7 @@ export default async function SearchPage({
                 ? t('prompt.itemDescription')
                 : t('prompt.hospitalDescription')
             }
-            actions={
+            action={
               <SuggestionButtons
                 links={['category']}
                 keyword=""

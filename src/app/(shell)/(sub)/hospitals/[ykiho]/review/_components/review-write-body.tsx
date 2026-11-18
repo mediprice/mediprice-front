@@ -66,7 +66,7 @@ function EditBody<T extends string>({
         description={tErrors(errorMessageKey(query.error))}
         action={
           <Button
-            variant="outline"
+            variant="tint"
             size="md"
             isLoading={query.isRefetching}
             onClick={() => void query.refetch()}

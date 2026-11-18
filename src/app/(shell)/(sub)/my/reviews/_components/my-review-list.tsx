@@ -8,6 +8,7 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ReviewNoticeBanner } from '@/features/reviews/components/review-notice-banner';
 import { reviewQueries } from '@/features/reviews/queries';
@@ -54,7 +55,7 @@ export function MyReviewList() {
         description={tErrors(errorMessageKey(reviews.error))}
         action={
           <Button
-            variant="outline"
+            variant="tint"
             size="md"
             isLoading={reviews.isRefetching}
             onClick={() => void reviews.refetch()}
@@ -76,7 +77,7 @@ export function MyReviewList() {
           description={t('emptyDescription')}
           className="py-16"
           action={
-            <Button asChild size="md">
+            <Button asChild variant="tint" size="md">
               <Link href="/">{t('browse')}</Link>
             </Button>
           }
@@ -88,14 +89,12 @@ export function MyReviewList() {
   return (
     <section aria-labelledby="my-reviews-count" className="flex flex-col gap-4">
       {banner}
-      <div className="flex flex-col gap-1">
-        <h2 id="my-reviews-count" className="text-heading">
-          {t('count', { count: total })}
-        </h2>
-        <p className="text-body-sm text-text-secondary lg:hidden">
-          {t('description')}
-        </p>
-      </div>
+      <SectionHeader
+        id="my-reviews-count"
+        title={t('count', { count: total })}
+        description={t('description')}
+        className="lg:[&_p]:hidden"
+      />
       <ul className="flex flex-col gap-3 lg:gap-4">
         {items.map((review) => (
           <li key={review.id}>

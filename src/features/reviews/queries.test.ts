@@ -114,3 +114,26 @@ describe('reviewQueries.hospital', () => {
     );
   });
 });
+
+describe('reviewQueries.mine', () => {
+  it('5xx는 한 번만 다시 보내고 실패를 알린다', async () => {
+    let calls = 0;
+    server.use(
+      http.get(`${BASE}/api/users/me/reviews`, () => {
+        calls += 1;
+        return HttpResponse.json(
+          { code: 'INTERNAL_ERROR', message: '오류', errors: [] },
+          { status: 500 },
+        );
+      }),
+    );
+
+    await expect(
+      new QueryClient().fetchInfiniteQuery({
+        ...reviewQueries.mine(),
+        retryDelay: 0,
+      }),
+    ).rejects.toMatchObject({ status: 500 });
+    expect(calls).toBe(2);
+  });
+});

@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import type { HomeCategoryId } from '@/features/npay/catalog';
 import { npayQueries } from '@/features/npay/queries';
 import {
@@ -20,7 +21,6 @@ import { CategoryItems } from './category-items';
 import { CategoryRoot } from './category-root';
 import { ResultsError } from './results-error';
 import { SearchSuggestions } from './search-suggestions';
-import { StatusPanel } from './status-panel';
 
 /**
  * S-02 C 분류 모드. 백엔드 분류 목록으로 경로·하위 분류를 만들고 고른 분류의 항목을 보여 준다.
@@ -60,12 +60,12 @@ export function CategoryView({
   if (view === null) {
     return (
       <PageContainer className="pb-section lg:pt-10">
-        <StatusPanel
-          titleAs="h1"
+        <h1 className="sr-only">{t('topBar.category')}</h1>
+        <EmptyState
           icon={<FolderSearch />}
           title={t('category.notFound')}
           description={t('category.notFoundDescription')}
-          actions={
+          action={
             <Button asChild size="md" variant="tint">
               <Link
                 href={{
