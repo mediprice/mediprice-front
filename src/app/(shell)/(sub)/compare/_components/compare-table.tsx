@@ -60,7 +60,7 @@ export function CompareTable<T extends string>({
 
   return (
     <div className="flex flex-col gap-2">
-      {hospitals.length >= 3 && (
+      {hospitals.length >= 2 && (
         <p className="text-caption text-text-tertiary lg:hidden">
           {t('scrollHint')}
         </p>
@@ -75,7 +75,7 @@ export function CompareTable<T extends string>({
       >
         <table
           style={{ '--cols': hospitals.length } as CSSProperties}
-          className="w-full min-w-[calc(5rem+var(--cols)*7.5rem)] table-fixed border-collapse text-left lg:min-w-0"
+          className="w-full min-w-[calc(5rem+var(--cols)*9.5rem)] table-fixed border-collapse text-left lg:min-w-0"
         >
           <caption id={captionId} className="sr-only">
             {itemName ? t('caption', { item: itemName }) : t('captionNoItem')}
@@ -173,9 +173,12 @@ export function CompareTable<T extends string>({
                         {format.dateTime(new Date(date), 'dateShort')}
                       </span>
                     ) : (
-                      <span className="text-text-tertiary">
-                        {t('startDateUnknown')}
-                      </span>
+                      <>
+                        <span aria-hidden="true" className="text-text-tertiary">
+                          {t('dateNone')}
+                        </span>
+                        <span className="sr-only">{t('startDateUnknown')}</span>
+                      </>
                     );
                   }}
                 </InfoRow>

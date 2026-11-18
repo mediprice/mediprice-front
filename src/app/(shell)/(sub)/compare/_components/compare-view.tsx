@@ -47,6 +47,7 @@ export function CompareView({
   const t = useTranslations('comparison');
   const tErrors = useTranslations('errors');
   const tActions = useTranslations('common.actions');
+  const tMeta = useTranslations('metadata');
   const router = useRouter();
   const regionId = useId();
   const regionRef = useRef<HTMLDivElement>(null);
@@ -60,24 +61,30 @@ export function CompareView({
     enabled: hasHospitals,
     placeholderData: keepPreviousData,
   });
+  const baseItemRow = item
+    ? base.data?.items.find((row) => row.npayCode === item)
+    : undefined;
+  /** 함께 공개한 항목(기본 응답)에 선택 항목이 있으면 한 번으로 끝내고, 없을 때만(일부 병원만 공개·100개 초과) 항목을 따로 묻는다. */
+  const needsItemQuery =
+    item != null && base.isSuccess && !base.isPlaceholderData && !baseItemRow;
   const selected = useQuery({
     ...comparisonQueries.table(ykihos, item ? [item] : []),
-    enabled: hasHospitals && item != null,
+    enabled: needsItemQuery,
     placeholderData: keepPreviousData,
   });
   const isItemMissing = hasCode(selected.error, 'NPAY_ITEM_NOT_FOUND');
   const activeItem = item && !isItemMissing ? item : null;
   const error = base.error ?? (isItemMissing ? null : selected.error);
-  const isPending =
-    base.isPending || (activeItem != null && selected.isPending);
+  const isPending = base.isPending || (needsItemQuery && selected.isPending);
 
   const hospitals = base.data
     ? orderHospitals(base.data.hospitals, ykihos)
     : [];
   const itemRow =
-    (activeItem &&
+    baseItemRow ??
+    ((activeItem &&
       selected.data?.items.find((row) => row.npayCode === activeItem)) ||
-    null;
+      null);
   const itemName = itemRow ? formatComparisonItemName(itemRow) : null;
 
   const datesQueries = useQueries({
@@ -88,14 +95,17 @@ export function CompareView({
         itemRow?.itemName ?? '',
       ),
       enabled: itemRow != null,
+      /** 보조 정보라 실패하면 다시 기다리게 하지 않고 바로 "–"로 둔다. */
+      retry: false,
     })),
   });
+  /** undefined는 불러오는 중, null은 날짜 없음(실패·미공개 포함)이다. */
   const dates = datesQueries.map((query) =>
     query.data
       ? latestDate(query.data.map((row) => row.startDate))
-      : query.isError
-        ? null
-        : undefined,
+      : query.fetchStatus === 'fetching'
+        ? undefined
+        : null,
   );
 
   const otherItems =
@@ -104,6 +114,15 @@ export function CompareView({
     ? otherItems
     : otherItems.slice(0, INITIAL_COMMON_ITEMS);
   const addHref = activeItem ? (`/items/${activeItem}` as const) : '/search';
+
+  const documentTitle = itemName
+    ? t('page.documentTitle', { item: itemName })
+    : t('page.metaTitle');
+
+  /** 앞 화면(항목 가격)이 바꿔 둔 제목이 남지 않도록 항목 이름이 들어간 제목으로 맞춘다. */
+  useEffect(() => {
+    document.title = tMeta('titleTemplate').replace('%s', documentTitle);
+  }, [documentTitle, tMeta]);
 
   /** 공유받은 주소로 들어오면 비어 있는 비교함을 이 병원들로 채워, 병원을 더 담을 때 이어지게 한다. */
   useEffect(() => {
@@ -157,7 +176,7 @@ export function CompareView({
               isLoading={base.isFetching || selected.isFetching}
               onClick={() => {
                 if (base.isError) void base.refetch();
-                if (selected.isError) void selected.refetch();
+                else void selected.refetch();
               }}
             >
               {tActions('retry')}

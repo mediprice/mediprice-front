@@ -1,7 +1,8 @@
 {
   "toggle": {
     "add": "비교함 담기",
-    "added": "비교함 담음"
+    "added": "비교함 담음",
+    "full": "비교함은 최대 {max, number}곳이에요. 다른 병원을 빼면 담을 수 있어요."
   },
   "tray": {
     "label": "비교함",
@@ -25,6 +26,7 @@
   },
   "page": {
     "metaTitle": "병원 비교",
+    "documentTitle": "{item} 병원 비교",
     "topBarTitle": "병원 비교",
     "breadcrumbHome": "홈",
     "breadcrumbCurrent": "병원 비교",
@@ -49,6 +51,7 @@
     "lowest": "최저",
     "startDate": "적용일",
     "startDateUnknown": "적용일 미확인",
+    "dateNone": "–",
     "region": "지역",
     "address": "주소",
     "phone": "전화",

@@ -31,7 +31,11 @@ export function PriceRow({
   trailing?: ReactNode;
 }) {
   const t = useTranslations('comparison.table');
-  const lowest = findLowest(row.prices);
+  const lowest = findLowest(
+    row.prices.filter((price) =>
+      hospitals.some((hospital) => hospital.ykiho === price.ykiho),
+    ),
+  );
 
   return (
     <tr
@@ -55,7 +59,7 @@ export function PriceRow({
           <td
             key={hospital.ykiho}
             className={cn(
-              'p-3 align-top lg:px-6',
+              'px-2.5 py-3 align-top lg:px-6',
               isEmphasized ? 'lg:py-5' : 'lg:py-3.5',
             )}
           >
@@ -94,7 +98,7 @@ export function PriceRow({
   );
 }
 
-/** 좁은 열(모바일 120px)에서 "10,000~90,000원"이 넘치지 않게 금액 사이에서 줄바꿈을 허용한다. */
+/** 좁은 열(모바일 144px)에서 금액은 한 줄로 두고, 넘칠 때만 "~" 뒤에서 줄을 바꾼다. */
 function CellPrice({
   min,
   max,
@@ -107,6 +111,8 @@ function CellPrice({
   const t = useTranslations('common.price');
   const low = min ?? max;
   const high = max ?? min;
+  /** 줄을 바꿔야 하면 "5,000~" 다음에서 바꾼다. */
+  let isMaxNext = false;
   if (low == null || high == null) {
     return (
       <span className={cn('text-text-tertiary', className)}>{t('none')}</span>
@@ -119,12 +125,16 @@ function CellPrice({
         : t.rich('rangeParts', {
             min: low,
             max: high,
-            amount: (chunks) => (
-              <>
-                <span className="whitespace-nowrap">{chunks}</span>
-                <wbr />
-              </>
-            ),
+            amount: (chunks) => {
+              const isMax = isMaxNext;
+              isMaxNext = true;
+              return (
+                <>
+                  {isMax && <wbr />}
+                  <span className="whitespace-nowrap">{chunks}</span>
+                </>
+              );
+            },
           })}
     </span>
   );
