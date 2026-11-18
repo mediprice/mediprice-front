@@ -23,7 +23,7 @@ export function SelectedHospitalPanel({
   return (
     <section
       aria-labelledby="map-selected-title"
-      className="flex shrink-0 flex-col gap-2 border-t border-hairline bg-bg pt-2 px-page pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] lg:hidden"
+      className="flex shrink-0 flex-col gap-2 border-t border-hairline bg-bg pt-2 px-page pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] md:hidden"
     >
       <div className="flex items-center justify-between gap-2">
         <h2

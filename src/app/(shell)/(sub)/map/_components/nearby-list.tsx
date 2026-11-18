@@ -62,11 +62,11 @@ export function NearbyList({
     <section
       aria-labelledby="map-list-title"
       className={cn(
-        'bg-bg lg:w-115 lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-hairline',
+        'bg-surface md:w-88 md:shrink-0 md:overflow-y-auto md:border-r md:border-hairline lg:w-100 xl:w-115',
         className,
       )}
     >
-      <div className="flex flex-col gap-4 pt-5 px-page pb-section lg:px-6 lg:pb-8">
+      <div className="flex flex-col gap-4 pt-5 px-page pb-section md:px-4 md:pb-8 lg:px-6">
         <div className="flex flex-col gap-1">
           <h2
             id="map-list-title"
@@ -95,7 +95,7 @@ export function NearbyList({
             {[0, 1, 2].map((index) => (
               <li
                 key={index}
-                className="flex flex-col gap-2 rounded-xl bg-surface p-4"
+                className="flex flex-col gap-2 rounded-xl bg-bg p-4 shadow-card"
               >
                 <Skeleton className="h-6 w-40" />
                 <Skeleton className="h-4 w-56" />
@@ -107,7 +107,7 @@ export function NearbyList({
           <EmptyState
             icon={<CircleAlert />}
             title={tErrors(errorMessageKey(query.error))}
-            className="rounded-xl bg-surface"
+            className="rounded-xl bg-bg"
             action={
               <Button
                 variant="tint"
@@ -123,7 +123,7 @@ export function NearbyList({
             icon={<MapPinned />}
             title={item ? t('emptyItemTitle') : t('emptyTitle')}
             description={t('emptyDescription')}
-            className="rounded-xl bg-surface"
+            className="rounded-xl bg-bg"
             action={
               wider && (
                 <Button

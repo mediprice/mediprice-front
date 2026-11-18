@@ -10,7 +10,7 @@ import { LazyHospitalMap } from '@/features/map/components/lazy-hospital-map';
 import type { MapParams } from '@/features/map/map-params';
 import { cn } from '@/lib/utils';
 
-import { isDesktop, scrollListTo } from './list-scroll';
+import { isSideBySide, scrollListTo } from './list-scroll';
 import { LocationNoticeBanner } from './location-notice-banner';
 import { MapToolbar, type MobileView } from './map-toolbar';
 import { hospitalCardId, NearbyList } from './nearby-list';
@@ -38,13 +38,13 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
   /** 지도에서 고르면 데스크톱 목록 열에서 그 카드가 보이게 옮긴다. 모바일은 지도 아래 "선택한 병원"이 대신한다. */
   const handleMarkerSelect = useCallback((id: string) => {
     setSelectedId(id);
-    if (!isDesktop()) return;
+    if (!isSideBySide()) return;
     requestAnimationFrame(() => scrollListTo(hospitalCardId(id)));
   }, []);
 
   /** 데스크톱은 지도가 옆에 있어 켜고 끄는 토글이고, 모바일은 고른 뒤 지도 보기로 넘어간다. */
   function handleShowOnMap(id: string) {
-    if (isDesktop()) {
+    if (isSideBySide()) {
       setSelectedId((current) => (current === id ? null : id));
       return;
     }
@@ -67,7 +67,7 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
   return (
     <div
       className={cn(
-        'flex flex-col lg:h-[calc(100dvh-var(--spacing-top-nav))]',
+        'flex flex-col md:h-[calc(100dvh-var(--spacing-top-bar)-env(safe-area-inset-top,0px))] md:min-h-120 lg:h-[calc(100dvh-var(--spacing-top-nav))]',
         view === 'map' &&
           'h-[calc(100dvh-var(--spacing-top-bar)-env(safe-area-inset-top,0px))] min-h-120',
       )}
@@ -90,10 +90,10 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
           onDismiss={state.dismissNotice}
         />
       )}
-      <div className="flex min-h-0 flex-1 flex-col lg:flex-row-reverse">
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row-reverse">
         <div
           className={cn(
-            'relative min-h-0 flex-1 lg:block',
+            'relative min-h-0 flex-1 md:block',
             view === 'list' && 'hidden',
           )}
         >
@@ -126,7 +126,7 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
                   variant="tint"
                   size="md"
                   onClick={() => handleViewChange('list')}
-                  className="lg:hidden"
+                  className="md:hidden"
                 >
                   {t('view.showList')}
                 </Button>
@@ -156,7 +156,7 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
           selectedId={activeId}
           onShowOnMap={handleShowOnMap}
           onRadiusChange={state.changeRadius}
-          className={cn(view === 'map' && 'hidden lg:block')}
+          className={cn(view === 'map' && 'hidden md:block')}
         />
         {view === 'map' && selected && (
           <SelectedHospitalPanel

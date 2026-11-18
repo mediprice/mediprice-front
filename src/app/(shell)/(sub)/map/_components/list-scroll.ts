@@ -1,6 +1,8 @@
-export const isDesktop = () => window.matchMedia('(min-width: 64rem)').matches;
+/** md부터 목록과 지도가 나란히 보인다. */
+export const isSideBySide = () =>
+  window.matchMedia('(min-width: 48rem)').matches;
 
-/** 데스크톱 목록 열만 스크롤한다. scrollIntoView는 페이지까지 움직여 상단 도구 줄이 가려진다. */
+/** 옆 목록 열만 스크롤한다. scrollIntoView는 페이지까지 움직여 상단 도구 줄이 가려진다. */
 export function scrollListTo(cardId: string) {
   const card = document.getElementById(cardId);
   const list = card?.closest('section');

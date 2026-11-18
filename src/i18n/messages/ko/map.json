@@ -59,8 +59,6 @@
     "showOnMap": "지도에서 보기",
     "showOnMapLabel": "{name} 지도에서 보기",
     "noPosition": "지도 위치 정보 없음",
-    "detail": "병원 상세",
-    "detailLabel": "{name} 병원 상세",
     "selected": "지도에서 선택됨",
     "selectedHeading": "선택한 병원",
     "clearSelection": "선택 해제"

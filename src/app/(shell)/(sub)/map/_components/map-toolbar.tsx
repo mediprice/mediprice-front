@@ -37,7 +37,7 @@ export function MapToolbar({
 
   return (
     <div className="border-b border-hairline bg-bg">
-      <div className="flex flex-col gap-3 py-3 px-page lg:flex-row lg:flex-wrap lg:items-center lg:gap-4 lg:py-4">
+      <div className="flex flex-col gap-3 py-3 px-page md:flex-row md:flex-wrap md:items-center md:gap-4 lg:py-4">
         <div className="flex min-w-0 items-center gap-3">
           {item && (
             <Link
@@ -67,13 +67,13 @@ export function MapToolbar({
               { value: 'list', label: t('view.list') },
               { value: 'map', label: t('view.map') },
             ]}
-            className="w-32 shrink-0 flex-nowrap lg:hidden"
+            className="w-32 shrink-0 flex-nowrap md:hidden"
           />
         </div>
         <div
           role="group"
           aria-label={t('radius.label')}
-          className="-mx-page flex gap-2 overflow-x-auto py-1 px-page lg:mx-0 lg:px-0"
+          className="-mx-page flex gap-2 overflow-x-auto py-1 px-page md:mx-0 md:px-0"
         >
           {RADIUS_OPTIONS.map((option) => (
             <Chip
