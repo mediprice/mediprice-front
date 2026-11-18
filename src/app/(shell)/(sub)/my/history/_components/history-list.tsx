@@ -8,8 +8,8 @@ import { useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
-import { ConfirmDialog } from '@/features/history/components/confirm-dialog';
 import {
   countHistoryByFilter,
   filterHistory,

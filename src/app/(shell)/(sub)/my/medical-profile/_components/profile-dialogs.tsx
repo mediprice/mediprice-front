@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { ConfirmDialog } from '@/features/history/components/confirm-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 import type { useLeaveGuard } from './use-leave-guard';
 

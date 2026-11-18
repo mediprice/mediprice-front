@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { ConfirmDialog } from '@/features/history/components/confirm-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { LazyHospitalMap } from '@/features/map/components/lazy-hospital-map';
 import type { MapParams } from '@/features/map/map-params';
 import { cn } from '@/lib/utils';
