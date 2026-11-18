@@ -10,7 +10,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { GoogleLoginButton } from '@/features/auth/components/google-login-button';
 import { MyMenuList } from '@/features/auth/components/my-menu-list';
 import { MyPageHeader } from '@/features/auth/components/my-page-header';
-import { MySideNav } from '@/features/auth/components/my-side-nav';
 import { UserAvatar } from '@/features/auth/components/user-avatar';
 import { displayName, useSession } from '@/features/auth/use-session';
 
@@ -62,7 +61,7 @@ export function MyHome() {
               icon={<UserRound />}
               title={t('signedOutTitle')}
               description={t('signedOutDescription')}
-              action={<GoogleLoginButton size="md" label={t('login')} />}
+              action={<GoogleLoginButton size="md" />}
               className="rounded-xl bg-surface"
             />
           )}
@@ -83,8 +82,8 @@ export function MyHome() {
           </div>
         </div>
       </MyPageHeader>
-      <PageContainer className="pb-section lg:grid lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8">
-        <MySideNav />
+      {/** 내 정보 홈은 메뉴 카드가 곧 탐색이라 옆 메뉴를 두지 않는다(하위 화면만 옆 메뉴를 쓴다). */}
+      <PageContainer className="pb-section">
         <MyMenuList />
       </PageContainer>
     </>

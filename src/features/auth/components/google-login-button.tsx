@@ -12,14 +12,11 @@ import { GoogleMark } from './google-mark';
 export function GoogleLoginButton({
   returnTo = null,
   label,
-  hasMark = true,
   className,
   ...props
 }: Omit<ComponentProps<typeof Button>, 'onClick' | 'children'> & {
   returnTo?: string | null;
   label?: string;
-  /** 색 면(primary) 위에서는 Google 로고를 빼서 브랜드 가이드를 지킨다. */
-  hasMark?: boolean;
 }) {
   const t = useTranslations('auth.loginDialog');
   const [isLeaving, setIsLeaving] = useState(false);
@@ -34,7 +31,7 @@ export function GoogleLoginButton({
       }}
       {...props}
     >
-      {hasMark && <GoogleMark />}
+      <GoogleMark />
       {label ?? t('google')}
     </Button>
   );

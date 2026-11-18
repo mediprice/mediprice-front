@@ -1,6 +1,6 @@
 'use client';
 
-import { Bookmark, Clock, PenLine } from 'lucide-react';
+import { Clock, Heart, PenLine } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import {
@@ -11,13 +11,13 @@ import {
 import { closeLoginDialog, useLoginDialogState } from '../login-dialog-store';
 import { GoogleLoginButton } from './google-login-button';
 
-/** 셸에 하나만 렌더하고 openLoginDialog()로 연다. */
+/** 셸에 하나만 렌더하고 openLoginDialog()로 연다. 헤더에서 직접 열면(general) 제목이 "로그인", 막힌 행동에서 열면 "로그인이 필요해요"다. */
 export function LoginDialog() {
   const t = useTranslations('auth.loginDialog');
   const { isOpen, reason, returnTo, opener } = useLoginDialogState();
   const icon = { 'aria-hidden': true, strokeWidth: 1.75 } as const;
   const benefits = [
-    { key: 'favorite', icon: <Bookmark {...icon} /> },
+    { key: 'favorite', icon: <Heart {...icon} /> },
     { key: 'history', icon: <Clock {...icon} /> },
     { key: 'review', icon: <PenLine {...icon} /> },
   ] as const;
@@ -30,7 +30,7 @@ export function LoginDialog() {
       }}
     >
       <ResponsiveDialogContent
-        title={t('title')}
+        title={reason === 'general' ? t('titleGeneral') : t('title')}
         className="lg:max-w-md"
         onCloseAutoFocus={(event) => {
           if (!opener?.isConnected) return;
