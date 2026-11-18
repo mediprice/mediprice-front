@@ -8,6 +8,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { useId, useState } from 'react';
 
 import { PriceRange } from '@/components/ui/price-range';
+import { RangeBar } from '@/components/ui/range-bar';
 import { CompareToggle } from '@/features/comparison/components/compare-toggle';
 import { FavoriteButton } from '@/features/favorites/components/favorite-button';
 import { HospitalIdentity } from '@/features/hospitals/components/hospital-identity';
@@ -16,17 +17,22 @@ import { cn } from '@/lib/utils';
 
 import type { HospitalPriceGroup } from '../group-prices';
 import type { HospitalPrice } from '../price-stream';
+import type { PriceSummary } from '../price-summary';
 
 /**
- * 항목별 가격 목록의 병원 한 곳. 병원이 같은 항목을 이름별로 따로 신고하므로 최저~최고가를 보여 주고,
- * 세부 이름·가격은 펼쳐서 본다. 카드 전체는 병원 이름 링크가 덮고, 펼치기·관심·비교함 버튼만 그 위(relative z-10)에 올린다.
+ * 항목별 가격 목록의 병원 한 행. 병원이 같은 항목을 이름별로 따로 신고하므로 최저~최고가를 오른쪽에 크게 쓰고,
+ * 세부 이름·가격은 펼쳐서 본다. 행 전체는 병원 이름 링크가 덮고, 펼치기·관심·비교함 버튼만 그 위(relative z-10)에 올린다.
+ * 목록이 행 사이 구분선(divide-y divide-hairline)을 준다.
  */
 export function HospitalPriceGroupCard<T extends string>({
   group,
   href,
+  summary,
 }: {
   group: HospitalPriceGroup;
   href: Route<T>;
+  /** 같은 조건의 항목 요약. 있으면 이 병원 최저가가 범위 어디쯤인지 작은 막대로 보여 준다. */
+  summary?: Pick<PriceSummary, 'minPrice' | 'maxPrice' | 'avgPrice'>;
 }) {
   const t = useTranslations('items.card');
   /** 항목 가격 화면(/items/[code])에서만 쓰여 경로의 항목 코드를 비교함에 함께 담는다. */
@@ -42,26 +48,38 @@ export function HospitalPriceGroupCard<T extends string>({
   const extraCount = group.variants.length - 1;
 
   return (
-    <article className="relative flex flex-col gap-3 rounded-xl pressable bg-bg px-4 pt-4 pb-3.5 shadow-card md:px-6 md:py-5">
-      <div className="flex flex-col gap-2.5 md:flex-row md:items-start md:justify-between md:gap-6">
+    <article className="relative flex flex-col gap-3 px-4 pt-5 pb-4 transition-colors duration-200 ease-standard hover:bg-surface active:bg-surface md:px-6 md:pt-6 md:pb-5">
+      <div className="flex items-start justify-between gap-4 md:gap-6">
         <HospitalIdentity
           as="h3"
-          className="min-w-0 md:flex-1"
+          className="min-w-0 flex-1"
           meta={meta}
           name={
             <Link
               href={href}
-              className="rounded-sm after:absolute after:inset-0 after:rounded-xl hover:text-primary-text"
+              className="rounded-sm after:absolute after:inset-0 hover:text-primary-text"
             >
               {group.hospitalName}
             </Link>
           }
         />
-        <PriceRange
-          min={group.minPrice}
-          max={group.maxPrice}
-          className="text-price-lg md:text-right"
-        />
+        <div className="flex max-w-1/2 shrink-0 flex-col items-end gap-2 text-right">
+          <PriceRange
+            min={group.minPrice}
+            max={group.maxPrice}
+            className="text-price-lg"
+          />
+          {summary && (
+            <RangeBar
+              size="sm"
+              min={summary.minPrice}
+              max={summary.maxPrice}
+              average={summary.avgPrice}
+              value={group.minPrice}
+              className="w-24 md:w-36"
+            />
+          )}
+        </div>
       </div>
 
       {firstVariant && (

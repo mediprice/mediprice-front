@@ -80,21 +80,24 @@ export function PriceResults({
       </div>
 
       {query.isPending ? (
-        <ul aria-busy="true" className="flex flex-col gap-3">
+        <ul
+          aria-busy="true"
+          className="flex flex-col divide-y divide-hairline overflow-hidden rounded-2xl bg-bg"
+        >
           {Array.from({ length: 4 }, (_, index) => (
             <li
               key={index}
-              className="flex flex-col gap-3 rounded-xl bg-bg p-4 shadow-card lg:p-6"
+              className="flex items-start justify-between gap-4 px-4 pt-5 pb-4 md:px-6 md:pt-6 md:pb-5"
             >
-              <span className="flex items-center gap-3">
-                <Skeleton className="size-11 rounded-lg" />
-                <span className="flex flex-1 flex-col gap-1.5">
-                  <Skeleton className="h-5 w-40" />
-                  <Skeleton className="h-4 w-28" />
-                </span>
+              <span className="flex flex-1 flex-col gap-1.5">
+                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-5 w-28" />
+                <Skeleton className="mt-2 h-6 w-48 max-w-full" />
               </span>
-              <Skeleton className="h-7 w-32" />
-              <Skeleton className="h-4 w-48" />
+              <span className="flex flex-col items-end gap-2">
+                <Skeleton className="h-8 w-28" />
+                <Skeleton className="h-3 w-24 md:w-36" />
+              </span>
             </li>
           ))}
         </ul>
@@ -102,7 +105,7 @@ export function PriceResults({
         <EmptyState
           icon={<CircleAlert />}
           title={tErrors(errorMessageKey(query.error))}
-          className="rounded-xl bg-bg shadow-card"
+          className="rounded-2xl bg-bg"
           action={
             <Button
               variant="tint"
@@ -117,12 +120,13 @@ export function PriceResults({
         <ZeroResults code={code} filters={filters} />
       ) : (
         <>
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col divide-y divide-hairline overflow-hidden rounded-2xl bg-bg">
             {groups.map((group) => (
               <li key={group.ykiho}>
                 <HospitalPriceGroupCard
                   group={group}
                   href={`/hospitals/${encodeURIComponent(group.ykiho)}?${hospitalQuery}`}
+                  summary={summary.data}
                 />
               </li>
             ))}

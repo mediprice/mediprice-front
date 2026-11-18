@@ -23,9 +23,10 @@ export function PopularItemPrice({ code }: { code: string }) {
         {t('priceLabel', { region: tRegion(DEFAULT_REGION) })}
       </p>
       {isPending ? (
-        <span className="space-y-1.5">
-          <Skeleton className="h-7 w-40" />
-          <Skeleton className="h-4 w-52" />
+        <span className="flex flex-col gap-1.5">
+          <Skeleton className="h-8 w-44 lg:h-9" />
+          <Skeleton className="h-4 w-full max-w-60" />
+          <Skeleton className="h-4.75 w-52 max-w-full lg:h-5" />
         </span>
       ) : isError ? (
         <p className="text-body-sm text-text-tertiary">{t('error')}</p>
