@@ -1,6 +1,6 @@
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query';
 
-import { apiClient } from '@/lib/api/client';
+import { type ApiClient, apiClient } from '@/lib/api/client';
 import type { paths } from '@/lib/api/schema';
 import { unwrap } from '@/lib/api/unwrap';
 
@@ -65,12 +65,12 @@ export const npayQueries = {
         unwrap(apiClient.GET('/api/npay-items', { params: { query: params } })),
     }),
 
-  detail: (code: string) =>
+  detail: (code: string, client: ApiClient = apiClient) =>
     queryOptions({
       queryKey: npayKeys.detail(code),
       queryFn: () =>
         unwrap(
-          apiClient.GET('/api/npay-items/{npayCode}', {
+          client.GET('/api/npay-items/{npayCode}', {
             params: { path: { npayCode: code } },
           }),
         ),
@@ -78,7 +78,11 @@ export const npayQueries = {
     }),
 
   /** 서울·경기처럼 여러 시도의 요약을 각각 받아 합친다. 빈 배열이면 전국 요약 하나다. */
-  summaryIn: (code: string, sidoCodes: readonly string[]) =>
+  summaryIn: (
+    code: string,
+    sidoCodes: readonly string[],
+    client: ApiClient = apiClient,
+  ) =>
     queryOptions({
       queryKey: npayKeys.summaryIn(code, sidoCodes),
       queryFn: async () => {
@@ -88,7 +92,7 @@ export const npayQueries = {
         const summaries = await Promise.all(
           conditions.map((condition) =>
             unwrap(
-              apiClient.GET('/api/npay-items/{npayCode}/price-summary', {
+              client.GET('/api/npay-items/{npayCode}/price-summary', {
                 params: { path: { npayCode: code }, query: { condition } },
               }),
             ),
@@ -99,7 +103,11 @@ export const npayQueries = {
     }),
 
   /** 시도별 조건에 시군구·종별이 더해진 경우. 조건마다 요약을 받아 합친다. */
-  summaryOf: (code: string, conditions: readonly NpayPriceCondition[]) =>
+  summaryOf: (
+    code: string,
+    conditions: readonly NpayPriceCondition[],
+    client: ApiClient = apiClient,
+  ) =>
     queryOptions({
       queryKey: npayKeys.summaryOf(code, conditions),
       queryFn: async () =>
@@ -108,7 +116,7 @@ export const npayQueries = {
           await Promise.all(
             conditions.map((condition) =>
               unwrap(
-                apiClient.GET('/api/npay-items/{npayCode}/price-summary', {
+                client.GET('/api/npay-items/{npayCode}/price-summary', {
                   params: { path: { npayCode: code }, query: { condition } },
                 }),
               ),
@@ -140,7 +148,11 @@ export const npayQueries = {
     }),
 
   /** 항목별 가격 목록의 "더 보기". 조건별 목록을 가격순으로 합치고, 한 번에 새 병원이 10곳 이상 나오게 읽는다. */
-  priceList: (code: string, { conditions, sort }: NpayPriceListParams) =>
+  priceList: (
+    code: string,
+    { conditions, sort }: NpayPriceListParams,
+    client: ApiClient = apiClient,
+  ) =>
     infiniteQueryOptions({
       queryKey: npayKeys.priceList(code, { conditions, sort }),
       queryFn: ({ pageParam }) =>
@@ -151,7 +163,7 @@ export const npayQueries = {
           maxRows: MAX_ROWS_PER_PAGE,
           fetchPage: (condition, page) =>
             unwrap(
-              apiClient.GET('/api/npay-items/{npayCode}/prices', {
+              client.GET('/api/npay-items/{npayCode}/prices', {
                 params: {
                   path: { npayCode: code },
                   query: {

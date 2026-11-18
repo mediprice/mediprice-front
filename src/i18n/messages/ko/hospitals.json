@@ -1,11 +1,16 @@
 {
   "detail": {
     "metaTitle": "병원 상세",
+    "metadata": {
+      "title": "{name} 비급여 진료비",
+      "titleWithLocation": "{name}({location}) 비급여 진료비",
+      "description": "{name}의 비급여 진료비 공개 가격과 진료 시간, 위치를 확인해요. 건강보험심사평가원 공개 자료 기준이에요.",
+      "descriptionWithLocation": "{location}에 있는 {name}의 비급여 진료비 공개 가격과 진료 시간, 위치를 확인해요. 건강보험심사평가원 공개 자료 기준이에요."
+    },
     "topBarTitle": "병원 상세",
     "notFound": {
       "description": "주소가 바뀌었거나 더 이상 공개되지 않는 병원일 수 있어요.",
-      "home": "홈으로 가기",
-      "title": "병원을 찾을 수 없어요"
+      "home": "홈으로 가기"
     },
     "header": {
       "contactLabel": "병원 연락처",

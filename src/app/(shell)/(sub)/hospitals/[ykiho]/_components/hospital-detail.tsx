@@ -4,17 +4,19 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { Building2, CircleAlert } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { useRecordView } from '@/features/history/use-record-view';
 import type { VariantSelection } from '@/features/hospitals/detail-links';
 import {
   pickVariantRow,
   priceRowName,
 } from '@/features/hospitals/price-groups';
 import { hospitalQueries } from '@/features/hospitals/queries';
+import { npayQueries } from '@/features/npay/queries';
 import {
   DEFAULT_REGION,
   parseServiceRegion,
@@ -73,11 +75,13 @@ export function HospitalDetail({
   const t = useTranslations('hospitals.detail');
   const tErrors = useTranslations('errors');
   const tActions = useTranslations('common.actions');
-  const tMeta = useTranslations('metadata');
   const [item, setItem] = useState(initialItem);
   const [variant, setVariant] = useState(initialVariant);
   const [expectedRows, setExpectedRows] = useState(DEFAULT_EXPECTED_ROWS);
   const detail = useQuery(hospitalQueries.detail(ykiho));
+  useRecordView(hospitalQueries.detail(ykiho));
+  /** 선택 항목의 상세도 서버가 채우므로, 로그인했으면 항목도 최근 본 기록에 남긴다(서버 렌더 전과 같은 동작). */
+  useRecordView(npayQueries.detail(item ?? ''), item != null);
   /** 카드가 채워지는 동안 가격 목록이 아직 그려지지 않아도 첫 페이지를 함께 받아 둔다(PriceList의 첫 조건과 같은 키). */
   useInfiniteQuery(hospitalQueries.priceList(ykiho, {}));
   const prices = useItemPrices(ykiho, item);
@@ -105,17 +109,6 @@ export function HospitalDetail({
     failure.error instanceof ApiError &&
     (failure.error.code === 'HOSPITAL_NOT_FOUND' ||
       failure.error.status === 404);
-  const pageTitle = detail.data
-    ? detail.data.name
-    : isNotFound
-      ? t('notFound.title')
-      : null;
-
-  useEffect(() => {
-    if (pageTitle)
-      document.title = tMeta('titleTemplate').replace('%s', pageTitle);
-  }, [pageTitle, tMeta]);
-
   function handleSelectItem(
     code: string | null,
     nextVariant: VariantSelection | null = null,

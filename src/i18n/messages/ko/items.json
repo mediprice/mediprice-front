@@ -1,9 +1,10 @@
 {
   "metadata": {
-    "title": "항목별 가격",
-    "description": "병원마다 다른 비급여 진료비를 건강보험심사평가원 공개 가격으로 비교해요.",
-    "documentTitle": "{name} 병원별 가격 | MediPrice",
-    "notFoundTitle": "찾을 수 없는 항목 | MediPrice"
+    "title": "{name} 병원별 가격",
+    "descriptionWithAverage": "{name} 비급여 진료비를 병원별로 비교해요. {region} 평균 {average, number}원, 병원 {hospitals, number}곳의 건강보험심사평가원 공개 가격이에요.",
+    "descriptionWithoutAverage": "{name} 비급여 진료비를 건강보험심사평가원 공개 가격으로 병원별로 비교해요.",
+    "fallbackTitle": "항목별 가격",
+    "fallbackDescription": "병원마다 다른 비급여 진료비를 건강보험심사평가원 공개 가격으로 비교해요."
   },
   "topBar": {
     "title": "항목별 가격"
