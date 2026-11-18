@@ -286,7 +286,16 @@ export function Chip({
 }
 ```
 
-- 변형 이름은 Figma 변형 이름의 camelCase다(`primary | tint | neutral | dangerText | ghost | onTint`).
+- 변형 이름은 Figma 변형 이름의 camelCase다. Figma에 없는 것은 QA에서 필요해서 더한 것이다.
+
+| 컴포넌트 | 변형                                                                                             | 크기                                                                  | 기타                                                                                      |
+| -------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `Button` | `primary` `tint` `neutral` `outline` `danger`(삭제 확인) `dangerText` `ghost` `onTint`(색 면 위) | `lg` 52px(페이지 CTA) `md` 44px `sm` 36px(누르는 영역 44) `icon` 44px | `elevated`: 화면의 대표 행동 하나에만 그림자. `isLoading`: 너비·색·포커스 유지, 클릭 차단 |
+
+- 비활성 스타일은 `inactive:` 변형으로 쓴다. `disabled` 속성과 `aria-disabled="true"`(asChild 링크)를 함께 잡고, 로딩 중(`data-loading`)은 뺀다.
+- 버튼 문구는 줄바꿈된다(`text-balance`). 한 줄로 자르지 않는다. 버튼은 기본으로 줄어들지 않고(`shrink-0`, 카드의 "비교함 담기"가 찌그러지지 않게) 부모 폭을 넘지 않는다(`max-w-full`). 같은 줄의 긴 글은 `min-w-0 flex-1`로 줄어들게 하고, 버튼을 줄여야 하는 곳만 `className="shrink"`를 준다.
+- 상태가 바뀔 때 포커스를 잃지 않게 한다. 로딩처럼 잠깐 막을 때는 `disabled` 대신 `aria-disabled`와 클릭 차단을 쓴다(`disabled`가 되면 브라우저가 포커스를 뺀다).
+- 숨기는 문구는 `invisible`(`visibility: hidden`)이 아니라 `opacity-0`이나 `sr-only`를 쓴다. `invisible`은 접근성 이름까지 지운다.
 - props 타입은 `ComponentProps<'요소'> & VariantProps<typeof xVariants>`이고, `className`은 `cn(xVariants(...), className)`로 항상 마지막에 합친다.
 - 링크처럼 다른 요소로 렌더해야 하면 `asChild`(radix `Slot`)를 쓴다: `<Button asChild><Link href="/">…</Link></Button>`.
 - React 19라서 `forwardRef`를 쓰지 않는다. `ref`는 일반 prop으로 넘어간다.
@@ -303,7 +312,11 @@ export function Chip({
 
 ### 6.8 아이콘과 접근성
 
-- 아이콘은 `lucide-react`를 쓴다. 굵기: 24px는 `strokeWidth={2}`, 16–20px는 `1.75`, 12px 이하는 `1.5`.
+- 아이콘은 `lucide-react`를 쓴다. 굵기: 24px(내비게이션)는 `strokeWidth={2}`, 16–20px(버튼 안 등)는 `1.75`, 12px 이하는 `1.5`.
+- 활성 상태는 색만으로 표시하지 않는다(MUST). 굵기·채운 아이콘·밑줄 중 하나를 함께 쓴다. 아이콘을 채울 때 안쪽 모양(집의 문)이 메워지면 path 순서를 바꾼 아이콘을 `createLucideIcon`으로 만든다(`app/(shell)/_components/house-icon.tsx`).
+- 파란 면(`bg-primary`) 위의 포커스 가능한 요소는 부모에 `focus-inverse`를 붙여 흰 포커스 링을 쓴다.
+- 셸 아래 화면은 본문을 `<main id="main">`으로 감싼다. 첫 Tab은 `SkipLink`("본문 바로가기")다.
+- 화면마다 `generateMetadata`로 제목을 준다(`"%s | MediPrice"`).
 - 장식용 아이콘에는 `aria-hidden="true"`를 붙인다. 아이콘만 있는 버튼은 `aria-label={t(...)}`가 필수다(MUST).
 - 누를 수 있는 요소는 44×44px 이상이다. 보이는 크기가 더 작으면 `touch-target` 유틸리티로 누르는 영역만 넓힌다.
 - DOM 테스트(jsdom, Testing Library)는 첫 상호작용 로직(필터 시트의 임시 선택과 적용 등)이 생길 때 도입한다. 그 전까지 로직은 순수 함수로 빼서 테스트한다.
@@ -372,20 +385,25 @@ export const hospitalQueries = {
 
 ### 8.2 디자인 토큰 (MUST)
 
-토큰은 `src/app/globals.css`의 `@theme`에 있고, 이름과 값은 Figma(MediPrice) 변수·텍스트 스타일·이펙트 스타일과 같다. 우리 코드는 이 이름만 쓴다.
+토큰은 `src/app/globals.css`에 있다. Figma(MediPrice) 변수·텍스트 스타일·이펙트 스타일에서 시작했고, 대비와 가독성 QA에서 바꾼 값은 파일에 이유를 적어 두었다. Figma는 하나의 안이므로 QA 결과가 우선한다. 우리 코드는 이 이름만 쓴다.
 
-| 종류     | 클래스 예                                                                                                                                                                                |
-| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 색       | `bg-primary` `hover:bg-primary-hover` `active:bg-primary-pressed` `text-primary-text` `bg-primary-tint` `bg-hero` `bg-surface` `bg-surface-strong` `border-hairline`                     |
-| 글자색   | `text-text-primary` `text-text-secondary` `text-text-tertiary` `text-text-disabled` `text-on-primary`                                                                                    |
-| 상태     | `text-positive` `bg-positive-tint` `text-warning` `bg-warning-tint` `text-danger` `bg-danger-tint` `bg-overlay`                                                                          |
-| 선       | `border-border` `border-border-strong` `outline-focus-ring`                                                                                                                              |
-| 타이포   | `text-hero` `text-display` `text-title` `text-heading` `text-subheading` `text-body-lg` `text-body` `text-label(-bold)` `text-caption(-strong/-bold)` `text-price-md/lg/xl` `text-field` |
-| 모서리   | 카드·다이얼로그 `rounded-xl`, 버튼·입력·배너 `rounded-lg`, 타일·세그먼트·태그 `rounded-md`, 칩 `rounded-full`, 시트 상단 `rounded-t-3xl`                                                 |
-| 그림자   | `shadow-card` `shadow-cta-glow` `shadow-float` `shadow-sheet` `shadow-bar`                                                                                                               |
-| 레이아웃 | `max-w-page` `h-top-nav` `h-top-bar` `h-tab-bar` `pb-tab-bar` `pb-safe` `pt-safe` `touch-target`                                                                                         |
+| 종류     | 클래스 예                                                                                                                                                                                                           |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 색       | `bg-primary` `hover:bg-primary-hover` `active:bg-primary-pressed` `text-primary-text` `bg-primary-tint`(`-hover`, `-pressed`) `bg-hero` `bg-surface` `bg-surface-strong` `border-hairline`                          |
+| 글자색   | `text-text-primary` `text-text-secondary` `text-text-tertiary` `text-text-disabled` `text-on-primary`                                                                                                               |
+| 상태     | `text-positive` `bg-positive-tint` `text-warning` `bg-warning-tint` `text-danger` `bg-danger`(`-hover`, `-pressed`) `bg-danger-tint` `bg-overlay`                                                                   |
+| 선       | `border-border` `border-border-strong` `outline-focus-ring`, 파란 면 위는 `focus-inverse`                                                                                                                           |
+| 타이포   | `text-hero` `text-display` `text-title` `text-heading` `text-subheading` `text-body-lg` `text-body`(16px) `text-body-sm`(15px) `text-label(-bold)` `text-caption(-strong/-bold)` `text-price-md/lg/xl` `text-field` |
+| 모서리   | 카드·다이얼로그 `rounded-xl`, 버튼·입력·배너 `rounded-lg`, 타일·세그먼트·태그 `rounded-md`, 칩 `rounded-full`, 시트 상단 `rounded-t-3xl`                                                                            |
+| 그림자   | `shadow-card` `shadow-cta-glow` `shadow-float` `shadow-sheet` `shadow-bar`. 쓰임은 카드·떠 있는 것(다이얼로그)·시트·하단 바·대표 CTA로만 나눈다                                                                     |
+| 레이아웃 | `max-w-page` `px-page`(16·24·32px + 노치) `py-section`(40 → lg 64px) `h-top-nav` `h-top-bar` `h-tab-bar` `pb-tab-bar` `pb-safe` `pt-safe` `px-safe` `touch-target`                                                  |
+| 겹침     | `z-(--z-header)` `z-(--z-tab-bar)` `z-(--z-bottom-cta)` `z-(--z-overlay)` `z-(--z-toast)` `z-(--z-skip-link)`. 숫자 `z-40`을 직접 쓰지 않는다                                                                       |
+| 움직임   | `ease-standard`, 150–200ms. `prefers-reduced-motion`이면 전역에서 멈춘다(상태를 알리는 스피너만 `data-allow-motion`)                                                                                                |
 
+- 타이포는 모바일 우선이다. `hero` `display` `title` `price-lg` `price-xl`은 모바일 값(28·28·24·22·26px)이고 `lg`부터 데스크톱 값(34·32·26·24·30px)으로 자동으로 바뀐다. 화면에서 `lg:text-*`를 따로 붙이지 않는다.
 - 타이포 토큰 하나에 크기·행간·자간·굵기가 함께 들어 있다. `font-bold` 같은 굵기 클래스를 따로 붙이지 않는다(활성 상태처럼 굵기만 바꿀 때는 예외).
+- 본문은 16px(`text-body`)이 기본이다. 13px(`text-caption`)은 출처·날짜 같은 메타 정보에만 쓰고, 가격 조건("1회 기준")처럼 판단에 필요한 정보에는 쓰지 않는다.
+- 대비: 글자는 배경과 4.5:1 이상(큰 글자 3:1). `text-tertiary`까지는 흰색·surface·surface-strong 위에서 통과한다. 입력창처럼 테두리만으로 구분되는 컨트롤은 `border-border`(1.3:1)가 아니라 `border-border-strong`(3.3:1)을 쓴다.
 - Tailwind 기본 팔레트(`blue-600`, `slate-50`), `white`·`black`, 기본 글자 크기(`text-sm`~`text-9xl`), shadcn 별칭(`bg-background`, `text-muted-foreground`)은 쓰지 않는다(lint). 기본 팔레트는 CSS도 만들어지지 않는다.
 - 간격은 Tailwind 기본 4px 단위를 그대로 쓴다(`gap-3` = 12px, `w-70` = 280px).
 - arbitrary value(`[...]`)는 토큰으로 표현할 수 없을 때만 쓴다(safe-area 계산, grid template).
@@ -512,7 +530,7 @@ const t = await getTranslations('metadata');
 | `BottomTabBar`  | `lg` 미만 | 64px 하단 탭바 + safe-area. `(tabs)`에서만 쓰고 본문에 `pb-tab-bar lg:pb-0`을 준다                           |
 | `PageContainer` | 모두      | 모바일 좌우 16px, 데스크톱 1200px 본문 폭                                                                    |
 
-내비게이션 항목은 `app/(shell)/_components/use-nav-items.tsx` 하나에서 정의하고 데스크톱과 모바일이 같이 쓴다.
+내비게이션 항목은 `app/(shell)/_components/use-nav-items.tsx` 하나에서 정의하고 데스크톱과 모바일이 같은 이름(홈·AI 찾기·관심·내 정보)을 쓴다. 화면 폭에 따라 메뉴 이름을 바꾸지 않는다.
 
 ### 13.3 모달과 바텀시트
 
@@ -525,7 +543,8 @@ const t = await getTranslations('metadata');
 
 - 누를 수 있는 요소는 44×44px 이상이다(6.8). 모바일 누름 피드백은 `active:`로 준다(`hover:`는 마우스가 있는 기기에만 적용된다).
 - 화면 높이는 `min-h-dvh`를 쓰고 `h-screen`을 쓰지 않는다(모바일 주소창 때문에 넘친다).
-- 고정 바 아래로 스크롤 이동할 때는 `scroll-mt-top-bar lg:scroll-mt-top-nav`로 가려지지 않게 한다.
+- 포커스·앵커 이동이 고정된 상단 바와 하단 탭바에 가려지지 않게 `globals.css`가 `scroll-padding`을 준다. 화면마다 `scroll-mt-*`를 붙이지 않는다.
+- 하단 탭바 위에 붙는 바(비교함 등)는 `z-(--z-bottom-cta)`로 탭바 위에 쌓는다.
 - 입력창 글자는 `text-field`(16px)를 쓴다. 16px보다 작으면 iOS Safari가 포커스할 때 화면을 확대한다.
 - `viewport`는 `app/layout.tsx`에 있다(`viewportFit: 'cover'`로 safe-area 사용). 확대를 막는 설정(`maximumScale`, `userScalable`)은 넣지 않는다.
 - 음성 입력·현재 위치·카메라는 `next.config.ts`의 `Permissions-Policy`에서 같은 출처(`self`)에만 허용돼 있다. 다른 출처의 iframe에서는 쓰지 않는다.
