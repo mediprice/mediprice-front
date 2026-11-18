@@ -22,5 +22,9 @@
   "server": "일시적인 오류가 생겼어요. 잠시 후 다시 시도해 주세요.",
   "serverUnavailable": "서버에 연결할 수 없어요. 잠시 후 다시 시도해 주세요.",
   "network": "인터넷 연결을 확인해 주세요.",
-  "unknown": "알 수 없는 오류가 생겼어요."
+  "unknown": "알 수 없는 오류가 생겼어요.",
+  "aiQuotaExceeded": "오늘 AI 찾기를 모두 사용했어요. 내일 다시 이용해 주세요.",
+  "aiUnavailable": "AI가 지금 응답하지 못해요. 잠시 후 다시 시도해 주세요.",
+  "audioTooLarge": "음성이 너무 길어요. 1분 안으로 다시 말해 주세요.",
+  "unsupportedMedia": "지원하지 않는 형식이에요."
 }

@@ -13,6 +13,8 @@ describe('errorMessageKey', () => {
     ['HOSPITAL_NOT_FOUND', 404, 'hospitalNotFound'],
     ['REVIEW_ALREADY_REPORTED', 409, 'reviewAlreadyReported'],
     ['UPSTREAM_UNAVAILABLE', 502, 'serverUnavailable'],
+    ['AI_QUOTA_EXCEEDED', 429, 'aiQuotaExceeded'],
+    ['AI_UNAVAILABLE', 503, 'aiUnavailable'],
   ])('알려진 코드 %s는 해당 문구 키로 바꾼다', (code, status, key) => {
     expect(errorMessageKey(new ApiError(status, code, 'ignored'))).toBe(key);
   });

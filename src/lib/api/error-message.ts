@@ -33,6 +33,10 @@ const MESSAGE_KEY_BY_CODE = {
   HISTORY_NOT_FOUND: 'historyNotFound',
   REVIEW_ALREADY_REPORTED: 'reviewAlreadyReported',
   REPORT_ALREADY_RESOLVED: 'reportAlreadyResolved',
+  AI_QUOTA_EXCEEDED: 'aiQuotaExceeded',
+  AI_UNAVAILABLE: 'aiUnavailable',
+  AI_AUDIO_TOO_LARGE: 'audioTooLarge',
+  UNSUPPORTED_MEDIA_TYPE: 'unsupportedMedia',
   INTERNAL_ERROR: 'server',
   UPSTREAM_UNAVAILABLE: 'serverUnavailable',
 } as const satisfies Record<string, ErrorMessageKey>;
