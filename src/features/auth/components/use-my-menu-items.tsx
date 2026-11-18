@@ -34,7 +34,7 @@ export function useMyMenuItems(): MyMenuItem[] {
     },
     {
       key: 'medicalProfile',
-      href: null,
+      href: '/my/medical-profile',
       label: t('medicalProfile'),
       icon: <Activity {...icon} />,
     },
@@ -46,13 +46,13 @@ export function useMyMenuItems(): MyMenuItem[] {
     },
     {
       key: 'history',
-      href: null,
+      href: '/my/history',
       label: t('history'),
       icon: <Clock {...icon} />,
     },
     {
       key: 'reviews',
-      href: null,
+      href: '/my/reviews',
       label: t('reviews'),
       icon: <PenLine {...icon} />,
     },

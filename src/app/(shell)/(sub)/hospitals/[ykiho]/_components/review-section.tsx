@@ -1,21 +1,31 @@
 'use client';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { Lock, MessageSquareText } from 'lucide-react';
+import { Lock, MessageSquareText, PenLine } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useLoginGuard, useSession } from '@/features/auth/use-session';
+import { ReviewNoticeBanner } from '@/features/reviews/components/review-notice-banner';
 import { reviewQueries } from '@/features/reviews/queries';
+import { useReviewNotice } from '@/features/reviews/review-notice';
+import { reviewWriteHref } from '@/features/reviews/write-href';
 
 import { ReviewCard } from './review-card';
 import { SectionError } from './section-error';
 import { useStickyError } from './use-sticky-error';
 
-/** 읽기 전용 후기 목록. 작성·신고는 로그인이 필요해 안내만 한다. */
+/** 병원 후기 목록. 작성·수정·삭제·신고는 로그인이 필요해 누를 때 로그인을 먼저 묻는다. */
 export function ReviewSection({ ykiho }: { ykiho: string }) {
   const t = useTranslations('hospitals.detail.reviews');
+  const tReviews = useTranslations('reviews.section');
+  const router = useRouter();
+  const { status } = useSession();
+  const guard = useLoginGuard();
+  const [notice, setNotice] = useReviewNotice(ykiho);
   const reviews = useInfiniteQuery(reviewQueries.hospital(ykiho));
   const failure = useStickyError(reviews.error, () => reviews.refetch());
   const items = reviews.data?.pages.flatMap((page) => page.content) ?? [];
@@ -27,20 +37,33 @@ export function ReviewSection({ ykiho }: { ykiho: string }) {
       aria-labelledby="reviews-title"
       className="flex scroll-mt-14 flex-col gap-4"
     >
-      <div className="flex flex-wrap items-baseline gap-x-2">
-        <h2 id="reviews-title" className="text-heading">
-          {t('title')}
-        </h2>
-        {total != null && total > 0 && (
-          <span className="text-body-sm text-text-secondary tabular-nums">
-            {t('count', { count: total })}
-          </span>
-        )}
+      <div className="flex items-center gap-3">
+        <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2">
+          <h2 id="reviews-title" className="text-heading">
+            {t('title')}
+          </h2>
+          {total != null && total > 0 && (
+            <span className="text-body-sm text-text-secondary tabular-nums">
+              {t('count', { count: total })}
+            </span>
+          )}
+        </div>
+        <Button
+          variant="tint"
+          size="sm"
+          onClick={guard('review', () => router.push(reviewWriteHref(ykiho)))}
+        >
+          <PenLine aria-hidden="true" />
+          {tReviews('write')}
+        </Button>
       </div>
-      <p className="flex items-center gap-1.5 text-caption text-text-secondary">
-        <Lock aria-hidden="true" className="size-3.5" strokeWidth={1.5} />
-        {t('loginNote')}
-      </p>
+      {status === 'anonymous' && (
+        <p className="flex items-center gap-1.5 text-caption text-text-secondary">
+          <Lock aria-hidden="true" className="size-3.5" strokeWidth={1.5} />
+          {t('loginNote')}
+        </p>
+      )}
+      {notice && !reviews.isPending && <ReviewNoticeBanner kind={notice} />}
 
       {failure.error ? (
         <SectionError
@@ -64,7 +87,10 @@ export function ReviewSection({ ykiho }: { ykiho: string }) {
         <ul className="flex flex-col gap-3">
           {items.map((review) => (
             <li key={review.id}>
-              <ReviewCard review={review} />
+              <ReviewCard
+                review={review}
+                onDeleted={() => setNotice('deleted')}
+              />
             </li>
           ))}
         </ul>
