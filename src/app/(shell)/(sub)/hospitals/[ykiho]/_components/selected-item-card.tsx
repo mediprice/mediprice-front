@@ -21,6 +21,7 @@ export function SelectedItemCard({
   prices,
   trend,
   activeVariant,
+  expectedRows,
   onVariantChange,
   onClear,
 }: {
@@ -28,6 +29,8 @@ export function SelectedItemCard({
   prices: ItemPrices;
   trend: PriceTrendState;
   activeVariant: string | null;
+  /** 불러오는 동안 자리를 잡을 세부 항목 수(목록에서 고른 경우 이미 아는 값). */
+  expectedRows: number;
   onVariantChange: (variant: string) => void;
   onClear: () => void;
 }) {
@@ -40,13 +43,15 @@ export function SelectedItemCard({
     format.dateTime(new Date(date), 'dateShort');
   const activeRow =
     rows?.find((row) => priceRowName(row) === activeVariant) ?? rows?.[0];
+  const isLoading =
+    prices.isPending || !rows || (trend.isPending && !trend.error);
 
   return (
     <section
       id="selected-item"
       tabIndex={-1}
       aria-labelledby="selected-item-title"
-      aria-busy={prices.isPending || undefined}
+      aria-busy={isLoading || undefined}
       className="flex scroll-mt-14 flex-col gap-3 rounded-xl bg-primary-tint px-5 py-5 outline-none focus-visible:outline-2 lg:px-7 lg:py-6"
     >
       <div className="flex items-start justify-between gap-3">
@@ -77,11 +82,8 @@ export function SelectedItemCard({
           isRetrying={failure.isRetrying}
           className="bg-bg"
         />
-      ) : prices.isPending || !rows ? (
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-8 w-48 bg-primary-tint-pressed" />
-          <Skeleton className="h-5 w-56 bg-primary-tint-pressed" />
-        </div>
+      ) : isLoading || !rows ? (
+        <SelectedItemSkeleton rowCount={expectedRows} />
       ) : !activeRow ? (
         <p className="text-body-sm text-text-secondary">{t('notOffered')}</p>
       ) : (
@@ -166,13 +168,15 @@ export function SelectedItemCard({
         </>
       )}
 
-      <Link
-        href={`/items/${item}`}
-        className="inline-flex min-h-11 w-fit items-center gap-1 text-label-bold text-primary-text hover:underline lg:hidden"
-      >
-        {t('compare')}
-        <ChevronRight aria-hidden="true" className="size-4" strokeWidth={2} />
-      </Link>
+      {!isLoading && (
+        <Link
+          href={`/items/${item}`}
+          className="inline-flex min-h-11 w-fit items-center gap-1 text-label-bold text-primary-text hover:underline lg:hidden"
+        >
+          {t('compare')}
+          <ChevronRight aria-hidden="true" className="size-4" strokeWidth={2} />
+        </Link>
+      )}
     </section>
   );
 }
@@ -193,9 +197,7 @@ function TrendNote({ trend }: { trend: PriceTrendState }) {
       />
     );
   }
-  if (trend.isPending)
-    return <Skeleton className="h-5 w-52 bg-primary-tint-pressed" />;
-  if (trend.summary.kind === 'trend') return null;
+  if (trend.isPending || trend.summary.kind === 'trend') return null;
 
   const only = trend.summary.points.at(-1);
   return (
@@ -214,5 +216,45 @@ function TrendNote({ trend }: { trend: PriceTrendState }) {
           })
         : t('none')}
     </p>
+  );
+}
+
+const SKELETON = 'bg-primary-tint-pressed';
+
+/** 가격·세부 항목 행·추이 한 줄·최신 가격 확인 버튼·비교 링크까지 실제 카드와 같은 높이로 자리를 잡는다. */
+function SelectedItemSkeleton({ rowCount }: { rowCount: number }) {
+  return (
+    <div aria-hidden="true" className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1">
+        <Skeleton className={cn('my-1 h-6.5 w-40', SKELETON)} />
+        <Skeleton className={cn('my-0.5 h-3.75 w-56', SKELETON)} />
+      </div>
+      {rowCount > 1 && (
+        <div className="flex flex-col">
+          <Skeleton className={cn('mb-2 h-4.75 w-20', SKELETON)} />
+          <div className="flex flex-col overflow-hidden rounded-lg bg-bg">
+            {Array.from({ length: rowCount }, (_, index) => (
+              <div
+                key={index}
+                className="flex min-h-12 items-center gap-3 border-b border-border px-3.5 py-2.5 last:border-b-0"
+              >
+                <Skeleton className="size-5 rounded-full" />
+                <span className="flex min-w-0 flex-1 flex-col gap-1">
+                  <Skeleton className="h-4.5 w-3/5" />
+                  <Skeleton className="h-3.5 w-24" />
+                </span>
+                <Skeleton className="h-5 w-16" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <Skeleton className={cn('h-4.75 w-52', SKELETON)} />
+      <div className="flex flex-col gap-1.5">
+        <Skeleton className={cn('h-11 w-full rounded-lg lg:w-48', SKELETON)} />
+        <Skeleton className={cn('h-4.75 w-64 max-w-full', SKELETON)} />
+      </div>
+      <Skeleton className={cn('h-11 w-40 lg:hidden', SKELETON)} />
+    </div>
   );
 }

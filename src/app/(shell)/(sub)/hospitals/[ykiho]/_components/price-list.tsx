@@ -40,7 +40,7 @@ export function PriceList({
   selectedItem: string | null;
   /** 선택한 항목의 행. 아직 불러오지 않은 페이지에 있어도 그 분류의 맨 위에 보인다. */
   selectedRows: readonly PriceRow[] | undefined;
-  onSelect: (code: string, variant: string) => void;
+  onSelect: (code: string, variant: string, variantCount: number) => void;
 }) {
   const t = useTranslations('hospitals.detail.prices');
   const [input, setInput] = useState('');
@@ -119,28 +119,27 @@ export function PriceList({
             className="min-h-11 w-full min-w-0 bg-transparent text-field text-text-primary outline-none placeholder:text-text-tertiary"
           />
         </label>
-        {categories.isSuccess && (
-          <label className="relative flex min-h-12 items-center rounded-lg bg-surface focus-within:outline-2 focus-within:outline-focus-ring sm:w-56">
-            <span className="sr-only">{t('category')}</span>
-            <select
-              value={categoryCode}
-              onChange={(event) => setCategoryCode(event.target.value)}
-              className="min-h-12 w-full min-w-0 appearance-none truncate bg-transparent pr-10 pl-4 text-field text-text-primary outline-none"
-            >
-              <option value="">{t('categoryAll')}</option>
-              {categories.data.map((category) => (
-                <option key={category.code} value={category.code}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              aria-hidden="true"
-              className="pointer-events-none absolute right-3 size-5 text-text-tertiary"
-              strokeWidth={1.75}
-            />
-          </label>
-        )}
+        <label className="relative flex min-h-12 items-center rounded-lg bg-surface focus-within:outline-2 focus-within:outline-focus-ring sm:w-56">
+          <span className="sr-only">{t('category')}</span>
+          <select
+            value={categoryCode}
+            aria-busy={categories.isPending || undefined}
+            onChange={(event) => setCategoryCode(event.target.value)}
+            className="min-h-12 w-full min-w-0 appearance-none truncate bg-transparent pr-10 pl-4 text-field text-text-primary outline-none"
+          >
+            <option value="">{t('categoryAll')}</option>
+            {categories.data?.map((category) => (
+              <option key={category.code} value={category.code}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            aria-hidden="true"
+            className="pointer-events-none absolute right-3 size-5 text-text-tertiary"
+            strokeWidth={1.75}
+          />
+        </label>
       </div>
 
       {failure.error ? (
@@ -150,11 +149,7 @@ export function PriceList({
           onRetry={() => void failure.retry()}
         />
       ) : list.isPending ? (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 4 }, (_, index) => (
-            <Skeleton key={index} className="h-18 rounded-lg" />
-          ))}
-        </div>
+        <PriceListSkeleton />
       ) : rows.length === 0 ? (
         <EmptyState
           icon={<SearchX />}
@@ -184,7 +179,13 @@ export function PriceList({
                     <PriceRowButton
                       row={row}
                       isSelected={row.npayCode === selectedItem}
-                      onSelect={onSelect}
+                      onSelect={(code, variant) =>
+                        onSelect(
+                          code,
+                          variant,
+                          rows.filter((r) => r.npayCode === code).length,
+                        )
+                      }
                     />
                   </li>
                 ))}
@@ -276,5 +277,33 @@ function PriceRowButton({
         className="shrink-0 text-label-bold text-text-primary"
       />
     </button>
+  );
+}
+
+const SKELETON_ROWS = 8;
+
+/** 첫 페이지와 같은 행 모양으로 자리를 잡아, 목록이 채워질 때 아래 구역이 화면 안에서 밀려나지 않게 한다. */
+function PriceListSkeleton() {
+  return (
+    <div aria-hidden="true" className="flex flex-col gap-2">
+      <Skeleton className="h-5.5 w-24" />
+      <div className="flex flex-col rounded-xl bg-surface px-2 py-1 lg:px-3">
+        {Array.from({ length: SKELETON_ROWS }, (_, index) => (
+          <div
+            key={index}
+            className="border-b border-border py-1 last:border-b-0"
+          >
+            <div className="flex items-center gap-3 px-3 py-3">
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <Skeleton className="my-0.5 h-4.5 w-3/5" />
+                <Skeleton className="my-0.5 h-4 w-2/5" />
+                <Skeleton className="my-0.5 h-4 w-24" />
+              </div>
+              <Skeleton className="h-5 w-16" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

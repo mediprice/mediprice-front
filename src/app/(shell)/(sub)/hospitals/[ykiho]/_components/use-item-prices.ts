@@ -26,6 +26,8 @@ export function useItemPrices(ykiho: string, item: string | null) {
       detail.data?.detailName ?? detail.data?.sdivName ?? detail.data?.name,
     rows: prices.data,
     isPending: detail.isPending || prices.isPending,
+    /** 항목 이름(경로·제목에 쓰임)을 아직 모른다. 항목이 없으면 false다. */
+    isNamePending: item != null && detail.isPending,
     error: detail.error ?? prices.error,
     refetch: () => (detail.isError ? detail.refetch() : prices.refetch()),
   };

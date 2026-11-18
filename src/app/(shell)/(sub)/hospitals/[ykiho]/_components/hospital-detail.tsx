@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { Building2, CircleAlert } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -27,6 +27,8 @@ import { SelectedItemCard } from './selected-item-card';
 import { useItemPrices, usePriceTrend } from './use-item-prices';
 import { useStickyError } from './use-sticky-error';
 
+const DEFAULT_EXPECTED_ROWS = 3;
+
 /** 선택 항목은 URL(item)과 같이 움직이되, 서버 왕복 없이 history.replaceState로만 바꾼다. */
 function syncItemParam(code: string | null) {
   const url = new URL(window.location.href);
@@ -51,11 +53,21 @@ export function HospitalDetail({
   const tMeta = useTranslations('metadata');
   const [item, setItem] = useState(initialItem);
   const [variant, setVariant] = useState<string | null>(null);
+  const [expectedRows, setExpectedRows] = useState(DEFAULT_EXPECTED_ROWS);
   const detail = useQuery(hospitalQueries.detail(ykiho));
+  /** 카드가 채워지는 동안 가격 목록이 아직 그려지지 않아도 첫 페이지를 함께 받아 둔다(PriceList의 첫 조건과 같은 키). */
+  useInfiniteQuery(hospitalQueries.priceList(ykiho, {}));
   const prices = useItemPrices(ykiho, item);
   const firstRow = prices.rows?.[0];
   const activeVariant = variant ?? (firstRow ? priceRowName(firstRow) : null);
   const trend = usePriceTrend(ykiho, item, activeVariant);
+  const isCardLoading =
+    item != null &&
+    !prices.error &&
+    (prices.isPending || (trend.isPending && !trend.error));
+  /** 처음 들어올 때만 선택 카드가 다 채워진 뒤 아래 구역을 그려, 카드가 자라며 화면 안의 내용을 밀지 않게 한다. */
+  const [hasSettled, setHasSettled] = useState(initialItem == null);
+  if (!hasSettled && detail.data && !isCardLoading) setHasSettled(true);
 
   const failure = useStickyError(detail.error, () => detail.refetch());
   const isNotFound =
@@ -76,9 +88,11 @@ export function HospitalDetail({
   function handleSelectItem(
     code: string | null,
     nextVariant: string | null = null,
+    variantCount = DEFAULT_EXPECTED_ROWS,
   ) {
     setItem(code);
     setVariant(nextVariant);
+    setExpectedRows(variantCount);
     syncItemParam(code);
     if (code) {
       requestAnimationFrame(() => {
@@ -125,7 +139,9 @@ export function HospitalDetail({
   }
 
   const hospital = detail.data;
-  if (!hospital) return <DetailSkeleton />;
+  if (!hospital || (!hasSettled && prices.isNamePending)) {
+    return <DetailSkeleton />;
+  }
   const itemHref =
     item && item === initialItem && back
       ? (`/items/${item}?${back}` as const)
@@ -152,6 +168,7 @@ export function HospitalDetail({
                 prices={prices}
                 trend={trend}
                 activeVariant={activeVariant}
+                expectedRows={expectedRows}
                 onVariantChange={setVariant}
                 onClear={() => handleSelectItem(null)}
               />
@@ -163,16 +180,20 @@ export function HospitalDetail({
               )}
             </div>
           )}
-          <SectionNav />
-          <PriceList
-            ykiho={ykiho}
-            selectedItem={item}
-            selectedRows={prices.rows}
-            onSelect={handleSelectItem}
-          />
-          <OperatingSection hospital={hospital} />
-          <LocationSection hospital={hospital} />
-          <ReviewSection ykiho={ykiho} />
+          {hasSettled && (
+            <>
+              <SectionNav />
+              <PriceList
+                ykiho={ykiho}
+                selectedItem={item}
+                selectedRows={prices.rows}
+                onSelect={handleSelectItem}
+              />
+              <OperatingSection hospital={hospital} />
+              <LocationSection hospital={hospital} />
+              <ReviewSection ykiho={ykiho} />
+            </>
+          )}
         </div>
         <ItemRail item={item} itemName={prices.displayName} />
       </PageContainer>
