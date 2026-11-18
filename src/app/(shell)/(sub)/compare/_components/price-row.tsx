@@ -69,7 +69,7 @@ export function PriceRow({
                 max={cell?.maxPrice}
                 className={cn(
                   isEmphasized
-                    ? 'text-label-bold lg:text-price-lg'
+                    ? 'text-label-bold lg:text-price-md xl:text-price-lg'
                     : 'text-label lg:text-label-bold',
                   cell?.minPrice != null && 'text-text-primary',
                 )}

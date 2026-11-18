@@ -1,3 +1,4 @@
+import { useSyncExternalStore } from 'react';
 import { z } from 'zod';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -128,5 +129,14 @@ export function buildBasketHref(hospitals: readonly CompareHospital[]) {
   return buildCompareHref(
     hospitals.map((h) => h.ykiho),
     sharedItemCode(hospitals),
+  );
+}
+
+/** 저장된 비교함을 다 불러왔는지. 서버 렌더링과 첫 렌더는 false다. */
+export function useCompareHydrated() {
+  return useSyncExternalStore(
+    (onChange) => useCompareStore.persist.onFinishHydration(onChange),
+    () => useCompareStore.persist.hasHydrated(),
+    () => false,
   );
 }

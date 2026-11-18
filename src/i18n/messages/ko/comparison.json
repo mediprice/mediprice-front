@@ -72,7 +72,6 @@
   "empty": {
     "title": "비교할 병원을 골라 주세요",
     "description": "항목별 가격 화면에서 '비교함 담기'로 병원을 2곳 이상 담으면 나란히 비교할 수 있어요.",
-    "fromBasket": "비교함의 {count, number}곳 비교하기",
     "search": "진료 항목 찾기"
   },
   "notFound": {
