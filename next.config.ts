@@ -65,6 +65,12 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   typedRoutes: true,
   devIndicators: { position: 'bottom-left' },
+  /** 아이콘 태그를 읽지 않고 /favicon.ico를 바로 찾는 브라우저·크롤러를 생성 아이콘으로 보낸다. */
+  async redirects() {
+    return [
+      { source: '/favicon.ico', destination: '/icon/32', permanent: true },
+    ];
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },
