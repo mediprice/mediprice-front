@@ -7,16 +7,16 @@ export function InfoTable({
   rows: { key: string; label: ReactNode; value: ReactNode }[];
 }) {
   return (
-    <dl className="flex flex-col rounded-xl bg-surface px-5 py-1.5 lg:px-6">
+    <dl className="flex flex-col rounded-2xl bg-surface px-5 py-1 md:px-6">
       {rows.map((row) => (
         <div
           key={row.key}
-          className="flex items-start justify-between gap-4 border-b border-border py-3.5 last:border-b-0"
+          className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 border-b border-border py-4 last:border-b-0"
         >
-          <dt className="shrink-0 text-label text-text-secondary">
+          <dt className="shrink-0 text-body text-text-secondary">
             {row.label}
           </dt>
-          <dd className="min-w-0 text-right text-label-bold text-text-primary">
+          <dd className="ml-auto min-w-0 text-right text-body font-bold text-text-primary">
             {row.value}
           </dd>
         </div>

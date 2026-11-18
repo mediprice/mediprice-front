@@ -36,7 +36,7 @@ export function TrendChart({
   const first = points[0];
 
   return (
-    <figure className="rounded-lg bg-bg px-3 pt-2 pb-1">
+    <figure className="rounded-xl bg-bg px-3 pt-2 pb-1">
       <figcaption className="sr-only">
         {first &&
           t('chartLabel', {

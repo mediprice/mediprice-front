@@ -49,7 +49,7 @@ export function ReviewSection({ ykiho }: { ykiho: string }) {
         action={
           <Button
             variant="tint"
-            size="sm"
+            size="md"
             onClick={guard('review', () => router.push(reviewWriteHref(ykiho)))}
           >
             <PenLine aria-hidden="true" />
@@ -58,8 +58,12 @@ export function ReviewSection({ ykiho }: { ykiho: string }) {
         }
       />
       {status === 'anonymous' && (
-        <p className="flex items-center gap-1.5 text-caption text-text-secondary">
-          <Lock aria-hidden="true" className="size-3.5" strokeWidth={1.5} />
+        <p className="flex items-start gap-2 text-body-sm text-text-secondary">
+          <Lock
+            aria-hidden="true"
+            className="mt-0.5 size-4 shrink-0"
+            strokeWidth={1.75}
+          />
           {t('loginNote')}
         </p>
       )}
@@ -72,19 +76,27 @@ export function ReviewSection({ ykiho }: { ykiho: string }) {
           onRetry={() => void failure.retry()}
         />
       ) : reviews.isPending ? (
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-24 rounded-xl" />
-          <Skeleton className="h-24 rounded-xl" />
+        <div
+          aria-hidden="true"
+          className="flex flex-col divide-y divide-hairline"
+        >
+          {Array.from({ length: 2 }, (_, index) => (
+            <div key={index} className="flex flex-col gap-2.5 py-5">
+              <Skeleton className="h-5.5 w-48" />
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-3/4" />
+            </div>
+          ))}
         </div>
       ) : items.length === 0 ? (
         <EmptyState
           icon={<MessageSquareText />}
           title={t('emptyTitle')}
           description={t('emptyDescription')}
-          className="rounded-xl bg-surface py-10"
+          className="rounded-2xl bg-surface py-10"
         />
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col divide-y divide-hairline border-y border-hairline">
           {items.map((review) => (
             <li key={review.id}>
               <ReviewCard

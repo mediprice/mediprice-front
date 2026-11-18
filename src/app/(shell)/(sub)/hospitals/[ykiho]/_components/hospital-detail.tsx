@@ -15,8 +15,8 @@ import { errorMessageKey } from '@/lib/api/error-message';
 import { ApiError } from '@/lib/api/errors';
 
 import { DetailSkeleton } from './detail-skeleton';
+import { HospitalContact } from './hospital-contact';
 import { HospitalHeader } from './hospital-header';
-import { ItemRail } from './item-rail';
 import { LocationSection } from './location-section';
 import { OperatingSection } from './operating-section';
 import { PriceList } from './price-list';
@@ -24,7 +24,11 @@ import { PriceTrend } from './price-trend';
 import { ReviewSection } from './review-section';
 import { SectionNav } from './section-nav';
 import { SelectedItemCard } from './selected-item-card';
-import { useItemPrices, usePriceTrend } from './use-item-prices';
+import {
+  useItemPrices,
+  usePriceTrend,
+  useRegionSummary,
+} from './use-item-prices';
 import { useStickyError } from './use-sticky-error';
 
 const DEFAULT_EXPECTED_ROWS = 3;
@@ -61,6 +65,7 @@ export function HospitalDetail({
   const firstRow = prices.rows?.[0];
   const activeVariant = variant ?? (firstRow ? priceRowName(firstRow) : null);
   const trend = usePriceTrend(ykiho, item, activeVariant);
+  const summary = useRegionSummary(item);
   const isCardLoading =
     item != null &&
     !prices.error &&
@@ -150,39 +155,45 @@ export function HospitalDetail({
         : null;
 
   return (
-    <div className="min-h-dvh">
+    <PageContainer className="min-h-dvh pt-6 pb-section lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-x-10 lg:pt-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
       <HospitalHeader
         hospital={hospital}
+        className="lg:col-start-1 lg:row-start-1"
         itemCrumb={
           itemHref && prices.displayName
             ? { href: itemHref, name: prices.displayName }
             : null
         }
       />
-      <PageContainer className="flex flex-col gap-10 pt-6 pb-section lg:flex-row lg:items-start lg:pt-8">
-        <div className="flex min-w-0 flex-1 flex-col gap-8 lg:gap-10">
-          {item && (
-            <div className="flex flex-col gap-4">
-              <SelectedItemCard
-                item={item}
-                prices={prices}
-                trend={trend}
-                activeVariant={activeVariant}
-                expectedRows={expectedRows}
-                onVariantChange={setVariant}
-                onClear={() => handleSelectItem(null)}
+      <HospitalContact
+        hospital={hospital}
+        className="mt-5 lg:sticky lg:top-[calc(var(--spacing-top-nav)+1.5rem)] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:self-start"
+      />
+      <div className="mt-8 flex min-w-0 flex-col gap-section lg:col-start-1 lg:row-start-2 lg:mt-10">
+        {item && (
+          <div className="flex flex-col gap-4">
+            <SelectedItemCard
+              item={item}
+              prices={prices}
+              trend={trend}
+              summary={summary}
+              activeVariant={activeVariant}
+              expectedRows={expectedRows}
+              onVariantChange={setVariant}
+              onClear={() => handleSelectItem(null)}
+            />
+            {trend.summary.kind === 'trend' && (
+              <PriceTrend
+                summary={trend.summary}
+                name={activeVariant ?? prices.displayName ?? item}
               />
-              {trend.summary.kind === 'trend' && (
-                <PriceTrend
-                  summary={trend.summary}
-                  name={activeVariant ?? prices.displayName ?? item}
-                />
-              )}
-            </div>
-          )}
-          {hasSettled && (
-            <>
-              <SectionNav />
+            )}
+          </div>
+        )}
+        {hasSettled && (
+          <div className="flex flex-col gap-6 lg:gap-8">
+            <SectionNav />
+            <div className="flex flex-col gap-section">
               <PriceList
                 ykiho={ykiho}
                 selectedItem={item}
@@ -192,11 +203,10 @@ export function HospitalDetail({
               <OperatingSection hospital={hospital} />
               <LocationSection hospital={hospital} />
               <ReviewSection ykiho={ykiho} />
-            </>
-          )}
-        </div>
-        <ItemRail item={item} itemName={prices.displayName} />
-      </PageContainer>
-    </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </PageContainer>
   );
 }

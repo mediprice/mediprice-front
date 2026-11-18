@@ -39,13 +39,10 @@ export function TargetHospitalCard({
   return (
     <section
       aria-labelledby="review-target-title"
-      className="flex items-center gap-3 rounded-xl bg-bg px-4 py-4 shadow-card lg:bg-surface lg:px-6 lg:shadow-none"
+      className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl bg-surface px-5 py-5 md:px-6"
     >
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <h2
-          id="review-target-title"
-          className="text-caption text-text-secondary"
-        >
+      <div className="flex min-w-0 flex-[1_1_14rem] flex-col gap-1">
+        <h2 id="review-target-title" className="text-label text-text-secondary">
           {t('target')}
         </h2>
         {name ? (
@@ -57,14 +54,10 @@ export function TargetHospitalCard({
         ) : (
           <Skeleton className="h-7 w-48 max-w-full" />
         )}
-        {meta && <p className="text-caption text-text-secondary">{meta}</p>}
+        {meta && <p className="text-body-sm text-text-secondary">{meta}</p>}
       </div>
-      <p className="flex shrink-0 flex-col items-center gap-1 text-caption text-text-secondary lg:flex-row lg:rounded-full lg:border lg:border-border lg:bg-bg lg:px-3.5 lg:py-1.5 lg:text-body-sm">
-        <Lock
-          aria-hidden="true"
-          className="size-4 lg:hidden"
-          strokeWidth={1.75}
-        />
+      <p className="flex shrink-0 items-center gap-1.5 rounded-full bg-bg px-3.5 py-1.5 text-label text-text-secondary">
+        <Lock aria-hidden="true" className="size-4" strokeWidth={1.75} />
         {t('locked')}
       </p>
     </section>

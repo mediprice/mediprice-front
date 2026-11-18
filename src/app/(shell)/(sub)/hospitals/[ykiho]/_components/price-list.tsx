@@ -11,7 +11,6 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
-import { PriceRange } from '@/components/ui/price-range';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -86,13 +85,13 @@ export function PriceList({
     <section
       id="prices"
       aria-labelledby="prices-title"
-      className="flex scroll-mt-14 flex-col gap-4"
+      className="flex scroll-mt-14 flex-col gap-5"
     >
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1.5">
         <SectionHeader id="prices-title" title={t('title')} />
         <p
           aria-live="polite"
-          className="min-h-6 text-body-sm text-text-secondary"
+          className="min-h-6.5 text-body text-text-secondary"
         >
           {list.isSuccess &&
             (isFiltered
@@ -100,7 +99,7 @@ export function PriceList({
               : t('count', { count: total }))}
         </p>
         {!selectedItem && (
-          <p className="text-caption text-text-tertiary">{t('hint')}</p>
+          <p className="text-body-sm text-text-tertiary">{t('hint')}</p>
         )}
       </div>
 
@@ -109,7 +108,7 @@ export function PriceList({
         aria-label={t('search')}
         className="flex flex-col gap-2 sm:flex-row"
       >
-        <label className="flex min-h-12 flex-1 items-center gap-2.5 rounded-lg bg-surface px-4 focus-within:outline-2 focus-within:outline-focus-ring">
+        <label className="flex min-h-12 flex-1 items-center gap-2.5 rounded-xl border border-border-strong bg-bg px-4 transition-colors duration-200 ease-standard focus-within:border-primary focus-within:outline-2 focus-within:outline-focus-ring hover:border-text-tertiary">
           <span className="sr-only">{t('search')}</span>
           <Search
             aria-hidden="true"
@@ -126,13 +125,13 @@ export function PriceList({
             className="min-h-11 w-full min-w-0 bg-transparent text-field text-text-primary outline-none placeholder:text-text-tertiary"
           />
         </label>
-        <label className="relative flex min-h-12 items-center rounded-lg bg-surface focus-within:outline-2 focus-within:outline-focus-ring sm:w-56">
+        <label className="relative flex min-h-12 items-center rounded-xl border border-border-strong bg-bg transition-colors duration-200 ease-standard focus-within:border-primary focus-within:outline-2 focus-within:outline-focus-ring hover:border-text-tertiary sm:w-60">
           <span className="sr-only">{t('category')}</span>
           <select
             value={categoryCode}
             aria-busy={categories.isPending || undefined}
             onChange={(event) => setCategoryCode(event.target.value)}
-            className="min-h-12 w-full min-w-0 appearance-none truncate bg-transparent pr-10 pl-4 text-field text-text-primary outline-none"
+            className="min-h-11 w-full min-w-0 appearance-none truncate bg-transparent pr-10 pl-4 text-field text-text-primary outline-none"
           >
             <option value="">{t('categoryAll')}</option>
             {categories.data?.map((category) => (
@@ -169,44 +168,63 @@ export function PriceList({
               </Button>
             ) : undefined
           }
-          className="rounded-xl bg-surface py-10"
+          className="rounded-2xl bg-surface py-10"
         />
       ) : (
         <ul
           aria-busy={list.isPlaceholderData || undefined}
           className={cn(
-            'flex flex-col gap-5 transition-opacity',
+            'flex flex-col gap-8 transition-opacity duration-200 ease-standard',
             list.isPlaceholderData && 'opacity-60',
           )}
         >
           {groups.map((group) => (
-            <li key={group.category ?? ''} className="flex flex-col gap-2">
-              <h3 className="text-label-bold text-text-secondary">
+            <li key={group.category ?? ''} className="flex flex-col gap-1">
+              <h3 className="flex items-baseline justify-between gap-3 border-b border-border pb-2.5 text-subheading">
                 {group.category ?? t('otherCategory')}
+                <span className="shrink-0 text-label text-text-tertiary">
+                  {t('groupCount', { count: group.rows.length })}
+                </span>
               </h3>
-              <ul className="flex flex-col rounded-xl bg-surface px-2 py-1 lg:px-3">
-                {group.rows.map((row, index) => (
-                  <li
-                    key={`${row.npayCode}-${row.hospitalItemName}-${row.price}-${index}`}
-                    className={cn(
-                      'border-b border-border last:border-b-0',
-                      row.npayCode === selectedItem &&
-                        '-mx-2 rounded-lg border-b-transparent bg-primary-tint px-2 lg:-mx-3 lg:px-3',
-                    )}
-                  >
-                    <PriceRowButton
-                      row={row}
-                      isSelected={row.npayCode === selectedItem}
-                      onSelect={(code, variant) =>
-                        onSelect(
-                          code,
-                          variant,
-                          rows.filter((r) => r.npayCode === code).length,
-                        )
-                      }
-                    />
-                  </li>
-                ))}
+              <ul className="flex flex-col">
+                {group.rows.map((row, index) => {
+                  const isSelected = row.npayCode === selectedItem;
+                  const joinsPrev =
+                    isSelected &&
+                    group.rows[index - 1]?.npayCode === selectedItem;
+                  const joinsNext =
+                    isSelected &&
+                    group.rows[index + 1]?.npayCode === selectedItem;
+                  return (
+                    <li
+                      key={`${row.npayCode}-${row.hospitalItemName}-${row.price}-${index}`}
+                      data-selected={isSelected || undefined}
+                      className={cn(
+                        'flex flex-col border-b last:border-b-0',
+                        !isSelected &&
+                          'border-hairline has-[+li[data-selected]]:border-transparent',
+                        isSelected &&
+                          (joinsNext
+                            ? 'border-primary-tint-pressed'
+                            : 'border-transparent'),
+                      )}
+                    >
+                      <PriceRowButton
+                        row={row}
+                        isSelected={isSelected}
+                        joinsPrev={joinsPrev}
+                        joinsNext={joinsNext}
+                        onSelect={(code, variant) =>
+                          onSelect(
+                            code,
+                            variant,
+                            rows.filter((r) => r.npayCode === code).length,
+                          )
+                        }
+                      />
+                    </li>
+                  );
+                })}
               </ul>
             </li>
           ))}
@@ -240,13 +258,19 @@ export function PriceList({
 function PriceRowButton({
   row,
   isSelected,
+  joinsPrev,
+  joinsNext,
   onSelect,
 }: {
   row: PriceRow;
   isSelected: boolean;
+  /** 선택 항목의 세부 행이 이어지면 모서리를 붙여 한 덩어리 면으로 보이게 한다. */
+  joinsPrev: boolean;
+  joinsNext: boolean;
   onSelect: (code: string, variant: string) => void;
 }) {
   const t = useTranslations('hospitals.detail.prices');
+  const tPrice = useTranslations('common.price');
   const format = useFormatter();
   const name = priceRowName(row);
   const standardName = lastSegment(row.itemName);
@@ -257,43 +281,48 @@ function PriceRowButton({
       aria-current={isSelected || undefined}
       onClick={() => onSelect(row.npayCode, name)}
       className={cn(
-        'my-1 flex w-full flex-col gap-0.5 rounded-lg px-3 py-3 text-left transition-colors hover:bg-surface-strong',
+        '-mx-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-xl px-3 py-3.5 text-left transition-colors duration-200 ease-standard',
+        isSelected
+          ? 'bg-primary-tint hover:bg-primary-tint-hover active:bg-primary-tint-pressed'
+          : 'hover:bg-surface active:bg-surface-strong',
+        joinsPrev && 'rounded-t-none',
+        joinsNext && 'rounded-b-none',
       )}
     >
-      <span
-        className={cn(
-          'flex items-center gap-1.5 text-label text-text-primary',
-          isSelected && 'text-label-bold text-primary-text',
-        )}
-      >
+      <span className="flex min-w-0 flex-[1_1_12rem] items-start gap-2">
         {isSelected && (
           <Check
             aria-hidden="true"
-            className="size-4 shrink-0"
-            strokeWidth={2}
+            className="mt-0.5 size-5 shrink-0 text-primary-text"
+            strokeWidth={2.25}
           />
         )}
-        <span className="min-w-0">
-          <VariantName name={name} />
-        </span>
-      </span>
-      <span className="flex items-end justify-between gap-3">
-        <span className="min-w-0 text-caption text-text-tertiary">
-          {standardName !== name && (
-            <span title={row.itemName} className="block">
-              {standardName}
+        <span className="flex min-w-0 flex-col gap-0.5">
+          <span
+            className={cn(
+              'text-body text-text-primary',
+              isSelected && 'font-bold text-primary-text',
+            )}
+          >
+            <VariantName name={name} />
+          </span>
+          {(standardName !== name || row.startDate) && (
+            <span className="text-caption text-text-tertiary">
+              {standardName !== name && (
+                <span title={row.itemName} className="block">
+                  {standardName}
+                </span>
+              )}
+              {row.startDate &&
+                t('appliedOn', {
+                  date: format.dateTime(new Date(row.startDate), 'dateShort'),
+                })}
             </span>
           )}
-          {row.startDate &&
-            t('appliedOn', {
-              date: format.dateTime(new Date(row.startDate), 'dateShort'),
-            })}
         </span>
-        <PriceRange
-          min={row.price}
-          max={row.price}
-          className="shrink-0 text-label-bold text-text-primary"
-        />
+      </span>
+      <span className="ml-auto shrink-0 text-price-md whitespace-nowrap">
+        {tPrice('won', { amount: row.price })}
       </span>
     </button>
   );
@@ -304,27 +333,23 @@ const SKELETON_ROWS = 8;
 /** 첫 페이지와 같은 행 모양으로 자리를 잡아, 목록이 채워질 때 아래 구역이 화면 안에서 밀려나지 않게 한다. */
 function PriceListSkeleton() {
   return (
-    <div aria-hidden="true" className="flex flex-col gap-2">
-      <Skeleton className="h-5.5 w-24" />
-      <div className="flex flex-col rounded-xl bg-surface px-2 py-1 lg:px-3">
-        {Array.from({ length: SKELETON_ROWS }, (_, index) => (
-          <div
-            key={index}
-            className="border-b border-border py-1 last:border-b-0"
-          >
-            <div className="flex flex-col gap-0.5 px-3 py-3">
-              <Skeleton className="my-0.5 h-4.5 w-3/5" />
-              <div className="flex items-end justify-between gap-3">
-                <div className="flex flex-col">
-                  <Skeleton className="my-0.5 h-3.75 w-2/5 min-w-24" />
-                  <Skeleton className="my-0.5 h-3.75 w-24" />
-                </div>
-                <Skeleton className="my-0.5 h-4.5 w-16" />
-              </div>
-            </div>
-          </div>
-        ))}
+    <div aria-hidden="true" className="flex flex-col gap-1">
+      <div className="flex items-center justify-between border-b border-border pb-2.5">
+        <Skeleton className="h-6 w-28" />
+        <Skeleton className="h-5 w-10" />
       </div>
+      {Array.from({ length: SKELETON_ROWS }, (_, index) => (
+        <div
+          key={index}
+          className="flex items-center justify-between gap-4 border-b border-hairline py-3.5 last:border-b-0"
+        >
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <Skeleton className="h-5 w-3/5" />
+            <Skeleton className="h-3.5 w-2/5 min-w-24" />
+          </div>
+          <Skeleton className="h-6 w-20" />
+        </div>
+      ))}
     </div>
   );
 }
