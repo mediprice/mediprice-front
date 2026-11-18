@@ -4,7 +4,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Heart } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useRef, useState } from 'react';
+import { Fragment, useCallback, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -18,8 +18,11 @@ import { cn } from '@/lib/utils';
 
 import { FavoriteCard } from './favorite-card';
 import { FavoriteListSkeleton } from './favorite-list-skeleton';
+import { RemovedFavoriteRow } from './removed-favorite-row';
 
 type Notice = { id: number; text: string };
+/** 되돌릴 수 있게 잠깐 남겨 두는 뺀 병원과 원래 자리. 되돌리기 하나만 유지한다(새로 빼면 앞의 것은 확정). */
+type PendingUndo = { favorite: FavoriteHospital; index: number };
 
 export function FavoriteList() {
   const t = useTranslations('library.favorites');
@@ -29,25 +32,48 @@ export function FavoriteList() {
   const favorites = useQuery(favoriteQueries.list());
   const [notice, setNotice] = useState<Notice | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
-  const toggle = favoriteMutations.toggle();
-  /** 연달아 빼면 mutate별 콜백은 마지막 것만 불리므로 옵션 단계에서 결과를 받는다. 되돌리기(onError)는 그대로 둔다. */
-  const remove = useMutation({
-    ...toggle,
+  const [undo, setUndo] = useState<PendingUndo | null>(null);
+  const toggleOptions = favoriteMutations.toggle();
+  /** 연달아 빼면 mutate별 콜백은 마지막 것만 불리므로 옵션 단계에서 결과를 받는다. 캐시 되돌리기(onError)는 그대로 둔다. */
+  const toggle = useMutation({
+    ...toggleOptions,
     onError: (error, variables, result, context) => {
-      void toggle.onError?.(error, variables, result, context);
-      setFailure(`${t('removeFailed')} ${tErrors(errorMessageKey(error))}`);
+      void toggleOptions.onError?.(error, variables, result, context);
+      setUndo((current) =>
+        current?.favorite.ykiho === variables.ykiho ? null : current,
+      );
+      const key = variables.isFavorite ? 'restoreFailed' : 'removeFailed';
+      setFailure(`${t(key)} ${tErrors(errorMessageKey(error))}`);
     },
   });
-
-  function handleRemove(favorite: FavoriteHospital) {
-    setFailure(null);
-    remove.mutate({ ykiho: favorite.ykiho, isFavorite: false });
-    const text = t('removed', {
-      name: favorite.name ?? t('unavailableName'),
-    });
+  const announce = (text: string) =>
     setNotice((previous) => ({ id: (previous?.id ?? 0) + 1, text }));
+  const nameOf = (favorite: FavoriteHospital) =>
+    favorite.name ?? t('unavailableName');
+
+  function handleRemove(favorite: FavoriteHospital, index: number) {
+    setFailure(null);
+    setUndo({ favorite, index });
+    toggle.mutate({ ykiho: favorite.ykiho, isFavorite: false });
+    announce(t('removed', { name: nameOf(favorite) }));
+  }
+
+  function handleUndo({ favorite }: PendingUndo) {
+    setFailure(null);
+    setUndo(null);
+    toggle.mutate({
+      ykiho: favorite.ykiho,
+      isFavorite: true,
+      hospital: favorite,
+    });
+    announce(t('restored', { name: nameOf(favorite) }));
     headingRef.current?.focus();
   }
+
+  const handleExpire = useCallback((hadFocus: boolean) => {
+    setUndo(null);
+    if (hadFocus) headingRef.current?.focus();
+  }, []);
 
   if (favorites.isPending) return <FavoriteListSkeleton />;
 
@@ -71,6 +97,22 @@ export function FavoriteList() {
     );
   }
 
+  const items = favorites.data;
+  const undoRow =
+    undo && !items.some((item) => item.ykiho === undo.favorite.ykiho)
+      ? undo
+      : null;
+  const undoIndex = undoRow ? Math.min(undoRow.index, items.length) : -1;
+  const renderUndo = (pending: PendingUndo) => (
+    <li key={`removed-${pending.favorite.ykiho}`}>
+      <RemovedFavoriteRow
+        name={nameOf(pending.favorite)}
+        onUndo={() => handleUndo(pending)}
+        onExpire={handleExpire}
+      />
+    </li>
+  );
+
   return (
     <section aria-labelledby="favorites-heading" className="pt-4 lg:pt-0">
       <h2
@@ -79,10 +121,10 @@ export function FavoriteList() {
         tabIndex={-1}
         className={cn(
           'text-subheading outline-none',
-          favorites.data.length === 0 && 'sr-only',
+          items.length === 0 && !undoRow && 'sr-only',
         )}
       >
-        {t('count', { count: favorites.data.length })}
+        {t('count', { count: items.length })}
       </h2>
       {failure && (
         <p
@@ -92,7 +134,7 @@ export function FavoriteList() {
           {failure}
         </p>
       )}
-      {favorites.data.length === 0 ? (
+      {items.length === 0 && !undoRow ? (
         <EmptyState
           icon={<Heart />}
           title={t('emptyTitle')}
@@ -105,14 +147,18 @@ export function FavoriteList() {
         />
       ) : (
         <ul className="mt-3 flex flex-col gap-3 lg:mt-4 lg:gap-4">
-          {favorites.data.map((favorite) => (
-            <li key={favorite.ykiho}>
-              <FavoriteCard
-                favorite={favorite}
-                onRemove={() => handleRemove(favorite)}
-              />
-            </li>
+          {items.map((favorite, index) => (
+            <Fragment key={favorite.ykiho}>
+              {undoRow && index === undoIndex && renderUndo(undoRow)}
+              <li>
+                <FavoriteCard
+                  favorite={favorite}
+                  onRemove={() => handleRemove(favorite, index)}
+                />
+              </li>
+            </Fragment>
           ))}
+          {undoRow && undoIndex === items.length && renderUndo(undoRow)}
         </ul>
       )}
       <div aria-live="polite" aria-atomic="true" className="sr-only">

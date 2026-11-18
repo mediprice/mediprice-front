@@ -19,7 +19,8 @@ import {
 type Notice = { id: number; kind: 'added' | 'removed' | 'failed' };
 
 /**
- * 병원 찜 토글(하트, aria-pressed). 로그인하지 않았으면 로그인 다이얼로그를 연다.
+ * 병원 관심(찜) 토글. 상태는 바뀌는 접근성 이름("○○ 관심 추가" / "○○ 관심 병원에서 빼기")과 채운 하트로 알린다.
+ * 이름이 행동을 말하므로 aria-pressed는 쓰지 않는다(둘을 함께 쓰면 "빼기, 눌림"처럼 겹쳐 읽힌다). 로그인하지 않았으면 로그인 다이얼로그를 연다.
  * 하트 상태는 찜 목록 캐시(favoriteQueries.list)에서 읽으므로 화면에 여러 개를 두어도 목록 요청은 한 번이다.
  */
 export function FavoriteButton({
@@ -30,9 +31,9 @@ export function FavoriteButton({
   className,
 }: {
   ykiho: string;
-  /** 접근성 이름("○○ 관심 병원에 저장")과 관심 화면의 낙관적 표시에 쓴다. */
+  /** 접근성 이름과 관심 화면의 낙관적 표시에 쓴다. */
   hospital?: FavoriteSeed;
-  /** icon: 44px 하트만(카드·모바일). labeled: "저장/저장됨" 알약 버튼(병원 상세·데스크톱 카드). */
+  /** icon: 44px 하트만(카드). labeled: "관심 추가/관심 병원" 버튼(병원 상세, 비교함 담기 옆). */
   variant?: 'icon' | 'labeled';
   /** 실패를 화면에 따로 알리고 싶을 때. 하트는 이미 원래대로 돌아가 있다. */
   onError?: (error: Error) => void;
@@ -52,6 +53,13 @@ export function FavoriteButton({
   const isPressed = toggle.isPending ? toggle.variables.isFavorite : isSaved;
   const isBusy = isSignedIn && (isListPending || toggle.isPending);
   const name = hospital?.name?.trim();
+  const label = isPressed
+    ? name
+      ? t('removeLabelNamed', { name })
+      : t('removeLabel')
+    : name
+      ? t('addLabelNamed', { name })
+      : t('addLabel');
 
   const handleClick = guard('favorite', () => {
     if (isBusy) return;
@@ -78,18 +86,18 @@ export function FavoriteButton({
   return (
     <>
       <Button
-        variant={variant === 'icon' ? 'ghost' : 'tint'}
+        variant={variant === 'icon' ? 'ghost' : isPressed ? 'tint' : 'outline'}
         size={variant === 'icon' ? 'icon' : 'sm'}
-        aria-pressed={isPressed}
-        aria-label={name ? t('labelNamed', { name }) : t('label')}
+        aria-label={label}
         aria-busy={isBusy || undefined}
         data-slot="favorite-button"
+        data-pressed={isPressed}
         onClick={handleClick}
         className={cn(
           'z-10',
-          variant === 'icon'
-            ? 'text-text-tertiary hover:bg-surface aria-pressed:text-primary'
-            : 'rounded-full',
+          variant === 'icon' &&
+            'text-text-tertiary hover:bg-surface data-[pressed=true]:text-primary',
+          variant === 'labeled' && isPressed && 'text-primary-text',
           className,
         )}
       >
@@ -99,7 +107,7 @@ export function FavoriteButton({
           className={cn(variant === 'icon' && 'size-6!')}
         />
         {variant === 'labeled' && (
-          <span aria-hidden="true">{isPressed ? t('saved') : t('save')}</span>
+          <span aria-hidden="true">{isPressed ? t('added') : t('add')}</span>
         )}
       </Button>
       <span aria-live="polite" aria-atomic="true" className="sr-only">

@@ -82,6 +82,11 @@ export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
     });
   }
 
+  function openDelete() {
+    remove.reset();
+    setIsDeleting(true);
+  }
+
   function handleDelete() {
     remove.mutate(undefined, {
       onSuccess: () => {
@@ -128,37 +133,36 @@ export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
             })
           : t('notSaved')}
       </p>
-      {save.isError && !isFieldRejection(save.error) && (
-        <p role="alert" className="text-body-sm text-danger">
-          {tErrors(errorMessageKey(save.error))}
-        </p>
-      )}
-      <p role="status" className="text-body-sm text-positive empty:hidden">
-        {status && !isDirty && t(status)}
-      </p>
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-        <Button
-          type="submit"
-          size="lg"
-          isLoading={save.isPending}
-          className="w-full lg:w-auto lg:min-w-30"
-        >
-          {t('save')}
-        </Button>
-        {profile && (
-          <Button
-            variant="dangerText"
-            size="lg"
-            onClick={() => {
-              remove.reset();
-              setIsDeleting(true);
-            }}
-            className="w-full lg:w-auto"
-          >
-            {t('remove')}
-          </Button>
+      {/** 긴 폼이라 모바일은 저장 바를 화면 아래에 붙인다. 폼 안에서만 붙어 있어 끝에 오면 제자리에 놓이고 내용을 가리지 않는다. */}
+      <div className="sticky bottom-0 z-(--z-bottom-cta) -mx-(--page-gutter) flex flex-col gap-2 border-t border-hairline bg-bg px-(--page-gutter) pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-bar lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
+        {save.isError && !isFieldRejection(save.error) && (
+          <p role="alert" className="text-body-sm text-danger">
+            {tErrors(errorMessageKey(save.error))}
+          </p>
         )}
+        <p role="status" className="text-body-sm text-positive empty:hidden">
+          {status && !isDirty && t(status)}
+        </p>
+        <div className="flex items-center gap-3">
+          <Button
+            type="submit"
+            size="lg"
+            isLoading={save.isPending}
+            className="w-full lg:w-auto lg:min-w-30"
+          >
+            {t('save')}
+          </Button>
+          {profile && (
+            <DeleteButton
+              onClick={openDelete}
+              className="hidden lg:inline-flex"
+            />
+          )}
+        </div>
       </div>
+      {profile && (
+        <DeleteButton onClick={openDelete} className="w-full lg:hidden" />
+      )}
       <ProfileDialogs
         isDeleting={isDeleting}
         onDeletingChange={setIsDeleting}
@@ -171,5 +175,25 @@ export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
         leaveGuard={leaveGuard}
       />
     </form>
+  );
+}
+
+function DeleteButton({
+  onClick,
+  className,
+}: {
+  onClick: () => void;
+  className: string;
+}) {
+  const t = useTranslations('library.medicalProfile');
+  return (
+    <Button
+      variant="dangerText"
+      size="lg"
+      onClick={onClick}
+      className={className}
+    >
+      {t('remove')}
+    </Button>
   );
 }

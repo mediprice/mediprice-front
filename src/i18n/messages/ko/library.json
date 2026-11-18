@@ -1,9 +1,11 @@
 {
   "favoriteButton": {
-    "label": "관심 병원에 저장",
-    "labelNamed": "{name} 관심 병원에 저장",
-    "save": "저장",
-    "saved": "저장됨",
+    "add": "관심 추가",
+    "added": "관심 병원",
+    "addLabel": "관심 병원에 추가",
+    "addLabelNamed": "{name} 관심 추가",
+    "removeLabel": "관심 병원에서 빼기",
+    "removeLabelNamed": "{name} 관심 병원에서 빼기",
     "notice": {
       "added": "관심 병원에 저장했어요.",
       "removed": "관심 병원에서 뺐어요.",
@@ -24,7 +26,12 @@
     "emptyTitle": "아직 관심 병원이 없어요",
     "emptyDescription": "병원 상세에서 하트를 누르면 여기에 모아 볼 수 있어요.",
     "browse": "병원 둘러보기",
-    "errorTitle": "관심 병원을 불러오지 못했어요"
+    "errorTitle": "관심 병원을 불러오지 못했어요",
+    "removedInline": "<strong>{name}</strong> 관심에서 뺐어요",
+    "undo": "되돌리기",
+    "undoLabel": "{name} 관심 병원 되돌리기",
+    "restored": "{name}을(를) 다시 관심 병원에 저장했어요.",
+    "restoreFailed": "관심 병원에 다시 저장하지 못했어요."
   },
   "history": {
     "title": "최근 기록",
@@ -49,8 +56,6 @@
     "gone": "삭제된 대상",
     "listLabel": "최근 기록 {count, plural, other {#개}}",
     "revisit": "다시 보기",
-    "revisitLabel": "{title} 다시 보기",
-    "remove": "삭제",
     "removeLabel": "{title} 기록 삭제",
     "removed": "기록을 삭제했어요.",
     "removeFailed": "기록을 삭제하지 못했어요.",

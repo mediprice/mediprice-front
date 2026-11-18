@@ -73,7 +73,7 @@ export function FavoriteCard({
       >
         <Heart aria-hidden="true" fill="currentColor" />
         <span aria-hidden="true" className="hidden lg:inline">
-          {tButton('saved')}
+          {tButton('added')}
         </span>
       </Button>
     </article>
