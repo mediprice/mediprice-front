@@ -7,7 +7,7 @@ import {
  * 평균의 1/3 아래이거나 3배 위인 가격은 % 차이를 말하지 않는다. 도수치료 서울·경기 2,744건에서 15분 세션 중앙값은 평균의 0.25배,
  * 100분 세션은 3.4배였다. 이 차이는 병원이 싸거나 비싸서가 아니라 시간·횟수 같은 세부 구성이 달라서 생긴다(docs 14장).
  */
-export const COMPARABLE_RATIO = 3;
+const COMPARABLE_RATIO = 3;
 
 export type AverageVerdict =
   | { kind: 'comparable'; comparison: AverageComparison }
