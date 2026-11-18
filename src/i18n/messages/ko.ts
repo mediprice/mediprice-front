@@ -6,6 +6,7 @@ import errors from './ko/errors.json';
 import home from './ko/home.json';
 import hospitals from './ko/hospitals.json';
 import items from './ko/items.json';
+import legal from './ko/legal.json';
 import library from './ko/library.json';
 import liveFee from './ko/liveFee.json';
 import map from './ko/map.json';
@@ -35,4 +36,5 @@ export const messages = {
   ai,
   map,
   liveFee,
+  legal,
 };

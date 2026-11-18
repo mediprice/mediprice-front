@@ -1,7 +1,8 @@
 'use client';
 
-import { Clock, Heart, PenLine } from 'lucide-react';
+import { Clock, ExternalLink, Heart, PenLine } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import type { ReactNode } from 'react';
 
 import {
   ResponsiveDialog,
@@ -10,6 +11,27 @@ import {
 
 import { closeLoginDialog, useLoginDialogState } from '../login-dialog-store';
 import { GoogleLoginButton } from './google-login-button';
+
+/** 로그인 흐름(돌아올 경로)을 잃지 않도록 약관은 새 탭으로 연다. */
+function newTabLink(href: '/terms' | '/privacy') {
+  return function NewTabLink(chunks: ReactNode) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener"
+        className="text-primary-text underline underline-offset-4 hover:decoration-2"
+      >
+        {chunks}
+        <ExternalLink
+          aria-hidden="true"
+          className="ml-0.5 inline size-3.5 align-middle"
+          strokeWidth={2}
+        />
+      </a>
+    );
+  };
+}
 
 /** 셸에 하나만 렌더하고 openLoginDialog()로 연다. 헤더에서 직접 열면(general) 제목이 "로그인", 막힌 행동에서 열면 "로그인이 필요해요"다. */
 export function LoginDialog() {
@@ -71,7 +93,13 @@ export function LoginDialog() {
             size="lg"
             className="min-h-14 w-full text-subheading"
           />
-          <p className="text-body-sm text-text-secondary">{t('terms')}</p>
+          <p className="text-body-sm text-text-secondary">
+            {t.rich('terms', {
+              terms: newTabLink('/terms'),
+              privacy: newTabLink('/privacy'),
+              newTab: (chunks) => <span className="sr-only">{chunks}</span>,
+            })}
+          </p>
         </div>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
