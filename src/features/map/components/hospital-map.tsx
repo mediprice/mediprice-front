@@ -2,35 +2,20 @@
 
 import 'leaflet/dist/leaflet.css';
 
-import { latLng, latLngBounds, type Map as LeafletMap } from 'leaflet';
+import { latLngBounds, type Map as LeafletMap } from 'leaflet';
 import { Minus, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Circle,
-  CircleMarker,
-  MapContainer,
-  Marker,
-  TileLayer,
-  useMap,
-  useMapEvents,
-} from 'react-leaflet';
+import { type ReactNode, useEffect, useState } from 'react';
+import { Circle, CircleMarker, MapContainer, TileLayer } from 'react-leaflet';
 
 import { KOREA_BOUNDS, type LatLng } from '../map-geo';
 import { useReducedMotion } from '../use-reduced-motion';
-import { createMarkerIcon, type MapMarkerKind } from './marker-icon';
-
-export type MapMarker = {
-  id: string;
-  position: LatLng;
-  kind: MapMarkerKind;
-  /** 마커에 보일 짧은 문구(가격, 또는 고른 병원의 이름). 번역한 문자열을 넘긴다. */
-  label: string;
-};
+import { HospitalMarkers, type MapMarker } from './hospital-markers';
+import { boundsOf, type MapSearchArea, MapViewSync } from './map-view-sync';
 
 export type HospitalMapProps = {
   /** 바뀌면 지도가 이 원이 보이게 맞춘다. 같은 객체를 다시 넘기면 움직이지 않는다. */
-  search: { center: LatLng; radius: number };
+  search: MapSearchArea;
   markers: MapMarker[];
   selectedId: string | null;
   onSelect: (id: string) => void;
@@ -46,12 +31,6 @@ const MAX_BOUNDS = latLngBounds(
   [KOREA_BOUNDS.south - 0.5, KOREA_BOUNDS.west - 0.5],
   [KOREA_BOUNDS.north + 0.5, KOREA_BOUNDS.east + 0.5],
 );
-
-function boundsOf(search: HospitalMapProps['search']) {
-  return latLng(search.center.lat, search.center.lng).toBounds(
-    search.radius * 2,
-  );
-}
 
 /**
  * 지도 라이브러리(Leaflet + OpenStreetMap)를 이 파일 안에만 둔다. 다른 지도(네이버 등)로 바꿀 때는 같은 props로
@@ -121,15 +100,12 @@ export function HospitalMap({
             }}
           />
         )}
-        {markers.map((marker) => (
-          <HospitalMarker
-            key={marker.id}
-            marker={marker}
-            isSelected={marker.id === selectedId}
-            onSelect={onSelect}
-          />
-        ))}
-        <ViewSync
+        <HospitalMarkers
+          markers={markers}
+          selectedId={selectedId}
+          onSelect={onSelect}
+        />
+        <MapViewSync
           search={search}
           markers={markers}
           selectedId={selectedId}
@@ -161,77 +137,4 @@ export function HospitalMap({
       </div>
     </div>
   );
-}
-
-function HospitalMarker({
-  marker,
-  isSelected,
-  onSelect,
-}: {
-  marker: MapMarker;
-  isSelected: boolean;
-  onSelect: (id: string) => void;
-}) {
-  const { kind, label, id } = marker;
-  const icon = useMemo(
-    () => createMarkerIcon({ kind, label, isSelected }),
-    [kind, label, isSelected],
-  );
-  const eventHandlers = useMemo(
-    () => ({ click: () => onSelect(id) }),
-    [onSelect, id],
-  );
-  return (
-    <Marker
-      position={[marker.position.lat, marker.position.lng]}
-      icon={icon}
-      keyboard={false}
-      zIndexOffset={isSelected ? 1000 : 0}
-      eventHandlers={eventHandlers}
-    />
-  );
-}
-
-/** 검색 영역이 바뀌면 원이 보이게 맞추고, 목록에서 고른 병원이 화면 밖이면 그쪽으로 옮긴다. */
-function ViewSync({
-  search,
-  markers,
-  selectedId,
-  onMoveEnd,
-  isReducedMotion,
-}: {
-  search: HospitalMapProps['search'];
-  markers: MapMarker[];
-  selectedId: string | null;
-  onMoveEnd: (center: LatLng) => void;
-  isReducedMotion: boolean;
-}) {
-  const map = useMap();
-  const fittedSearch = useRef(search);
-
-  useMapEvents({
-    moveend: () => {
-      const center = map.getCenter();
-      onMoveEnd({ lat: center.lat, lng: center.lng });
-    },
-  });
-
-  useEffect(() => {
-    if (search === fittedSearch.current) return;
-    fittedSearch.current = search;
-    map.fitBounds(boundsOf(search), { animate: !isReducedMotion });
-  }, [search, map, isReducedMotion]);
-
-  const selected = markers.find((marker) => marker.id === selectedId)?.position;
-  const selectedLat = selected?.lat;
-  const selectedLng = selected?.lng;
-  useEffect(() => {
-    if (selectedLat === undefined || selectedLng === undefined) return;
-    map.panInside([selectedLat, selectedLng], {
-      padding: [48, 48],
-      animate: !isReducedMotion,
-    });
-  }, [selectedId, selectedLat, selectedLng, map, isReducedMotion]);
-
-  return null;
 }

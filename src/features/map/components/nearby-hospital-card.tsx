@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import type { ComponentProps } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { FavoriteButton } from '@/features/favorites/components/favorite-button';
 import { cn } from '@/lib/utils';
 
 import type { NearbyHospital } from '../queries';
@@ -18,6 +19,7 @@ export function NearbyHospitalCard<T extends string>({
   hasItem,
   isSelected,
   onShowOnMap,
+  isCompact = false,
   className,
   ...props
 }: Omit<ComponentProps<'article'>, 'children'> & {
@@ -26,7 +28,10 @@ export function NearbyHospitalCard<T extends string>({
   /** 항목을 골라 가격을 보여 주는 중인지. 아니면 가격 줄을 빼고 병원 정보만 보여 준다. */
   hasItem: boolean;
   isSelected: boolean;
+  /** 없으면 "지도에서 보기"를 그리지 않는다(이미 지도 옆에 보일 때). */
   onShowOnMap?: () => void;
+  /** 지도 아래 "선택한 병원"처럼 좁은 곳: 주소와 선택 표시 줄을 뺀다. */
+  isCompact?: boolean;
 }) {
   const t = useTranslations('map.card');
   const tPrice = useTranslations('common.price');
@@ -46,20 +51,27 @@ export function NearbyHospitalCard<T extends string>({
       )}
       {...props}
     >
-      <div className="flex flex-col gap-1">
-        {isSelected && (
-          <p className="flex items-center gap-1 text-caption-bold text-primary-text">
-            <MapPin aria-hidden="true" className="size-3.5" strokeWidth={2} />
-            {t('selected')}
-          </p>
-        )}
-        <h3 className="text-subheading">{hospital.name}</h3>
-        <p className="text-body-sm text-text-secondary">{meta}</p>
-        {hospital.address && (
-          <p className="line-clamp-2 text-body-sm text-text-tertiary">
-            {hospital.address}
-          </p>
-        )}
+      <div className="flex items-start gap-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          {isSelected && !isCompact && (
+            <p className="flex items-center gap-1 text-caption-bold text-primary-text">
+              <MapPin aria-hidden="true" className="size-3.5" strokeWidth={2} />
+              {t('selected')}
+            </p>
+          )}
+          <h3 className="text-subheading">{hospital.name}</h3>
+          <p className="text-body-sm text-text-secondary">{meta}</p>
+          {hospital.address && !isCompact && (
+            <p className="line-clamp-2 text-body-sm text-text-tertiary">
+              {hospital.address}
+            </p>
+          )}
+        </div>
+        <FavoriteButton
+          ykiho={hospital.ykiho}
+          hospital={hospital}
+          className="-mt-2 -mr-2"
+        />
       </div>
 
       {hasItem &&
@@ -72,7 +84,7 @@ export function NearbyHospitalCard<T extends string>({
         ))}
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        {hasPosition ? (
+        {!onShowOnMap ? null : hasPosition ? (
           <Button
             variant="tint"
             size="sm"

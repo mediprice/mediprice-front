@@ -15,6 +15,11 @@
     "itemLoading": "항목 이름을 불러오는 중",
     "backToList": "목록"
   },
+  "view": {
+    "label": "보기 방식",
+    "list": "목록",
+    "map": "지도"
+  },
   "radius": {
     "label": "검색 반경",
     "option": "{km, number}km"

@@ -31,7 +31,9 @@ export function CompareTray() {
   const barRef = useRef<HTMLDivElement>(null);
   const countRef = useRef<HTMLParagraphElement>(null);
   const [dismissedNotice, setDismissedNotice] = useState(0);
-  const isVisible = hospitals.length > 0 && pathname !== '/compare';
+  /** 지도 화면은 지도와 목록이 화면 높이를 꽉 채워서 바가 둘을 가린다. */
+  const isVisible =
+    hospitals.length > 0 && pathname !== '/compare' && pathname !== '/map';
   const coveredHeight = useCoveredHeight(barRef, isVisible);
   const isFull = notice?.kind === 'full' && notice.id !== dismissedNotice;
   const canCompare = hospitals.length >= 2;

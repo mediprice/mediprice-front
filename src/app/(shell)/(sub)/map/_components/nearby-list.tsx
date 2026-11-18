@@ -4,7 +4,7 @@ import type {
   InfiniteData,
   UseInfiniteQueryResult,
 } from '@tanstack/react-query';
-import { CircleAlert, MapPinned, X } from 'lucide-react';
+import { CircleAlert, MapPinned } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
@@ -14,12 +14,13 @@ import { NearbyHospitalCard } from '@/features/map/components/nearby-hospital-ca
 import { RADIUS_OPTIONS, type RadiusOption } from '@/features/map/map-geo';
 import type { NearbyHospital } from '@/features/map/queries';
 import { errorMessageKey } from '@/lib/api/error-message';
+import { cn } from '@/lib/utils';
 
 type NearbyPage = { content: NearbyHospital[]; totalElements: number };
 
 export const hospitalCardId = (ykiho: string) => `map-hospital-${ykiho}`;
 
-function hospitalHref(ykiho: string, item: string | null) {
+export function hospitalHref(ykiho: string, item: string | null) {
   const path = `/hospitals/${encodeURIComponent(ykiho)}` as const;
   return item ? (`${path}?item=${encodeURIComponent(item)}` as const) : path;
 }
@@ -32,8 +33,9 @@ export function NearbyList({
   radius,
   isSearching,
   selectedId,
-  onSelect,
+  onShowOnMap,
   onRadiusChange,
+  className,
 }: {
   query: UseInfiniteQueryResult<InfiniteData<NearbyPage>>;
   hospitals: NearbyHospital[];
@@ -42,47 +44,29 @@ export function NearbyList({
   /** 첫 위치를 기다리는 중이라 아직 조회하지 않았다. */
   isSearching: boolean;
   selectedId: string | null;
-  onSelect: (id: string | null) => void;
+  onShowOnMap: (id: string) => void;
   onRadiusChange: (radius: RadiusOption) => void;
+  className?: string;
 }) {
   const t = useTranslations('map.list');
-  const tCard = useTranslations('map.card');
   const tErrors = useTranslations('errors');
   const tActions = useTranslations('common.actions');
   const total = query.data?.pages[0]?.totalElements;
   const noPositionCount = hospitals.filter(
     (h) => h.latitude === null || h.longitude === null,
   ).length;
-  const selected = hospitals.find((hospital) => hospital.ykiho === selectedId);
   const isLoading = isSearching || query.isPending;
   const wider = RADIUS_OPTIONS.find((option) => option > radius);
 
   return (
     <section
       aria-labelledby="map-list-title"
-      className="border-t border-hairline bg-bg lg:w-115 lg:shrink-0 lg:overflow-y-auto lg:border-t-0 lg:border-r"
+      className={cn(
+        'bg-bg lg:w-115 lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-hairline',
+        className,
+      )}
     >
       <div className="flex flex-col gap-4 pt-5 px-page pb-section lg:px-6 lg:pb-8">
-        {selected && (
-          <div className="flex flex-col gap-2 lg:hidden">
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="text-label-bold text-text-secondary">
-                {tCard('selectedHeading')}
-              </h2>
-              <Button variant="ghost" size="sm" onClick={() => onSelect(null)}>
-                <X aria-hidden="true" />
-                {tCard('clearSelection')}
-              </Button>
-            </div>
-            <NearbyHospitalCard
-              hospital={selected}
-              href={hospitalHref(selected.ykiho, item)}
-              hasItem={item !== null}
-              isSelected
-            />
-          </div>
-        )}
-
         <div className="flex flex-col gap-1">
           <h2
             id="map-list-title"
@@ -166,11 +150,7 @@ export function NearbyList({
                     href={hospitalHref(hospital.ykiho, item)}
                     hasItem={item !== null}
                     isSelected={hospital.ykiho === selectedId}
-                    onShowOnMap={() =>
-                      onSelect(
-                        hospital.ykiho === selectedId ? null : hospital.ykiho,
-                      )
-                    }
+                    onShowOnMap={() => onShowOnMap(hospital.ykiho)}
                   />
                 </li>
               ))}
