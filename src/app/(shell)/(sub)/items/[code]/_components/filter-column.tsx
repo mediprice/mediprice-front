@@ -1,8 +1,11 @@
 'use client';
 
+import { Map as MapIcon } from 'lucide-react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { regionQuery } from '@/features/regions/service-region';
 
 import { FilterPanel } from './filter-panel';
 import {
@@ -22,6 +25,11 @@ export function FilterColumn({
 }) {
   const t = useTranslations('items.filters');
   const applyFilters = useApplyFilters(code);
+  const tMap = useTranslations('map.entry');
+  const mapQuery = new URLSearchParams({
+    item: code,
+    ...regionQuery(filters.region),
+  }).toString();
 
   return (
     <aside
@@ -44,6 +52,12 @@ export function FilterColumn({
         </Button>
       </div>
       <FilterPanel value={filters} onChange={applyFilters} />
+      <Button asChild variant="outline" size="md" className="mt-5 w-full">
+        <Link href={`/map?${mapQuery}`}>
+          <MapIcon aria-hidden="true" />
+          {tMap('openMap')}
+        </Link>
+      </Button>
     </aside>
   );
 }
