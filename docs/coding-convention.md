@@ -390,38 +390,53 @@ export const hospitalQueries = {
 
 ### 8.2 디자인 토큰 (MUST)
 
-토큰은 `src/app/globals.css`에 있다. Figma(MediPrice) 변수·텍스트 스타일·이펙트 스타일에서 시작했고, 대비와 가독성 QA에서 바꾼 값은 파일에 이유를 적어 두었다. Figma는 하나의 안이므로 QA 결과가 우선한다. 우리 코드는 이 이름만 쓴다.
+토큰은 `src/app/globals.css`에 있다. Figma(MediPrice) 변수·텍스트 스타일·이펙트 스타일에서 시작했고, 2026-11 리디자인("큰 숫자", `docs/design/2026-11-19-redesign-big-numbers.md`)에서 이름은 두고 값만 바꿨다. 흰 바탕 하나, 맑은 파랑 하나, 큰 가격 숫자가 기본이다. 대비와 가독성 QA에서 정한 값은 파일에 이유를 적어 두었다. 우리 코드는 이 이름만 쓴다.
 
-| 종류     | 클래스 예                                                                                                                                                                                                           |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 색       | `bg-primary` `hover:bg-primary-hover` `active:bg-primary-pressed` `text-primary-text` `bg-primary-tint`(`-hover`, `-pressed`, 페이지 머리 띠) `bg-surface` `bg-surface-strong` `border-hairline`                    |
-| 글자색   | `text-text-primary` `text-text-secondary` `text-text-tertiary` `text-text-disabled` `text-on-primary`                                                                                                               |
-| 상태     | `text-positive` `bg-positive-tint` `text-warning` `bg-warning-tint` `text-danger` `bg-danger`(`-hover`, `-pressed`) `bg-danger-tint` `bg-overlay`                                                                   |
-| 선       | `border-border` `border-border-strong` `outline-focus-ring`, 파란 면 위는 `focus-inverse`                                                                                                                           |
-| 타이포   | `text-hero` `text-display` `text-title` `text-heading` `text-subheading` `text-body-lg` `text-body`(16px) `text-body-sm`(15px) `text-label(-bold)` `text-caption(-strong/-bold)` `text-price-md/lg/xl` `text-field` |
-| 모서리   | 카드·다이얼로그 `rounded-xl`, 버튼·입력·배너 `rounded-lg`, 타일·세그먼트·태그 `rounded-md`, 칩 `rounded-full`, 시트 상단 `rounded-t-3xl`                                                                            |
-| 그림자   | `shadow-card` `shadow-cta-glow` `shadow-float` `shadow-sheet` `shadow-bar`. 쓰임은 카드·떠 있는 것(다이얼로그)·시트·하단 바·대표 CTA로만 나눈다                                                                     |
-| 레이아웃 | `max-w-page` `px-page`(16·24·32px + 노치) `py-section`(40 → lg 64px) `h-top-nav` `h-top-bar` `h-tab-bar` `pb-tab-bar` `pb-safe` `pt-safe` `px-safe` `touch-target`                                                  |
-| 겹침     | `z-(--z-header)` `z-(--z-tab-bar)` `z-(--z-bottom-cta)` `z-(--z-overlay)` `z-(--z-toast)` `z-(--z-skip-link)`. 숫자 `z-40`을 직접 쓰지 않는다                                                                       |
-| 움직임   | `ease-standard`, 150–200ms. `prefers-reduced-motion`이면 전역에서 멈춘다(상태를 알리는 스피너만 `data-allow-motion`)                                                                                                |
+| 종류     | 클래스 예                                                                                                                                                                                                                               |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 색       | `bg-primary` `hover:bg-primary-hover` `active:bg-primary-pressed` `text-primary-text` `bg-primary-tint`(`-hover`, `-pressed`, 선택 상태·칩·작은 강조 면만) `bg-surface`(묶음 면) `bg-surface-strong` `border-hairline`(목록 행 구분선)  |
+| 글자색   | `text-text-primary` `text-text-secondary` `text-text-tertiary` `text-text-disabled` `text-on-primary`                                                                                                                                   |
+| 상태     | `text-positive` `bg-positive-tint` `text-warning` `bg-warning-tint` `text-danger` `bg-danger`(`-hover`, `-pressed`) `bg-danger-tint` `bg-overlay`                                                                                       |
+| 선       | `border-border` `border-border-strong` `outline-focus-ring`, 파란 면 위는 `focus-inverse`                                                                                                                                               |
+| 타이포   | `text-hero` `text-display` `text-title` `text-section` `text-heading` `text-subheading` `text-body-lg` `text-body`(16px) `text-body-sm`(15px) `text-label(-bold)` `text-caption(-strong/-bold)` `text-price-md/lg/xl/hero` `text-field` |
+| 모서리   | 카드·묶음 면 `rounded-2xl`, 큰 면 `rounded-3xl`, 버튼·입력·다이얼로그·세그먼트 `rounded-xl`(작은 버튼·세그먼트 안 항목 `rounded-lg`), 태그 `rounded-md`, 칩 `rounded-full`, 시트 상단 `rounded-t-3xl`                                   |
+| 그림자   | `shadow-card`(거의 보이지 않음) `shadow-cta-glow` `shadow-float` `shadow-sheet` `shadow-bar`. 묶음은 그림자보다 `surface` 면으로 나누고, `float`·`sheet`·`bar`는 겹치는 요소에만 쓴다                                                   |
+| 레이아웃 | `max-w-page` `px-page`(16·24·32px + 노치) `py-section`(40 → lg 64px) `h-top-nav` `h-top-bar` `h-tab-bar` `pb-tab-bar` `pb-safe` `pt-safe` `px-safe` `touch-target`                                                                      |
+| 겹침     | `z-(--z-header)` `z-(--z-tab-bar)` `z-(--z-bottom-cta)` `z-(--z-overlay)` `z-(--z-toast)` `z-(--z-skip-link)`. 숫자 `z-40`을 직접 쓰지 않는다                                                                                           |
+| 움직임   | 상태 전환은 `ease-standard` 200–400ms, 처음 나타나는 것(스크롤 등장·범위 막대·숫자 롤업 800ms)은 `ease-enter`. `prefers-reduced-motion`이면 전역에서 멈춘다(상태를 알리는 스피너만 `data-allow-motion`)                                 |
 
-- 타이포는 모바일 우선이다. `hero` `display` `title` `price-lg` `price-xl`은 모바일 값(28·28·24·22·26px)이고 `lg`부터 데스크톱 값(34·32·26·24·30px)으로 자동으로 바뀐다. 읽는 거리가 먼 데스크톱에서는 `caption`(13→14px), `body-sm`·`label`(15→16px)도 한 단계 커진다. 배경 그라데이션과 왼쪽 선 강조는 쓰지 않는다(단색 띠, 옅은 바탕으로 구분). 화면에서 `lg:text-*`를 따로 붙이지 않는다.
+- 타이포는 모바일 우선이다. `hero` `display` `title` `section` `price-lg` `price-xl` `price-hero`는 모바일 값(28·28·24·22·24·30·40px)이고 `lg`부터 데스크톱 값(34·32·26·28·28·36·56px)으로 자동으로 바뀐다. 읽는 거리가 먼 데스크톱에서는 `caption`(13→14px), `body-sm`·`label`(15→16px)도 한 단계 커진다. 배경 그라데이션과 왼쪽 선 강조는 쓰지 않는다(단색 띠, 옅은 바탕으로 구분). 화면에서 `lg:text-*`를 따로 붙이지 않는다.
 - 타이포 토큰 하나에 크기·행간·자간·굵기가 함께 들어 있다. `font-bold` 같은 굵기 클래스를 따로 붙이지 않는다(활성 상태처럼 굵기만 바꿀 때는 예외).
 - 본문은 16px(`text-body`)이 기본이다. 13px(`text-caption`)은 출처·날짜 같은 메타 정보에만 쓰고, 가격 조건("1회 기준")처럼 판단에 필요한 정보에는 쓰지 않는다.
-- 대비: 글자는 배경과 4.5:1 이상(큰 글자 3:1). `text-tertiary`까지는 흰색·surface·surface-strong 위에서 통과한다. 입력창처럼 테두리만으로 구분되는 컨트롤은 `border-border`(1.3:1)가 아니라 `border-border-strong`(3.3:1)을 쓴다.
+- 대비: 글자는 배경과 4.5:1 이상(큰 글자 3:1). `text-tertiary`까지는 흰색·surface·surface-strong 위에서 통과한다(surface-strong 위 4.6:1). 입력창처럼 테두리만으로 구분되는 컨트롤은 `border-border`(1.2:1)가 아니라 `border-border-strong`(흰 바탕 3.6:1, surface 3.3:1)을 쓴다.
 - Tailwind 기본 팔레트(`blue-600`, `slate-50`), `white`·`black`, 기본 글자 크기(`text-sm`~`text-9xl`), shadcn 별칭(`bg-background`, `text-muted-foreground`)은 쓰지 않는다(lint). 기본 팔레트는 CSS도 만들어지지 않는다.
 - 간격은 Tailwind 기본 4px 단위를 그대로 쓴다(`gap-3` = 12px, `w-70` = 280px).
 - arbitrary value(`[...]`)는 토큰으로 표현할 수 없을 때만 쓴다(safe-area 계산, grid template).
-- 가격처럼 자릿수를 맞춰야 하는 숫자에는 `tabular-nums`를 쓴다.
+- 가격처럼 자릿수를 맞춰야 하는 숫자에는 `tabular-nums`를 쓴다. `text-price-*`에는 이미 들어 있다.
+- 가격 화면의 문법: 결론 문장 제목(`hero`·`display`·`section`), 화면의 주인공 가격 하나는 `text-price-hero`, 행의 가격은 오른쪽 정렬 `text-price-lg`, 그리고 최저–평균–최고 `RangeBar`. 넓은 색 띠·그라데이션·왼쪽 선 강조는 쓰지 않는다.
 - 토큰을 추가하거나 이름을 바꾸면 `src/lib/utils.ts`의 `extendTailwindMerge` 목록도 고친다. 등록하지 않으면 `cn('text-title', 'text-text-primary')`에서 앞 클래스가 지워진다.
 - 토큰 이름이 shadcn 별칭과 겹치지 않게 한다(예: 입력창 타이포가 `text-input`이면 `--color-input`과 겹쳐 색까지 바뀐다).
 - 다크 모드는 없다.
 
-### 8.3 폰트
+### 8.3 움직임과 공용 조각
+
+| 조각                                                | 쓰임                                                                                                                                                                                                                   |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RangeBar`(`components/ui/range-bar.tsx`)           | `min` `max` `average?` `value?`(이 병원 점) `valueLabel?` `size`(`md` 라벨 붙은 막대, `sm` 목록 행의 작은 막대) `showAverageAmount?`. 범위가 없거나 최저=최고면 그리지 않는다. 막대는 `aria-hidden`, 뜻은 sr-only 문장 |
+| `RollingNumber`(`components/ui/rolling-number.tsx`) | `value` `format?`(가격은 `(n) => t('won', { amount: n })`). 처음 보일 때와 값이 바뀔 때 0부터 굴린다. 접근성 이름은 최종값                                                                                             |
+| `Reveal`(`components/ui/reveal.tsx`)                | 스크롤 등장(12px 아래에서 떠오름). `asChild` `delayMs`. 서버 렌더·이미 보이는 것·reduced-motion은 그대로 보인다                                                                                                        |
+| `useRotation` + `RotationControls`                  | `useRotation(length, intervalMs)`는 `index` `paused` `isUserPaused` `next` `prev` `goTo` `toggle` `rootProps`를 준다. 마우스·포커스·탭 숨김에 멈추고 reduced-motion이면 멈춘 채 시작한다. 멈춤 버튼은 항상 함께 둔다   |
+| `PriceOverview`(`features/npay`)                    | `size="md"`는 목록·카드, `size="lg"`는 화면 머리(굴러 올라가는 큰 평균 + 라벨 붙은 막대). `label`로 "도수치료, 서울·경기 평균" 같은 줄을 준다                                                                          |
+
+- 움직임은 `lib/motion`의 `useFirstView`(처음 보일 때 한 번)와 `usePrefersReducedMotion`으로 만든다. 서버 렌더와 JS가 없을 때는 항상 최종 모습이다.
+- 움직이는 숫자·막대는 장식이다. 같은 뜻을 글자로 함께 둔다.
+- 자동으로 바뀌는 것(예시 문구, 오늘의 가격)은 멈춤 수단이 있어야 한다(MUST). 멈출 수 없는 자동 슬라이드는 쓰지 않는다.
+
+### 8.4 폰트
 
 Pretendard 하나만 쓴다. `app/layout.tsx`에서 `pretendard` 패키지의 dynamic subset CSS를 import한다. 화면에 필요한 글자 조각만 받으므로 `next/font/local`로 2MB 전체 파일을 받지 않는다.
 
-### 8.4 shadcn 추가
+### 8.5 shadcn 추가
 
 ```bash
 pnpm ui:add dialog sheet   # components/primitives에 생성, cn import를 @/lib/utils로 바꿈
