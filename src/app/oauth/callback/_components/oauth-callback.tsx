@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   type CallbackOutcome,
   describeCallbackError,
@@ -36,7 +37,7 @@ export function OAuthCallback() {
   }, [router]);
 
   return (
-    <div className="flex w-full max-w-100 flex-col items-center gap-4 rounded-xl bg-bg px-6 py-10 text-center shadow-card">
+    <div className="w-full max-w-100">
       {failure ? (
         <CallbackFailure code={failure.code} returnTo={failure.returnTo} />
       ) : (
@@ -49,17 +50,12 @@ export function OAuthCallback() {
 function CallbackProgress() {
   const t = useTranslations('auth.callback');
   return (
-    <div role="status" className="flex flex-col items-center gap-4">
-      <LoaderCircle
-        aria-hidden="true"
-        data-allow-motion
-        className="size-10 animate-spin text-primary"
-        strokeWidth={2}
+    <div role="status">
+      <EmptyState
+        icon={<LoaderCircle data-allow-motion className="animate-spin" />}
+        title={t('progressTitle')}
+        description={t('progressDescription')}
       />
-      <h1 className="text-heading">{t('progressTitle')}</h1>
-      <p className="text-body text-text-secondary">
-        {t('progressDescription')}
-      </p>
     </div>
   );
 }
@@ -75,34 +71,33 @@ function CallbackFailure({
   const tErrors = useTranslations('errors');
   const copy = describeCallbackError(code);
   return (
-    <div role="alert" className="flex w-full flex-col items-center gap-4">
-      <span
-        aria-hidden="true"
-        className="flex size-14 items-center justify-center rounded-full bg-danger-tint text-danger"
-      >
-        <CircleAlert className="size-7" strokeWidth={1.75} />
-      </span>
-      <h1 className="text-heading">
-        {copy.kind === 'cancelled' ? t('cancelledTitle') : t('failedTitle')}
-      </h1>
-      <p className="text-body text-text-secondary">
-        {copy.kind === 'cancelled'
-          ? t('cancelledDescription')
-          : tErrors(copy.messageKey)}
-      </p>
-      <div className="mt-2 flex w-full flex-col gap-2">
-        <GoogleLoginButton
-          size="md"
-          label={t('retry')}
-          returnTo={returnTo}
-          className="w-full"
-        />
-        <Button asChild variant="ghost" size="md" className="w-full">
-          <Link href="/" replace>
-            {t('home')}
-          </Link>
-        </Button>
-      </div>
+    <div role="alert">
+      <EmptyState
+        icon={<CircleAlert />}
+        title={
+          copy.kind === 'cancelled' ? t('cancelledTitle') : t('failedTitle')
+        }
+        description={
+          copy.kind === 'cancelled'
+            ? t('cancelledDescription')
+            : tErrors(copy.messageKey)
+        }
+        action={
+          <>
+            <GoogleLoginButton
+              variant="tint"
+              size="md"
+              label={t('retry')}
+              returnTo={returnTo}
+            />
+            <Button asChild variant="ghost" size="md">
+              <Link href="/" replace>
+                {t('home')}
+              </Link>
+            </Button>
+          </>
+        }
+      />
     </div>
   );
 }

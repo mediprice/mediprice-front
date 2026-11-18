@@ -45,7 +45,7 @@ export function LoginRequired({
         icon={<LockKeyhole />}
         title={t('required.errorTitle')}
         action={
-          <Button variant="outline" size="md" onClick={refetch}>
+          <Button variant="tint" size="md" onClick={refetch}>
             {tCommon('actions.retry')}
           </Button>
         }
@@ -59,7 +59,7 @@ export function LoginRequired({
         icon={<LockKeyhole />}
         title={t('loginDialog.title')}
         description={t(`loginDialog.reason.${reason}`)}
-        action={<GoogleLoginButton size="md" />}
+        action={<GoogleLoginButton variant="tint" size="md" />}
       />
     );
   }

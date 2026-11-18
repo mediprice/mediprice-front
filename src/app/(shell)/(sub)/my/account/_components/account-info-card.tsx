@@ -2,14 +2,22 @@
 
 import { PenLine } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useRef, useState } from 'react';
+import { type ReactNode, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { SectionHeader } from '@/components/ui/section-header';
 import type { CurrentUser } from '@/features/auth/queries';
 
 import { NicknameDialog } from './nickname-dialog';
 
-export function AccountInfoCard({ user }: { user: CurrentUser }) {
+export function AccountInfoCard({
+  user,
+  footer,
+}: {
+  user: CurrentUser;
+  /** 카드 아래 행동(로그아웃). */
+  footer?: ReactNode;
+}) {
   const t = useTranslations('mypage.account');
   const [isEditing, setIsEditing] = useState(false);
   /** 다이얼로그를 Trigger 없이 열어 Radix가 포커스를 돌려주지 못하므로 직접 돌려준다. */
@@ -17,12 +25,10 @@ export function AccountInfoCard({ user }: { user: CurrentUser }) {
   return (
     <section
       aria-labelledby="account-info-title"
-      className="rounded-xl bg-bg px-4 py-4 shadow-card lg:px-5"
+      className="flex flex-col gap-3"
     >
-      <h2 id="account-info-title" className="text-subheading">
-        {t('infoTitle')}
-      </h2>
-      <dl className="mt-2 divide-y divide-hairline">
+      <SectionHeader id="account-info-title" title={t('infoTitle')} />
+      <dl className="divide-y divide-hairline rounded-xl bg-bg px-4 py-2 shadow-card lg:px-5">
         <div className="flex min-h-13 items-center justify-between gap-4 py-2">
           <dt className="shrink-0 text-body-sm text-text-secondary">
             {t('email')}
@@ -58,6 +64,7 @@ export function AccountInfoCard({ user }: { user: CurrentUser }) {
           </dd>
         </div>
       </dl>
+      {footer}
       <NicknameDialog
         open={isEditing}
         onOpenChange={(next) => {

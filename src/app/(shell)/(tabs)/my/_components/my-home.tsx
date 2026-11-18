@@ -32,7 +32,7 @@ export function MyHome() {
             <span className="sr-only">{tCommon('status.loading')}</span>
           </div>
         </MyPageHeader>
-        <PageContainer className="pb-section">
+        <PageContainer className="pb-section md:max-w-2xl lg:max-w-page">
           <Skeleton className="h-80 w-full rounded-xl" />
         </PageContainer>
       </>
@@ -45,13 +45,13 @@ export function MyHome() {
         <MyPageHeader>
           <h1 className="text-title">{tNav('my')}</h1>
         </MyPageHeader>
-        <PageContainer className="pb-section">
+        <PageContainer className="pb-section md:max-w-2xl lg:max-w-page">
           {status === 'error' ? (
             <EmptyState
               icon={<UserRound />}
               title={t('errorTitle')}
               action={
-                <Button variant="outline" size="md" onClick={refetch}>
+                <Button variant="tint" size="md" onClick={refetch}>
                   {tCommon('actions.retry')}
                 </Button>
               }
@@ -61,7 +61,7 @@ export function MyHome() {
               icon={<UserRound />}
               title={t('signedOutTitle')}
               description={t('signedOutDescription')}
-              action={<GoogleLoginButton size="md" />}
+              action={<GoogleLoginButton variant="tint" size="md" />}
               className="rounded-xl bg-surface"
             />
           )}
@@ -83,7 +83,7 @@ export function MyHome() {
         </div>
       </MyPageHeader>
       {/** 내 정보 홈은 메뉴 카드가 곧 탐색이라 옆 메뉴를 두지 않는다(하위 화면만 옆 메뉴를 쓴다). */}
-      <PageContainer className="pb-section">
+      <PageContainer className="pb-section md:max-w-2xl lg:max-w-page">
         <MyMenuList />
       </PageContainer>
     </>
