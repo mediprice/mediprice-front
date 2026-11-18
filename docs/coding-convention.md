@@ -7,16 +7,18 @@ mediprice-frontend의 코딩 규칙입니다. 사람과 AI(Claude Code 등)가 �
 
 ## 도구로 강제되는 규칙
 
-| 도구                           | 설정                               | 검사 대상                                                                                                 |
-| ------------------------------ | ---------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Prettier                       | `prettier.config.mjs`              | 포맷(작은따옴표, 후행 쉼표, Tailwind 클래스 정렬)                                                         |
-| ESLint                         | `eslint.config.mjs`                | import 정렬, 미사용 import, `type` import, `no-floating-promises`, TanStack Query 규칙, Next 규칙         |
-| ESLint `no-restricted-imports` | `eslint.config.mjs`                | 2.2 의존 방향 (`lib`·`components`는 `features`·`app`·`server`를, 클라이언트는 `server`를 import하지 않음) |
-| ESLint `no-console`            | `eslint.config.mjs`                | `console.log` 금지 (`warn`·`error`는 허용)                                                                |
-| TypeScript `strict`            | `tsconfig.json`                    | `noUncheckedIndexedAccess`, `noImplicitOverride` 포함                                                     |
-| `server-only`                  | `src/server/**`                    | 서버 전용 코드가 클라이언트 번들에 들어가면 빌드 실패                                                     |
-| knip                           | `knip.jsonc`                       | 쓰지 않는 파일·export·의존성                                                                              |
-| commitlint + husky             | `commitlint.config.mjs`, `.husky/` | 11장 커밋 메시지, 커밋 전 lint·format                                                                     |
+| 도구                                                   | 설정                               | 검사 대상                                                                                                                                                         |
+| ------------------------------------------------------ | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Prettier                                               | `prettier.config.mjs`              | 포맷(작은따옴표, 후행 쉼표, Tailwind 클래스 정렬)                                                                                                                 |
+| ESLint                                                 | `eslint.config.mjs`                | import 정렬, 미사용 import, `type` import, `no-floating-promises`, TanStack Query 규칙, Next 규칙                                                                 |
+| ESLint `no-restricted-imports`                         | `eslint.config.mjs`                | 2.2 의존 방향 (`lib`·`components`는 `features`·`app`·`server`를, 클라이언트는 `server`를 import하지 않음), `components/primitives`는 `components/ui`에서만 import |
+| ESLint `react/jsx-no-literals`, `no-restricted-syntax` | `eslint.config.mjs`                | 12장 화면 문구 하드코딩(JSX 텍스트, 한글 문자열), 8장 Tailwind 기본 팔레트·글자 크기·shadcn 별칭 클래스, `{error.message}` 출력, `toLocale*String`·`new Intl.*`   |
+| ESLint `no-console`                                    | `eslint.config.mjs`                | `console.log` 금지 (`warn`·`error`는 허용)                                                                                                                        |
+| next-intl 타입                                         | `src/i18n/next-intl.d.ts`          | `ko.json`에 없는 메시지 키는 typecheck 실패                                                                                                                       |
+| TypeScript `strict`                                    | `tsconfig.json`                    | `noUncheckedIndexedAccess`, `noImplicitOverride` 포함                                                                                                             |
+| `server-only`                                          | `src/server/**`                    | 서버 전용 코드가 클라이언트 번들에 들어가면 빌드 실패                                                                                                             |
+| knip                                                   | `knip.jsonc`                       | 쓰지 않는 파일·export·의존성                                                                                                                                      |
+| commitlint + husky                                     | `commitlint.config.mjs`, `.husky/` | 11장 커밋 메시지, 커밋 전 lint·format                                                                                                                             |
 
 ```bash
 pnpm format         # 포맷 자동 수정
@@ -38,12 +40,14 @@ pnpm check          # lint + typecheck + format:check + knip + test (CI와 같�
 - 9. 주석과 문서
 - 10. 테스트
 - 11. Git
+- 12. 화면 문구와 다국어
+- 13. 모바일과 반응형
 
 ## 1. 이름
 
 ### 1.1 식별자에는 영문/숫자만 허용 (MUST)
 
-변수, 함수, 타입, 파일 이름에는 영어와 숫자만 쓴다. 한국어 발음을 영어로 옮기지 않는다(`juso` 대신 `address`). 사용자에게 보이는 문구는 예외다.
+변수, 함수, 타입, 파일 이름에는 영어와 숫자만 쓴다. 한국어 발음을 영어로 옮기지 않는다(`juso` 대신 `address`). 사용자에게 보이는 문구는 코드에 쓰지 않고 메시지 파일에 둔다(12장).
 
 ### 1.2 파일 이름은 kebab-case
 
@@ -70,7 +74,7 @@ Next의 특수 파일(`page.tsx`, `layout.tsx`, `route.ts`)과 폴더 이름도 
 - 함수 이름은 동사로 시작한다(`parseX`, `buildX`, `resolveX`). 무엇을 돌려주는지가 아니라 무엇을 하는지를 쓴다.
 - `data`, `info`, `handle`, `util`, `common`, `manager`처럼 아무 데나 붙는 이름은 쓰지 않는다.
 - 한 글자 이름은 짧은 콜백의 인자(`(h) => h.name`)나 반복 변수에만 쓴다.
-- 서로 다른 계층에 같은 이름의 파일(`session.ts`)을 두지 않는다. 역할이 드러나게 짓는다(`refresh-session.ts`).
+- 서로 다른 계층에 같은 이름의 파일(`session.ts`)을 두지 않는다. 역할이 드러나게 짓는다(`refresh-session.ts`). 예외: `components/ui/x.tsx`가 shadcn 생성물 `components/primitives/x.tsx`를 감쌀 때는 같은 이름을 쓴다.
 
 ## 2. 폴더 구조와 의존 방향
 
@@ -79,7 +83,15 @@ Next의 특수 파일(`page.tsx`, `layout.tsx`, `route.ts`)과 폴더 이름도 
 ```text
 src/
   env.ts                  검증된 환경변수
+  i18n/                   next-intl 설정과 화면 문구. 코드에는 키만 둔다(12장)
+    request.ts            locale·시간대·포맷 설정
+    messages/ko.json      모든 화면 문구
   app/                    라우팅 전용. 페이지는 features의 컴포넌트를 조립만 한다
+    layout.tsx            html·폰트·NextIntlClientProvider·viewport·metadata
+    (shell)/              상단 내비게이션이 있는 화면 (데스크톱 TopNav)
+      (tabs)/             모바일 하단 탭바가 있는 탭 루트 화면 (홈·AI·관심·마이)
+      <route>/            하위 화면 (모바일은 페이지가 SubTopBar를 직접 렌더)
+      _components/        셸 조각 (내비게이션 목록 등)
     bff/                  BFF 라우트(핸들러는 얇게, 로직은 server/bff)
     <route>/_components/  그 라우트에서만 쓰는 조각 (Next의 private 폴더)
   features/<도메인>/      도메인 하나의 모든 것
@@ -87,10 +99,11 @@ src/
     schemas.ts            폼·입력 zod 스키마 (필요할 때)
     components/           그 도메인의 UI (필요할 때)
   components/
-    ui/                   shadcn 프리미티브 (생성물, 수정 금지)
-    layout/               여러 라우트가 공유하는 헤더·푸터 같은 틀 (필요할 때)
+    primitives/           shadcn 생성물 (pnpm ui:add로만 추가, 수정 금지, components/ui에서만 import)
+    ui/                   디자인 시스템 컴포넌트 (Figma 컴포넌트와 1:1, 도메인 모름)
+    layout/               여러 라우트가 공유하는 틀 (TopNav, MobileTopBar, BottomTabBar, PageContainer)
   lib/                    도메인을 모르는 공용 코드
-    api/                  HTTP 클라이언트, 에러, 쿼리 직렬화, 재발급, 세션 만료 이벤트, schema.d.ts
+    api/                  HTTP 클라이언트, 에러, 에러 코드 → 문구 키, 쿼리 직렬화, 재발급, 세션 만료 이벤트, schema.d.ts
   server/bff/             서버 전용 코드: 쿠키, 업스트림 호출, 재발급, 응답 헬퍼
   test/                   테스트 공용 설정 (msw 서버, 요청 헬퍼)
 ```
@@ -121,22 +134,23 @@ import { hospitalKeys } from '@/features/hospitals/queries'; // lib이 도메인
 **좋은 예**
 
 ```ts
-// src/features/hospitals/components/price-tag.tsx
-import { formatWon } from '@/lib/format'; // features가 lib을 쓴다
+// src/features/hospitals/components/hospital-error.tsx
+import { errorMessageKey } from '@/lib/api/error-message'; // features가 lib을 쓴다
 ```
 
 ### 2.3 코드를 어디에 둘까
 
 위에서부터 차례로 물어보고, 처음 "예"가 나온 곳에 둔다.
 
+0. 사용자에게 보이는 문구인가 → `i18n/messages/ko.json` (코드에는 키만)
 1. 한 라우트에서만 쓰는가 → `app/<route>/_components/`
-2. 도메인을 전혀 모르는 범용 UI(버튼, 다이얼로그)인가 → `components/ui/`
-3. 여러 라우트가 공유하는 화면의 틀(헤더, 푸터)인가 → `components/layout/`
+2. 도메인을 전혀 모르는 범용 UI(버튼, 다이얼로그)인가 → `components/ui/`. shadcn 생성물은 `components/primitives/`에 두고 `ui`에서만 감싼다
+3. 여러 라우트가 공유하는 화면의 틀(헤더, 탭바)인가 → `components/layout/`
 4. 병원, 후기, 로그인 같은 도메인을 아는 코드인가 → `features/<도메인>/`
 5. 도메인을 모르는 로직(포맷, HTTP, 유틸)인가 → `lib/`
 6. 서버에서만 실행되는가(쿠키, 백엔드 호출) → `server/`
 
-`hooks/`, `utils/`, `types/`, `common/` 같은 전역 폴더는 만들지 않는다. 무엇이든 들어가서 위치가 겹치는 원인이 된다.
+`hooks/`, `utils/`, `types/`, `common/` 같은 전역 폴더는 만들지 않는다. 무엇이든 들어가서 위치가 겹치는 원인이 된다. `i18n/`은 설정과 문구 파일만 담는 폴더라 예외다.
 
 ### 2.4 쪼개는 기준
 
@@ -148,7 +162,7 @@ import { formatWon } from '@/lib/format'; // features가 lib을 쓴다
 
 ### 3.1 명명 export가 기본 (MUST)
 
-`export default`는 Next가 요구하는 특수 파일(`page`, `layout`, `loading`, `error`, `not-found` 등)에서만 쓴다. 그 외에는 명명 export를 쓴다. 이름 변경과 자동 완성, 검색이 쉬워진다.
+`export default`는 Next가 요구하는 특수 파일(`page`, `layout`, `loading`, `error`, `not-found` 등)과 라이브러리가 요구하는 설정 파일(`next.config.ts`, `src/i18n/request.ts`)에서만 쓴다. 그 외에는 명명 export를 쓴다. 이름 변경과 자동 완성, 검색이 쉬워진다.
 
 ### 3.2 배럴 파일(`index.ts`) 금지
 
@@ -227,6 +241,73 @@ const body = sessionSchema.parse(await response.json());
 - `page.tsx`, `route.ts`는 조립과 위임만 한다. 로직은 `features`나 `server`에 둔다.
 - 라우트 핸들러(`route.ts`)는 요청을 검증하고, `server`의 함수를 부르고, 응답을 만드는 일만 한다.
 
+### 6.5 컴포넌트 계층
+
+| 계층                    | 내용                                                                                          | 규칙                                                                                |
+| ----------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `components/primitives` | shadcn 생성물(Radix 동작 + 기본 마크업)                                                       | `pnpm ui:add <이름>`으로만 추가하고 고치지 않는다                                   |
+| `components/ui`         | 우리 디자인 시스템. Figma 컴포넌트와 1:1 (`Button`, `Chip`, `PriceRange`, `ResponsiveDialog`) | cva + 토큰. 도메인을 모른다                                                         |
+| `components/layout`     | 화면의 틀 (`TopNav`, `MobileTopBar`, `BottomTabBar`, `PageContainer`)                         | 도메인을 모른다. 로그인 메뉴 같은 도메인 조각은 `actions` 같은 slot prop으로 받는다 |
+| `features/*/components` | 도메인 UI (`HospitalPriceCard`)                                                               | `ui`·`layout`을 조립한다                                                            |
+
+- Radix 동작이 필요 없는 것(Button, Chip, StatusChip, Badge, Card, Banner, Skeleton, TextField, PriceRange, EmptyState)은 `ui`에서 cva로 직접 만든다.
+- 동작이 복잡한 것(Dialog, Sheet, Tabs, Accordion, Checkbox, Switch, ToggleGroup, Popover)은 primitives를 감싼다. shadcn 마크업이 디자인과 맞지 않으면 `radix-ui`를 `ui`에서 직접 써도 된다.
+- 컴포넌트는 화면에서 필요해질 때 만든다. 미리 만들어 두지 않는다(knip이 쓰지 않는 파일을 막는다).
+- `ui`에 같은 이름의 컴포넌트가 있으면 primitives를 직접 쓰지 않는다(lint).
+
+### 6.6 props 패턴 (MUST)
+
+```tsx
+const chipVariants = cva(
+  'inline-flex h-8 items-center rounded-full border px-3 text-label',
+  {
+    variants: {
+      selected: {
+        true: 'border-primary bg-primary-tint text-primary-text',
+        false: 'border-border',
+      },
+    },
+  },
+);
+
+export function Chip({
+  className,
+  selected,
+  ...props
+}: ComponentProps<'button'> & VariantProps<typeof chipVariants>) {
+  return (
+    <button
+      type="button"
+      data-slot="chip"
+      className={cn(chipVariants({ selected }), className)}
+      {...props}
+    />
+  );
+}
+```
+
+- 변형 이름은 Figma 변형 이름의 camelCase다(`primary | tint | neutral | dangerText | ghost | onTint`).
+- props 타입은 `ComponentProps<'요소'> & VariantProps<typeof xVariants>`이고, `className`은 `cn(xVariants(...), className)`로 항상 마지막에 합친다.
+- 링크처럼 다른 요소로 렌더해야 하면 `asChild`(radix `Slot`)를 쓴다: `<Button asChild><Link href="/">…</Link></Button>`.
+- React 19라서 `forwardRef`를 쓰지 않는다. `ref`는 일반 prop으로 넘어간다.
+- `<button>`은 기본 `type="button"`이다. 폼 제출 버튼만 `type="submit"`을 명시한다.
+- 루트 요소에 `data-slot="이름"`을 붙여 부모가 `[&_[data-slot=chip]]:`로 스타일을 줄 수 있게 한다.
+- `xVariants`는 다른 파일이 쓸 때만 export한다.
+- 모바일과 데스크톱 크기가 다르면 변형 문자열 안에 반응형 클래스를 쓴다(`'h-12 lg:h-14'`). 브레이크포인트별 prop을 만들지 않는다.
+
+### 6.7 서버와 클라이언트
+
+- `ui`·`layout` 컴포넌트는 지시어 없이 둬서 서버와 클라이언트 양쪽에서 쓴다. Radix나 상태를 쓰는 파일만 `'use client'`를 붙인다.
+- `usePathname` 같은 클라이언트 훅은 작은 조각으로 뺀다(예: `NavLink`가 `aria-current`만 붙이고, 활성 스타일은 부모가 `aria-[current=page]:`로 준다).
+- 서버 컴포넌트에서 클라이언트 컴포넌트로 함수(아이콘 컴포넌트 등)를 넘기지 않는다. 렌더한 요소(`icon: <Heart />`)를 넘긴다.
+
+### 6.8 아이콘과 접근성
+
+- 아이콘은 `lucide-react`를 쓴다. 굵기: 24px는 `strokeWidth={2}`, 16–20px는 `1.75`, 12px 이하는 `1.5`.
+- 장식용 아이콘에는 `aria-hidden="true"`를 붙인다. 아이콘만 있는 버튼은 `aria-label={t(...)}`가 필수다(MUST).
+- 누를 수 있는 요소는 44×44px 이상이다. 보이는 크기가 더 작으면 `touch-target` 유틸리티로 누르는 영역만 넓힌다.
+- DOM 테스트(jsdom, Testing Library)는 첫 상호작용 로직(필터 시트의 임시 선택과 적용 등)이 생길 때 도입한다. 그 전까지 로직은 순수 함수로 빼서 테스트한다.
+
 ## 7. 데이터 요청
 
 ### 7.1 호출 경로
@@ -273,15 +354,57 @@ export const hospitalQueries = {
 ### 7.4 에러
 
 - 에러는 `ApiError.code`로 분기한다. 메시지 문자열을 비교하지 않는다.
-- 입력 검증 실패(`INVALID_INPUT`)는 `fieldErrors`를 폼의 해당 칸에 연결한다.
+- 화면 문구는 `t(errorMessageKey(error))`로 고른다(`useTranslations('errors')`). 매핑은 `lib/api/error-message.ts`에 있고, 모르는 코드는 HTTP 상태로 고른다. 백엔드가 새 에러 코드를 추가하면 이 표와 `ko.json`의 `errors`에 함께 추가한다.
+- 백엔드의 `message`와 `fieldErrors[].reason`은 화면에 출력하지 않는다(MUST). 백엔드 문구는 한국어로 고정돼 있고 `reason`은 Bean Validation 기본 문구다.
+- 입력 검증 실패(`INVALID_INPUT`)는 `fieldErrors`의 `field`로 폼의 해당 칸을 찾아 `setError(field, { message: 'validation.invalid' })`처럼 키를 건다.
+- 쿼리는 4xx를 재시도하지 않는다(`lib/query-client.ts`). 결과가 바뀌지 않고, 401은 재발급이 따로 처리한다.
+- `MEDICAL_PROFILE_NOT_FOUND`처럼 "없음"이 정상인 404는 에러가 아니라 빈 상태다. `queryFn`에서 `null`로 바꿔 돌려준다.
 - 에러를 삼키지 않는다. 처리할 수 없으면 위로 던진다.
 
 ## 8. 스타일
 
+### 8.1 기본
+
 - 스타일은 Tailwind 클래스로 쓰고, 조건부 클래스는 `cn()`으로 합친다.
-- 변형(크기, 색상)이 있는 컴포넌트는 `cva`로 선언한다.
-- `components/ui/`의 shadcn 생성물은 직접 고치지 않는다. 바꾸고 싶으면 감싸는 컴포넌트를 만든다.
-- 인라인 `style`은 쓰지 않는다. 색과 간격은 `globals.css`의 디자인 토큰을 쓴다.
+- 변형(크기, 색상)이 있는 컴포넌트는 `cva`로 선언한다(6.6).
+- `components/primitives/`의 shadcn 생성물은 직접 고치지 않는다. 바꾸고 싶으면 `components/ui/`에 감싸는 컴포넌트를 만든다.
+- 인라인 `style`은 런타임 값을 CSS 변수로 넘길 때만 쓴다(``style={{ '--progress': `${pct}%` }}``).
+
+### 8.2 디자인 토큰 (MUST)
+
+토큰은 `src/app/globals.css`의 `@theme`에 있고, 이름과 값은 Figma(MediPrice) 변수·텍스트 스타일·이펙트 스타일과 같다. 우리 코드는 이 이름만 쓴다.
+
+| 종류     | 클래스 예                                                                                                                                                                                |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 색       | `bg-primary` `hover:bg-primary-hover` `active:bg-primary-pressed` `text-primary-text` `bg-primary-tint` `bg-hero` `bg-surface` `bg-surface-strong` `border-hairline`                     |
+| 글자색   | `text-text-primary` `text-text-secondary` `text-text-tertiary` `text-text-disabled` `text-on-primary`                                                                                    |
+| 상태     | `text-positive` `bg-positive-tint` `text-warning` `bg-warning-tint` `text-danger` `bg-danger-tint` `bg-overlay`                                                                          |
+| 선       | `border-border` `border-border-strong` `outline-focus-ring`                                                                                                                              |
+| 타이포   | `text-hero` `text-display` `text-title` `text-heading` `text-subheading` `text-body-lg` `text-body` `text-label(-bold)` `text-caption(-strong/-bold)` `text-price-md/lg/xl` `text-field` |
+| 모서리   | 카드·다이얼로그 `rounded-xl`, 버튼·입력·배너 `rounded-lg`, 타일·세그먼트·태그 `rounded-md`, 칩 `rounded-full`, 시트 상단 `rounded-t-3xl`                                                 |
+| 그림자   | `shadow-card` `shadow-cta-glow` `shadow-float` `shadow-sheet` `shadow-bar`                                                                                                               |
+| 레이아웃 | `max-w-page` `h-top-nav` `h-top-bar` `h-tab-bar` `pb-tab-bar` `pb-safe` `pt-safe` `touch-target`                                                                                         |
+
+- 타이포 토큰 하나에 크기·행간·자간·굵기가 함께 들어 있다. `font-bold` 같은 굵기 클래스를 따로 붙이지 않는다(활성 상태처럼 굵기만 바꿀 때는 예외).
+- Tailwind 기본 팔레트(`blue-600`, `slate-50`), `white`·`black`, 기본 글자 크기(`text-sm`~`text-9xl`), shadcn 별칭(`bg-background`, `text-muted-foreground`)은 쓰지 않는다(lint). 기본 팔레트는 CSS도 만들어지지 않는다.
+- 간격은 Tailwind 기본 4px 단위를 그대로 쓴다(`gap-3` = 12px, `w-70` = 280px).
+- arbitrary value(`[...]`)는 토큰으로 표현할 수 없을 때만 쓴다(safe-area 계산, grid template).
+- 가격처럼 자릿수를 맞춰야 하는 숫자에는 `tabular-nums`를 쓴다.
+- 토큰을 추가하거나 이름을 바꾸면 `src/lib/utils.ts`의 `extendTailwindMerge` 목록도 고친다. 등록하지 않으면 `cn('text-title', 'text-text-primary')`에서 앞 클래스가 지워진다.
+- 토큰 이름이 shadcn 별칭과 겹치지 않게 한다(예: 입력창 타이포가 `text-input`이면 `--color-input`과 겹쳐 색까지 바뀐다).
+- 다크 모드는 없다.
+
+### 8.3 폰트
+
+Pretendard 하나만 쓴다. `app/layout.tsx`에서 `pretendard` 패키지의 dynamic subset CSS를 import한다. 화면에 필요한 글자 조각만 받으므로 `next/font/local`로 2MB 전체 파일을 받지 않는다.
+
+### 8.4 shadcn 추가
+
+```bash
+pnpm ui:add dialog sheet   # components/primitives에 생성, cn import를 @/lib/utils로 바꿈
+```
+
+`components.json`의 `ui` 별칭이 `@/components/primitives`다. 생성물은 shadcn 별칭 색(`bg-popover`)을 쓰고, `globals.css`의 `:root`가 이를 우리 토큰으로 연결한다.
 
 ## 9. 주석과 문서
 
@@ -313,6 +436,96 @@ export function createRefresher(baseUrl: string) {}
 
 - 브랜치: `feature/<설명>`, `fix/<설명>`, `chore/<설명>`
 - 커밋 메시지는 conventional commits(`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`)로 쓴다. commitlint가 검사한다.
+- 제목은 대문자로 시작하는 영어 단어로 시작하지 않는다(`subject-case`). `API`·`Permissions-Policy`처럼 시작하면 commitlint가 거부하니 한국어로 시작한다.
 - 파일 이동과 동작 변경은 커밋을 나눈다. 리뷰가 쉬워진다.
 - PR을 올리기 전에 `pnpm check`를 통과시킨다.
 - 생성 파일(`src/lib/api/schema.d.ts`)은 `pnpm api:generate`로만 바꾸고 커밋한다. 백엔드 변경이 PR diff에 보이게 하려는 것이다.
+
+## 12. 화면 문구와 다국어
+
+지금은 한국어만 지원한다. 그래도 문구는 처음부터 메시지 파일로 분리해서, 영어는 파일을 추가하는 것으로 확장한다.
+
+### 12.1 문구는 코드에 쓰지 않는다 (MUST)
+
+사용자에게 보이는 모든 문구(본문, 버튼, `aria-label`, `placeholder`, `alt`, metadata)는 `src/i18n/messages/ko.json`에 두고 키로 쓴다. lint가 JSX 텍스트와 한글 문자열을 막는다. 영어로 쓴 `aria-label`·`placeholder`는 lint가 잡지 못하므로 리뷰에서 본다.
+
+예외: `server/**`, `app/bff/**`의 API 응답 본문(백엔드 계약을 흉내 내는 것이라 화면에 나가지 않는다), 테스트, 개발자용 `Error` 메시지(영어로 쓴다).
+
+### 12.2 쓰는 법
+
+```tsx
+// 동기 컴포넌트(서버·클라이언트 모두)
+const t = useTranslations('hospitals.detail');
+<h2>{t('priceSection.title')}</h2>;
+
+// async 서버 컴포넌트, generateMetadata
+const t = await getTranslations('metadata');
+```
+
+- `queries.ts`, `lib`, zod 스키마는 번역하지 않고 키나 코드만 돌려준다. zod 메시지는 `validation.*` 키로 쓰고, 폼 필드가 `t()`로 바꾼다.
+- 문자열을 이어 붙이지 않는다. 변수는 ICU 자리표시자(`"{name}님"`), 강조는 `t.rich`를 쓴다.
+- 개수는 한국어라도 ICU plural로 쓴다(`"{count, plural, other {#개}}"`). 영어를 추가할 때 `one`만 더하면 된다.
+
+### 12.3 키 이름
+
+- 최상위 namespace는 공용 `common`·`nav`·`metadata`·`errors`·`validation`과 feature 폴더 이름(`hospitals`, `npay`, `comparison`, `review`, `mypage`, `auth`, `admin`)이다.
+- 그 아래는 화면 → 조각 → 의미 순서다(`hospitals.detail.priceSection.emptyTitle`). camelCase, 4단계 이하.
+- 키는 문구가 아니라 의미로 짓는다(`emptyTitle`, `submit`). 문구가 같아도 다른 화면의 키를 빌려 쓰지 않는다. 예외는 `common.actions.*`(닫기·취소·확인·초기화·적용·더 보기·다시 시도·뒤로 가기)다.
+- 없는 키는 typecheck에서 실패한다(`src/i18n/next-intl.d.ts`가 `ko.json`에서 키 타입을 만든다).
+
+### 12.4 숫자·가격·날짜 (MUST)
+
+- 날짜와 숫자는 next-intl의 `useFormatter()`/`getFormatter()`로만 포맷한다. `toLocaleString`, `new Intl.*`를 직접 쓰지 않는다(lint).
+- 시간대는 `src/i18n/request.ts`에서 `Asia/Seoul`로 고정했다. Vercel의 SSR은 UTC로 실행되므로, 직접 포맷하면 서버와 브라우저 결과가 달라 하이드레이션 오류가 난다.
+- 날짜 포맷 이름은 `src/i18n/formats.ts`에 둔다(`format.dateTime(date, 'date')`).
+- 가격은 메시지로 표현한다: `common.price.won` = `"{amount, number}원"`, `common.price.range` = `"{min, number}~{max, number}원"`, `common.price.none`. "원"의 위치는 언어마다 달라서 `formatWon` 같은 함수를 만들지 않는다.
+
+### 12.5 영어를 추가할 때
+
+1. `messages/en.json`을 추가하고, `ko.json`과 키 집합이 같은지 확인하는 테스트를 만든다.
+2. `request.ts`에서 locale을 고른다. 쿠키(`NEXT_LOCALE`)로 고르면 모든 페이지가 동적 렌더링이 된다. 검색 노출이 필요하면 `[locale]` 세그먼트와 proxy 라우팅으로 바꾼다.
+3. `next-intl.d.ts`의 `Locale`을 `'ko' | 'en'`으로 넓힌다.
+4. 언어 전환 UI를 만들고, 360px에서 긴 영어 문구가 넘치지 않는지 확인한다.
+
+## 13. 모바일과 반응형
+
+### 13.1 모바일 우선 (MUST)
+
+한 라우트에 페이지 하나를 두고 반응형으로 만든다. 기본 클래스는 모바일(Figma 360px 시안) 기준이고, `lg:`(1024px)부터 데스크톱(Figma 1440px 시안) 레이아웃이다. `md:`는 모바일 레이아웃을 넓게 쓰는 구간이다.
+
+```tsx
+<div className="flex flex-col gap-4 lg:flex-row lg:gap-8">
+  <aside className="hidden shrink-0 lg:block lg:w-70">
+    {/* 데스크톱 필터 열 280px */}
+  </aside>
+  <section className="flex-1">{/* 목록 */}</section>
+</div>
+```
+
+### 13.2 셸
+
+| 컴포넌트        | 보이는 곳 | 내용                                                                                                         |
+| --------------- | --------- | ------------------------------------------------------------------------------------------------------------ |
+| `TopNav`        | `lg` 이상 | 72px 상단 내비게이션. `app/(shell)/layout.tsx`가 렌더한다                                                    |
+| `MobileTopBar`  | `lg` 미만 | 탭 루트 화면의 56px 상단 바(로고·우측 동작). `(tabs)/layout.tsx`가 렌더한다                                  |
+| `SubTopBar`     | `lg` 미만 | 하위 화면의 뒤로 가기·제목 바. 첫 하위 화면을 만들 때 `components/layout`에 추가하고, 페이지가 직접 렌더한다 |
+| `BottomTabBar`  | `lg` 미만 | 64px 하단 탭바 + safe-area. `(tabs)`에서만 쓰고 본문에 `pb-tab-bar lg:pb-0`을 준다                           |
+| `PageContainer` | 모두      | 모바일 좌우 16px, 데스크톱 1200px 본문 폭                                                                    |
+
+내비게이션 항목은 `app/(shell)/_components/use-nav-items.tsx` 하나에서 정의하고 데스크톱과 모바일이 같이 쓴다.
+
+### 13.3 모달과 바텀시트
+
+- 모바일은 바텀시트, 데스크톱은 가운데 모달인 화면(필터, 로그인)은 `components/ui/responsive-dialog.tsx` 하나로 만든다(첫 사용 화면에서 추가). Radix Dialog 하나를 CSS로만 바꾼다: 기본은 `fixed inset-x-0 bottom-0 rounded-t-3xl shadow-sheet pb-safe`, `lg:`부터 `top-1/2 left-1/2 -translate-1/2 rounded-xl shadow-float`.
+- JS로 화면 폭을 재서 다른 컴포넌트를 렌더하지 않는다(MUST). 서버 렌더링 결과와 달라져 하이드레이션 오류와 깜빡임이 생긴다.
+- 확인 다이얼로그(삭제 확인 등, 320px)는 모든 크기에서 가운데 모달이다.
+- 데스크톱은 옆 열, 모바일은 시트인 필터는 같은 `FilterPanel`을 두 곳(`hidden lg:block`인 열과 `lg:hidden`인 시트)에 렌더한다. 상태가 URL 쿼리에 있어 두 곳이 어긋나지 않는다(6.3).
+
+### 13.4 모바일 세부 규칙
+
+- 누를 수 있는 요소는 44×44px 이상이다(6.8). 모바일 누름 피드백은 `active:`로 준다(`hover:`는 마우스가 있는 기기에만 적용된다).
+- 화면 높이는 `min-h-dvh`를 쓰고 `h-screen`을 쓰지 않는다(모바일 주소창 때문에 넘친다).
+- 고정 바 아래로 스크롤 이동할 때는 `scroll-mt-top-bar lg:scroll-mt-top-nav`로 가려지지 않게 한다.
+- 입력창 글자는 `text-field`(16px)를 쓴다. 16px보다 작으면 iOS Safari가 포커스할 때 화면을 확대한다.
+- `viewport`는 `app/layout.tsx`에 있다(`viewportFit: 'cover'`로 safe-area 사용). 확대를 막는 설정(`maximumScale`, `userScalable`)은 넣지 않는다.
+- 음성 입력·현재 위치·카메라는 `next.config.ts`의 `Permissions-Policy`에서 같은 출처(`self`)에만 허용돼 있다. 다른 출처의 iframe에서는 쓰지 않는다.

@@ -14,11 +14,12 @@ pnpm dev
 | --------------------- | --------------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_API_URL` | 백엔드 주소(예: `http://localhost:8080`). BFF 중계, 로그인 시작, 타입 생성에 쓴다 |
 
-| 명령                | 설명                                                          |
-| ------------------- | ------------------------------------------------------------- |
-| `pnpm check`        | lint, typecheck, format, knip, test를 모두 실행(PR 전에 실행) |
-| `pnpm test`         | 단위 테스트(vitest + msw)                                     |
-| `pnpm api:generate` | 백엔드 `/api-docs`에서 타입을 다시 생성                       |
+| 명령                 | 설명                                                          |
+| -------------------- | ------------------------------------------------------------- |
+| `pnpm check`         | lint, typecheck, format, knip, test를 모두 실행(PR 전에 실행) |
+| `pnpm test`          | 단위 테스트(vitest + msw)                                     |
+| `pnpm api:generate`  | 백엔드 `/api-docs`에서 타입을 다시 생성                       |
+| `pnpm ui:add <이름>` | shadcn 컴포넌트를 `src/components/primitives`에 추가          |
 
 ## 백엔드 연동 구조
 
@@ -70,6 +71,13 @@ const { data: hospitals } = useQuery(
 ## 코딩 컨벤션
 
 폴더 구조, 의존 방향, 이름, 주석 규칙은 [`docs/coding-convention.md`](docs/coding-convention.md)에 있다. 의존 방향과 `server` 경계는 ESLint와 `server-only`가 강제한다.
+
+화면을 만들 때 알아둘 것:
+
+- **컴포넌트**: `components/ui`(Figma와 1:1인 디자인 시스템), `components/layout`(TopNav·탭바 같은 틀), `features/<도메인>/components`(도메인 UI). shadcn 생성물은 `components/primitives`에 두고 `ui`에서만 감싼다(6장).
+- **색·글자**: Figma 토큰 이름 그대로 쓴다(`bg-primary`, `text-text-secondary`, `text-title`, `shadow-card`). 토큰은 `src/app/globals.css`에 있고 Tailwind 기본 팔레트는 지워져 있다(8장).
+- **문구**: 화면에 보이는 글은 `src/i18n/messages/ko.json`에 두고 `useTranslations`로 쓴다. 날짜는 `useFormatter`로 포맷한다(서울 시간 고정). 에러 문구는 `errorMessageKey(error)`로 고른다(12장).
+- **모바일**: 기본 클래스가 모바일(360px), `lg:`부터 데스크톱(1440px)이다(13장).
 
 ## 새 도메인(쿼리) 추가하기
 
