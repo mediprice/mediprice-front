@@ -69,12 +69,13 @@ export function HomeSearchForm() {
           <span className="relative flex items-center">
             <select
               name="region"
-              defaultValue="all"
-              className="min-h-11 w-full appearance-none rounded-md bg-transparent pr-8 text-label text-text-primary -outline-offset-2"
+              defaultValue="metro"
+              className="min-h-11 w-full appearance-none rounded-md bg-transparent pr-8 text-field text-text-primary -outline-offset-2"
             >
-              <option value="all">{t('regionAll')}</option>
+              <option value="metro">{t('regionAll')}</option>
               <option value="seoul">{t('regionSeoul')}</option>
               <option value="gyeonggi">{t('regionGyeonggi')}</option>
+              <option value="all">{t('regionNationwide')}</option>
             </select>
             <ChevronDown
               aria-hidden="true"

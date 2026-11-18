@@ -87,7 +87,8 @@ const RAW_STYLE = `/(^|[\\s:])-?(${COLOR_UTILITIES})-((${TAILWIND_PALETTE})-[0-9
 /** 화면 문구·디자인 토큰·날짜 포맷 규칙(docs/coding-convention.md 8장, 12장). */
 function uiTextAndTokens() {
   const restricted = (selector, message) => ({ selector, message });
-  const TEXT = '화면 문구는 src/i18n/messages/ko.json에 두고 키로 씁니다.';
+  const TEXT =
+    '화면 문구는 src/i18n/messages/ko/<네임스페이스>.json에 두고 키로 씁니다.';
   const TOKEN =
     'Tailwind 기본 팔레트·글자 크기·shadcn 별칭 대신 globals.css의 토큰을 씁니다.';
   const FORMAT =

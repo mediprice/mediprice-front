@@ -14,7 +14,10 @@
     "won": "{amount, number}원",
     "range": "{min, number}~{max, number}원",
     "none": "가격 정보 없음",
-    "rangeParts": "<amount>{min, number}</amount>~<amount>{max, number}원</amount>"
+    "rangeParts": "<amount>{min, number}</amount>~<amount>{max, number}원</amount>",
+    "average": "평균 {amount, number}원",
+    "minMax": "최저 {min, number}원 · 최고 {max, number}원",
+    "hospitals": "병원 {count, number}곳"
   },
   "footer": {
     "source": "데이터 출처: 건강보험심사평가원 비급여 진료비 공개 자료",
@@ -23,5 +26,12 @@
   },
   "status": {
     "loading": "불러오는 중"
-  }
+  },
+  "region": {
+    "metro": "서울·경기",
+    "seoul": "서울",
+    "gyeonggi": "경기",
+    "all": "전국"
+  },
+  "breadcrumb": "현재 위치"
 }

@@ -6,7 +6,7 @@ import { SiteFooter } from '@/components/layout/site-footer';
 export default function SubLayout({ children }: { children: ReactNode }) {
   return (
     <>
-      <main id="main" tabIndex={-1} className="outline-none">
+      <main id="main" tabIndex={-1} className="min-h-dvh outline-none">
         {children}
       </main>
       <SiteFooter />

@@ -1,6 +1,6 @@
 {
   "hero": {
-    "badge": "건강보험심사평가원 공개 가격 기준",
+    "badge": "건강보험심사평가원 공개 가격 · 서울·경기",
     "title": "어떤 진료비가 궁금하세요?",
     "subtitle": "병원마다 다른 비급여 진료비, 공개된 가격으로 한눈에 비교해요"
   },
@@ -12,10 +12,11 @@
     "keyword": "검색어",
     "keywordPlaceholder": "진료 항목이나 병원 이름 (예: 도수치료)",
     "region": "지역",
-    "regionAll": "전체 지역",
+    "regionAll": "서울·경기",
     "regionSeoul": "서울",
     "regionGyeonggi": "경기",
-    "submit": "검색"
+    "submit": "검색",
+    "regionNationwide": "전국"
   },
   "ai": {
     "title": "어떤 진료가 필요한지 모르겠다면?",
@@ -35,8 +36,7 @@
     "title": "자주 찾는 진료 항목",
     "description": "항목을 고르면 병원별 공개 가격을 비교할 수 있어요",
     "viewAll": "전체 보기",
-    "priceLabel": "공개 가격 범위",
-    "hospitalCount": "{count, number}곳 기준",
+    "priceLabel": "{region} 공개 가격",
     "error": "가격을 불러오지 못했어요",
     "items": {
       "manualTherapy": {

@@ -14,7 +14,7 @@ mediprice-frontend의 코딩 규칙입니다. 사람과 AI(Claude Code 등)가 �
 | ESLint `no-restricted-imports`                         | `eslint.config.mjs`                | 2.2 의존 방향 (`lib`·`components`는 `features`·`app`·`server`를, 클라이언트는 `server`를 import하지 않음), `components/primitives`는 `components/ui`에서만 import |
 | ESLint `react/jsx-no-literals`, `no-restricted-syntax` | `eslint.config.mjs`                | 12장 화면 문구 하드코딩(JSX 텍스트, 한글 문자열), 8장 Tailwind 기본 팔레트·글자 크기·shadcn 별칭 클래스, `{error.message}` 출력, `toLocale*String`·`new Intl.*`   |
 | ESLint `no-console`                                    | `eslint.config.mjs`                | `console.log` 금지 (`warn`·`error`는 허용)                                                                                                                        |
-| next-intl 타입                                         | `src/i18n/next-intl.d.ts`          | `ko.json`에 없는 메시지 키는 typecheck 실패                                                                                                                       |
+| next-intl 타입                                         | `src/i18n/next-intl.d.ts`          | `messages/ko`에 없는 메시지 키는 typecheck 실패                                                                                                                   |
 | TypeScript `strict`                                    | `tsconfig.json`                    | `noUncheckedIndexedAccess`, `noImplicitOverride` 포함                                                                                                             |
 | `server-only`                                          | `src/server/**`                    | 서버 전용 코드가 클라이언트 번들에 들어가면 빌드 실패                                                                                                             |
 | knip                                                   | `knip.jsonc`                       | 쓰지 않는 파일·export·의존성                                                                                                                                      |
@@ -42,6 +42,7 @@ pnpm check          # lint + typecheck + format:check + knip + test (CI와 같�
 - 11. Git
 - 12. 화면 문구와 다국어
 - 13. 모바일과 반응형
+- 14. 가격·지역 데이터 표시
 
 ## 1. 이름
 
@@ -85,7 +86,7 @@ src/
   env.ts                  검증된 환경변수
   i18n/                   next-intl 설정과 화면 문구. 코드에는 키만 둔다(12장)
     request.ts            locale·시간대·포맷 설정
-    messages/ko.json      모든 화면 문구
+    messages/ko/*.json    화면 문구 (네임스페이스마다 파일 하나, messages/ko.ts가 합친다)
   app/                    라우팅 전용. 페이지는 features의 컴포넌트를 조립만 한다
     layout.tsx            html·폰트·NextIntlClientProvider·viewport·metadata
     (shell)/              상단 내비게이션이 있는 화면 (데스크톱 TopNav)
@@ -121,7 +122,7 @@ app ──▶ features ──▶ components, lib
 - `lib`, `components`는 `features`, `app`, `server`를 import하지 않는다. 도메인을 알면 `features`에 둔다.
 - 클라이언트 코드(`features`, `components`, `lib`, `app`의 화면)는 `server`를 import하지 않는다. 예외는 `app/bff/**` 라우트와 테스트다.
 - `server/**`의 파일은 첫 줄에 `import 'server-only';`를 둔다.
-- 다른 feature의 코드는 `queries.ts`와 `components/`만 import한다. 내부 파일을 직접 가져오지 않는다.
+- 다른 feature의 코드는 `queries.ts`와 `components/`, 그리고 여러 화면이 함께 쓰도록 만든 공용 모듈(`regions/service-region.ts`, `regions/format-location.ts`, `npay/price-summary.ts`, `npay/catalog.ts`)만 import한다. 그 밖의 내부 파일을 직접 가져오지 않는다.
 - 폴더를 넘나드는 import는 `@/` 절대 경로를 쓰고 `../..`는 쓰지 않는다.
 
 **나쁜 예**
@@ -142,7 +143,7 @@ import { errorMessageKey } from '@/lib/api/error-message'; // features가 lib을
 
 위에서부터 차례로 물어보고, 처음 "예"가 나온 곳에 둔다.
 
-0. 사용자에게 보이는 문구인가 → `i18n/messages/ko.json` (코드에는 키만)
+0. 사용자에게 보이는 문구인가 → `i18n/messages/ko/<네임스페이스>.json` (코드에는 키만)
 1. 한 라우트에서만 쓰는가 → `app/<route>/_components/`
 2. 도메인을 전혀 모르는 범용 UI(버튼, 다이얼로그)인가 → `components/ui/`. shadcn 생성물은 `components/primitives/`에 두고 `ui`에서만 감싼다
 3. 여러 라우트가 공유하는 화면의 틀(헤더, 탭바)인가 → `components/layout/`
@@ -367,7 +368,7 @@ export const hospitalQueries = {
 ### 7.4 에러
 
 - 에러는 `ApiError.code`로 분기한다. 메시지 문자열을 비교하지 않는다.
-- 화면 문구는 `t(errorMessageKey(error))`로 고른다(`useTranslations('errors')`). 매핑은 `lib/api/error-message.ts`에 있고, 모르는 코드는 HTTP 상태로 고른다. 백엔드가 새 에러 코드를 추가하면 이 표와 `ko.json`의 `errors`에 함께 추가한다.
+- 화면 문구는 `t(errorMessageKey(error))`로 고른다(`useTranslations('errors')`). 매핑은 `lib/api/error-message.ts`에 있고, 모르는 코드는 HTTP 상태로 고른다. 백엔드가 새 에러 코드를 추가하면 이 표와 `messages/ko/errors.json`에 함께 추가한다.
 - 백엔드의 `message`와 `fieldErrors[].reason`은 화면에 출력하지 않는다(MUST). 백엔드 문구는 한국어로 고정돼 있고 `reason`은 Bean Validation 기본 문구다.
 - 입력 검증 실패(`INVALID_INPUT`)는 `fieldErrors`의 `field`로 폼의 해당 칸을 찾아 `setError(field, { message: 'validation.invalid' })`처럼 키를 건다.
 - 쿼리는 4xx를 재시도하지 않는다(`lib/query-client.ts`). 결과가 바뀌지 않고, 401은 재발급이 따로 처리한다.
@@ -465,7 +466,7 @@ export function createRefresher(baseUrl: string) {}
 
 ### 12.1 문구는 코드에 쓰지 않는다 (MUST)
 
-사용자에게 보이는 모든 문구(본문, 버튼, `aria-label`, `placeholder`, `alt`, metadata)는 `src/i18n/messages/ko.json`에 두고 키로 쓴다. lint가 JSX 텍스트와 한글 문자열을 막는다. 영어로 쓴 `aria-label`·`placeholder`는 lint가 잡지 못하므로 리뷰에서 본다.
+사용자에게 보이는 모든 문구(본문, 버튼, `aria-label`, `placeholder`, `alt`, metadata)는 `src/i18n/messages/ko/<네임스페이스>.json`에 두고 키로 쓴다. 네임스페이스를 새로 만들면 `messages/ko.ts`에 추가한다. 화면마다 파일이 나뉘어 있어 여러 사람이 동시에 작업해도 충돌하지 않는다. lint가 JSX 텍스트와 한글 문자열을 막는다. 영어로 쓴 `aria-label`·`placeholder`는 lint가 잡지 못하므로 리뷰에서 본다.
 
 예외: `server/**`, `app/bff/**`의 API 응답 본문(백엔드 계약을 흉내 내는 것이라 화면에 나가지 않는다), 테스트, 개발자용 `Error` 메시지(영어로 쓴다).
 
@@ -489,7 +490,7 @@ const t = await getTranslations('metadata');
 - 최상위 namespace는 공용 `common`·`nav`·`metadata`·`errors`·`validation`과 feature 폴더 이름(`hospitals`, `npay`, `comparison`, `review`, `mypage`, `auth`, `admin`)이다.
 - 그 아래는 화면 → 조각 → 의미 순서다(`hospitals.detail.priceSection.emptyTitle`). camelCase, 4단계 이하.
 - 키는 문구가 아니라 의미로 짓는다(`emptyTitle`, `submit`). 문구가 같아도 다른 화면의 키를 빌려 쓰지 않는다. 예외는 `common.actions.*`(닫기·취소·확인·초기화·적용·더 보기·다시 시도·뒤로 가기)다.
-- 없는 키는 typecheck에서 실패한다(`src/i18n/next-intl.d.ts`가 `ko.json`에서 키 타입을 만든다).
+- 없는 키는 typecheck에서 실패한다(`src/i18n/next-intl.d.ts`가 `messages/ko.ts`에서 키 타입을 만든다).
 
 ### 12.4 숫자·가격·날짜 (MUST)
 
@@ -500,7 +501,7 @@ const t = await getTranslations('metadata');
 
 ### 12.5 영어를 추가할 때
 
-1. `messages/en.json`을 추가하고, `ko.json`과 키 집합이 같은지 확인하는 테스트를 만든다.
+1. `messages/en/*.json`과 `messages/en.ts`를 추가하고, ko와 키 집합이 같은지 확인하는 테스트를 만든다.
 2. `request.ts`에서 locale을 고른다. 쿠키(`NEXT_LOCALE`)로 고르면 모든 페이지가 동적 렌더링이 된다. 검색 노출이 필요하면 `[locale]` 세그먼트와 proxy 라우팅으로 바꾼다.
 3. `next-intl.d.ts`의 `Locale`을 `'ko' | 'en'`으로 넓힌다.
 4. 언어 전환 UI를 만들고, 360px에서 긴 영어 문구가 넘치지 않는지 확인한다.
@@ -548,3 +549,14 @@ const t = await getTranslations('metadata');
 - 입력창 글자는 `text-field`(16px)를 쓴다. 16px보다 작으면 iOS Safari가 포커스할 때 화면을 확대한다.
 - `viewport`는 `app/layout.tsx`에 있다(`viewportFit: 'cover'`로 safe-area 사용). 확대를 막는 설정(`maximumScale`, `userScalable`)은 넣지 않는다.
 - 음성 입력·현재 위치·카메라는 `next.config.ts`의 `Permissions-Policy`에서 같은 출처(`self`)에만 허용돼 있다. 다른 출처의 iframe에서는 쓰지 않는다.
+
+## 14. 가격·지역 데이터 표시
+
+공개 가격 데이터의 특성 때문에 정한 규칙이다. 화면을 새로 만들 때도 지킨다.
+
+- **지역 (MUST)**: 지역은 `features/regions/service-region.ts` 하나로 다룬다. 기본은 서울·경기(`metro`)이고 선택지는 서울·경기 / 서울 / 경기 / 전국(`all`)이다. URL 파라미터 이름은 `region`이고 기본값은 링크에서 뺀다. 백엔드가 시도 하나만 받으므로 서울·경기는 `sidoCodesOf`로 나눠 조회해 합친다.
+- **가격 요약 (MUST)**: 최저~최고 범위를 대표값으로 내세우지 않는다. 범위는 "1일당 1,000원" 같은 예외 값에 끌려가 오해를 만든다. 평균을 크게, 범위와 병원 수를 작게 쓴다(`PriceOverview`). 여러 시도의 요약은 `npayQueries.summaryIn`이 합친다(평균은 가격 수로 가중).
+- **병원 단위 (MUST)**: 가격 API는 병원의 세부 항목마다 한 줄을 준다. 병원을 비교하는 목록은 병원 하나에 카드 하나로 묶고, 세부 항목은 펼쳐서 보여 준다. 개수는 "병원 N곳"으로 쓴다.
+- **분류 이름**: 홈 분류(`features/npay/catalog.ts`)에 속하는 코드는 쉬운 이름("물리치료·재활")을 먼저, 공식 이름("이학요법료")은 보조로 쓴다. 항목 이름의 "대분류/" 앞부분은 떼고 보여 준다.
+- **지역 이름**: 시도·시군구는 `formatLocation`으로 정리한다("부산 부산남구" → "부산 남구", "경기 부천원미구" → "경기 부천시 원미구").
+- **없는 데이터**: 통계·업데이트 날짜·가격 범위 필터처럼 API가 없는 것은 그럴듯한 값으로 채우지 않고 뺀다. 빠진 것은 PR 설명에 적는다.
