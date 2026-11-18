@@ -419,7 +419,8 @@ export const hospitalQueries = {
 - 간격은 Tailwind 기본 4px 단위를 그대로 쓴다(`gap-3` = 12px, `w-70` = 280px).
 - arbitrary value(`[...]`)는 토큰으로 표현할 수 없을 때만 쓴다(safe-area 계산, grid template).
 - 가격처럼 자릿수를 맞춰야 하는 숫자에는 `tabular-nums`를 쓴다. `text-price-*`에는 이미 들어 있다.
-- 가격 화면의 문법: 결론 문장 제목(`hero`·`display`·`section`), 화면의 주인공 가격 하나는 `text-price-hero`, 행의 가격은 오른쪽 정렬 `text-price-lg`, 이 병원 값이 있는 곳의 최저–평균–최고 `RangeBar`, 값이 없는 곳의 "최저 N원 ~ 최고 N원" 글자(`PriceSpread`). 넓은 색 띠·그라데이션·왼쪽 선 강조는 쓰지 않는다.
+- 가격 화면의 문법: 결론 문장 제목(`hero`·`display`·`section`), 화면의 주인공 가격 하나는 `text-price-hero`(감싼 요소에 `@container`를 붙인다. 글자를 키우면 그 폭의 14%까지만 커져서 숫자 중간에서 줄이 나뉘지 않는다), 행의 가격은 오른쪽 정렬 `text-price-lg`, 이 병원 값이 있는 곳의 최저–평균–최고 `RangeBar`, 값이 없는 곳의 "최저 N원 ~ 최고 N원" 글자(`PriceSpread`). 넓은 색 띠·그라데이션·왼쪽 선 강조는 쓰지 않는다.
+- 글자 크기에 따라 배치가 바뀌어야 하는 곳(필터 열 옆의 목록 행, 고정 바)은 화면 폭 `lg:`·`xl:` 대신 rem 단위 컨테이너 쿼리(`@container` + `@min-[50rem]:`)를 쓴다. rem 기준이라 글자를 200%로 키우면 좁은 배치로 바뀐다.
 - 토큰을 추가하거나 이름을 바꾸면 `src/lib/utils.ts`의 `extendTailwindMerge` 목록도 고친다. 등록하지 않으면 `cn('text-title', 'text-text-primary')`에서 앞 클래스가 지워진다.
 - 토큰 이름이 shadcn 별칭과 겹치지 않게 한다(예: 입력창 타이포가 `text-input`이면 `--color-input`과 겹쳐 색까지 바뀐다).
 - 다크 모드는 없다.

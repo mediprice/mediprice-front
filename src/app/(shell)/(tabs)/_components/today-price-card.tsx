@@ -73,8 +73,8 @@ export function TodayPriceCard() {
         ) : average == null ? (
           <p className="mt-4 text-body text-text-tertiary">{tPrice('none')}</p>
         ) : (
-          <div className="mt-2 flex flex-col gap-4">
-            <p className="text-price-hero [overflow-wrap:anywhere]">
+          <div className="@container mt-2 flex flex-col gap-4">
+            <p className="text-price-hero wrap-anywhere">
               <RollingNumber
                 value={average}
                 format={(value) => tPrice('won', { amount: value })}

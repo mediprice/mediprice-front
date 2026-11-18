@@ -133,7 +133,7 @@ export function SelectedItemCard({
         <p className="text-body text-text-secondary">{t('notOffered')}</p>
       ) : (
         <>
-          <div aria-live="polite" className="flex flex-col gap-1">
+          <div aria-live="polite" className="@container flex flex-col gap-1">
             <p className="text-price-hero wrap-anywhere">
               <RollingNumber
                 value={activeRow.price}

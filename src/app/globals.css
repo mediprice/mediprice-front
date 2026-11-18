@@ -127,9 +127,12 @@
   --text-price-xl--line-height: 2.375rem;
   --text-price-xl--letter-spacing: -0.015em;
   --text-price-xl--font-weight: 800;
-  /* 화면의 주인공 가격 하나(항목 평균, 병원의 선택 항목 가격)에만 쓴다. */
-  --text-price-hero: 2.5rem;
-  --text-price-hero--line-height: 3rem;
+  /*
+   * 화면의 주인공 가격 하나(항목 평균, 병원의 선택 항목 가격)에만 쓴다. 글자를 키우면 감싼 @container 폭의 14%까지만 커져서
+   * "1,250,000원"이 숫자 중간에서 줄이 나뉘지 않는다. px 하한은 기본 글자 크기일 때의 값이라, 키웠을 때 오히려 작아지지는 않는다.
+   */
+  --text-price-hero: max(40px, min(2.5rem, 14cqi));
+  --text-price-hero--line-height: 1.2;
   --text-price-hero--letter-spacing: -0.02em;
   --text-price-hero--font-weight: 800;
   /* 입력창 전용. 16px 미만이면 iOS Safari가 포커스할 때 화면을 확대한다. */
@@ -194,8 +197,8 @@
     --text-price-lg--line-height: 2.25rem;
     --text-price-xl: 2.25rem;
     --text-price-xl--line-height: 2.75rem;
-    --text-price-hero: 3.5rem;
-    --text-price-hero--line-height: 4rem;
+    --text-price-hero: max(56px, min(3.5rem, 14cqi));
+    --text-price-hero--line-height: 1.15;
     --spacing-section: 4rem;
   }
 }

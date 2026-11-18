@@ -33,7 +33,7 @@ export function PriceSummary({
 
   if (isPending) {
     return (
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:gap-10">
+      <div className="@container flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end lg:gap-x-10">
         <Skeleton className="h-12 w-56 lg:h-16 lg:w-72" />
         <div className="flex flex-col gap-1 lg:pb-2">
           <Skeleton className="my-0.5 h-4.75 w-72 max-w-full lg:h-5" />
@@ -75,9 +75,9 @@ export function PriceSummary({
   }
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:gap-10">
+    <div className="@container flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end lg:gap-x-10">
       <p className="max-w-full text-price-hero">
-        {/** 아주 큰 글자(200%)의 좁은 화면에서만 숫자가 줄을 넘겨 가로 스크롤이 생기지 않게 한다. */}
+        {/** 글자 크기가 컨테이너 폭에 맞춰 줄어든다(text-price-hero). 그래도 넘치는 아주 긴 금액만 줄을 넘긴다. */}
         <RollingNumber
           value={data.avgPrice}
           format={(value) => tPrice('won', { amount: value })}
