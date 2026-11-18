@@ -11,7 +11,7 @@ import type { PriceFilters } from './price-filters';
 import { useFilterLabels } from './use-filter-labels';
 import { usePriceSummary } from './use-price-summary';
 
-/** 현재 조건의 평균을 크게, 최저·최고와 병원·가격 수를 작게 보여 준다(극단값을 머리로 쓰지 않는다). */
+/** 현재 조건의 평균을 크게, 최저·최고와 병원·가격 수를 작게 보여 준다(극단값을 머리로 쓰지 않는다). 모바일은 머리 띠, 데스크톱은 회색 목록 띠 위의 흰 카드다. */
 export function PriceSummary({
   code,
   filters,
@@ -34,7 +34,7 @@ export function PriceSummary({
   return (
     <div
       className={cn(
-        'flex-col gap-3 rounded-xl bg-bg px-4.5 py-5 shadow-card lg:flex-row lg:items-end lg:justify-between lg:gap-6 lg:bg-surface lg:px-7 lg:py-6 lg:shadow-none',
+        'flex-col gap-3 rounded-xl bg-bg px-4.5 py-5 shadow-card md:flex-row md:items-end md:justify-between md:gap-6 lg:px-7 lg:py-6',
         className,
       )}
     >
@@ -70,7 +70,7 @@ export function PriceSummary({
         <Skeleton className="h-11 w-56 max-w-full" />
       ) : (
         data && (
-          <div className="flex flex-col gap-0.5 text-body-sm tabular-nums lg:items-end lg:text-right">
+          <div className="flex flex-col gap-0.5 text-body-sm tabular-nums md:items-end md:text-right">
             {data.minPrice != null && data.maxPrice != null && (
               <p className="text-text-secondary">
                 {tPrice('minMax', { min: data.minPrice, max: data.maxPrice })}

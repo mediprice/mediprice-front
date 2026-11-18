@@ -33,7 +33,7 @@
     "region": "지역",
     "sggu": "시·군·구",
     "sgguAll": "전체 시·군·구",
-    "sgguNeedsRegion": "지역을 서울이나 경기 하나로 고르면 시·군·구를 고를 수 있어요.",
+    "sgguNeedsRegion": "지역을 서울이나 경기 하나로 고르면 <nowrap>시·군·구</nowrap>를 고를 수 있어요.",
     "institution": "기관 종별",
     "institutionAll": "전체 종별",
     "loading": "불러오는 중",

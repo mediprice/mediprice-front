@@ -34,7 +34,7 @@ export function FilterColumn({
   return (
     <aside
       aria-labelledby="item-filters-title"
-      className="sticky top-24 hidden w-70 shrink-0 self-start rounded-xl bg-surface p-6 lg:block"
+      className="sticky top-24 hidden w-70 shrink-0 self-start rounded-xl bg-bg p-6 shadow-card lg:block"
     >
       <div className="mb-5 flex items-center justify-between gap-2">
         <h2 id="item-filters-title" className="text-heading">

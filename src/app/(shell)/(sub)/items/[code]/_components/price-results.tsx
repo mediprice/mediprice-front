@@ -102,7 +102,7 @@ export function PriceResults({
         <EmptyState
           icon={<CircleAlert />}
           title={tErrors(errorMessageKey(query.error))}
-          className="rounded-xl bg-surface"
+          className="rounded-xl bg-bg shadow-card"
           action={
             <Button
               variant="tint"

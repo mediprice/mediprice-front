@@ -32,7 +32,7 @@ export function ZeroResults({
         icon={<SearchX />}
         title={t('noPriceTitle')}
         description={t('noPriceDescription')}
-        className="rounded-xl bg-surface"
+        className="rounded-xl bg-bg shadow-card"
         action={
           <Button asChild variant="tint" size="md">
             <Link href="/search">{t('search')}</Link>
@@ -47,29 +47,29 @@ export function ZeroResults({
       icon={<SearchX />}
       title={t('title')}
       description={t('description')}
-      className="rounded-xl bg-surface"
+      className="rounded-xl bg-bg shadow-card"
       action={
-        <div className="flex w-64 max-w-full flex-col gap-2 lg:w-auto lg:flex-row">
-          <div className="lg:hidden">
-            <FilterSheet
-              code={code}
-              filters={filters}
-              trigger={
-                <Button variant="tint" size="md" className="w-full">
-                  {t('change')}
-                </Button>
-              }
-            />
-          </div>
+        <div className="flex flex-col items-center gap-1">
           <Button
+            variant="tint"
             size="md"
-            className="w-full lg:w-auto"
             onClick={() =>
               applyFilters(clearConditions(filters), { focusResults: true })
             }
           >
             {t('reset')}
           </Button>
+          <div className="lg:hidden">
+            <FilterSheet
+              code={code}
+              filters={filters}
+              trigger={
+                <Button variant="ghost" size="md">
+                  {t('change')}
+                </Button>
+              }
+            />
+          </div>
         </div>
       }
     />

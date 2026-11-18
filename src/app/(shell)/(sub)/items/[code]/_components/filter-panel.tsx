@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { type ComponentProps, useId } from 'react';
+import { type ComponentProps, type ReactNode, useId } from 'react';
 
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { institutionQueries } from '@/features/institutions/queries';
@@ -53,7 +53,15 @@ export function FilterPanel({
 
       <FilterSelect
         label={t('filters.sggu')}
-        hint={sidoCode ? undefined : t('filters.sgguNeedsRegion')}
+        hint={
+          sidoCode
+            ? undefined
+            : t.rich('filters.sgguNeedsRegion', {
+                nowrap: (chunks) => (
+                  <span className="whitespace-nowrap">{chunks}</span>
+                ),
+              })
+        }
         status={
           !sidoCode
             ? undefined
@@ -111,7 +119,7 @@ function FilterSelect({
   ...props
 }: ComponentProps<'select'> & {
   label: string;
-  hint?: string;
+  hint?: ReactNode;
   status?: string;
 }) {
   const id = useId();

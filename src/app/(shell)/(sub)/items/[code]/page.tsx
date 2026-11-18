@@ -41,17 +41,19 @@ export default async function ItemPricePage({
           </PageContainer>
         </div>
         <MobileToolbar code={code} filters={filters} />
-        <PageContainer className="flex flex-col gap-4 pt-4 pb-section lg:flex-row lg:items-start lg:gap-8 lg:pt-8">
-          <FilterColumn code={code} filters={filters} />
-          <div className="flex min-w-0 flex-1 flex-col gap-4 lg:gap-6">
-            <PriceSummary
-              code={code}
-              filters={filters}
-              className="hidden lg:flex"
-            />
-            <PriceResults code={code} filters={filters} />
-          </div>
-        </PageContainer>
+        <div className="flex-1 bg-surface">
+          <PageContainer className="flex flex-col gap-4 pt-4 pb-section lg:flex-row lg:items-start lg:gap-8 lg:pt-8">
+            <FilterColumn code={code} filters={filters} />
+            <div className="flex min-w-0 flex-1 flex-col gap-4 lg:gap-6">
+              <PriceSummary
+                code={code}
+                filters={filters}
+                className="hidden lg:flex"
+              />
+              <PriceResults code={code} filters={filters} />
+            </div>
+          </PageContainer>
+        </div>
       </ItemGate>
     </>
   );

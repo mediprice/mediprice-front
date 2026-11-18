@@ -10,6 +10,7 @@ import { useId, useState } from 'react';
 import { PriceRange } from '@/components/ui/price-range';
 import { CompareToggle } from '@/features/comparison/components/compare-toggle';
 import { FavoriteButton } from '@/features/favorites/components/favorite-button';
+import { HospitalIdentity } from '@/features/hospitals/components/hospital-identity';
 import { formatLocation } from '@/features/regions/format-location';
 import { cn } from '@/lib/utils';
 
@@ -18,7 +19,7 @@ import type { HospitalPrice } from '../price-stream';
 
 /**
  * 항목별 가격 목록의 병원 한 곳. 병원이 같은 항목을 이름별로 따로 신고하므로 최저~최고가를 보여 주고,
- * 세부 이름·가격은 펼쳐서 본다. 카드 전체는 병원 이름 링크가 덮고, 펼치기 버튼만 그 위에 올린다.
+ * 세부 이름·가격은 펼쳐서 본다. 카드 전체는 병원 이름 링크가 덮고, 펼치기·관심·비교함 버튼만 그 위(relative z-10)에 올린다.
  */
 export function HospitalPriceGroupCard<T extends string>({
   group,
@@ -41,34 +42,35 @@ export function HospitalPriceGroupCard<T extends string>({
   const extraCount = group.variants.length - 1;
 
   return (
-    <article className="relative flex flex-col gap-3 rounded-xl bg-bg px-4 pt-4 pb-3.5 shadow-card transition-shadow duration-150 ease-standard has-[a:hover]:shadow-float lg:px-6 lg:py-5">
-      <div className="grid grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-x-3 gap-y-2.5 lg:grid-cols-[2.75rem_minmax(0,1fr)_auto]">
+    <article className="relative flex flex-col gap-3 rounded-xl pressable bg-bg px-4 pt-4 pb-3.5 shadow-card md:px-6 md:py-5">
+      <div className="grid grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-x-3 gap-y-2.5 md:grid-cols-[2.75rem_minmax(0,1fr)_auto]">
         <span
           aria-hidden="true"
           className="flex size-11 items-center justify-center rounded-lg bg-primary-tint text-primary"
         >
           <Hospital className="size-5.5" strokeWidth={1.75} />
         </span>
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <h3 className="text-subheading">
+        <HospitalIdentity
+          as="h3"
+          meta={meta}
+          name={
             <Link
               href={href}
               className="rounded-sm after:absolute after:inset-0 after:rounded-xl hover:text-primary-text"
             >
               {group.hospitalName}
             </Link>
-          </h3>
-          {meta && <p className="text-body-sm text-text-tertiary">{meta}</p>}
-        </div>
+          }
+        />
         <PriceRange
           min={group.minPrice}
           max={group.maxPrice}
-          className="col-span-2 text-price-lg lg:col-span-1 lg:text-right"
+          className="col-span-2 text-price-lg md:col-span-1 md:text-right"
         />
       </div>
 
       {firstVariant && (
-        <div className="flex flex-col gap-2 lg:pl-14">
+        <div className="flex flex-col gap-2 md:pl-14">
           {isExpanded ? (
             <ul
               id={listId}
@@ -127,7 +129,7 @@ export function HospitalPriceGroupCard<T extends string>({
                   address: null,
                   phone: null,
                 }}
-                variant="labeled"
+                variant="icon"
               />
               <CompareToggle
                 ykiho={group.ykiho}
