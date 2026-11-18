@@ -1,6 +1,7 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { TriangleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
@@ -43,7 +44,14 @@ export function DeleteReviewDialog({
         onCloseAutoFocus={onCloseAutoFocus}
       >
         <div className="flex flex-col gap-4">
-          <p className="text-body-sm text-text-secondary">{t('description')}</p>
+          <p className="flex items-start gap-2 rounded-lg bg-warning-tint px-4 py-3 text-body-sm text-text-primary">
+            <TriangleAlert
+              aria-hidden="true"
+              className="mt-0.5 size-4 shrink-0 text-warning"
+              strokeWidth={1.75}
+            />
+            {t('description')}
+          </p>
           {remove.isError && (
             <p role="alert" className="text-body-sm text-danger">
               {tErrors(errorMessageKey(remove.error))}

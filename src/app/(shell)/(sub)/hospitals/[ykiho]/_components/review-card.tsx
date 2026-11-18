@@ -20,6 +20,7 @@ export function ReviewCard({
   const format = useFormatter();
   const rating = clampRating(review.rating);
   const isHidden = review.status === 'HIDDEN';
+  const author = review.authorName ?? t('anonymous');
   const meta = [
     review.visitedOn &&
       t('visited', {
@@ -32,9 +33,7 @@ export function ReviewCard({
     <article className="flex flex-col gap-2 rounded-xl bg-surface px-5 py-4 lg:px-6">
       <div className="flex items-start gap-2">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2.5 gap-y-1">
-          <p className="text-label-bold text-text-primary">
-            {review.authorName ?? t('anonymous')}
-          </p>
+          <p className="text-label-bold text-text-primary">{author}</p>
           {review.mine && <Tag>{t('mine')}</Tag>}
           <RatingStars rating={rating} label={t('rating', { rating })} />
           <time
@@ -47,6 +46,7 @@ export function ReviewCard({
         {!isHidden && (
           <ReviewMoreMenu
             review={review}
+            subject={author}
             from="hospital"
             onDeleted={onDeleted}
           />

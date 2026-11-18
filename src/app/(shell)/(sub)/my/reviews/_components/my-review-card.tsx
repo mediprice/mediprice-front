@@ -40,7 +40,12 @@ export function MyReviewCard({
           </Link>
         </h3>
         {!isHidden && (
-          <ReviewMoreMenu review={review} from="my" onDeleted={onDeleted} />
+          <ReviewMoreMenu
+            review={review}
+            subject={hospitalName}
+            from="my"
+            onDeleted={onDeleted}
+          />
         )}
       </div>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">

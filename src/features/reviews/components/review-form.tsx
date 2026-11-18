@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CircleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useId } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
@@ -12,15 +12,17 @@ import { errorMessageKey } from '@/lib/api/error-message';
 
 import { type Review, reviewMutations } from '../queries';
 import {
+  buildReviewFormSchema,
   invalidFields,
   REVIEW_CONTENT_MAX,
   REVIEW_FORM_FIELDS,
   type ReviewForm as ReviewFormValues,
-  reviewFormErrorKey,
   type ReviewFormInput,
-  reviewFormSchema,
+  todayInSeoul,
 } from '../schemas';
+import { FieldError } from './field-error';
 import { StarRatingInput } from './star-rating-input';
+import { VisitFields } from './visit-fields';
 
 type Props = {
   ykiho: string;
@@ -43,6 +45,16 @@ export function ReviewForm({
   const id = useId();
   const queryClient = useQueryClient();
   const isEdit = review != null;
+  const [today] = useState(todayInSeoul);
+  const [schema] = useState(() =>
+    buildReviewFormSchema({
+      today,
+      keep: {
+        visitedOn: review?.visitedOn != null,
+        paidAmount: review?.paidAmount != null,
+      },
+    }),
+  );
   const {
     control,
     register,
@@ -51,12 +63,15 @@ export function ReviewForm({
     setFocus,
     formState: { errors, isDirty },
   } = useForm<ReviewFormInput, unknown, ReviewFormValues>({
-    resolver: zodResolver(reviewFormSchema),
+    resolver: zodResolver(schema),
     /** 별점 Controller가 본문보다 늦게 등록돼 기본 포커스가 화면 순서와 어긋나므로 직접 고른다. */
     shouldFocusError: false,
-    defaultValues: review
-      ? { rating: review.rating, content: review.content }
-      : { rating: undefined, content: '' },
+    defaultValues: {
+      rating: review?.rating,
+      content: review?.content ?? '',
+      visitedOn: review?.visitedOn ?? '',
+      paidAmount: review?.paidAmount != null ? String(review.paidAmount) : '',
+    },
   });
   const content = useWatch({ control, name: 'content' });
   const save = useMutation({
@@ -84,7 +99,10 @@ export function ReviewForm({
       noValidate
       onSubmit={handleSubmit(
         (form) => save.mutate(form, { onSuccess: (saved) => onSuccess(saved) }),
-        (invalid) => setFocus(invalid.rating ? 'rating' : 'content'),
+        (invalid) => {
+          const first = REVIEW_FORM_FIELDS.find((field) => invalid[field]);
+          if (first) setFocus(first);
+        },
       )}
       className="flex flex-col gap-6"
     >
@@ -108,11 +126,7 @@ export function ReviewForm({
             />
           )}
         />
-        {ratingError && (
-          <p id={`${id}-rating-error`} className="text-body-sm text-danger">
-            {t(`errors.${reviewFormErrorKey(ratingError)}`)}
-          </p>
-        )}
+        <FieldError id={`${id}-rating-error`} message={ratingError} />
       </fieldset>
 
       <div className="flex flex-col gap-2">
@@ -147,12 +161,15 @@ export function ReviewForm({
             })}
           </span>
         </div>
-        {contentError && (
-          <p id={`${id}-content-error`} className="text-body-sm text-danger">
-            {t(`errors.${reviewFormErrorKey(contentError)}`)}
-          </p>
-        )}
+        <FieldError id={`${id}-content-error`} message={contentError} />
       </div>
+
+      <VisitFields
+        register={register}
+        errors={errors}
+        today={today}
+        isEdit={isEdit}
+      />
 
       <ul className="flex flex-col gap-1 rounded-xl bg-surface px-4 py-4 text-body-sm text-text-secondary lg:px-5">
         <li>{t('noticeName')}</li>

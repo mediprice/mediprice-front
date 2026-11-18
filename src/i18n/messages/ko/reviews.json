@@ -24,6 +24,12 @@
     "contentRange": "10~2,000자",
     "contentCount": "{count, number} / {max, number}",
     "contentCountLabel": "{max, number}자 중 {count, number}자 입력",
+    "visitTitle": "방문 정보 (선택)",
+    "visitedOn": "방문일",
+    "paidAmount": "결제 금액(원)",
+    "paidAmountPlaceholder": "예: 45000",
+    "visitHint": "입력하면 후기에 함께 보여요. 게시한 뒤에는 바꿀 수만 있고 지울 수는 없어요.",
+    "visitHintEdit": "이미 입력한 방문일과 결제 금액은 바꿀 수만 있고 지울 수는 없어요.",
     "noticeName": "후기에는 별칭이 일부 가려져서 공개돼요(예: 건*하루).",
     "noticePrivacy": "실명·전화번호는 쓰지 마세요. 이미지는 첨부할 수 없어요.",
     "noticePublic": "게시하면 바로 공개돼요.",
@@ -36,6 +42,10 @@
       "ratingRequired": "평점을 골라 주세요.",
       "contentTooShort": "후기를 10자 이상 남겨 주세요.",
       "contentTooLong": "2,000자 이내로 줄여 주세요.",
+      "visitedOnInvalid": "날짜를 다시 확인해 주세요.",
+      "visitedOnFuture": "오늘 이후 날짜는 고를 수 없어요.",
+      "paidAmountInvalid": "1억 원 이하의 숫자로 입력해 주세요.",
+      "cannotClear": "이미 입력한 값은 지울 수 없어요. 바꿀 값을 입력해 주세요.",
       "invalid": "입력한 내용을 다시 확인해 주세요."
     }
   },
@@ -54,14 +64,17 @@
     "write": "후기 쓰기"
   },
   "menu": {
-    "open": "후기 더보기",
     "title": "후기 메뉴",
     "edit": "수정",
     "editLong": "수정하기",
     "delete": "삭제",
     "deleteLong": "삭제하기",
     "report": "신고",
-    "reportLong": "신고하기"
+    "reportLong": "신고하기",
+    "openFor": "{name} 후기 더보기",
+    "editFor": "{name} 후기 수정",
+    "deleteFor": "{name} 후기 삭제",
+    "reportFor": "{name} 후기 신고"
   },
   "delete": {
     "title": "후기를 삭제할까요?",
@@ -89,7 +102,8 @@
     "doneDescription": "운영 정책을 확인한 뒤 처리해요. 처리 결과는 따로 알려 드리지 않아요.",
     "alreadyTitle": "이미 신고한 후기예요",
     "alreadyDescription": "같은 후기는 한 번만 신고할 수 있어요. 접수된 신고를 확인하고 있어요.",
-    "failed": "신고를 접수하지 못했어요."
+    "failed": "신고를 접수하지 못했어요.",
+    "reasonHint": "신고 사유를 고르면 접수할 수 있어요."
   },
   "my": {
     "metaTitle": "내 후기",
@@ -102,7 +116,6 @@
     "public": "공개",
     "hidden": "숨김",
     "hiddenNote": "운영 정책에 따라 숨김 처리돼 병원 상세에 보이지 않아요. 숨김 처리된 후기는 수정하거나 삭제할 수 없어요.",
-    "deleteNote": "삭제하면 되돌릴 수 없어요.",
     "emptyTitle": "작성한 후기가 없어요",
     "emptyDescription": "방문한 병원의 후기를 남기면 여기에서 볼 수 있어요.",
     "browse": "병원 둘러보기",

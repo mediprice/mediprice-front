@@ -21,6 +21,7 @@ vi.mock('@/lib/api/client', async (importOriginal) => {
 });
 
 const BASE = 'http://app.test/bff';
+const NO_VISIT = { visitedOn: undefined, paidAmount: undefined };
 
 function review(overrides: Partial<Review> = {}): Review {
   return {
@@ -80,7 +81,7 @@ function isStale(client: QueryClient, key: readonly unknown[]) {
 }
 
 describe('reviewMutations.create', () => {
-  it('별점과 내용만 보내고, 성공하면 병원 목록과 내 후기 캐시를 무효화한다', async () => {
+  it('비운 선택 칸은 빼고 보내고, 성공하면 병원 목록과 내 후기 캐시를 무효화한다', async () => {
     let body: unknown;
     server.use(
       http.post(`${BASE}/api/hospitals/H1/reviews`, async ({ request }) => {
@@ -93,7 +94,11 @@ describe('reviewMutations.create', () => {
     const created = await new MutationObserver(
       client,
       reviewMutations.create(client, 'H1'),
-    ).mutate({ rating: 4, content: '설명을 자세히 해 주셔서 좋았어요.' });
+    ).mutate({
+      rating: 4,
+      content: '설명을 자세히 해 주셔서 좋았어요.',
+      ...NO_VISIT,
+    });
 
     expect(created.id).toBe(1);
     expect(body).toEqual({
@@ -102,6 +107,34 @@ describe('reviewMutations.create', () => {
     });
     expect(isStale(client, reviewKeys.hospital('H1', 'latest'))).toBe(true);
     expect(isStale(client, reviewKeys.myList())).toBe(true);
+  });
+
+  it('방문일과 결제 금액을 넣으면 함께 보낸다', async () => {
+    let body: unknown;
+    server.use(
+      http.post(`${BASE}/api/hospitals/H1/reviews`, async ({ request }) => {
+        body = await request.json();
+        return HttpResponse.json(review(), { status: 201 });
+      }),
+    );
+    const client = seededClient();
+
+    await new MutationObserver(
+      client,
+      reviewMutations.create(client, 'H1'),
+    ).mutate({
+      rating: 5,
+      content: '도수치료 설명이 자세했어요.',
+      visitedOn: '2026-10-01',
+      paidAmount: 0,
+    });
+
+    expect(body).toEqual({
+      rating: 5,
+      content: '도수치료 설명이 자세했어요.',
+      visitedOn: '2026-10-01',
+      paidAmount: 0,
+    });
   });
 
   it('입력 검증 실패는 fieldErrors를 담은 ApiError로 실패하고 캐시는 그대로 둔다', async () => {
@@ -116,7 +149,7 @@ describe('reviewMutations.create', () => {
 
     await expect(
       new MutationObserver(client, reviewMutations.create(client, 'H1')).mutate(
-        { rating: 4, content: '열 글자가 넘는 후기 내용' },
+        { rating: 4, content: '열 글자가 넘는 후기 내용', ...NO_VISIT },
       ),
     ).rejects.toMatchObject({
       status: 400,
@@ -144,6 +177,7 @@ describe('reviewMutations.update', () => {
     ).mutate({
       rating: 2,
       content: '대기 시간이 길었어요. 다시 가진 않을래요.',
+      ...NO_VISIT,
     });
 
     expect(method).toBe('PATCH');
@@ -163,6 +197,7 @@ describe('reviewMutations.update', () => {
       new MutationObserver(client, reviewMutations.update(client, 7)).mutate({
         rating: 3,
         content: '열 글자가 넘는 후기 내용',
+        ...NO_VISIT,
       }),
     ).rejects.toMatchObject({ status: 403, code: 'REVIEW_FORBIDDEN' });
     expect(isStale(client, reviewKeys.hospital('H1', 'latest'))).toBe(true);

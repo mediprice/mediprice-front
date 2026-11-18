@@ -1,7 +1,7 @@
 'use client';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { CircleAlert, Info, MessageSquareText } from 'lucide-react';
+import { CircleAlert, MessageSquareText } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -114,14 +114,6 @@ export function MyReviewList() {
           {t('more')}
         </Button>
       )}
-      <p className="flex items-center gap-2 rounded-lg bg-warning-tint px-4 py-3 text-body-sm text-text-primary">
-        <Info
-          aria-hidden="true"
-          className="size-4 shrink-0 text-warning"
-          strokeWidth={1.75}
-        />
-        {t('deleteNote')}
-      </p>
     </section>
   );
 }

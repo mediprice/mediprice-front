@@ -23,10 +23,13 @@ type Action = 'edit' | 'delete' | 'report';
 /** 후기의 수정·삭제(내 후기)와 신고(남의 후기). 모바일은 ⋯ 시트, 데스크톱은 카드 안의 작은 버튼이다. */
 export function ReviewMoreMenu({
   review,
+  subject,
   from,
   onDeleted,
 }: {
   review: Review;
+  /** 버튼 이름에 붙일 대상(작성자 또는 병원 이름). 카드가 여러 개라 "신고"만으로는 어느 후기인지 알 수 없다. */
+  subject: string;
   /** 수정을 마치고 돌아갈 화면. */
   from: 'hospital' | 'my';
   onDeleted?: () => void;
@@ -68,21 +71,24 @@ export function ReviewMoreMenu({
 
   const labels: Record<
     Action,
-    { short: string; long: string; icon: ReactNode }
+    { short: string; long: string; label: string; icon: ReactNode }
   > = {
     edit: {
       short: t('edit'),
       long: t('editLong'),
+      label: t('editFor', { name: subject }),
       icon: <PenLine aria-hidden="true" />,
     },
     delete: {
       short: t('delete'),
       long: t('deleteLong'),
+      label: t('deleteFor', { name: subject }),
       icon: <Trash2 aria-hidden="true" />,
     },
     report: {
       short: t('report'),
       long: t('reportLong'),
+      label: t('reportFor', { name: subject }),
       icon: <Flag aria-hidden="true" />,
     },
   };
@@ -93,7 +99,7 @@ export function ReviewMoreMenu({
         ref={moreRef}
         variant="ghost"
         size="icon"
-        aria-label={t('open')}
+        aria-label={t('openFor', { name: subject })}
         aria-haspopup="dialog"
         onClick={() => setIsMenuOpen(true)}
         className="-my-2 -mr-3 text-text-secondary lg:hidden"
@@ -106,6 +112,7 @@ export function ReviewMoreMenu({
             key={action}
             variant={action === 'edit' ? 'tint' : 'ghost'}
             size="sm"
+            aria-label={labels[action].label}
             onClick={() => run(action)}
             className={
               action === 'edit'

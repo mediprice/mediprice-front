@@ -55,6 +55,7 @@ export function ReportForm({
     defaultValues: { detail: '' },
   });
   const detail = useWatch({ control, name: 'detail' });
+  const reason = useWatch({ control, name: 'reason' });
   const report = useMutation({
     ...reviewMutations.report(review.id),
     onSuccess: () => onOutcome('done'),
@@ -176,6 +177,14 @@ export function ReportForm({
         </p>
       )}
 
+      {!reason && (
+        <p
+          id={`${id}-submit-hint`}
+          className="-mb-3 text-body-sm text-text-secondary lg:text-right"
+        >
+          {t('reasonHint')}
+        </p>
+      )}
       <div className="flex flex-col gap-2 lg:flex-row lg:justify-end">
         <Button
           variant="neutral"
@@ -188,6 +197,8 @@ export function ReportForm({
         <Button
           type="submit"
           size="lg"
+          disabled={!reason}
+          aria-describedby={reason ? undefined : `${id}-submit-hint`}
           isLoading={report.isPending}
           className="w-full lg:min-h-11 lg:w-auto"
         >

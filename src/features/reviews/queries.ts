@@ -13,6 +13,16 @@ import { shouldRetryQuery } from '@/lib/query-client';
 
 import type { ReportForm, ReviewForm } from './schemas';
 
+/** 비운 선택 칸은 보내지 않는다. 수정(PATCH)에서는 보내지 않은 값이 그대로 남는다. */
+function toReviewBody(form: ReviewForm) {
+  return {
+    rating: form.rating,
+    content: form.content,
+    ...(form.visitedOn !== undefined && { visitedOn: form.visitedOn }),
+    ...(form.paidAmount !== undefined && { paidAmount: form.paidAmount }),
+  };
+}
+
 export type Review = components['schemas']['ReviewResponse'];
 export type ReviewSort = 'latest' | 'rating';
 
@@ -110,7 +120,7 @@ export const reviewMutations = {
         unwrap(
           apiClient.POST('/api/hospitals/{ykiho}/reviews', {
             params: { path: { ykiho } },
-            body: { rating: form.rating, content: form.content },
+            body: toReviewBody(form),
           }),
         ),
       onSuccess: () => invalidateReviews(queryClient),
@@ -122,7 +132,7 @@ export const reviewMutations = {
         unwrap(
           apiClient.PATCH('/api/reviews/{reviewId}', {
             params: { path: { reviewId } },
-            body: { rating: form.rating, content: form.content },
+            body: toReviewBody(form),
           }),
         ),
       onSuccess: (review) => {

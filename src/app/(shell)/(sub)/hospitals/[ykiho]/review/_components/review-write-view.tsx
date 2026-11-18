@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -14,6 +15,7 @@ import { SubTopBar } from '@/components/layout/sub-top-bar';
 import { LoginRequired } from '@/features/auth/components/login-required';
 import { MyPageHeader } from '@/features/auth/components/my-page-header';
 import { MySideNav } from '@/features/auth/components/my-side-nav';
+import { hospitalQueries } from '@/features/hospitals/queries';
 import { setReviewNotice } from '@/features/reviews/review-notice';
 import type { ReviewWriteFrom } from '@/features/reviews/write-href';
 
@@ -34,28 +36,48 @@ export function ReviewWriteView({
   const tMenu = useTranslations('mypage.menu');
   const tNav = useTranslations('nav');
   const router = useRouter();
+  const hospital = useQuery(hospitalQueries.detail(ykiho));
+  const isMyContext = from === 'my';
   const [isDirty, setIsDirty] = useState(false);
   const leave = useLeaveGuard(isDirty);
-  const backHref =
-    from === 'my'
-      ? ('/my/reviews' as const)
-      : (`/hospitals/${encodeURIComponent(ykiho)}` as const);
+  const hospitalHref = `/hospitals/${encodeURIComponent(ykiho)}` as const;
+  const backHref = isMyContext ? ('/my/reviews' as const) : hospitalHref;
   const title = editId ? t('titleEdit') : t('title');
 
   return (
     <div onClickCapture={leave.handleClickCapture}>
       <SubTopBar title={title} backHref={backHref} />
       <MyPageHeader className="max-lg:hidden">
-        <Breadcrumb>
-          <BreadcrumbLink href="/my">{tNav('my')}</BreadcrumbLink>
-          <BreadcrumbLink href="/my/reviews">{tMenu('reviews')}</BreadcrumbLink>
-          <BreadcrumbCurrent>{title}</BreadcrumbCurrent>
-        </Breadcrumb>
+        {isMyContext ? (
+          <Breadcrumb>
+            <BreadcrumbLink href="/my">{tNav('my')}</BreadcrumbLink>
+            <BreadcrumbLink href="/my/reviews">
+              {tMenu('reviews')}
+            </BreadcrumbLink>
+            <BreadcrumbCurrent>{title}</BreadcrumbCurrent>
+          </Breadcrumb>
+        ) : (
+          <Breadcrumb>
+            <BreadcrumbLink href="/">{tNav('home')}</BreadcrumbLink>
+            {hospital.data && (
+              <BreadcrumbLink href={hospitalHref}>
+                {hospital.data.name}
+              </BreadcrumbLink>
+            )}
+            <BreadcrumbCurrent>{title}</BreadcrumbCurrent>
+          </Breadcrumb>
+        )}
         <h1 className="text-title">{title}</h1>
       </MyPageHeader>
       <h1 className="sr-only lg:hidden">{title}</h1>
-      <PageContainer className="pt-4 pb-section lg:grid lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8 lg:pt-0">
-        <MySideNav />
+      <PageContainer
+        className={
+          isMyContext
+            ? 'pt-4 pb-section lg:grid lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8 lg:pt-0'
+            : 'pt-4 pb-section lg:pt-0 [&>*]:lg:max-w-3xl'
+        }
+      >
+        {isMyContext && <MySideNav />}
         <LoginRequired reason="review">
           <ReviewWriteBody
             ykiho={ykiho}
@@ -66,7 +88,7 @@ export function ReviewWriteView({
             onSaved={() => {
               setIsDirty(false);
               setReviewNotice(
-                from === 'my' ? 'my' : ykiho,
+                isMyContext ? 'my' : ykiho,
                 editId ? 'updated' : 'created',
               );
               router.replace(backHref);
