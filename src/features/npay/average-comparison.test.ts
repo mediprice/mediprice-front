@@ -56,4 +56,24 @@ describe('compareToAverage', () => {
     expect(compareToAverage(Number.NaN, 50_000)).toBeNull();
     expect(compareToAverage(40_000, Number.POSITIVE_INFINITY)).toBeNull();
   });
+
+  it('sameWithinPercent 미만의 차이는 같다고 보고, 경계(정확히 그 값)부터는 차이로 본다', () => {
+    const near = { sameWithinPercent: 5 };
+    expect(compareToAverage(104_900, 100_000, near)).toEqual({
+      direction: 'same',
+      percent: 0,
+    });
+    expect(compareToAverage(95_500, 100_000, near)).toEqual({
+      direction: 'same',
+      percent: 0,
+    });
+    expect(compareToAverage(95_000, 100_000, near)).toEqual({
+      direction: 'below',
+      percent: 5,
+    });
+    expect(compareToAverage(105_000, 100_000, near)).toEqual({
+      direction: 'above',
+      percent: 5,
+    });
+  });
 });

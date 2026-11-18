@@ -32,7 +32,6 @@ export function ZeroResults({
         icon={<SearchX />}
         title={t('noPriceTitle')}
         description={t('noPriceDescription')}
-        className="rounded-xl bg-bg shadow-card"
         action={
           <Button asChild variant="tint" size="md">
             <Link href="/search">{t('search')}</Link>

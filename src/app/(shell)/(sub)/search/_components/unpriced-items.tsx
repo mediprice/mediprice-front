@@ -28,11 +28,8 @@ export function UnpricedItems({
   const label = useCategoryLabel();
 
   return (
-    <details
-      open={isOpen}
-      className="group rounded-xl bg-bg lg:border lg:border-border"
-    >
-      <summary className="flex min-h-13 cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 text-label text-text-secondary lg:px-6 [&::-webkit-details-marker]:hidden">
+    <details open={isOpen} className="group rounded-2xl border border-border">
+      <summary className="flex min-h-13 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-4 text-label text-text-secondary lg:px-6 [&::-webkit-details-marker]:hidden">
         {t('unpricedTitle', { count: items.length })}
         <ChevronDown
           aria-hidden="true"

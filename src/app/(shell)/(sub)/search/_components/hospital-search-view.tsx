@@ -42,10 +42,10 @@ export function HospitalSearchView({
   const hasSameNames = new Set(names).size < names.length;
 
   const notice = (
-    <p className="mt-2 flex items-start gap-2 rounded-lg bg-primary-tint px-4 py-3 text-body-sm text-text-primary">
+    <p className="flex items-start gap-2 rounded-2xl bg-surface px-4 py-3 text-body-sm text-text-secondary">
       <Info
         aria-hidden="true"
-        className="mt-0.5 size-4.5 shrink-0 text-primary"
+        className="mt-0.5 size-4.5 shrink-0 text-text-tertiary"
         strokeWidth={1.75}
       />
       {t('hospital.notice')}
@@ -114,7 +114,7 @@ export function HospitalSearchView({
       {header}
       <ResultsLayout aside={aside}>
         {notice}
-        <ul className="space-y-3 lg:space-y-4">
+        <ul className="divide-y divide-hairline border-y border-hairline">
           {hospitals.map((hospital) => (
             <li key={hospital.ykiho}>
               <HospitalCard hospital={hospital} />

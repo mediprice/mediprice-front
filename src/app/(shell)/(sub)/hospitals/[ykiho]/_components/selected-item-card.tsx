@@ -17,10 +17,10 @@ import { Button } from '@/components/ui/button';
 import { RangeBar } from '@/components/ui/range-bar';
 import { RollingNumber } from '@/components/ui/rolling-number';
 import { Skeleton } from '@/components/ui/skeleton';
-import { compareToAverage } from '@/features/hospitals/average-comparison';
 import { decodeYkiho } from '@/features/hospitals/detail-links';
 import { priceRowName } from '@/features/hospitals/price-groups';
 import { LiveFeeCheck } from '@/features/live-fee/components/live-fee-check';
+import { compareToAverage } from '@/features/npay/average-comparison';
 import { DEFAULT_REGION } from '@/features/regions/service-region';
 import { cn } from '@/lib/utils';
 

@@ -8,7 +8,7 @@ import { FilterSheet } from './filter-sheet';
 import { countActiveFilters, type PriceFilters } from './price-filters';
 import { SortSheet } from './sort-sheet';
 
-/** 모바일에서 스크롤해도 상단 바 아래에 붙어 있는 필터·지도·정렬 한 줄. 낮은 화면(큰 글자·가로)에서는 본문을 가리지 않게 붙이지 않는다. */
+/** 머리와 목록 사이. 모바일에서 스크롤해도 상단 바 아래에 붙어 있는 필터·지도·정렬 한 줄. 낮은 화면(큰 글자·가로)에서는 본문을 가리지 않게 붙이지 않는다. */
 export function MobileToolbar({
   code,
   filters,
@@ -25,7 +25,7 @@ export function MobileToolbar({
   }).toString();
 
   return (
-    <div className="sticky top-[calc(var(--spacing-top-bar)+env(safe-area-inset-top,0px))] z-(--z-header) border-b border-hairline bg-bg lg:hidden [@media(max-height:40rem)]:static">
+    <div className="sticky top-[calc(var(--spacing-top-bar)+env(safe-area-inset-top,0px))] z-(--z-header) -mx-page border-y border-hairline bg-bg lg:hidden [@media(max-height:40rem)]:static">
       <div className="mx-auto flex max-w-page flex-wrap items-center gap-2 py-2 px-page">
         <FilterSheet
           code={code}

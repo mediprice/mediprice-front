@@ -24,7 +24,11 @@ import { useItemReady } from './use-item-ready';
 import { usePriceSummary } from './use-price-summary';
 import { ZeroResults } from './zero-results';
 
-/** 병원 수·적용된 조건·정렬과 병원별 가격 카드. "더 보기"로 읽은 행은 기존 병원 카드에 합쳐진다. */
+/** 흰 바탕의 행 목록. 모바일은 화면 끝까지, 행 사이는 옅은 구분선이다. */
+const LIST =
+  '-mx-4 flex flex-col divide-y divide-hairline border-y border-hairline md:-mx-6';
+
+/** 적용된 조건·정렬과 병원별 가격 행. "더 보기"로 읽은 행은 기존 병원 행에 합쳐진다. 병원 수는 머리에 크게 있어 여기서는 읽어 주기만 한다. */
 export function PriceResults({
   code,
   filters,
@@ -57,21 +61,20 @@ export function PriceResults({
   return (
     <section
       aria-labelledby={RESULTS_HEADING_ID}
-      className="flex flex-col gap-3"
+      className="flex flex-col gap-4"
     >
-      <h2 id={RESULTS_HEADING_ID} tabIndex={-1} className="sr-only">
-        {t('title')}
-      </h2>
-      <div className="flex min-h-11 items-center gap-3">
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 lg:gap-3">
-          <p
-            aria-live="polite"
-            className="text-label-bold text-text-primary lg:text-heading"
-          >
-            {total !== undefined
-              ? t('count', { count: total })
-              : summary.isPending && <Skeleton className="h-5.5 w-24 lg:h-7" />}
-          </p>
+      <div className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-2">
+        <h2
+          id={RESULTS_HEADING_ID}
+          tabIndex={-1}
+          className="text-heading text-text-primary"
+        >
+          {t('title')}
+        </h2>
+        <p aria-live="polite" className="sr-only">
+          {total !== undefined && t('countStatus', { count: total })}
+        </p>
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
           <ActiveFilterChips code={code} filters={filters} />
         </div>
         <div className="hidden lg:block">
@@ -80,23 +83,27 @@ export function PriceResults({
       </div>
 
       {query.isPending ? (
-        <ul
-          aria-busy="true"
-          className="flex flex-col divide-y divide-hairline overflow-hidden rounded-2xl bg-bg"
-        >
+        <ul aria-busy="true" className={LIST}>
           {Array.from({ length: 4 }, (_, index) => (
             <li
               key={index}
-              className="flex items-start justify-between gap-4 px-4 pt-5 pb-4 md:px-6 md:pt-6 md:pb-5"
+              className="flex flex-col gap-3 px-4 pt-5 pb-3 md:px-6 md:pt-6 md:pb-4"
             >
-              <span className="flex flex-1 flex-col gap-1.5">
-                <Skeleton className="h-6 w-40" />
-                <Skeleton className="h-5 w-28" />
-                <Skeleton className="mt-2 h-6 w-48 max-w-full" />
+              <span className="flex items-start justify-between gap-4 md:gap-8">
+                <span className="flex min-w-0 flex-1 flex-col gap-1">
+                  <Skeleton className="h-6 w-40 max-w-full" />
+                  <Skeleton className="h-5.75 w-28 lg:h-6" />
+                </span>
+                <Skeleton className="h-8 w-24" />
               </span>
-              <span className="flex flex-col items-end gap-2">
-                <Skeleton className="h-8 w-28" />
-                <Skeleton className="h-3 w-24 md:w-36" />
+              <span className="flex items-center justify-between gap-4 md:justify-end">
+                <Skeleton className="h-6.5 w-36" />
+                <Skeleton className="h-4 w-28 md:w-40" />
+              </span>
+              <span className="flex min-h-11 items-center gap-3">
+                <Skeleton className="h-5.75 w-40 max-w-full lg:h-6" />
+                <Skeleton className="ml-auto size-11 shrink-0 rounded-xl" />
+                <Skeleton className="h-9 w-28 shrink-0 rounded-lg" />
               </span>
             </li>
           ))}
@@ -105,7 +112,6 @@ export function PriceResults({
         <EmptyState
           icon={<CircleAlert />}
           title={tErrors(errorMessageKey(query.error))}
-          className="rounded-2xl bg-bg"
           action={
             <Button
               variant="tint"
@@ -120,13 +126,14 @@ export function PriceResults({
         <ZeroResults code={code} filters={filters} />
       ) : (
         <>
-          <ul className="flex flex-col divide-y divide-hairline overflow-hidden rounded-2xl bg-bg">
+          <ul className={LIST}>
             {groups.map((group) => (
               <li key={group.ykiho}>
                 <HospitalPriceGroupCard
                   group={group}
                   href={`/hospitals/${encodeURIComponent(group.ykiho)}?${hospitalQuery}`}
                   summary={summary.data}
+                  sort={filters.sort}
                 />
               </li>
             ))}

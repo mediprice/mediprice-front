@@ -14,32 +14,37 @@ export function ListSkeleton({
 }) {
   const t = useTranslations('common.status');
   return (
-    <div aria-busy="true" className="space-y-2 lg:space-y-3">
+    <div aria-busy="true" className="space-y-1">
       <span className="sr-only">{t('loading')}</span>
       {variant === 'item' ? (
         <>
-          <div className="flex min-h-6 items-center pt-2">
-            <Skeleton className="h-4 w-40" />
+          <div className="flex min-h-6 items-center">
+            <Skeleton className="h-4.5 w-40" />
           </div>
-          <ul className="divide-y divide-hairline rounded-xl bg-bg px-4 lg:px-6 lg:shadow-card">
+          <ul className="divide-y divide-hairline border-b border-hairline">
             {Array.from({ length: rows }, (_, index) => (
-              <li key={index} className="space-y-1 py-4 lg:py-5">
-                <Skeleton className="h-6 w-1/2" />
-                <PriceSkeleton />
+              <li key={index} className="flex items-center gap-3 py-5 lg:gap-8">
+                <span className="flex min-w-0 flex-1 flex-col gap-2 lg:flex-row lg:items-center lg:gap-8">
+                  <Skeleton className="h-7 w-1/2 lg:flex-1" />
+                  <span className="lg:w-72 lg:shrink-0">
+                    <PriceSkeleton />
+                  </span>
+                </span>
+                <Skeleton className="size-6 shrink-0" />
               </li>
             ))}
           </ul>
         </>
       ) : (
-        <ul className="space-y-3 lg:space-y-4">
+        <ul className="divide-y divide-hairline border-y border-hairline">
           {Array.from({ length: rows }, (_, index) => (
-            <li
-              key={index}
-              className="space-y-1 rounded-xl bg-bg p-4 shadow-card lg:p-6"
-            >
-              <Skeleton className="h-6 w-1/2" />
-              <Skeleton className="h-5.75 w-1/3" />
-              <Skeleton className="h-5.75 w-3/4" />
+            <li key={index} className="flex items-center gap-3 py-4 lg:py-5">
+              <span className="flex min-w-0 flex-1 flex-col gap-1">
+                <Skeleton className="h-7 w-1/2" />
+                <Skeleton className="h-5.75 w-1/3 lg:h-6" />
+                <Skeleton className="h-5.75 w-3/4 lg:h-6" />
+              </span>
+              <Skeleton className="size-11 shrink-0 rounded-xl" />
             </li>
           ))}
         </ul>

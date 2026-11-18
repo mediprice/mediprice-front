@@ -44,10 +44,11 @@ const HOME_CODES = HOME_CATEGORIES.flatMap(({ categoryCodes }) => [
   ...categoryCodes,
 ]);
 
-const TILE =
-  'flex h-full min-h-18 items-center gap-3 rounded-xl bg-bg py-3 pr-3 pl-4 shadow-card transition-colors hover:bg-primary-tint lg:bg-surface lg:shadow-none lg:hover:bg-primary-tint';
+/** 그 밖의 분류 한 줄. 여러 열로 흘러도 줄마다 아래 구분선을 둔다. */
+const ROW =
+  'flex h-full min-h-14 items-center gap-3 border-b border-hairline py-3 pr-1';
 
-/** 전체 분류(category=all). 홈 분야 다섯 개를 먼저 크게, 나머지 공식 대분류는 가나다순으로 보여 준다. */
+/** 전체 분류(category=all). 홈 분야 다섯 개를 큰 타일로 먼저, 나머지 공식 대분류는 가나다순 구분선 목록으로 보여 준다. */
 export function CategoryRoot({
   categories,
   region,
@@ -63,41 +64,41 @@ export function CategoryRoot({
 
   return (
     <>
-      <PageContainer className="space-y-2 pt-5 pb-4 lg:pt-4 lg:pb-6">
+      <PageContainer className="space-y-2 pt-5 pb-6 lg:pt-6 lg:pb-10">
         <Breadcrumb>
           <BreadcrumbLink href="/">{tCrumb('home')}</BreadcrumbLink>
           <BreadcrumbCurrent>{t('root')}</BreadcrumbCurrent>
         </Breadcrumb>
-        <h1 className="text-title">{t('root')}</h1>
-        <p className="text-body-sm text-text-secondary">
+        <h1 className="text-display">{t('root')}</h1>
+        <p className="max-w-2xl text-body text-text-secondary">
           {t('rootDescription')}
         </p>
       </PageContainer>
 
-      <div className="flex-1 bg-surface lg:bg-bg">
-        <PageContainer className="space-y-8 pt-5 pb-section lg:pt-2">
+      <div className="flex-1">
+        <PageContainer className="space-y-10 pb-section lg:space-y-14">
           <section
             aria-labelledby="search-home-categories"
             className="space-y-3"
           >
             <SectionHeader id="search-home-categories" title={t('popular')} />
-            <ul className="grid grid-cols-2 gap-2.5 lg:grid-cols-5 lg:gap-4">
+            <ul className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,8.5rem),1fr))] gap-3 lg:grid-cols-5 lg:gap-4">
               {HOME_CATEGORIES.map(({ id }) => (
-                <li key={id}>
+                <li key={id} className="max-md:last:col-span-full">
                   <Link
                     href={{
                       pathname: '/search',
                       query: { category: id, ...regionQuery(region) },
                     }}
-                    className="flex h-full min-h-28 flex-col justify-between gap-3 rounded-xl bg-bg p-4 shadow-card transition-colors hover:bg-primary-tint lg:items-center lg:bg-surface lg:py-6 lg:shadow-none lg:hover:bg-primary-tint"
+                    className="flex h-full min-h-36 flex-col justify-between gap-4 rounded-2xl bg-surface p-5 transition-[background-color,scale] duration-200 ease-standard hover:bg-surface-strong active:scale-98 active:bg-surface-strong lg:min-h-44 lg:p-6"
                   >
                     <span
                       aria-hidden="true"
-                      className="flex size-12 items-center justify-center rounded-xl bg-primary-tint text-primary lg:bg-bg [&_svg]:size-6 [&_svg]:[stroke-width:1.75]"
+                      className="flex size-14 items-center justify-center rounded-2xl bg-bg text-primary [&_svg]:size-7 [&_svg]:[stroke-width:1.75]"
                     >
                       {ICONS[id]}
                     </span>
-                    <span className="text-label-bold">
+                    <span className="text-heading">
                       <KeepPhrase text={t(`home.${id}`)} />
                     </span>
                   </Link>
@@ -131,7 +132,7 @@ export function CategoryRoot({
                 onRetry={() => void categories.refetch()}
               />
             ) : (
-              <ul className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+              <ul className="grid md:grid-cols-2 md:gap-x-8 lg:grid-cols-3 lg:gap-x-10">
                 {others
                   ? others.map((category) => (
                       <li key={category.code}>
@@ -144,21 +145,21 @@ export function CategoryRoot({
                               ...regionQuery(region),
                             },
                           }}
-                          className={TILE}
+                          className={`${ROW} group hover:text-primary-text`}
                         >
-                          <span className="min-w-0 flex-1 text-label-bold">
+                          <span className="min-w-0 flex-1 text-body">
                             {category.name}
                           </span>
                           <ChevronRight
                             aria-hidden="true"
-                            className="size-5 shrink-0 text-text-tertiary"
+                            className="size-5 shrink-0 text-text-tertiary group-hover:text-primary-text"
                             strokeWidth={1.75}
                           />
                         </Link>
                       </li>
                     ))
                   : Array.from({ length: 8 }, (_, index) => (
-                      <li key={index} className={TILE}>
+                      <li key={index} className={ROW}>
                         <Skeleton className="h-5 w-2/3" />
                       </li>
                     ))}

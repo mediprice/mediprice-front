@@ -11,17 +11,18 @@
   "header": {
     "source": "건강보험심사평가원 공개 가격 기준",
     "loading": "항목 정보를 불러오는 중",
-    "fallbackTitle": "항목별 가격"
+    "fallbackTitle": "항목별 가격",
+    "headline": "{item}, {scope} 평균",
+    "noPrice": "아직 공개된 가격이 없어요",
+    "regionLabel": "지역"
   },
   "notFound": {
     "description": "주소가 바뀌었거나 더 이상 공개되지 않는 항목일 수 있어요.",
     "search": "다른 항목 찾기"
   },
   "summary": {
-    "label": "공개 가격",
     "regionWithSggu": "{region} {sggu}",
     "scopeWithInstitution": "{scope} · {institution}",
-    "scope": "{scope} 기준",
     "counts": "병원 {hospitals, number}곳 · 가격 {prices, number}건"
   },
   "filters": {
@@ -53,9 +54,9 @@
   },
   "list": {
     "title": "병원별 공개 가격",
-    "count": "병원 {count, number}곳",
     "progress": "전체 {total, number}곳 중 {shown, number}곳",
-    "loadMoreError": "다음 목록을 불러오지 못했어요."
+    "loadMoreError": "다음 목록을 불러오지 못했어요.",
+    "countStatus": "병원 {count, number}곳을 찾았어요."
   },
   "empty": {
     "title": "조건에 맞는 병원이 없어요",
@@ -73,7 +74,12 @@
     "showVariants": "세부 {count, number}건 보기",
     "hideVariants": "세부 접기",
     "variantsLabel": "{hospital}의 세부 가격",
-    "moreVariants": "외 {count, number}건"
+    "moreVariants": "외 {count, number}건",
+    "comparison": {
+      "below": "평균보다 {percent, number}% 저렴",
+      "above": "평균보다 {percent, number}% 비쌈",
+      "same": "평균 수준"
+    }
   },
   "breadcrumb": {
     "home": "홈"

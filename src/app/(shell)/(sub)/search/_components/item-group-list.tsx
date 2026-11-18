@@ -26,10 +26,10 @@ export function ItemGroupList({
   const { priced, unpriced } = partitionByPrice(items);
 
   return (
-    <div className="space-y-4 lg:space-y-6">
+    <div className="space-y-6 lg:space-y-8">
       {groupItems(priced).map((group) => (
-        <section key={group.key} className="space-y-2 lg:space-y-3">
-          <Heading className="flex min-h-6 flex-wrap items-center gap-x-1 pt-2 text-caption-bold text-text-secondary">
+        <section key={group.key} className="space-y-1">
+          <Heading className="flex min-h-6 flex-wrap items-center gap-x-1 text-label-bold text-text-secondary">
             {group.major && (
               <span>
                 <KeepPhrase text={label(group.major.code, group.major.name)} />
@@ -38,13 +38,13 @@ export function ItemGroupList({
             {group.major && group.minor && (
               <ChevronRight
                 aria-hidden="true"
-                className="size-3.5"
-                strokeWidth={1.5}
+                className="size-4"
+                strokeWidth={1.75}
               />
             )}
             {group.minor && <span>{group.minor.name}</span>}
           </Heading>
-          <ul className="divide-y divide-hairline overflow-hidden rounded-xl bg-bg px-4 lg:px-6 lg:shadow-card">
+          <ul className="divide-y divide-hairline border-b border-hairline">
             {group.items.map((item) => (
               <li key={item.code}>
                 <ItemRow item={item} region={region} />

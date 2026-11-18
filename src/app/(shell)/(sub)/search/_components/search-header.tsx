@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 
 import { SearchForm } from './search-form';
 
-/** 검색어를 고쳐 다시 찾는 띠. 폼은 URL이 바뀔 때마다 새로 그려야 입력값이 URL과 맞으므로 key를 준다. */
+/** 검색어를 고쳐 다시 찾는 흰 머리. 큰 검색창 하나와 아래 구분선만 둔다. 폼은 URL이 바뀔 때마다 새로 그려야 입력값이 URL과 맞으므로 key를 준다. */
 export function SearchHeader({
   type,
   keyword,
@@ -28,24 +28,20 @@ export function SearchHeader({
 }) {
   const t = useTranslations('search.breadcrumb');
   return (
-    <div
-      className={cn('rounded-b-4xl bg-primary-tint lg:rounded-none', className)}
-    >
-      <PageContainer className="py-3.5 md:py-6 lg:pt-2 lg:pb-9">
+    <div className={cn('border-b border-hairline', className)}>
+      <PageContainer className="flex flex-col gap-2 py-4 md:py-6 lg:pt-6 lg:pb-8">
         {current && (
           <Breadcrumb>
             <BreadcrumbLink href="/">{t('home')}</BreadcrumbLink>
             <BreadcrumbCurrent>{current}</BreadcrumbCurrent>
           </Breadcrumb>
         )}
-        <div className={cn(!current && 'lg:pt-7')}>
-          <SearchForm
-            key={`${type}:${keyword}:${region}`}
-            type={type}
-            keyword={keyword}
-            region={region}
-          />
-        </div>
+        <SearchForm
+          key={`${type}:${keyword}:${region}`}
+          type={type}
+          keyword={keyword}
+          region={region}
+        />
       </PageContainer>
     </div>
   );

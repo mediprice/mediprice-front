@@ -29,14 +29,12 @@
     "hospitalStatus": "병원 {count, plural, other {#곳}}을 찾았어요."
   },
   "item": {
-    "viewPrices": "병원별 가격 보기",
     "priceError": "가격을 불러오지 못했어요",
     "unpricedTitle": "가격 정보 없는 항목 {count, plural, other {#개}}",
     "unpricedHint": "<nb>{region}</nb>에 공개된 가격이 아직 없는 항목이에요."
   },
   "hospital": {
     "notice": "병원 결과에는 가격이 없어요. 병원을 열고 항목을 고르면 가격을 볼 수 있어요.",
-    "viewDetail": "병원 상세 보기",
     "duplicateNotice": "같은 이름의 병원이 있어요. 주소와 종별로 구분해 주세요."
   },
   "loadMore": {

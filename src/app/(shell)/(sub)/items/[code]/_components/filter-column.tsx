@@ -15,7 +15,7 @@ import {
 } from './price-filters';
 import { useApplyFilters } from './use-apply-filters';
 
-/** 데스크톱 왼쪽 필터 열. 열이 늘 보이므로 고르는 즉시 적용한다. */
+/** 데스크톱 오른쪽 필터 열(머리와 목록 옆). 열이 늘 보이므로 고르는 즉시 적용한다. */
 export function FilterColumn({
   code,
   filters,
@@ -34,7 +34,7 @@ export function FilterColumn({
   return (
     <aside
       aria-labelledby="item-filters-title"
-      className="sticky top-24 hidden w-70 shrink-0 self-start rounded-xl bg-bg p-6 shadow-card lg:block"
+      className="sticky top-24 hidden self-start rounded-2xl bg-surface p-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:block"
     >
       <div className="mb-5 flex items-center justify-between gap-2">
         <h2 id="item-filters-title" className="text-heading">
@@ -52,7 +52,7 @@ export function FilterColumn({
         </Button>
       </div>
       <FilterPanel value={filters} onChange={applyFilters} />
-      <Button asChild variant="outline" size="md" className="mt-5 w-full">
+      <Button asChild variant="outline" size="md" className="mt-6 w-full bg-bg">
         <Link href={`/map?${mapQuery}`}>
           <MapIcon aria-hidden="true" />
           {tMap('openMap')}

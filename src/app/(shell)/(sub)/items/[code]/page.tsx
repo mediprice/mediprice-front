@@ -10,7 +10,6 @@ import { ItemHeader } from './_components/item-header';
 import { MobileToolbar } from './_components/mobile-toolbar';
 import { parsePriceFilters } from './_components/price-filters';
 import { PriceResults } from './_components/price-results';
-import { PriceSummary } from './_components/price-summary';
 
 /** 항목 이름은 브라우저 전용 apiClient로만 가져올 수 있어 공통 제목을 두고, ItemGate가 받은 뒤 바꾼다. */
 export async function generateMetadata(): Promise<Metadata> {
@@ -30,30 +29,16 @@ export default async function ItemPricePage({
     <>
       <SubTopBar title={t('topBar.title')} backHref="/" />
       <ItemGate code={code}>
-        <div className="rounded-b-4xl bg-primary-tint lg:rounded-none">
-          <PageContainer className="flex flex-col gap-5 py-6 lg:py-10">
-            <ItemHeader code={code} region={filters.region} />
-            <PriceSummary
-              code={code}
-              filters={filters}
-              className="flex lg:hidden"
-            />
-          </PageContainer>
-        </div>
-        <MobileToolbar code={code} filters={filters} />
-        <div className="flex-1 bg-surface">
-          <PageContainer className="flex flex-col gap-4 pt-4 pb-section lg:flex-row lg:items-start lg:gap-8 lg:pt-8">
-            <FilterColumn code={code} filters={filters} />
-            <div className="flex min-w-0 flex-1 flex-col gap-4 lg:gap-6">
-              <PriceSummary
-                code={code}
-                filters={filters}
-                className="hidden lg:flex"
-              />
-              <PriceResults code={code} filters={filters} />
-            </div>
-          </PageContainer>
-        </div>
+        <PageContainer className="flex flex-1 flex-col pt-5 pb-section lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:content-start lg:gap-x-12 lg:pt-6">
+          <div className="pb-6 lg:col-start-1 lg:row-start-1 lg:pb-10">
+            <ItemHeader code={code} filters={filters} />
+          </div>
+          <MobileToolbar code={code} filters={filters} />
+          <FilterColumn code={code} filters={filters} />
+          <div className="pt-5 lg:col-start-1 lg:row-start-2 lg:pt-0">
+            <PriceResults code={code} filters={filters} />
+          </div>
+        </PageContainer>
       </ItemGate>
     </>
   );

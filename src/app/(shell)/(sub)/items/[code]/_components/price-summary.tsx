@@ -3,88 +3,96 @@
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { RangeBar } from '@/components/ui/range-bar';
+import { RollingNumber } from '@/components/ui/rolling-number';
 import { Skeleton } from '@/components/ui/skeleton';
 import { errorMessageKey } from '@/lib/api/error-message';
-import { cn } from '@/lib/utils';
 
 import type { PriceFilters } from './price-filters';
-import { useFilterLabels } from './use-filter-labels';
 import { usePriceSummary } from './use-price-summary';
 
-/** 현재 조건의 평균을 크게, 최저·최고와 병원·가격 수를 작게 보여 준다(극단값을 머리로 쓰지 않는다). 모바일은 머리 띠, 데스크톱은 회색 목록 띠 위의 흰 카드다. */
+/**
+ * 머리의 큰 평균과 최저–평균–최고 막대, 병원·가격 수. 극단값에 끌려가는 범위 대신 평균을 주인공으로 쓴다(docs 14장).
+ * 데스크톱은 평균 옆에 막대를 둬서 폭을 쓴다. 불러오는 동안 같은 높이의 뼈대를 둔다.
+ */
 export function PriceSummary({
   code,
   filters,
-  className,
 }: {
   code: string;
   filters: PriceFilters;
-  className?: string;
 }) {
-  const t = useTranslations('items.summary');
+  const t = useTranslations('items');
   const tPrice = useTranslations('common.price');
   const tErrors = useTranslations('errors');
   const tActions = useTranslations('common.actions');
-  const { scope } = useFilterLabels(filters);
   const { data, isPending, isError, error, refetch } = usePriceSummary(
     code,
     filters,
   );
 
-  return (
-    <div
-      className={cn(
-        'flex-col gap-3 rounded-xl bg-bg px-4.5 py-5 shadow-card md:flex-row md:items-end md:justify-between md:gap-6 lg:px-7 lg:py-6',
-        className,
-      )}
-    >
-      <div className="flex min-w-0 flex-col gap-1">
-        <p className="text-caption-strong text-text-secondary">
-          {t('scope', { scope })}
-        </p>
-        {isPending ? (
-          <Skeleton className="h-9 w-52 max-w-full" />
-        ) : isError ? (
-          <div className="flex flex-wrap items-center gap-2" role="alert">
-            <p className="text-body-sm text-text-secondary">
-              {tErrors(errorMessageKey(error))}
-            </p>
-            <Button variant="ghost" size="sm" onClick={() => void refetch()}>
-              {tActions('retry')}
-            </Button>
-          </div>
-        ) : (
-          <p
-            className={cn(
-              'text-price-xl tabular-nums',
-              data.avgPrice == null && 'text-text-tertiary',
-            )}
-          >
-            {data.avgPrice == null
-              ? tPrice('none')
-              : tPrice('average', { amount: data.avgPrice })}
-          </p>
-        )}
+  if (isPending) {
+    return (
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-12">
+        <Skeleton className="h-12 w-56 lg:h-16 lg:w-72" />
+        <div className="flex w-full max-w-xl flex-col gap-2 lg:max-w-lg lg:flex-1">
+          <Skeleton className="h-15 w-full" />
+          <Skeleton className="h-5.75 w-40 lg:h-6" />
+        </div>
       </div>
-      {isPending ? (
-        <Skeleton className="h-11 w-56 max-w-full" />
-      ) : (
-        data && (
-          <div className="flex flex-col gap-0.5 text-body-sm tabular-nums md:items-end md:text-right">
-            {data.minPrice != null && data.maxPrice != null && (
-              <p className="text-text-secondary">
-                {tPrice('minMax', { min: data.minPrice, max: data.maxPrice })}
-              </p>
-            )}
-            <p className="text-text-tertiary">
-              {t('counts', {
-                hospitals: data.hospitalCount,
-                prices: data.priceCount,
-              })}
-            </p>
-          </div>
-        )
-      )}
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-wrap items-center gap-2" role="alert">
+        <p className="text-body text-text-secondary">
+          {tErrors(errorMessageKey(error))}
+        </p>
+        <Button variant="ghost" size="sm" onClick={() => void refetch()}>
+          {tActions('retry')}
+        </Button>
+      </div>
+    );
+  }
+
+  const counts = (
+    <p className="text-body-sm text-text-secondary tabular-nums">
+      {t('summary.counts', {
+        hospitals: data.hospitalCount,
+        prices: data.priceCount,
+      })}
+    </p>
+  );
+
+  if (data.avgPrice == null) {
+    return (
+      <div className="flex flex-col gap-1">
+        <p className="text-heading text-text-tertiary">{t('header.noPrice')}</p>
+        {counts}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-12">
+      <p className="max-w-full text-price-hero">
+        {/** 아주 큰 글자(200%)의 좁은 화면에서만 숫자가 줄을 넘겨 가로 스크롤이 생기지 않게 한다. */}
+        <RollingNumber
+          value={data.avgPrice}
+          format={(value) => tPrice('won', { amount: value })}
+          className="max-w-full wrap-anywhere"
+        />
+      </p>
+      <div className="flex w-full max-w-xl flex-col gap-2 lg:max-w-lg lg:flex-1">
+        <RangeBar
+          min={data.minPrice}
+          max={data.maxPrice}
+          average={data.avgPrice}
+          showAverageAmount={false}
+        />
+        {counts}
+      </div>
     </div>
   );
 }
