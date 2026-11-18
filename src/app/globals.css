@@ -105,9 +105,9 @@
   --text-price-xl--letter-spacing: -0.01em;
   --text-price-xl--font-weight: 900;
   /* 입력창 전용. 16px 미만이면 iOS Safari가 포커스할 때 화면을 확대한다. */
-  --text-input: 1rem;
-  --text-input--line-height: 1.5rem;
-  --text-input--font-weight: 400;
+  --text-field: 1rem;
+  --text-field--line-height: 1.5rem;
+  --text-field--font-weight: 400;
 
   /* 카드·다이얼로그 xl, 버튼·입력·배너 lg, 타일·세그먼트·태그 md, 칩 full, 시트 상단 3xl */
   --radius-sm: 0.25rem;

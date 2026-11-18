@@ -21,7 +21,7 @@ const twMerge = extendTailwindMerge({
         'price-md',
         'price-lg',
         'price-xl',
-        'input',
+        'field',
       ],
       shadow: ['card', 'cta-glow', 'float', 'sheet', 'bar'],
       spacing: ['top-nav', 'top-bar', 'tab-bar'],
