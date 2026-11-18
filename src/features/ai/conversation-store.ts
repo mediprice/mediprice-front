@@ -9,6 +9,7 @@ import {
   type Conversation,
   type ConversationAction,
   conversationReducer,
+  type DailyScope,
   INITIAL_CONVERSATION,
   resumeConversation,
 } from './conversation';
@@ -24,8 +25,8 @@ export const CONVERSATION_STORAGE_KEY = 'mediprice:ai-conversation';
 
 type ConversationStore = Conversation & {
   /** 보낼 수 없는 상태이거나 빈 입력이면 false다. 답은 기다리지 않는다. */
-  send: (text: string) => boolean;
-  retry: () => void;
+  send: (text: string, scope: DailyScope) => boolean;
+  retry: (scope: DailyScope) => void;
   restart: () => void;
 };
 
@@ -59,6 +60,7 @@ const storedSchema = z.object({
     .nullable(),
   hasEmergency: z.boolean(),
   remainingTurns: z.number().int().nonnegative().nullable(),
+  dailyScope: z.enum(['anonymous', 'member']).nullable().default(null),
 });
 
 function pickConversation(state: ConversationStore): Conversation {
@@ -71,6 +73,7 @@ function pickConversation(state: ConversationStore): Conversation {
     failure,
     hasEmergency,
     remainingTurns,
+    dailyScope,
   } = state;
   return {
     messages,
@@ -81,6 +84,7 @@ function pickConversation(state: ConversationStore): Conversation {
     failure,
     hasEmergency,
     remainingTurns,
+    dailyScope,
   };
 }
 
@@ -126,7 +130,7 @@ export function createConversationStore({
 
         return {
           ...INITIAL_CONVERSATION,
-          send: (text) => {
+          send: (text, scope) => {
             const parsed = turnInputSchema.safeParse(text);
             if (!parsed.success) return false;
             const requestId = createId();
@@ -135,14 +139,15 @@ export function createConversationStore({
               requestId,
               messageId: createId(),
               text: parsed.data,
+              scope,
             });
             if (get().requestId !== requestId) return false;
             void request(requestId);
             return true;
           },
-          retry: () => {
+          retry: (scope) => {
             const requestId = createId();
-            dispatch({ type: 'retry', requestId });
+            dispatch({ type: 'retry', requestId, scope });
             if (get().requestId === requestId) void request(requestId);
           },
           restart: () => {

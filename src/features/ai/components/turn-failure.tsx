@@ -12,7 +12,8 @@ export function TurnFailure({
   failure,
   onRetry,
 }: {
-  failure: Failure;
+  /** resumeAfterLogin은 비회원 한도에 걸린 뒤 로그인했을 때다. */
+  failure: Failure | 'resumeAfterLogin';
   onRetry?: () => void;
 }) {
   const t = useTranslations('ai.failure');

@@ -85,9 +85,11 @@ describe('conversationStore', () => {
     );
     const store = setup();
 
-    expect(store.getState().send('2주째 허리가 아파요')).toBe(true);
+    expect(store.getState().send('2주째 허리가 아파요', 'anonymous')).toBe(
+      true,
+    );
     await settled(store);
-    expect(store.getState().send('아랫허리')).toBe(true);
+    expect(store.getState().send('아랫허리', 'anonymous')).toBe(true);
     await settled(store);
 
     expect(requests).toEqual([
@@ -129,14 +131,14 @@ describe('conversationStore', () => {
     );
     const store = setup();
 
-    store.getState().send('그냥 몸이 안 좋아요');
+    store.getState().send('그냥 몸이 안 좋아요', 'anonymous');
     await settled(store);
     expect(store.getState()).toMatchObject({
       status: 'failed',
       failure: 'unavailable',
     });
 
-    store.getState().retry();
+    store.getState().retry('anonymous');
     await settled(store);
 
     expect(requests).toEqual([
@@ -160,7 +162,7 @@ describe('conversationStore', () => {
     );
     const store = setup();
 
-    store.getState().send('도수치료 가격');
+    store.getState().send('도수치료 가격', 'anonymous');
     await settled(store);
 
     expect(store.getState()).toMatchObject({
@@ -171,7 +173,7 @@ describe('conversationStore', () => {
 
   it('빈 입력은 보내지 않는다', () => {
     const store = setup();
-    expect(store.getState().send('   ')).toBe(false);
+    expect(store.getState().send('   ', 'anonymous')).toBe(false);
     expect(store.getState().messages).toEqual([]);
   });
 
@@ -191,7 +193,7 @@ describe('conversationStore', () => {
     );
     const store = setup();
 
-    store.getState().send('오늘 날씨 어때요?');
+    store.getState().send('오늘 날씨 어때요?', 'anonymous');
     store.getState().restart();
     release();
     await new Promise((resolve) => setTimeout(resolve, 20));

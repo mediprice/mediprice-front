@@ -21,6 +21,9 @@ export type AssistantMessage = {
 };
 type ChatMessage = UserMessage | AssistantMessage;
 
+/** 오늘 남은 횟수는 로그인 여부마다 따로 센다. 비회원으로 한도를 다 쓴 뒤 로그인하면 그 값은 더 이상 맞지 않다. */
+export type DailyScope = 'anonymous' | 'member';
+
 /** stopped는 자해 표현으로 멈춘 대화, ended는 횟수를 다 쓴 대화다. 둘 다 더 보낼 수 없다. */
 type ConversationStatus = 'idle' | 'sending' | 'failed' | 'stopped' | 'ended';
 
@@ -35,12 +38,20 @@ export type Conversation = {
   requestId: string | null;
   failure: TurnFailure | null;
   hasEmergency: boolean;
+  /** 마지막 응답이 알려 준 오늘 남은 횟수와, 그 값이 누구 기준인지. */
   remainingTurns: number | null;
+  dailyScope: DailyScope | null;
 };
 
 export type ConversationAction =
-  | { type: 'send'; requestId: string; messageId: string; text: string }
-  | { type: 'retry'; requestId: string }
+  | {
+      type: 'send';
+      requestId: string;
+      messageId: string;
+      text: string;
+      scope: DailyScope;
+    }
+  | { type: 'retry'; requestId: string; scope: DailyScope }
   | {
       type: 'receive';
       requestId: string;
@@ -59,6 +70,7 @@ export const INITIAL_CONVERSATION: Conversation = {
   failure: null,
   hasEmergency: false,
   remainingTurns: null,
+  dailyScope: null,
 };
 
 export function canSend(conversation: Conversation) {
@@ -84,6 +96,29 @@ export function isNearEnd(conversation: Conversation) {
     conversation.status === 'idle' &&
     sessionTurnsLeft(conversation.serverState) === 1
   );
+}
+
+/** 지금 로그인 상태 기준의 오늘 남은 횟수. 모르거나 다른 상태에서 받은 값이면 null이다. */
+export function dailyRemaining(conversation: Conversation, scope: DailyScope) {
+  return conversation.dailyScope === scope ? conversation.remainingTurns : null;
+}
+
+/** 오늘 한도를 다 썼는지(429를 받았거나 남은 횟수가 0). 로그인해서 기준이 바뀌면 다시 보낼 수 있다. */
+export function isOverDailyLimit(
+  conversation: Conversation,
+  scope: DailyScope,
+) {
+  if (conversation.dailyScope !== scope) return false;
+  return (
+    (conversation.status === 'failed' && conversation.failure === 'quota') ||
+    conversation.remainingTurns === 0
+  );
+}
+
+function withScope(conversation: Conversation, scope: DailyScope) {
+  return conversation.dailyScope === scope
+    ? {}
+    : { dailyScope: scope, remainingTurns: null };
 }
 
 /** 실패한 입력을 두고 새로 보내면, 답을 받지 못한 이전 말풍선은 대화에서 뺀다. */
@@ -119,6 +154,7 @@ export function conversationReducer(
         pendingInput: action.text,
         requestId: action.requestId,
         failure: null,
+        ...withScope(conversation, action.scope),
       };
     }
     case 'retry': {
@@ -128,6 +164,7 @@ export function conversationReducer(
         status: 'sending',
         requestId: action.requestId,
         failure: null,
+        ...withScope(conversation, action.scope),
       };
     }
     case 'receive': {

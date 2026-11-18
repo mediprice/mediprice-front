@@ -11,7 +11,7 @@
   "usage": {
     "chip": "하루 {count, number}회",
     "chipLabel": "AI 탐색은 하루 {count, number}회까지 쓸 수 있어요",
-    "anonymousHint": "비회원은 하루 {anonymous, number}회 · <login>로그인하면 {member, number}회</login>",
+    "anonymousHint": "<login>로그인하면 더 많이 쓸 수 있어요</login>",
     "cardTitle": "AI 이용",
     "cardLimit": "하루 {count, number}회",
     "cardAnonymous": "로그인하면 하루 {count, number}회까지 쓸 수 있어요.",
@@ -27,8 +27,7 @@
       "shoulder": "어깨가 아파서 병원 가려는데 얼마나 나올까요?",
       "implant": "임플란트 가격이 궁금해요",
       "shingles": "대상포진 예방접종 비용이 궁금해요"
-    },
-    "turnLimit": "이 대화에서는 {count, number}번까지 말씀하실 수 있어요."
+    }
   },
   "log": {
     "label": "AI와 나눈 대화",
@@ -40,8 +39,7 @@
     "sendSelected": "고른 답 보내기"
   },
   "turns": {
-    "nearEnd": "한 번 더 말씀하실 수 있어요.",
-    "remaining": "이 대화에서 {count, number}번 더 말씀하실 수 있어요."
+    "nearEnd": "이 대화에서는 한 번 더 말씀하실 수 있어요. 한 대화는 {count, number}번까지예요."
   },
   "result": {
     "title": "관련 비급여 항목",
@@ -49,15 +47,16 @@
     "free": "가격을 확인해도 AI 횟수는 차감되지 않아요.",
     "priceLabel": "{region} 평균",
     "viewPrices": "병원별 가격 보기",
-    "nameError": "항목 이름을 불러오지 못했어요",
     "priceError": "가격을 불러오지 못했어요.",
     "notice": "건강보험이 적용되는 진료비(진찰료 등)는 포함되지 않은 비급여 가격이에요.",
     "askMore": "추가 질문하기",
-    "restart": "다시 찾기"
+    "restart": "다시 찾기",
+    "loadError": "찾은 항목을 불러오지 못했어요."
   },
   "noMatch": {
     "category": "카테고리로 찾기",
-    "search": "항목 이름으로 검색"
+    "search": "항목 이름으로 검색",
+    "reply": "말씀하신 상황과 맞는 비급여 항목을 찾지 못했어요. 항목 이름으로 직접 검색해 보시겠어요?"
   },
   "failure": {
     "unavailable": "답변을 불러오지 못했어요. 입력한 내용은 그대로 있어요.",
@@ -67,7 +66,8 @@
     "invalidInput": "보낼 수 없는 내용이에요. 1,000자 이내로 다시 적어 주세요.",
     "unknown": "알 수 없는 오류로 보내지 못했어요.",
     "retry": "다시 보내기",
-    "search": "일반 검색으로 찾기"
+    "search": "일반 검색으로 찾기",
+    "resumeAfterLogin": "로그인했어요. 다시 보내면 이어서 찾아 드려요."
   },
   "safety": {
     "emergency": "응급 상황이 의심되거나 즉시 도움이 필요하면 <b>119</b> 또는 가까운 응급실에 도움을 요청하세요. 이 서비스는 응급 여부를 판단하지 않아요.",
@@ -77,7 +77,7 @@
   },
   "ended": {
     "divider": "이번 대화는 여기까지예요",
-    "description": "더 궁금한 점은 새 대화로 이어가 보세요",
+    "description": "한 대화에서는 {count, number}번까지 말씀하실 수 있어요. 더 궁금한 점은 새 대화로 이어가 보세요.",
     "restart": "새 대화 시작",
     "category": "카테고리로 찾기",
     "placeholder": "새 대화에서 이어서 물어보세요"
@@ -160,5 +160,15 @@
     "categoryHint": "분류를 하나씩 좁혀 보세요",
     "hospital": "병원 이름으로 검색",
     "hospitalHint": "가고 싶은 병원이 정해져 있다면"
+  },
+  "limit": {
+    "title": "오늘 AI 탐색을 다 썼어요",
+    "anonymous": "로그인하면 하루 {count, number}회까지 쓸 수 있어요. 일반 검색은 계속 쓸 수 있어요.",
+    "login": "로그인하면 하루 {count, number}회",
+    "member": "내일 다시 쓸 수 있어요. 그동안 카테고리나 항목 이름으로 찾아보세요.",
+    "category": "카테고리로 찾기",
+    "search": "항목 이름으로 검색",
+    "placeholderAnonymous": "로그인하면 이어서 물어볼 수 있어요",
+    "placeholderMember": "내일 다시 쓸 수 있어요"
   }
 }

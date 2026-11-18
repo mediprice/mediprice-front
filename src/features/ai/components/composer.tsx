@@ -78,7 +78,9 @@ export function Composer({
           autoComplete="off"
           disabled={isDisabled}
           placeholder={
-            isDisabled ? (disabledPlaceholder ?? t('placeholder')) : t('placeholder')
+            isDisabled
+              ? (disabledPlaceholder ?? t('placeholder'))
+              : t('placeholder')
           }
           aria-describedby={
             value.length >= COUNTER_FROM ? counterId : undefined

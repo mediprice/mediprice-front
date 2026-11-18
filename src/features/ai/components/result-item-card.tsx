@@ -11,16 +11,29 @@ import { PriceOverview } from '@/features/npay/components/price-overview';
 import { npayQueries } from '@/features/npay/queries';
 import { useCategoryLabel } from '@/features/npay/use-category-label';
 import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
+import type { components } from '@/lib/api/schema';
 
 import { formatItemName } from '../item-name';
 import type { TurnItem } from '../schemas';
 
-/** AI는 항목 코드만 고르고, 이름과 가격은 항상 공개 데이터 API에서 가져온다. */
-export function ResultItemCard({ item }: { item: TurnItem }) {
+type NpayItemDetail = components['schemas']['NpayItemDetailResponse'];
+
+export type ItemDetail = Pick<
+  NpayItemDetail,
+  'code' | 'name' | 'mdivCode' | 'mdivName'
+>;
+
+/** AI는 항목 코드만 고르고, 이름과 가격은 항상 공개 데이터 API에서 가져온다. 이름을 찾은 항목만 카드로 보여 준다. */
+export function ResultItemCard({
+  item,
+  detail,
+}: {
+  item: TurnItem;
+  detail: ItemDetail;
+}) {
   const t = useTranslations('ai.result');
   const tRegion = useTranslations('common.region');
   const categoryLabel = useCategoryLabel();
-  const detail = useQuery(npayQueries.detail(item.code));
   const summary = useQuery(
     npayQueries.summaryIn(item.code, sidoCodesOf(DEFAULT_REGION)),
   );
@@ -28,20 +41,12 @@ export function ResultItemCard({ item }: { item: TurnItem }) {
   return (
     <article className="flex flex-col gap-3 rounded-xl bg-bg p-4 shadow-card lg:flex-row lg:items-end lg:gap-6 lg:p-5">
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        {detail.data?.mdivName && (
+        {detail.mdivName && (
           <p className="text-caption-strong text-primary-text">
-            {categoryLabel(detail.data.mdivCode, detail.data.mdivName)}
+            {categoryLabel(detail.mdivCode, detail.mdivName)}
           </p>
         )}
-        <h3 className="text-heading">
-          {detail.isPending ? (
-            <Skeleton className="h-7 w-40" />
-          ) : detail.isError ? (
-            t('nameError')
-          ) : (
-            formatItemName(detail.data)
-          )}
-        </h3>
+        <h3 className="text-heading">{formatItemName(detail)}</h3>
         <p className="text-body-sm text-text-secondary">{item.reason}</p>
         <div className="mt-2 flex flex-col gap-0.5">
           <p className="text-caption-strong text-text-tertiary">

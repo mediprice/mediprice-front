@@ -6,8 +6,11 @@ import {
   type Conversation,
   type ConversationAction,
   conversationReducer,
+  dailyRemaining,
+  type DailyScope,
   INITIAL_CONVERSATION,
   isNearEnd,
+  isOverDailyLimit,
   resumeConversation,
 } from './conversation';
 import type { TurnResponse } from './schemas';
@@ -34,11 +37,16 @@ function run(...actions: ConversationAction[]) {
   );
 }
 
-const send = (text: string, n = 1): ConversationAction => ({
+const send = (
+  text: string,
+  n = 1,
+  scope: DailyScope = 'anonymous',
+): ConversationAction => ({
   type: 'send',
   requestId: `r${n}`,
   messageId: `u${n}`,
   text,
+  scope,
 });
 const receive = (r: TurnResponse, n = 1): ConversationAction => ({
   type: 'receive',
@@ -95,6 +103,7 @@ describe('conversationReducer', () => {
     const retried = conversationReducer(failed, {
       type: 'retry',
       requestId: 'r3',
+      scope: 'anonymous',
     });
     expect(retried.status).toBe('sending');
     expect(retried.requestId).toBe('r3');
@@ -199,6 +208,48 @@ describe('conversationReducer', () => {
       ),
     );
     expect(state.messages[1]).toMatchObject({ kind: 'no_match', items: [] });
+  });
+});
+
+describe('오늘 남은 횟수', () => {
+  it('응답의 남은 횟수는 보낸 사람의 로그인 상태 기준이다', () => {
+    const state = run(send('a'), receive(response({ remainingTurns: 2 })));
+    expect(dailyRemaining(state, 'anonymous')).toBe(2);
+    expect(dailyRemaining(state, 'member')).toBeNull();
+  });
+
+  it('남은 횟수 0이나 429면 한도를 다 쓴 것이다', () => {
+    expect(
+      isOverDailyLimit(
+        run(send('a'), receive(response({ remainingTurns: 0 }))),
+        'anonymous',
+      ),
+    ).toBe(true);
+    const quota = run(send('a'), {
+      type: 'fail',
+      requestId: 'r1',
+      failure: 'quota',
+    });
+    expect(isOverDailyLimit(quota, 'anonymous')).toBe(true);
+  });
+
+  it('비회원으로 한도를 다 쓴 뒤 로그인하면 막지 않고 다시 보낼 수 있다', () => {
+    const quota = run(send('a'), {
+      type: 'fail',
+      requestId: 'r1',
+      failure: 'quota',
+    });
+    expect(isOverDailyLimit(quota, 'member')).toBe(false);
+    const retried = conversationReducer(quota, {
+      type: 'retry',
+      requestId: 'r2',
+      scope: 'member',
+    });
+    expect(retried).toMatchObject({
+      status: 'sending',
+      dailyScope: 'member',
+      remainingTurns: null,
+    });
   });
 });
 
