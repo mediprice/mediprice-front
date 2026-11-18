@@ -8,10 +8,12 @@ import { Button } from '@/components/ui/button';
 import { POPULAR_ITEMS } from '@/features/npay/catalog';
 import { useRotation } from '@/lib/motion/use-rotation';
 
-const EXAMPLE_INTERVAL_MS = 3000;
+/** 자동으로 움직이는 내용은 5초 안에 끝나야 멈춤 버튼 없이도 된다(WCAG 2.2.2). 예시 3개 × 1.6초 = 4.8초. */
+const EXAMPLES = POPULAR_ITEMS.slice(0, 3);
+const EXAMPLE_INTERVAL_MS = 1600;
 
 /**
- * JS 없이도 동작하는 GET 폼(/search가 type·q·region을 읽는다). 빈 입력창에는 인기 항목 이름이 예시로 한 바퀴 바뀌고 첫 예시에 멈춘다.
+ * JS 없이도 동작하는 GET 폼(/search가 type·q·region을 읽는다). 빈 입력창에는 인기 항목 3개가 예시로 한 바퀴(5초 안) 바뀌고 첫 예시에 멈춘다.
  * 예시는 aria-hidden 겹침 글자이고, 화면 낭독기는 고정된 placeholder를 읽는다. 마우스·포커스에 멈추고 reduced-motion이면 돌지 않는다.
  */
 export function HomeSearchForm() {
@@ -19,10 +21,10 @@ export function HomeSearchForm() {
   const tItems = useTranslations('home.popular.items');
   const inputId = useId();
   const [type, setType] = useState<'item' | 'hospital'>('item');
-  const rotation = useRotation(POPULAR_ITEMS.length, EXAMPLE_INTERVAL_MS, {
+  const rotation = useRotation(EXAMPLES.length, EXAMPLE_INTERVAL_MS, {
     once: true,
   });
-  const example = POPULAR_ITEMS[rotation.index] ?? POPULAR_ITEMS[0];
+  const example = EXAMPLES[rotation.index] ?? POPULAR_ITEMS[0];
 
   return (
     <form

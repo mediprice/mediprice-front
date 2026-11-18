@@ -407,7 +407,7 @@ export const hospitalQueries = {
 | 움직임   | 상태 전환은 `ease-standard` 200–400ms, 처음 나타나는 것(스크롤 등장·범위 막대·숫자 롤업 800ms)은 `ease-enter`. `prefers-reduced-motion`이면 전역에서 멈춘다(상태를 알리는 스피너만 `data-allow-motion`)                                 |
 
 - 타이포는 모바일 우선이다. `hero` `display` `title` `section` `price-lg` `price-xl` `price-hero`는 모바일 값(28·28·24·22·24·30·40px)이고 `lg`부터 데스크톱 값(34·32·26·28·28·36·56px)으로 자동으로 바뀐다. 읽는 거리가 먼 데스크톱에서는 `caption`(13→14px), `body-sm`·`label`(15→16px)도 한 단계 커진다. 배경 그라데이션과 왼쪽 선 강조는 쓰지 않는다(단색 띠, 옅은 바탕으로 구분). 화면에서 `lg:text-*`를 따로 붙이지 않는다.
-- 제목 크기는 단계를 따른다. 페이지 H1은 `text-display`(홈 히어로만 `text-hero`), 페이지 섹션 H2는 `text-section`(`SectionHeader`), 섹션 안 하위 묶음과 카드·알림·옆 칸 제목은 `text-heading` 이하를 쓴다. 어떤 제목도 그 화면의 H1보다 크게 보이지 않게 한다.
+- 제목 크기는 단계를 따른다. 페이지 H1은 `text-display`(홈 히어로만 `text-hero`), 페이지 섹션 H2는 `text-section`(`SectionHeader`), 섹션 안 하위 묶음과 카드·알림·옆 칸 제목은 `text-heading` 이하를 쓴다. 어떤 제목도 그 화면의 H1보다 크게 보이지 않게 한다. 예외: 지도처럼 화면 대부분을 도구가 차지하는 화면의 도구 막대 H1과, 절이 많은 법률 문서의 절 H2는 `text-heading`을 쓴다.
 - 타이포 토큰 하나에 크기·행간·자간·굵기가 함께 들어 있다. `font-bold` 같은 굵기 클래스를 따로 붙이지 않는다(활성 상태처럼 굵기만 바꿀 때는 예외).
 - 본문은 16px(`text-body`)이 기본이다. 13px(`text-caption`)은 출처·날짜 같은 메타 정보에만 쓰고, 가격 조건("1회 기준")처럼 판단에 필요한 정보에는 쓰지 않는다.
 - 대비: 글자는 배경과 4.5:1 이상(큰 글자 3:1). `text-tertiary`까지는 흰색·surface·surface-strong 위에서 통과한다(surface-strong 위 4.6:1). 입력창처럼 테두리만으로 구분되는 컨트롤은 `border-border`(1.2:1)가 아니라 `border-border-strong`(흰 바탕 3.6:1, surface 3.3:1)을 쓴다.
