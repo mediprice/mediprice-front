@@ -2,8 +2,11 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
+/* disabled 속성이나 aria-disabled(asChild 링크)인 상태. 로딩 중(data-loading)은 색을 유지하므로 뺀다. */
+@custom-variant inactive (&:is(:disabled, [aria-disabled='true']):not([data-loading]));
+
 /*
- * 디자인 토큰. 값은 Figma(MediPrice) 변수·텍스트 스타일·이펙트 스타일과 1:1이다.
+ * 디자인 토큰. Figma(MediPrice) 변수·텍스트 스타일·이펙트 스타일을 바탕으로 하고, QA에서 대비·가독성 때문에 바꾼 값은 옆에 이유를 적는다.
  * 이름을 바꾸거나 추가하면 docs/coding-convention.md 8장과 src/lib/utils.ts의 twMerge 설정도 함께 고친다.
  */
 @theme {
@@ -18,6 +21,7 @@
   --color-primary-text: #0061ae;
   --color-primary-tint: #e6f2ff;
   --color-primary-tint-hover: #d6eaff;
+  --color-primary-tint-pressed: #c9e2ff;
   --color-on-primary: #ffffff;
 
   --color-bg: #ffffff;
@@ -27,8 +31,10 @@
 
   --color-text-primary: #0f2d5b;
   --color-text-secondary: #4a5b6c;
-  --color-text-tertiary: #5f7083;
-  --color-text-disabled: #a3b0be;
+  /* Figma #5F7083은 surface-strong 위에서 4.36:1이라 AA를 넘도록 어둡게 했다. */
+  --color-text-tertiary: #56677a;
+  /* 비활성이어도 읽을 수 있게 surface-strong 위 2.9:1을 맞췄다. */
+  --color-text-disabled: #7f8e9e;
 
   --color-border: #dce3ea;
   --color-border-strong: #8090a0;
@@ -38,10 +44,14 @@
   --color-warning: #8a6410;
   --color-warning-tint: #fbf5e4;
   --color-danger: #b4302a;
+  --color-danger-hover: #a22b26;
+  --color-danger-pressed: #902621;
   --color-danger-tint: #fcebea;
 
   --color-overlay: rgb(10 31 64 / 0.55);
   --color-focus-ring: #016cbf;
+  /* 파란 면 위에서는 기본 링이 보이지 않으므로 focus-inverse로 바꿔 쓴다. */
+  --color-focus-ring-inverse: #ffffff;
 
   /* bg-hero만 만든다. text-hero는 타이포 토큰이다. */
   --background-color-hero: #edf7ff;
@@ -51,16 +61,17 @@
     system-ui, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic',
     sans-serif;
 
-  --text-hero: 2.125rem;
-  --text-hero--line-height: 2.75rem;
+  /* hero·display·title·price-lg·price-xl은 모바일 값이다. lg 이상 값은 아래 @media에서 바꾼다. */
+  --text-hero: 1.75rem;
+  --text-hero--line-height: 2.25rem;
   --text-hero--letter-spacing: -0.02em;
   --text-hero--font-weight: 700;
-  --text-display: 2rem;
-  --text-display--line-height: 2.625rem;
+  --text-display: 1.75rem;
+  --text-display--line-height: 2.25rem;
   --text-display--letter-spacing: -0.015em;
   --text-display--font-weight: 700;
-  --text-title: 1.625rem;
-  --text-title--line-height: 2.125rem;
+  --text-title: 1.5rem;
+  --text-title--line-height: 2rem;
   --text-title--letter-spacing: -0.01em;
   --text-title--font-weight: 700;
   --text-heading: 1.25rem;
@@ -74,9 +85,13 @@
   --text-body-lg: 1.0625rem;
   --text-body-lg--line-height: 1.625rem;
   --text-body-lg--font-weight: 400;
-  --text-body: 0.9375rem;
-  --text-body--line-height: 1.4375rem;
+  /* 고령 사용자를 고려해 본문은 16px. Figma 15px 본문은 body-sm이다. */
+  --text-body: 1rem;
+  --text-body--line-height: 1.625rem;
   --text-body--font-weight: 400;
+  --text-body-sm: 0.9375rem;
+  --text-body-sm--line-height: 1.4375rem;
+  --text-body-sm--font-weight: 400;
   --text-label: 0.9375rem;
   --text-label--line-height: 1.375rem;
   --text-label--font-weight: 500;
@@ -96,14 +111,14 @@
   --text-price-md--line-height: 1.75rem;
   --text-price-md--letter-spacing: -0.005em;
   --text-price-md--font-weight: 700;
-  --text-price-lg: 1.5rem;
-  --text-price-lg--line-height: 2rem;
+  --text-price-lg: 1.375rem;
+  --text-price-lg--line-height: 1.875rem;
   --text-price-lg--letter-spacing: -0.008em;
-  --text-price-lg--font-weight: 900;
-  --text-price-xl: 1.875rem;
-  --text-price-xl--line-height: 2.375rem;
+  --text-price-lg--font-weight: 800;
+  --text-price-xl: 1.625rem;
+  --text-price-xl--line-height: 2.125rem;
   --text-price-xl--letter-spacing: -0.01em;
-  --text-price-xl--font-weight: 900;
+  --text-price-xl--font-weight: 800;
   /* 입력창 전용. 16px 미만이면 iOS Safari가 포커스할 때 화면을 확대한다. */
   --text-field: 1rem;
   --text-field--line-height: 1.5rem;
@@ -130,6 +145,49 @@
   --spacing-top-nav: 4.5rem;
   --spacing-top-bar: 3.5rem;
   --spacing-tab-bar: 4rem;
+  /* 섹션 사이 세로 간격. lg 이상은 아래 @media에서 바꾼다. */
+  --spacing-section: 2.5rem;
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (width >= 64rem) {
+  :root {
+    --text-hero: 2.125rem;
+    --text-hero--line-height: 2.75rem;
+    --text-display: 2rem;
+    --text-display--line-height: 2.625rem;
+    --text-title: 1.625rem;
+    --text-title--line-height: 2.125rem;
+    --text-price-lg: 1.5rem;
+    --text-price-lg--line-height: 2rem;
+    --text-price-xl: 1.875rem;
+    --text-price-xl--line-height: 2.375rem;
+    --spacing-section: 4rem;
+  }
+}
+
+/* 페이지 좌우 여백(가로 모드 노치보다 좁아지지 않음)과 겹침 순서. z-index는 z-(--z-header)처럼 이 이름으로만 쓴다. */
+:root {
+  --page-gutter: 1rem;
+  --z-header: 40;
+  --z-tab-bar: 40;
+  --z-bottom-cta: 45;
+  --z-overlay: 50;
+  --z-toast: 60;
+  --z-skip-link: 70;
+}
+
+@media (width >= 48rem) {
+  :root {
+    --page-gutter: 1.5rem;
+  }
+}
+
+@media (width >= 64rem) {
+  :root {
+    --page-gutter: 2rem;
+  }
 }
 
 /*
@@ -185,6 +243,24 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+@utility px-page {
+  padding-left: max(var(--page-gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--page-gutter), env(safe-area-inset-right, 0px));
+}
+
+@utility px-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* 파란 면처럼 기본 포커스 링이 보이지 않는 영역에 붙인다. */
+@utility focus-inverse {
+  & :focus-visible,
+  &:focus-visible {
+    outline-color: var(--color-focus-ring-inverse);
+  }
+}
+
 /* 하단 탭바에 가려지지 않도록 본문 아래에 둔다. */
 @utility pb-tab-bar {
   padding-bottom: calc(
@@ -211,12 +287,38 @@
   :root {
     color-scheme: light;
     -webkit-tap-highlight-color: transparent;
+    /* 포커스·앵커 이동이 고정된 상단 바와 하단 탭바 아래로 숨지 않게 한다. */
+    scroll-padding-top: calc(
+      var(--spacing-top-bar) + env(safe-area-inset-top, 0px) + 0.5rem
+    );
+    scroll-padding-bottom: calc(
+      var(--spacing-tab-bar) + env(safe-area-inset-bottom, 0px) + 0.5rem
+    );
+  }
+
+  @media (width >= 64rem) {
+    :root {
+      scroll-padding-top: calc(var(--spacing-top-nav) + 0.5rem);
+      scroll-padding-bottom: 0.5rem;
+    }
   }
 
   body {
     @apply bg-bg font-sans text-body text-text-primary antialiased;
     word-break: keep-all;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
+  }
+
+  /* 로딩 스피너처럼 상태를 알려 주는 움직임은 data-allow-motion으로 남긴다. */
+  @media (prefers-reduced-motion: reduce) {
+    *:not([data-allow-motion]),
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   :focus-visible {
