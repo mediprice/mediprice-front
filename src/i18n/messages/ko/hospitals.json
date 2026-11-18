@@ -31,8 +31,12 @@
       "clear": "선택 해제",
       "appliedOn": "{date} 적용",
       "comparison": "{direction, select, below {{region} 평균보다 <em>{percent, number}% 저렴해요</em>} above {{region} 평균보다 <em>{percent, number}% 비싸요</em>} other {{region} 평균과 <em>비슷해요</em>}}",
-      "basis": "{region} 병원 {count, plural, other {#곳}}의 공개 가격 기준",
-      "noRegionPrice": "{region}에는 비교할 공개 가격이 아직 없어요."
+      "basis": "{region} 병원 {count, plural, other {#곳}}의 세부 항목별 공개 가격 기준",
+      "noRegionPrice": "{region}에는 비교할 공개 가격이 아직 없어요.",
+      "incomparable": "이 세부 항목은 단위·구성이 달라 {region} 평균과 비교하기 어려워요",
+      "incomparableNote": "평균({average, number}원)의 1/3보다 낮거나 3배보다 높은 가격은 시간·횟수 같은 구성이 다른 항목일 수 있어 % 차이를 쓰지 않아요.",
+      "showAll": "세부 항목 {count, plural, other {#개}} 모두 보기",
+      "showLess": "세부 항목 접기"
     },
     "trend": {
       "label": "가격 추이",

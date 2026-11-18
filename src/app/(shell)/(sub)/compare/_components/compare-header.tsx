@@ -8,10 +8,11 @@ import {
 } from '@/components/layout/breadcrumb';
 import { PageContainer } from '@/components/layout/page-container';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  type CompareSummary,
-  subjectParticle,
-} from '@/features/comparison/compare-strip';
+import type {
+  CompareSummary,
+  ComparisonBasis,
+} from '@/features/comparison/compare-basis';
+import { subjectParticle } from '@/features/comparison/compare-strip';
 import type {
   ComparisonHospital,
   ComparisonItem,
@@ -19,7 +20,10 @@ import type {
 
 import { CompareSummaryPanel } from './compare-summary-panel';
 
-/** 흰 머리. 선택 항목에서 결론을 낼 수 있으면 제목을 "3곳 중 OO병원이 가장 저렴해요" 같은 문장으로, 그 아래 가장 높은 곳과의 차이를 쓰고 요약 묶음을 붙인다. */
+/**
+ * 흰 머리. 모든 병원이 같은 이름의 세부 항목을 공개했으면 그 항목으로 "3곳 중 OO병원이 가장 저렴해요"라고 쓰고 가장 높은 곳과의 차이를 붙인다.
+ * 아니면 "가장 낮은 공개 가격은 OO병원이에요"라고 쓰고 어느 세부 항목의 값인지 밝힌다(같은 조건의 비교가 아니라서 "저렴"이라 하지 않는다).
+ */
 export function CompareHeader({
   item,
   itemName,
@@ -27,6 +31,7 @@ export function CompareHeader({
   summary,
   isSummaryLoading,
   itemRow,
+  basis,
   hospitals,
 }: {
   item: string | null;
@@ -37,6 +42,7 @@ export function CompareHeader({
   /** 항목을 골라 왔고 표를 불러오는 중이면 요약 자리를 미리 잡는다. */
   isSummaryLoading: boolean;
   itemRow: ComparisonItem | null;
+  basis: ComparisonBasis | null;
   hospitals: readonly ComparisonHospital[];
 }) {
   const t = useTranslations('comparison.page');
@@ -46,18 +52,41 @@ export function CompareHeader({
       : itemName
         ? t('titleWithItem', { item: itemName, count })
         : t('title', { count });
+  const isSame = summary?.basis === 'sameVariant';
+  const sharedVariant =
+    basis?.kind === 'sameVariant' ? basis.entries[0]?.variant : null;
   const sentence =
     summary == null || count == null
       ? null
       : summary.kind === 'cheapest'
-        ? t('summary', {
+        ? t(isSame ? 'summary' : 'summaryLowest', {
             count,
             name: summary.name,
             particle: subjectParticle(summary.name),
           })
         : summary.kind === 'tie'
-          ? t('summaryTie', { count, tied: summary.tied })
-          : t('summarySame', { count });
+          ? t(isSame ? 'summaryTieSame' : 'summaryTie', {
+              count,
+              tied: summary.tied,
+            })
+          : t(isSame ? 'summarySameVariant' : 'summarySame', { count });
+  const basisNote =
+    summary == null
+      ? null
+      : isSame
+        ? sharedVariant
+          ? t('basisSame', { variant: sharedVariant })
+          : null
+        : summary.kind === 'cheapest' && summary.variant
+          ? t.rich('basisLowest', {
+              name: summary.name,
+              variant: summary.variant,
+              price: summary.price,
+              nb: (chunks) => (
+                <span className="whitespace-nowrap tabular-nums">{chunks}</span>
+              ),
+            })
+          : t('basisLowestUnnamed');
 
   return (
     <PageContainer className="flex flex-col gap-6 pt-6 pb-8 lg:pt-8 lg:pb-12">
@@ -75,7 +104,10 @@ export function CompareHeader({
           </p>
         )}
         <h1 className="text-display text-balance">{sentence ?? plainTitle}</h1>
-        {summary && summary.kind !== 'same' && summary.gap > 0 && (
+        {basisNote && (
+          <p className="text-body-lg text-text-secondary">{basisNote}</p>
+        )}
+        {isSame && summary && summary.kind !== 'same' && summary.gap > 0 && (
           <p className="text-body-lg text-text-secondary">
             {t.rich('gap', {
               amount: summary.gap,
@@ -97,8 +129,12 @@ export function CompareHeader({
       {isSummaryLoading && (
         <Skeleton className="h-64 w-full rounded-3xl lg:h-56" />
       )}
-      {summary && itemRow && (
-        <CompareSummaryPanel row={itemRow} hospitals={hospitals} />
+      {summary && itemRow && basis && (
+        <CompareSummaryPanel
+          row={itemRow}
+          basis={basis}
+          hospitals={hospitals}
+        />
       )}
     </PageContainer>
   );

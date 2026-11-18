@@ -16,7 +16,7 @@ import { toTelHref } from '@/features/hospitals/detail-links';
 import { formatLocation } from '@/features/regions/format-location';
 
 import { CommonItemRows } from './common-item-rows';
-import { hasStripRow, LABEL_CELL, PriceRow } from './price-row';
+import { LABEL_CELL, PriceRow } from './price-row';
 
 /**
  * 병원 비교표. 데스크톱은 190px 이름 열 + 같은 폭의 병원 열 3개(빈 칸은 "병원 추가"),
@@ -28,6 +28,7 @@ export function CompareTable<T extends string>({
   addHref,
   item,
   itemRow,
+  itemLowest,
   itemName,
   dates,
   commonItems,
@@ -42,6 +43,8 @@ export function CompareTable<T extends string>({
   addHref: Route<T>;
   item: string | null;
   itemRow: ComparisonItem | null;
+  /** 선택 항목 줄의 "최저" 병원. 머리 결론과 같은 기준(같은 세부 항목 또는 가장 낮은 공개 가격)이다. */
+  itemLowest?: ReadonlySet<string>;
   itemName: string | null;
   /** 병원 순서대로의 적용일. undefined는 불러오는 중이다. */
   dates: readonly (string | null | undefined)[];
@@ -59,10 +62,7 @@ export function CompareTable<T extends string>({
   const format = useFormatter();
   const captionId = useId();
   const columnCount = 1 + hospitals.length + slots;
-  const infoRows =
-    3 +
-    (itemRow ? 2 : 0) +
-    (itemRow && hasStripRow(itemRow, hospitals) ? 1 : 0);
+  const infoRows = 3 + (itemRow ? 2 : 0);
   const detailQuery = item ? `?item=${item}` : '';
 
   return (
@@ -171,6 +171,7 @@ export function CompareTable<T extends string>({
                 <PriceRow
                   hospitals={hospitals}
                   row={itemRow}
+                  lowest={itemLowest}
                   label={t('price')}
                   sublabel={itemName}
                   isEmphasized

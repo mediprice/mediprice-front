@@ -9,19 +9,21 @@ import type { ComponentProps } from 'react';
 import { Button } from '@/components/ui/button';
 import { FavoriteButton } from '@/features/favorites/components/favorite-button';
 import { HospitalIdentity } from '@/features/hospitals/components/hospital-identity';
+import { AverageTag } from '@/features/npay/components/average-tag';
 import { cn } from '@/lib/utils';
 
 import type { NearbyHospital } from '../queries';
 
 /**
  * 주변 병원 한 행. 행 전체가 병원 상세 링크이고(이름 링크를 행 크기로 넓힘) 하트·지도에서 보기만 그 위에 놓인다.
- * 가격은 오른쪽에 크게 쓴다. 지도에서 고른 병원은 옅은 면과 "지도에서 선택됨" 문구로 함께 표시한다(색만으로 구분하지 않음).
+ * 가격(이 병원 세부 항목 중 가장 낮은 값)은 오른쪽에 크게 쓰고, 항목 행과 같은 규칙의 평균 대비 꼬리표를 붙인다. 지도에서 고른 병원은 옅은 면과 "지도에서 선택됨" 문구로 함께 표시한다(색만으로 구분하지 않음).
  * 목록이 행 사이 구분선을 준다.
  */
 export function NearbyHospitalCard<T extends string>({
   hospital,
   href,
   hasItem,
+  average,
   isSelected,
   onShowOnMap,
   className,
@@ -31,6 +33,8 @@ export function NearbyHospitalCard<T extends string>({
   href: Route<T>;
   /** 항목을 골라 가격을 보여 주는 중인지. 아니면 가격을 빼고 병원 정보만 보여 준다. */
   hasItem: boolean;
+  /** 꼬리표의 기준 평균(서울·경기). 없으면 꼬리표를 뺀다. */
+  average?: number | null;
   isSelected: boolean;
   onShowOnMap: () => void;
 }) {
@@ -64,7 +68,7 @@ export function NearbyHospitalCard<T extends string>({
           name={
             <Link
               href={href}
-              className="rounded-sm after:absolute after:inset-0 hover:text-primary-text"
+              className="-my-3 inline-block max-w-full rounded-sm py-3 wrap-break-word after:absolute after:inset-0 hover:text-primary-text"
             >
               {hospital.name}
             </Link>
@@ -92,13 +96,18 @@ export function NearbyHospitalCard<T extends string>({
                 <p className="text-price-lg wrap-anywhere">
                   {tPrice('won', { amount: hospital.minPrice })}
                 </p>
+                <AverageTag
+                  price={hospital.minPrice}
+                  average={average}
+                  className="mt-1"
+                />
               </>
             )}
           </div>
         )}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex min-h-11 flex-wrap items-center justify-between gap-2">
         {hasPosition ? (
           <Button
             variant={isSelected ? 'primary' : 'tint'}

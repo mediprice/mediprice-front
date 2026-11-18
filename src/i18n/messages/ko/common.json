@@ -20,7 +20,9 @@
     "hospitals": "병원 {count, number}곳",
     "averageParts": "평균 <nb>{amount, number}원</nb>",
     "minimum": "최저 {amount, number}원",
-    "maximum": "최고 {amount, number}원"
+    "maximum": "최고 {amount, number}원",
+    "spreadParts": "<nb>최저 {min, number}원</nb> ~ <nb>최고 {max, number}원</nb> <note>(세부 항목별 가격)</note>",
+    "compactRange": "{min, number, ::compact-short}~{max, number, ::compact-short}원"
   },
   "footer": {
     "source": "데이터 출처: 건강보험심사평가원 비급여 진료비 공개 자료",
@@ -72,5 +74,12 @@
     "next": "다음",
     "prev": "이전",
     "position": "{total, number}개 중 {current, number}번째"
+  },
+  "averageTag": {
+    "below": "평균보다 {percent, number}% 저렴",
+    "above": "평균보다 {percent, number}% 비쌈",
+    "same": "평균 수준",
+    "incomparable": "구성이 달라 비교 어려움",
+    "incomparableDescription": "이 가격은 평균의 1/3보다 낮거나 3배보다 높아, 시간·횟수 같은 세부 구성이 다른 항목일 수 있어요."
   }
 }

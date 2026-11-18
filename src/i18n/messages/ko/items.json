@@ -74,12 +74,7 @@
     "showVariants": "세부 {count, number}건 보기",
     "hideVariants": "세부 접기",
     "variantsLabel": "{hospital}의 세부 가격",
-    "moreVariants": "외 {count, number}건",
-    "comparison": {
-      "below": "평균보다 {percent, number}% 저렴",
-      "above": "평균보다 {percent, number}% 비쌈",
-      "same": "평균 수준"
-    }
+    "basis": "{name} 기준"
   },
   "breadcrumb": {
     "home": "홈"

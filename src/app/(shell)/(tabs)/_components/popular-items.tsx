@@ -1,6 +1,6 @@
 'use client';
 
-import { useQueries } from '@tanstack/react-query';
+import { keepPreviousData, useQueries } from '@tanstack/react-query';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -8,7 +8,6 @@ import { useState } from 'react';
 
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
-import { RangeBar } from '@/components/ui/range-bar';
 import { RollingNumber } from '@/components/ui/rolling-number';
 import { SectionHeader } from '@/components/ui/section-header';
 import { SegmentedControl } from '@/components/ui/segmented-control';
@@ -20,6 +19,7 @@ import {
   type ServiceRegion,
   sidoCodesOf,
 } from '@/features/regions/service-region';
+import { cn } from '@/lib/utils';
 
 /** 홈 탭은 서비스 지역 셋만 둔다(전국은 검색 화면에서 고른다). */
 const HOME_REGIONS = [
@@ -31,7 +31,8 @@ type HomeRegion = (typeof HOME_REGIONS)[number];
 
 /**
  * 순위는 POPULAR_ITEMS 순서다(실제 인기 순위 API가 생기면 바꾼다). 고른 지역의 요약만 요청하고,
- * 이미 연 지역은 React Query 캐시를 쓴다. 지역을 바꾸면 평균이 다시 굴러 올라간다.
+ * 이미 연 지역은 React Query 캐시를 쓴다. 지역을 바꾸면 새 값이 올 때까지 이전 값을 흐리게 두고, 평균은 이전 값에서 새 값으로 굴러간다.
+ * 범위는 값 점이 없는 막대 대신 "37만~495만원"처럼 짧은 글자로 쓴다(docs 14장).
  */
 export function PopularItems() {
   const t = useTranslations('home.popular');
@@ -40,9 +41,10 @@ export function PopularItems() {
   const tPrice = useTranslations('common.price');
   const [region, setRegion] = useState<HomeRegion>('metro');
   const results = useQueries({
-    queries: POPULAR_ITEMS.map((item) =>
-      npayQueries.summaryIn(item.code, sidoCodesOf(region)),
-    ),
+    queries: POPULAR_ITEMS.map((item) => ({
+      ...npayQueries.summaryIn(item.code, sidoCodesOf(region)),
+      placeholderData: keepPreviousData,
+    })),
   });
   const failed = results.filter((result) => result.isError);
 
@@ -77,10 +79,18 @@ export function PopularItems() {
             if (!result) return null;
             const summary = result.data;
             const average = summary?.avgPrice ?? null;
+            const min = summary?.minPrice;
+            const max = summary?.maxPrice;
+            const spread =
+              min != null && max != null && max > min ? { min, max } : null;
             return (
               <li
                 key={item.id}
-                className="border-b border-hairline lg:[&:nth-child(3n+1)]:border-t"
+                aria-busy={result.isPlaceholderData || undefined}
+                className={cn(
+                  'border-b border-hairline transition-opacity duration-200 ease-standard lg:[&:nth-child(3n+1)]:border-t',
+                  result.isPlaceholderData && 'opacity-60',
+                )}
               >
                 <Link
                   href={{
@@ -112,7 +122,7 @@ export function PopularItems() {
                       {result.isPending ? (
                         <>
                           <Skeleton className="h-8 w-28" />
-                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="my-0.5 h-4.75 w-24 lg:h-5" />
                         </>
                       ) : result.isError ? (
                         <span className="text-body-sm text-text-tertiary">
@@ -132,13 +142,11 @@ export function PopularItems() {
                               }
                             />
                           </span>
-                          <RangeBar
-                            size="sm"
-                            min={summary?.minPrice}
-                            max={summary?.maxPrice}
-                            average={average}
-                            className="w-28"
-                          />
+                          {spread && (
+                            <span className="text-right text-body-sm text-text-secondary tabular-nums">
+                              {tPrice('compactRange', spread)}
+                            </span>
+                          )}
                         </>
                       )}
                     </span>

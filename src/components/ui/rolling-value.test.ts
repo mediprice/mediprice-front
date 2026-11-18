@@ -30,4 +30,11 @@ describe('rollingValueAt', () => {
     expect(rollingValueAt(1, 500, 100)).toBe(100);
     expect(rollingValueAt(0.5, 500, 100)).toBeLessThan(300);
   });
+
+  it('값이 바뀌면 이전 값에서 시작해 새 값으로 간다', () => {
+    expect(rollingValueAt(0, 118384, 95000)).toBe(118384);
+    expect(rollingValueAt(0.5, 118384, 95000)).toBeLessThan(118384);
+    expect(rollingValueAt(0.5, 118384, 95000)).toBeGreaterThan(95000);
+    expect(rollingValueAt(1, 118384, 95000)).toBe(95000);
+  });
 });

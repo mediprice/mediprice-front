@@ -5,8 +5,10 @@ import {
   decodeYkiho,
   parseBackParam,
   parseItemParam,
+  parseVariantParam,
   toHomepageUrl,
   toTelHref,
+  variantQuery,
 } from './detail-links';
 
 describe('parseItemParam', () => {
@@ -71,5 +73,36 @@ describe('parseBackParam', () => {
     expect(parseBackParam('region=')).toBeNull();
     expect(parseBackParam('')).toBeNull();
     expect(parseBackParam(['region=1'])).toBeNull();
+  });
+});
+
+describe('parseVariantParam', () => {
+  it('세부 항목 이름과 가격을 받고, 가격이 없거나 이상하면 이름만 쓴다', () => {
+    expect(parseVariantParam(' 도수치료F ', '500000')).toEqual({
+      name: '도수치료F',
+      price: 500_000,
+    });
+    expect(parseVariantParam('도수치료F', undefined)).toEqual({
+      name: '도수치료F',
+      price: null,
+    });
+    expect(parseVariantParam('도수치료F', '5만')).toEqual({
+      name: '도수치료F',
+      price: null,
+    });
+  });
+
+  it('이름이 비었거나 너무 길거나 배열이면 고르지 않은 것으로 본다', () => {
+    expect(parseVariantParam('', '1000')).toBeNull();
+    expect(parseVariantParam('가'.repeat(121), '1000')).toBeNull();
+    expect(parseVariantParam(['a', 'b'], '1000')).toBeNull();
+  });
+
+  it('variantQuery로 만든 값을 그대로 되읽는다', () => {
+    const query = variantQuery({ name: '도수치료 [1일당]-N', price: 1000 });
+    expect(parseVariantParam(query.variant, query.price)).toEqual({
+      name: '도수치료 [1일당]-N',
+      price: 1000,
+    });
   });
 });

@@ -84,6 +84,7 @@ Next의 특수 파일(`page.tsx`, `layout.tsx`, `route.ts`)과 폴더 이름도 
 ```text
 src/
   env.ts                  검증된 환경변수
+  config/                 법적 고지 사실(legal-facts.json)과 약관 문서 버전 설정
   i18n/                   next-intl 설정과 화면 문구. 코드에는 키만 둔다(12장)
     request.ts            locale·시간대·포맷 설정
     messages/ko/*.json    화면 문구 (네임스페이스마다 파일 하나, messages/ko.ts가 합친다)
@@ -406,6 +407,7 @@ export const hospitalQueries = {
 | 움직임   | 상태 전환은 `ease-standard` 200–400ms, 처음 나타나는 것(스크롤 등장·범위 막대·숫자 롤업 800ms)은 `ease-enter`. `prefers-reduced-motion`이면 전역에서 멈춘다(상태를 알리는 스피너만 `data-allow-motion`)                                 |
 
 - 타이포는 모바일 우선이다. `hero` `display` `title` `section` `price-lg` `price-xl` `price-hero`는 모바일 값(28·28·24·22·24·30·40px)이고 `lg`부터 데스크톱 값(34·32·26·28·28·36·56px)으로 자동으로 바뀐다. 읽는 거리가 먼 데스크톱에서는 `caption`(13→14px), `body-sm`·`label`(15→16px)도 한 단계 커진다. 배경 그라데이션과 왼쪽 선 강조는 쓰지 않는다(단색 띠, 옅은 바탕으로 구분). 화면에서 `lg:text-*`를 따로 붙이지 않는다.
+- 제목 크기는 단계를 따른다. 페이지 H1은 `text-display`(홈 히어로만 `text-hero`), 페이지 섹션 H2는 `text-section`(`SectionHeader`), 섹션 안 하위 묶음과 카드·알림·옆 칸 제목은 `text-heading` 이하를 쓴다. 어떤 제목도 그 화면의 H1보다 크게 보이지 않게 한다.
 - 타이포 토큰 하나에 크기·행간·자간·굵기가 함께 들어 있다. `font-bold` 같은 굵기 클래스를 따로 붙이지 않는다(활성 상태처럼 굵기만 바꿀 때는 예외).
 - 본문은 16px(`text-body`)이 기본이다. 13px(`text-caption`)은 출처·날짜 같은 메타 정보에만 쓰고, 가격 조건("1회 기준")처럼 판단에 필요한 정보에는 쓰지 않는다.
 - 대비: 글자는 배경과 4.5:1 이상(큰 글자 3:1). `text-tertiary`까지는 흰색·surface·surface-strong 위에서 통과한다(surface-strong 위 4.6:1). 입력창처럼 테두리만으로 구분되는 컨트롤은 `border-border`(1.2:1)가 아니라 `border-border-strong`(흰 바탕 3.6:1, surface 3.3:1)을 쓴다.
@@ -413,20 +415,20 @@ export const hospitalQueries = {
 - 간격은 Tailwind 기본 4px 단위를 그대로 쓴다(`gap-3` = 12px, `w-70` = 280px).
 - arbitrary value(`[...]`)는 토큰으로 표현할 수 없을 때만 쓴다(safe-area 계산, grid template).
 - 가격처럼 자릿수를 맞춰야 하는 숫자에는 `tabular-nums`를 쓴다. `text-price-*`에는 이미 들어 있다.
-- 가격 화면의 문법: 결론 문장 제목(`hero`·`display`·`section`), 화면의 주인공 가격 하나는 `text-price-hero`, 행의 가격은 오른쪽 정렬 `text-price-lg`, 그리고 최저–평균–최고 `RangeBar`. 넓은 색 띠·그라데이션·왼쪽 선 강조는 쓰지 않는다.
+- 가격 화면의 문법: 결론 문장 제목(`hero`·`display`·`section`), 화면의 주인공 가격 하나는 `text-price-hero`, 행의 가격은 오른쪽 정렬 `text-price-lg`, 이 병원 값이 있는 곳의 최저–평균–최고 `RangeBar`, 값이 없는 곳의 "최저 N원 ~ 최고 N원" 글자(`PriceSpread`). 넓은 색 띠·그라데이션·왼쪽 선 강조는 쓰지 않는다.
 - 토큰을 추가하거나 이름을 바꾸면 `src/lib/utils.ts`의 `extendTailwindMerge` 목록도 고친다. 등록하지 않으면 `cn('text-title', 'text-text-primary')`에서 앞 클래스가 지워진다.
 - 토큰 이름이 shadcn 별칭과 겹치지 않게 한다(예: 입력창 타이포가 `text-input`이면 `--color-input`과 겹쳐 색까지 바뀐다).
 - 다크 모드는 없다.
 
 ### 8.3 움직임과 공용 조각
 
-| 조각                                                | 쓰임                                                                                                                                                                                                                                                                                                                                                    |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `RangeBar`(`components/ui/range-bar.tsx`)           | `min` `max` `average?` `value?`(이 병원 점) `valueLabel?` `size`(`md` 라벨 붙은 막대, `sm` 목록 행의 작은 막대) `showAverageAmount?` `showAverageTick?`(sm 평균 눈금 라벨). 평균이 가운데인 구간별 눈금(최저→평균 0–50%, 평균→최고 50–100%), 끝 라벨은 실제 최저·최고. 범위가 없거나 최저=최고면 그리지 않는다. 막대는 `aria-hidden`, 뜻은 sr-only 문장 |
-| `RollingNumber`(`components/ui/rolling-number.tsx`) | `value` `format?`(가격은 `(n) => t('won', { amount: n })`). 처음 보일 때와 값이 바뀔 때 0부터 굴린다. 접근성 이름은 최종값                                                                                                                                                                                                                              |
-| `Reveal`(`components/ui/reveal.tsx`)                | 스크롤 등장(12px 아래에서 떠오름). `asChild` `delayMs`. 서버 렌더·이미 보이는 것·reduced-motion은 그대로 보인다                                                                                                                                                                                                                                         |
-| `useRotation` + `RotationControls`                  | `useRotation(length, intervalMs)`는 `index` `paused` `isUserPaused` `next` `prev` `goTo` `toggle` `rootProps`를 준다. 마우스·포커스·탭 숨김에 멈추고 reduced-motion이면 멈춘 채 시작한다. 멈춤 버튼은 항상 함께 둔다                                                                                                                                    |
-| `PriceOverview`(`features/npay`)                    | `size="md"`는 목록·카드, `size="lg"`는 화면 머리(굴러 올라가는 큰 평균 + 라벨 붙은 막대). `label`로 "도수치료, 서울·경기 평균" 같은 줄을 준다                                                                                                                                                                                                           |
+| 조각                                                                   | 쓰임                                                                                                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RangeBar`(`components/ui/range-bar.tsx`)                              | `min` `max` `average?` `value`(이 병원 점, 필수) `valueLabel?` `size`(`md` 라벨 붙은 막대, `sm` 목록 행의 작은 막대) `showAverageTick?`(sm 평균 눈금 라벨). 평균이 가운데인 구간별 눈금(최저→평균 0–50%, 평균→최고 50–100%), 끝 라벨은 실제 최저·최고. 범위가 없거나 최저=최고면 그리지 않는다. 막대는 `aria-hidden`, 뜻은 sr-only 문장. 값 점이 있는 곳(항목 행, 병원 선택 항목)에서만 쓴다(14장) |
+| `RollingNumber`(`components/ui/rolling-number.tsx`)                    | `value` `format?`(가격은 `(n) => t('won', { amount: n })`). 처음 보일 때와 값이 바뀔 때 0부터 굴린다. 접근성 이름은 최종값                                                                                                                                                                                                                                                                         |
+| `Reveal`(`components/ui/reveal.tsx`)                                   | 스크롤 등장(12px 아래에서 떠오름). `asChild` `delayMs`. 서버 렌더·이미 보이는 것·reduced-motion은 그대로 보인다                                                                                                                                                                                                                                                                                    |
+| `useRotation` + `RotationControls`                                     | `useRotation(length, intervalMs)`는 `index` `paused` `isUserPaused` `next` `prev` `goTo` `toggle` `rootProps`를 준다. 마우스·포커스·탭 숨김에 멈추고 reduced-motion이면 멈춘 채 시작한다. 멈춤 버튼은 항상 함께 둔다                                                                                                                                                                               |
+| `PriceOverview`·`PriceSpread`·`AverageTag`(`features/npay/components`) | `PriceOverview`는 목록·카드의 평균 + "최저 N원 ~ 최고 N원 (세부 항목별 가격)" + 병원 수. `PriceSpread`는 그 범위 한 줄(15–16px, 머리·카드에서도 쓴다). 홈 목록처럼 좁은 곳은 `common.price.compactRange`("37만~495만원"). `AverageTag`는 "평균보다 N% 저렴" 꼬리표로, 평균의 1/3~3배 밖이면 "구성이 달라 비교 어려움"을 쓴다                                                                       |
 
 - 움직임은 `lib/motion`의 `useFirstView`(처음 보일 때 한 번)와 `usePrefersReducedMotion`으로 만든다. 서버 렌더와 JS가 없을 때는 항상 최종 모습이다.
 - 움직이는 숫자·막대는 장식이다. 같은 뜻을 글자로 함께 둔다.
@@ -576,6 +578,13 @@ const t = await getTranslations('metadata');
 
 - **지역 (MUST)**: 지역은 `features/regions/service-region.ts` 하나로 다룬다. 기본은 서울·경기(`metro`)이고 선택지는 서울·경기 / 서울 / 경기 / 전국(`all`)이다. URL 파라미터 이름은 `region`이고 기본값은 링크에서 뺀다. 백엔드가 시도 하나만 받으므로 서울·경기는 `sidoCodesOf`로 나눠 조회해 합친다.
 - **가격 요약 (MUST)**: 최저~최고 범위를 대표값으로 내세우지 않는다. 범위는 "1일당 1,000원" 같은 예외 값에 끌려가 오해를 만든다. 평균을 크게, 범위와 병원 수를 작게 쓴다(`PriceOverview`). 여러 시도의 요약은 `npayQueries.summaryIn`이 합친다(평균은 가격 수로 가중).
+- **값 점이 없는 범위 막대 금지 (MUST)**: `RangeBar`는 이 병원 값(`value`) 점이 있을 때만 쓴다. 막대는 평균을 가운데에 두는 눈금이라, 점이 없으면 평균 눈금이 늘 가운데에 있어 아무것도 알려 주지 않고 분포가 대칭인 것처럼 보인다. 점이 없는 곳(홈, 오늘의 가격, 항목 머리, 검색·분류 행, AI 결과)은 `PriceSpread` 글자나 `compactRange`로 쓴다.
+- **세부 항목이 다른 가격 (MUST)**: 한 항목(예: 도수치료) 안의 세부 항목은 병원마다 시간·횟수·구성이 다르다. 도수치료 서울·경기 2,744건에서 15분 세션 중앙값은 30,000원(평균 118,384원의 0.25배), 30분 80,000원, 60분 150,000원, 100분 400,000원(3.4배)이었다. "[1일당]"은 심평원 청구 단위 표기라 345건(12.6%)에 붙지만 중앙값이 95,000원으로 전체(100,000원)와 같아 단위를 가르는 표시가 아니다. 그래서 다음을 지킨다.
+  - 가격 옆에는 그 가격의 세부 항목 이름을 쓴다("도수치료F 기준"). 행의 꼬리표·막대·큰 가격·병원 화면 링크(`variant`·`price` 파라미터)는 모두 같은 세부 항목을 말한다. 병원 화면은 그 세부 항목을 먼저 고르고 같은 지역 평균과 견줘, 행의 꼬리표와 같은 숫자를 말한다.
+  - 평균 대비 %는 가격이 평균의 1/3~3배 안일 때만 쓴다(`features/npay/average-verdict.ts`의 `judgeAgainstAverage`). 밖이면 "구성이 달라 비교 어려움"으로 쓴다. 이 범위는 도수치료 가격의 8.9%, 체외충격파 4.5%, 임플란트 1.1%, 라식·라섹·대상포진 예방접종 0%를 거른다.
+  - 범위의 최저·최고는 세부 항목 하나의 값이라 "(세부 항목별 가격)"을 함께 쓴다.
+  - 병원 비교(`features/comparison/compare-basis.ts`)는 모든 병원이 같은 이름으로 공개한 세부 항목이 있으면 그것끼리 견줘 "가장 저렴해요"라고 쓴다. 없으면 병원별 가장 낮은 공개 가격끼리 견주되 "가장 낮은 공개 가격은 OO병원이에요"라고 쓰고, 어느 세부 항목의 값인지 밝히고 금액 차이를 쓰지 않는다.
+- **"최저" 낱말**: 범위의 끝은 "최저 N원 / 최고 N원", 한 병원의 세부 항목 중 가장 낮은 값은 "가장 낮은 가격", 비교한 병원 중 가장 낮은 곳의 꼬리표는 "최저"로 쓴다. "최저가"는 뜻이 섞여 쓰지 않는다.
 - **병원 단위 (MUST)**: 가격 API는 병원의 세부 항목마다 한 줄을 준다. 병원을 비교하는 목록은 병원 하나에 카드 하나로 묶고, 세부 항목은 펼쳐서 보여 준다. 개수는 "병원 N곳"으로 쓴다.
 - **분류 이름**: 홈 분류(`features/npay/catalog.ts`)에 속하는 코드는 쉬운 이름("물리치료·재활")을 먼저, 공식 이름("이학요법료")은 보조로 쓴다. 항목 이름의 "대분류/" 앞부분은 떼고 보여 준다.
 - **지역 이름**: 시도·시군구는 `formatLocation`으로 정리한다("부산 부산남구" → "부산 남구", "경기 부천원미구" → "경기 부천시 원미구").

@@ -3,8 +3,10 @@
 import {
   ChartLine,
   Check,
+  ChevronDown,
   ChevronRight,
   Equal,
+  Info,
   TrendingDown,
   TrendingUp,
   X,
@@ -12,16 +14,23 @@ import {
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
+import { useId, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { RangeBar } from '@/components/ui/range-bar';
-import { compareToAverage } from '@/components/ui/range-position';
 import { RollingNumber } from '@/components/ui/rolling-number';
 import { Skeleton } from '@/components/ui/skeleton';
-import { decodeYkiho } from '@/features/hospitals/detail-links';
-import { priceRowName } from '@/features/hospitals/price-groups';
+import {
+  decodeYkiho,
+  type VariantSelection,
+} from '@/features/hospitals/detail-links';
+import {
+  priceRowName,
+  visibleVariantRows,
+} from '@/features/hospitals/price-groups';
 import { LiveFeeCheck } from '@/features/live-fee/components/live-fee-check';
-import { DEFAULT_REGION } from '@/features/regions/service-region';
+import { judgeAgainstAverage } from '@/features/npay/average-verdict';
+import type { ServiceRegion } from '@/features/regions/service-region';
 import { cn } from '@/lib/utils';
 
 import { SectionError } from './section-error';
@@ -33,13 +42,22 @@ import type {
 import { useStickyError } from './use-sticky-error';
 import { VariantName } from './variant-name';
 
-/** 선택한 항목의 이 병원 가격을 화면의 주인공 숫자로 두고, 서울·경기 평균 대비 위치를 문장과 범위 막대로 보여 준다. */
+/** 접힌 카드에 보일 세부 항목 수. 아래 "공개 가격" 목록에 모두 있어 카드는 짧게 둔다. */
+const VISIBLE_VARIANTS = 3;
+
+type ItemRow = NonNullable<ItemPrices['rows']>[number];
+
+/**
+ * 선택한 항목의 이 병원 가격을 화면의 주인공 숫자로 두고, 지역 평균 대비 위치를 문장과 범위 막대로 보여 준다.
+ * 세부 항목은 낮은 가격부터 3개만 두고 나머지는 펼쳐서 본다.
+ */
 export function SelectedItemCard({
   item,
   prices,
   trend,
   summary,
-  activeVariant,
+  region,
+  activeRow,
   expectedRows,
   onVariantChange,
   onClear,
@@ -48,22 +66,29 @@ export function SelectedItemCard({
   prices: ItemPrices;
   trend: PriceTrendState;
   summary: RegionSummaryState;
-  activeVariant: string | null;
+  /** 평균을 낸 지역. 항목 가격 목록에서 왔으면 그 목록의 지역이다. */
+  region: ServiceRegion;
+  /** 지금 고른 세부 항목 행(prices.rows 중 하나). */
+  activeRow: ItemRow | undefined;
   /** 불러오는 동안 자리를 잡을 세부 항목 수(목록에서 고른 경우 이미 아는 값). */
   expectedRows: number;
-  onVariantChange: (variant: string) => void;
+  onVariantChange: (variant: VariantSelection) => void;
   onClear: () => void;
 }) {
   const t = useTranslations('hospitals.detail.selected');
   const tPrice = useTranslations('common.price');
   const ykiho = decodeYkiho(useParams<{ ykiho: string }>().ykiho);
   const format = useFormatter();
+  const listId = useId();
+  const [isExpanded, setIsExpanded] = useState(false);
   const { displayName, rows } = prices;
   const failure = useStickyError(prices.error, prices.refetch);
   const formatDate = (date: string) =>
     format.dateTime(new Date(date), 'dateShort');
-  const activeRow =
-    rows?.find((row) => priceRowName(row) === activeVariant) ?? rows?.[0];
+  const shownRows =
+    rows && !isExpanded
+      ? visibleVariantRows(rows, activeRow, VISIBLE_VARIANTS)
+      : rows;
   const isLoading =
     prices.isPending || !rows || (trend.isPending && !trend.error);
 
@@ -125,15 +150,22 @@ export function SelectedItemCard({
             </p>
           </div>
 
-          <RegionComparison price={activeRow.price} summary={summary} />
+          <RegionComparison
+            price={activeRow.price}
+            summary={summary}
+            region={region}
+          />
 
           {rows.length > 1 && (
             <fieldset className="flex min-w-0 flex-col">
               <legend className="mb-2 text-label-bold text-text-secondary">
                 {t('variants', { count: rows.length })}
               </legend>
-              <div className="flex flex-col divide-y divide-hairline overflow-hidden rounded-2xl bg-bg">
-                {rows.map((row, index) => {
+              <div
+                id={listId}
+                className="flex flex-col divide-y divide-hairline overflow-hidden rounded-2xl bg-bg"
+              >
+                {shownRows?.map((row, index) => {
                   const name = priceRowName(row);
                   return (
                     <label
@@ -148,7 +180,9 @@ export function SelectedItemCard({
                         name={`variant-${item}`}
                         value={name}
                         checked={row === activeRow}
-                        onChange={() => onVariantChange(name)}
+                        onChange={() =>
+                          onVariantChange({ name, price: row.price })
+                        }
                         className="peer sr-only"
                       />
                       <span
@@ -169,13 +203,34 @@ export function SelectedItemCard({
                           </span>
                         )}
                       </span>
-                      <span className="ml-auto shrink-0 text-price-md whitespace-nowrap">
+                      <span className="ml-auto max-w-full text-price-md wrap-anywhere">
                         {tPrice('won', { amount: row.price })}
                       </span>
                     </label>
                   );
                 })}
               </div>
+              {rows.length > VISIBLE_VARIANTS && (
+                <button
+                  type="button"
+                  aria-expanded={isExpanded}
+                  aria-controls={listId}
+                  onClick={() => setIsExpanded((value) => !value)}
+                  className="mt-1 inline-flex min-h-11 w-fit items-center gap-1 rounded-md text-label-bold text-primary-text hover:underline"
+                >
+                  {isExpanded
+                    ? t('showLess')
+                    : t('showAll', { count: rows.length })}
+                  <ChevronDown
+                    aria-hidden="true"
+                    className={cn(
+                      'size-4 transition-transform duration-200 ease-standard',
+                      isExpanded && 'rotate-180',
+                    )}
+                    strokeWidth={1.75}
+                  />
+                </button>
+              )}
             </fieldset>
           )}
 
@@ -205,18 +260,24 @@ const DIRECTION_STYLE = {
   below: { icon: TrendingDown, tone: 'text-positive' },
   above: { icon: TrendingUp, tone: 'text-warning' },
   same: { icon: Equal, tone: 'text-text-primary' },
+  incomparable: { icon: Info, tone: 'text-text-secondary' },
 } as const;
 
-/** "서울·경기 평균보다 12% 저렴해요" 한 문장과, 같은 지역 최저–평균–최고 막대 위의 이 병원 점. */
+/**
+ * "서울·경기 평균보다 12% 저렴해요" 한 문장과, 같은 지역 최저–평균–최고 막대 위의 이 병원 점.
+ * 평균의 1/3~3배 밖이면 % 대신 단위·구성이 달라 비교하기 어렵다고 쓴다(목록 행의 꼬리표와 같은 규칙).
+ */
 function RegionComparison({
   price,
   summary,
+  region: regionId,
 }: {
   price: number;
   summary: RegionSummaryState;
+  region: ServiceRegion;
 }) {
   const t = useTranslations('hospitals.detail.selected');
-  const region = useTranslations('common.region')(DEFAULT_REGION);
+  const region = useTranslations('common.region')(regionId);
   const failure = useStickyError(summary.error, summary.refetch);
 
   if (failure.error) {
@@ -238,15 +299,18 @@ function RegionComparison({
     );
   }
   const data = summary.data;
-  const comparison = data ? compareToAverage(price, data.avgPrice) : null;
-  if (!data || !comparison || data.priceCount === 0) {
+  const verdict = data ? judgeAgainstAverage(price, data.avgPrice) : null;
+  if (!data || !verdict || data.priceCount === 0 || data.avgPrice == null) {
     return (
       <p className="text-body text-text-secondary">
         {t('noRegionPrice', { region })}
       </p>
     );
   }
-  const { icon: Icon, tone } = DIRECTION_STYLE[comparison.direction];
+  const { icon: Icon, tone } =
+    verdict.kind === 'comparable'
+      ? DIRECTION_STYLE[verdict.comparison.direction]
+      : DIRECTION_STYLE.incomparable;
 
   return (
     <div className="flex flex-col gap-3">
@@ -257,14 +321,21 @@ function RegionComparison({
           strokeWidth={2}
         />
         <span>
-          {t.rich('comparison', {
-            region,
-            direction: comparison.direction,
-            percent: comparison.percent,
-            em: (chunks) => <span className={tone}>{chunks}</span>,
-          })}
+          {verdict.kind === 'comparable'
+            ? t.rich('comparison', {
+                region,
+                direction: verdict.comparison.direction,
+                percent: verdict.comparison.percent,
+                em: (chunks) => <span className={tone}>{chunks}</span>,
+              })
+            : t('incomparable', { region })}
         </span>
       </p>
+      {verdict.kind === 'incomparable' && (
+        <p className="text-body-sm text-text-secondary">
+          {t('incomparableNote', { average: data.avgPrice })}
+        </p>
+      )}
       <RangeBar
         min={data.minPrice}
         max={data.maxPrice}
@@ -333,19 +404,22 @@ function SelectedItemSkeleton({ rowCount }: { rowCount: number }) {
         <div className="flex flex-col">
           <Skeleton className="mb-2 h-5 w-24" />
           <div className="flex flex-col divide-y divide-hairline rounded-2xl bg-bg">
-            {Array.from({ length: rowCount }, (_, index) => (
-              <div
-                key={index}
-                className="flex min-h-14 items-center gap-3 px-4 py-3"
-              >
-                <Skeleton className="size-5 rounded-full" />
-                <span className="flex min-w-0 flex-1 flex-col gap-1">
-                  <Skeleton className="h-4.5 w-3/5" />
-                  <Skeleton className="h-3.5 w-24" />
-                </span>
-                <Skeleton className="h-6 w-20" />
-              </div>
-            ))}
+            {Array.from(
+              { length: Math.min(rowCount, VISIBLE_VARIANTS) },
+              (_, index) => (
+                <div
+                  key={index}
+                  className="flex min-h-14 items-center gap-3 px-4 py-3"
+                >
+                  <Skeleton className="size-5 rounded-full" />
+                  <span className="flex min-w-0 flex-1 flex-col gap-1">
+                    <Skeleton className="h-4.5 w-3/5" />
+                    <Skeleton className="h-3.5 w-24" />
+                  </span>
+                  <Skeleton className="h-6 w-20" />
+                </div>
+              ),
+            )}
           </div>
         </div>
       )}

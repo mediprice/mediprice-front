@@ -7,8 +7,10 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
+import { variantQuery } from '@/features/hospitals/detail-links';
 import { HospitalPriceGroupCard } from '@/features/npay/components/hospital-price-group-card';
 import { groupPricesByHospital } from '@/features/npay/group-prices';
+import type { HospitalPrice } from '@/features/npay/price-stream';
 import { npayQueries } from '@/features/npay/queries';
 import { errorMessageKey } from '@/lib/api/error-message';
 
@@ -53,10 +55,14 @@ export function PriceResults({
   );
   const total = summary.data?.hospitalCount;
   const backQuery = buildPriceFiltersQuery(filters);
-  const hospitalQuery = new URLSearchParams({
-    item: code,
-    ...(backQuery && { back: backQuery }),
-  }).toString();
+  /** 행이 크게 보여 준 세부 항목을 넘겨, 병원 화면의 가격·평균 비교 문장이 그 행과 같은 세부 항목을 말하게 한다. */
+  const hospitalQuery = (variant: HospitalPrice) =>
+    new URLSearchParams({
+      item: code,
+      ...(backQuery && { back: backQuery }),
+      ...(variant.itemName &&
+        variantQuery({ name: variant.itemName, price: variant.price })),
+    }).toString();
 
   return (
     <section
@@ -131,7 +137,9 @@ export function PriceResults({
               <li key={group.ykiho}>
                 <HospitalPriceGroupCard
                   group={group}
-                  href={`/hospitals/${encodeURIComponent(group.ykiho)}?${hospitalQuery}`}
+                  hrefFor={(variant) =>
+                    `/hospitals/${encodeURIComponent(group.ykiho)}?${hospitalQuery(variant)}`
+                  }
                   summary={summary.data}
                   sort={filters.sort}
                   showAverageTick={index === 0}

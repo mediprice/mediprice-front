@@ -61,3 +61,30 @@ export function parseBackParam(value: unknown): string | null {
   }
   return safe.size > 0 ? safe.toString() : null;
 }
+
+export type VariantSelection = { name: string; price: number | null };
+
+const variantSchema = z.object({
+  variant: z.string().trim().min(1).max(120),
+  price: z
+    .string()
+    .regex(/^\d{1,10}$/)
+    .transform(Number)
+    .optional()
+    .catch(undefined),
+});
+
+/** 목록 행이 보여 준 세부 항목(이름과 가격). 같은 이름이 여러 가격으로 있을 수 있어 가격을 함께 받는다. */
+export function parseVariantParam(
+  variant: unknown,
+  price: unknown,
+): VariantSelection | null {
+  const result = variantSchema.safeParse({ variant, price });
+  if (!result.success) return null;
+  return { name: result.data.variant, price: result.data.price ?? null };
+}
+
+/** 병원 화면이 목록 행과 같은 세부 항목을 먼저 고르도록 붙이는 쿼리. parseVariantParam과 짝이다. */
+export function variantQuery(selection: { name: string; price: number }) {
+  return { variant: selection.name, price: String(selection.price) };
+}

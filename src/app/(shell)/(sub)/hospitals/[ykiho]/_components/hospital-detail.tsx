@@ -9,8 +9,16 @@ import { useEffect, useState } from 'react';
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
-import { priceRowName } from '@/features/hospitals/price-groups';
+import type { VariantSelection } from '@/features/hospitals/detail-links';
+import {
+  pickVariantRow,
+  priceRowName,
+} from '@/features/hospitals/price-groups';
 import { hospitalQueries } from '@/features/hospitals/queries';
+import {
+  DEFAULT_REGION,
+  parseServiceRegion,
+} from '@/features/regions/service-region';
 import { errorMessageKey } from '@/lib/api/error-message';
 import { ApiError } from '@/lib/api/errors';
 
@@ -33,21 +41,32 @@ import { useStickyError } from './use-sticky-error';
 
 const DEFAULT_EXPECTED_ROWS = 3;
 
-/** 선택 항목은 URL(item)과 같이 움직이되, 서버 왕복 없이 history.replaceState로만 바꾼다. */
-function syncItemParam(code: string | null) {
+/** 선택 항목·세부 항목은 URL(item, variant, price)과 같이 움직이되, 서버 왕복 없이 history.replaceState로만 바꾼다. */
+function syncItemParams(code: string | null, variant: VariantSelection | null) {
   const url = new URL(window.location.href);
   if (code) url.searchParams.set('item', code);
   else url.searchParams.delete('item');
+  if (code && variant) {
+    url.searchParams.set('variant', variant.name);
+    if (variant.price == null) url.searchParams.delete('price');
+    else url.searchParams.set('price', String(variant.price));
+  } else {
+    url.searchParams.delete('variant');
+    url.searchParams.delete('price');
+  }
   window.history.replaceState(window.history.state, '', url);
 }
 
 export function HospitalDetail({
   ykiho,
   initialItem,
+  initialVariant,
   back,
 }: {
   ykiho: string;
   initialItem: string | null;
+  /** 항목 가격 목록의 행이 보여 준 세부 항목. 카드가 이것을 먼저 골라 목록과 같은 가격·비교 문장을 보여 준다. */
+  initialVariant: VariantSelection | null;
   /** 항목 가격 화면의 검색 조건(검증됨). 처음 들어온 항목으로 돌아갈 때만 붙인다. */
   back: string | null;
 }) {
@@ -56,16 +75,23 @@ export function HospitalDetail({
   const tActions = useTranslations('common.actions');
   const tMeta = useTranslations('metadata');
   const [item, setItem] = useState(initialItem);
-  const [variant, setVariant] = useState<string | null>(null);
+  const [variant, setVariant] = useState(initialVariant);
   const [expectedRows, setExpectedRows] = useState(DEFAULT_EXPECTED_ROWS);
   const detail = useQuery(hospitalQueries.detail(ykiho));
   /** 카드가 채워지는 동안 가격 목록이 아직 그려지지 않아도 첫 페이지를 함께 받아 둔다(PriceList의 첫 조건과 같은 키). */
   useInfiniteQuery(hospitalQueries.priceList(ykiho, {}));
   const prices = useItemPrices(ykiho, item);
-  const firstRow = prices.rows?.[0];
-  const activeVariant = variant ?? (firstRow ? priceRowName(firstRow) : null);
+  const activeRow = prices.rows
+    ? pickVariantRow(prices.rows, variant)
+    : undefined;
+  const activeVariant = activeRow ? priceRowName(activeRow) : null;
   const trend = usePriceTrend(ykiho, item, activeVariant);
-  const summary = useRegionSummary(item);
+  /** 목록에서 왔으면 목록의 지역 평균과 견줘 행의 꼬리표와 같은 숫자를 말한다. */
+  const region =
+    item != null && item === initialItem && back
+      ? parseServiceRegion(new URLSearchParams(back).get('region'))
+      : DEFAULT_REGION;
+  const summary = useRegionSummary(item, region);
   const isCardLoading =
     item != null &&
     !prices.error &&
@@ -92,13 +118,13 @@ export function HospitalDetail({
 
   function handleSelectItem(
     code: string | null,
-    nextVariant: string | null = null,
+    nextVariant: VariantSelection | null = null,
     variantCount = DEFAULT_EXPECTED_ROWS,
   ) {
     setItem(code);
     setVariant(nextVariant);
     setExpectedRows(variantCount);
-    syncItemParam(code);
+    syncItemParams(code, nextVariant);
     if (code) {
       requestAnimationFrame(() => {
         const card = document.getElementById('selected-item');
@@ -177,9 +203,13 @@ export function HospitalDetail({
               prices={prices}
               trend={trend}
               summary={summary}
-              activeVariant={activeVariant}
+              region={region}
+              activeRow={activeRow}
               expectedRows={expectedRows}
-              onVariantChange={setVariant}
+              onVariantChange={(next) => {
+                setVariant(next);
+                syncItemParams(item, next);
+              }}
               onClear={() => handleSelectItem(null)}
             />
             {trend.summary.kind === 'trend' && (

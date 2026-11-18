@@ -6,12 +6,12 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
-import { RangeBar } from '@/components/ui/range-bar';
 import { RollingNumber } from '@/components/ui/rolling-number';
 import { RotationControls } from '@/components/ui/rotation-controls';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tag } from '@/components/ui/tag';
 import { POPULAR_ITEMS } from '@/features/npay/catalog';
+import { PriceSpread } from '@/features/npay/components/price-spread';
 import { npayQueries } from '@/features/npay/queries';
 import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
 import { useRotation } from '@/lib/motion/use-rotation';
@@ -60,7 +60,7 @@ export function TodayPriceCard() {
         {isPending ? (
           <div aria-hidden="true" className="mt-2 flex flex-col gap-4">
             <Skeleton className="h-12 w-56 max-w-full lg:h-16 lg:w-72" />
-            <Skeleton className="h-16 w-full" />
+            <Skeleton className="my-0.5 h-4.75 w-72 max-w-full lg:h-5" />
             <Skeleton className="h-5.75 w-full" />
           </div>
         ) : isError ? (
@@ -80,13 +80,7 @@ export function TodayPriceCard() {
                 format={(value) => tPrice('won', { amount: value })}
               />
             </p>
-            <RangeBar
-              min={data.minPrice}
-              max={data.maxPrice}
-              average={average}
-              showAverageAmount={false}
-              className="[overflow-wrap:anywhere]"
-            />
+            <PriceSpread min={data.minPrice} max={data.maxPrice} />
             <p className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
               <span className="text-body-sm text-text-secondary tabular-nums">
                 {tPrice('hospitals', { count: data.hospitalCount })}

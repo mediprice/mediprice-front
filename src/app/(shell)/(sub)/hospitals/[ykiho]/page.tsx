@@ -6,6 +6,7 @@ import {
   decodeYkiho,
   parseBackParam,
   parseItemParam,
+  parseVariantParam,
 } from '@/features/hospitals/detail-links';
 
 import { HospitalDetail } from './_components/hospital-detail';
@@ -19,13 +20,14 @@ export default async function HospitalDetailPage({
   params,
   searchParams,
 }: PageProps<'/hospitals/[ykiho]'>) {
-  const [{ ykiho }, { item, back }, t] = await Promise.all([
+  const [{ ykiho }, { item, back, variant, price }, t] = await Promise.all([
     params,
     searchParams,
     getTranslations('hospitals.detail'),
   ]);
   const itemCode = parseItemParam(item);
   const backQuery = itemCode ? parseBackParam(back) : null;
+  const initialVariant = itemCode ? parseVariantParam(variant, price) : null;
   const backHref = itemCode
     ? backQuery
       ? (`/items/${itemCode}?${backQuery}` as const)
@@ -38,6 +40,7 @@ export default async function HospitalDetailPage({
       <HospitalDetail
         ykiho={decodeYkiho(ykiho)}
         initialItem={itemCode}
+        initialVariant={initialVariant}
         back={backQuery}
       />
     </>
