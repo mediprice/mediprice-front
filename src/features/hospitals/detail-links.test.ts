@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildNaverMapUrl,
   decodeYkiho,
+  parseBackParam,
   parseItemParam,
   toHomepageUrl,
   toTelHref,
@@ -53,5 +54,22 @@ describe('toTelHref', () => {
     expect(toTelHref('02-975-7500')).toBe('tel:029757500');
     expect(toTelHref('1800-3114')).toBe('tel:18003114');
     expect(toTelHref('-')).toBeNull();
+  });
+});
+
+describe('parseBackParam', () => {
+  it('허용한 검색 조건만 있으면 쿼리 문자열로 돌려준다', () => {
+    expect(parseBackParam('region=110000&sggu=110023&sort=price')).toBe(
+      'region=110000&sggu=110023&sort=price',
+    );
+  });
+
+  it('모르는 키, 이상한 값, 중복 키, 빈 값이면 쓰지 않는다', () => {
+    expect(parseBackParam('region=110000&next=/admin')).toBeNull();
+    expect(parseBackParam('region=<script>')).toBeNull();
+    expect(parseBackParam('sort=a&sort=b')).toBeNull();
+    expect(parseBackParam('region=')).toBeNull();
+    expect(parseBackParam('')).toBeNull();
+    expect(parseBackParam(['region=1'])).toBeNull();
   });
 });

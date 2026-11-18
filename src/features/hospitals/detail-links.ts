@@ -42,3 +42,22 @@ export function toTelHref(phone: string | null | undefined) {
   const digits = phone?.replace(/[^\d+]/g, '') ?? '';
   return digits.replace(/\D/g, '').length >= 7 ? `tel:${digits}` : null;
 }
+
+const BACK_KEYS = new Set(['region', 'sggu', 'institution', 'sort']);
+const BACK_VALUE = /^[A-Za-z0-9_-]{1,40}$/;
+
+/** 항목 가격 화면(S-06)이 넘긴 검색 조건. 허용한 키와 안전한 값만 있을 때만 쿼리 문자열로 돌려준다. */
+export function parseBackParam(value: unknown): string | null {
+  if (typeof value !== 'string' || value === '' || value.length > 200) {
+    return null;
+  }
+  const params = new URLSearchParams(value);
+  const safe = new URLSearchParams();
+  for (const [key, entry] of params) {
+    if (!BACK_KEYS.has(key) || !BACK_VALUE.test(entry) || safe.has(key)) {
+      return null;
+    }
+    safe.set(key, entry);
+  }
+  return safe.size > 0 ? safe.toString() : null;
+}

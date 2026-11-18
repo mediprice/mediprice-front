@@ -11,11 +11,13 @@ import { reviewQueries } from '@/features/reviews/queries';
 
 import { ReviewCard } from './review-card';
 import { SectionError } from './section-error';
+import { useStickyError } from './use-sticky-error';
 
 /** 읽기 전용 후기 목록. 작성·신고는 로그인이 필요해 안내만 한다. */
 export function ReviewSection({ ykiho }: { ykiho: string }) {
   const t = useTranslations('hospitals.detail.reviews');
   const reviews = useInfiniteQuery(reviewQueries.hospital(ykiho));
+  const failure = useStickyError(reviews.error, () => reviews.refetch());
   const items = reviews.data?.pages.flatMap((page) => page.content) ?? [];
   const total = reviews.data?.pages[0]?.totalElements;
 
@@ -40,16 +42,17 @@ export function ReviewSection({ ykiho }: { ykiho: string }) {
         {t('loginNote')}
       </p>
 
-      {reviews.isPending ? (
+      {failure.error ? (
+        <SectionError
+          error={failure.error}
+          isRetrying={failure.isRetrying}
+          onRetry={() => void failure.retry()}
+        />
+      ) : reviews.isPending ? (
         <div className="flex flex-col gap-3">
           <Skeleton className="h-24 rounded-xl" />
           <Skeleton className="h-24 rounded-xl" />
         </div>
-      ) : reviews.isError ? (
-        <SectionError
-          error={reviews.error}
-          onRetry={() => void reviews.refetch()}
-        />
       ) : items.length === 0 ? (
         <EmptyState
           icon={<MessageSquareText />}

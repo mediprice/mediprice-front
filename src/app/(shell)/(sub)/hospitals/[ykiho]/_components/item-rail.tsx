@@ -1,23 +1,19 @@
-'use client';
-
-import { useQuery } from '@tanstack/react-query';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { npayQueries } from '@/features/npay/queries';
 
-/** 데스크톱 오른쪽 열. 모바일에서는 같은 안내와 링크가 선택 항목 카드 안에 있다. */
-export function ItemRail({ item }: { item: string | null }) {
+/** 데스크톱 오른쪽 열. 모바일에서는 같은 안내와 링크가 가격 목록·선택 항목 카드 안에 있다. */
+export function ItemRail({
+  item,
+  itemName,
+}: {
+  item: string | null;
+  itemName: string | undefined;
+}) {
   const t = useTranslations('hospitals.detail');
-  const detail = useQuery({
-    ...npayQueries.detail(item ?? ''),
-    enabled: item != null,
-  });
-  const name =
-    detail.data?.detailName ?? detail.data?.sdivName ?? detail.data?.name;
 
   return (
     <aside className="hidden shrink-0 lg:sticky lg:top-[calc(var(--spacing-top-nav)+1.5rem)] lg:block lg:w-85">
@@ -25,8 +21,8 @@ export function ItemRail({ item }: { item: string | null }) {
         {item ? (
           <>
             <p className="text-caption text-text-secondary">
-              {name ? (
-                t('selected.label', { name })
+              {itemName ? (
+                t('selected.label', { name: itemName })
               ) : (
                 <Skeleton className="h-4 w-32" />
               )}

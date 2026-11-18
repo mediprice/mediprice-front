@@ -1,92 +1,49 @@
 'use client';
 
-import { Check, ChevronRight, X } from 'lucide-react';
+import { ChartLine, ChevronRight, X } from 'lucide-react';
 import Link from 'next/link';
 import { useFormatter, useTranslations } from 'next-intl';
 
 import { PriceRange } from '@/components/ui/price-range';
 import { Skeleton } from '@/components/ui/skeleton';
-import { StatusChip } from '@/components/ui/status-chip';
+import { priceRowName } from '@/features/hospitals/price-groups';
 import { cn } from '@/lib/utils';
 
 import { SectionError } from './section-error';
-import { useItemPrices, variantName } from './use-item-prices';
-
-const CARD =
-  'flex scroll-mt-14 flex-col gap-3 rounded-xl bg-primary-tint px-5 py-5 outline-none focus-visible:outline-2 lg:px-7 lg:py-6';
+import type { ItemPrices, PriceTrendState } from './use-item-prices';
+import { useStickyError } from './use-sticky-error';
 
 export function SelectedItemCard({
-  ykiho,
   item,
-  variant,
+  prices,
+  trend,
+  activeVariant,
   onVariantChange,
   onClear,
 }: {
-  ykiho: string;
-  item: string | null;
-  variant: string | null;
-  onVariantChange: (variant: string | null) => void;
+  item: string;
+  prices: ItemPrices;
+  trend: PriceTrendState;
+  activeVariant: string | null;
+  onVariantChange: (variant: string) => void;
   onClear: () => void;
 }) {
   const t = useTranslations('hospitals.detail.selected');
   const format = useFormatter();
-  const { displayName, rows, isPending, error, refetch } = useItemPrices(
-    ykiho,
-    item,
-  );
-
-  if (!item) {
-    return (
-      <section
-        id="selected-item"
-        tabIndex={-1}
-        aria-labelledby="selected-item-title"
-        className={cn(CARD, 'bg-surface')}
-      >
-        <h2 id="selected-item-title" className="text-subheading">
-          {t('emptyTitle')}
-        </h2>
-        <p className="text-body-sm text-text-secondary">
-          {t('emptyDescription')}
-        </p>
-      </section>
-    );
-  }
-
+  const { displayName, rows } = prices;
+  const failure = useStickyError(prices.error, prices.refetch);
   const formatDate = (date: string) =>
     format.dateTime(new Date(date), 'dateShort');
-  const selectedRow = rows?.find((row) => variantName(row) === variant);
-  const prices = rows?.map((row) => row.price) ?? [];
-  const latestDate = rows
-    ?.map((row) => row.startDate)
-    .filter((date): date is string => date != null)
-    .sort()
-    .at(-1);
-  const hasVariants = (rows?.length ?? 0) > 1;
-
-  function describeRows() {
-    const row = selectedRow ?? (hasVariants ? undefined : rows?.[0]);
-    if (row) {
-      return row.startDate
-        ? t('singleMeta', {
-            name: variantName(row),
-            date: formatDate(row.startDate),
-          })
-        : t('singleMetaNoDate', { name: variantName(row) });
-    }
-    const count = rows?.length ?? 0;
-    return latestDate
-      ? t('rangeMeta', { count, date: formatDate(latestDate) })
-      : t('rangeMetaNoDate', { count });
-  }
+  const activeRow =
+    rows?.find((row) => priceRowName(row) === activeVariant) ?? rows?.[0];
 
   return (
     <section
       id="selected-item"
       tabIndex={-1}
       aria-labelledby="selected-item-title"
-      aria-busy={isPending || undefined}
-      className={CARD}
+      aria-busy={prices.isPending || undefined}
+      className="flex scroll-mt-14 flex-col gap-3 rounded-xl bg-primary-tint px-5 py-5 outline-none focus-visible:outline-2 lg:px-7 lg:py-6"
     >
       <div className="flex items-start justify-between gap-3">
         <h2
@@ -109,63 +66,93 @@ export function SelectedItemCard({
         </button>
       </div>
 
-      {error ? (
-        <SectionError error={error} onRetry={refetch} className="bg-bg" />
-      ) : isPending || !rows ? (
+      {failure.error ? (
+        <SectionError
+          error={failure.error}
+          onRetry={() => void failure.retry()}
+          isRetrying={failure.isRetrying}
+          className="bg-bg"
+        />
+      ) : prices.isPending || !rows ? (
         <div className="flex flex-col gap-3">
           <Skeleton className="h-8 w-48 bg-primary-tint-pressed" />
           <Skeleton className="h-5 w-56 bg-primary-tint-pressed" />
         </div>
-      ) : rows.length === 0 ? (
+      ) : !activeRow ? (
         <p className="text-body-sm text-text-secondary">{t('notOffered')}</p>
       ) : (
         <>
-          {hasVariants && (
-            <div
-              role="group"
-              aria-label={t('variants')}
-              className="flex flex-wrap gap-2"
-            >
-              {rows.map((row, index) => {
-                const name = variantName(row);
-                const isSelected = name === variant;
-                return (
-                  <button
-                    key={`${name}-${index}`}
-                    type="button"
-                    aria-pressed={isSelected}
-                    onClick={() => onVariantChange(isSelected ? null : name)}
-                    className={cn(
-                      'touch-target inline-flex min-h-9 max-w-full items-center gap-1 rounded-full border px-3.5 py-1 text-left text-label transition-colors',
-                      isSelected
-                        ? 'border-primary bg-bg text-label-bold text-primary-text'
-                        : 'border-border bg-bg text-text-secondary hover:border-border-strong',
-                    )}
-                  >
-                    {isSelected && (
-                      <Check
-                        aria-hidden="true"
-                        className="size-4 shrink-0"
-                        strokeWidth={2}
+          <div aria-live="polite" className="flex flex-col gap-1">
+            <PriceRange
+              min={activeRow.price}
+              max={activeRow.price}
+              className="text-price-xl text-text-primary"
+            />
+            <p className="text-caption text-text-secondary">
+              {activeRow.startDate
+                ? t('singleMeta', {
+                    name: priceRowName(activeRow),
+                    date: formatDate(activeRow.startDate),
+                  })
+                : priceRowName(activeRow)}
+            </p>
+          </div>
+
+          {rows.length > 1 && (
+            <fieldset className="flex flex-col">
+              <legend className="mb-2 text-caption-strong text-text-secondary">
+                {t('variants', { count: rows.length })}
+              </legend>
+              <div className="flex flex-col overflow-hidden rounded-lg bg-bg">
+                {rows.map((row, index) => {
+                  const name = priceRowName(row);
+                  return (
+                    <label
+                      key={`${name}-${index}`}
+                      className={cn(
+                        'flex min-h-12 cursor-pointer items-center gap-3 border-b border-border px-3.5 py-2.5 last:border-b-0 hover:bg-surface',
+                        'has-checked:bg-primary-tint-hover has-focus-visible:outline-2 has-focus-visible:-outline-offset-2 has-focus-visible:outline-focus-ring',
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name={`variant-${item}`}
+                        value={name}
+                        checked={row === activeRow}
+                        onChange={() => onVariantChange(name)}
+                        className="peer sr-only"
                       />
-                    )}
-                    {name}
-                  </button>
-                );
-              })}
-            </div>
+                      <span
+                        aria-hidden="true"
+                        className="flex size-5 shrink-0 items-center justify-center rounded-full border-2 border-border-strong peer-checked:border-primary peer-checked:[&>span]:opacity-100"
+                      >
+                        <span className="size-2.5 rounded-full bg-primary opacity-0" />
+                      </span>
+                      <span className="flex min-w-0 flex-1 flex-col peer-checked:[&>span:first-child]:text-label-bold">
+                        <span className="text-label text-text-primary">
+                          {name}
+                        </span>
+                        {row.startDate && (
+                          <span className="text-caption text-text-tertiary">
+                            {t('appliedOn', {
+                              date: formatDate(row.startDate),
+                            })}
+                          </span>
+                        )}
+                      </span>
+                      <PriceRange
+                        min={row.price}
+                        max={row.price}
+                        className="shrink-0 text-label-bold text-text-primary"
+                      />
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
           )}
-          <p aria-live="polite" className="text-price-xl text-text-primary">
-            {selectedRow ? (
-              <PriceRange min={selectedRow.price} max={selectedRow.price} />
-            ) : (
-              <PriceRange min={Math.min(...prices)} max={Math.max(...prices)} />
-            )}
-          </p>
-          {hasVariants && !selectedRow && (
-            <StatusChip status="warning">{t('variantsDiffer')}</StatusChip>
-          )}
-          <p className="text-caption text-text-secondary">{describeRows()}</p>
+
+          <TrendNote trend={trend} />
         </>
       )}
 
@@ -177,5 +164,45 @@ export function SelectedItemCard({
         <ChevronRight aria-hidden="true" className="size-4" strokeWidth={2} />
       </Link>
     </section>
+  );
+}
+
+/** 추이를 그릴 만큼 기록이 없을 때 차트 대신 보여 주는 한 줄. 두 달 이상이면 차트 카드가 따로 뜬다. */
+function TrendNote({ trend }: { trend: PriceTrendState }) {
+  const t = useTranslations('hospitals.detail.trend');
+  const format = useFormatter();
+  const failure = useStickyError(trend.error, trend.refetch);
+
+  if (failure.error) {
+    return (
+      <SectionError
+        error={failure.error}
+        onRetry={() => void failure.retry()}
+        isRetrying={failure.isRetrying}
+        className="bg-bg"
+      />
+    );
+  }
+  if (trend.isPending)
+    return <Skeleton className="h-5 w-52 bg-primary-tint-pressed" />;
+  if (trend.summary.kind === 'trend') return null;
+
+  const only = trend.summary.points.at(-1);
+  return (
+    <p className="flex items-center gap-1.5 text-caption text-text-secondary">
+      <ChartLine
+        aria-hidden="true"
+        className="size-3.5 shrink-0"
+        strokeWidth={1.5}
+      />
+      {only
+        ? t('onlyMonth', {
+            month: format.dateTime(only.date, {
+              year: 'numeric',
+              month: 'long',
+            }),
+          })
+        : t('none')}
+    </p>
   );
 }

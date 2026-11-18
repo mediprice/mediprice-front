@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { buildNaverMapUrl } from '@/features/hospitals/detail-links';
+import { formatLocation } from '@/features/regions/format-location';
 import type { components } from '@/lib/api/schema';
 
 type Hospital = components['schemas']['HospitalDetailResponse'];
@@ -11,6 +12,7 @@ type Hospital = components['schemas']['HospitalDetailResponse'];
 export function LocationSection({ hospital }: { hospital: Hospital }) {
   const t = useTranslations('hospitals.detail.location');
   const query = hospital.address?.trim() || hospital.name;
+  const region = formatLocation(hospital.sidoName, hospital.sgguName);
 
   return (
     <section
@@ -32,9 +34,14 @@ export function LocationSection({ hospital }: { hospital: Hospital }) {
           <p className="text-body text-text-primary">
             {hospital.address ?? t('noAddress')}
           </p>
-          {hospital.postNo && (
+          {(region || hospital.postNo) && (
             <p className="text-caption text-text-secondary tabular-nums">
-              {t('postNo', { postNo: hospital.postNo })}
+              {[
+                region,
+                hospital.postNo && t('postNo', { postNo: hospital.postNo }),
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             </p>
           )}
         </div>

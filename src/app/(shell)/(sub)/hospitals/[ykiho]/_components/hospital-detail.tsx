@@ -4,11 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 import { Building2, CircleAlert } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { priceRowName } from '@/features/hospitals/price-groups';
 import { hospitalQueries } from '@/features/hospitals/queries';
 import { errorMessageKey } from '@/lib/api/error-message';
 import { ApiError } from '@/lib/api/errors';
@@ -23,6 +24,8 @@ import { PriceTrend } from './price-trend';
 import { ReviewSection } from './review-section';
 import { SectionNav } from './section-nav';
 import { SelectedItemCard } from './selected-item-card';
+import { useItemPrices, usePriceTrend } from './use-item-prices';
+import { useStickyError } from './use-sticky-error';
 
 /** 선택 항목은 URL(item)과 같이 움직이되, 서버 왕복 없이 history.replaceState로만 바꾼다. */
 function syncItemParam(code: string | null) {
@@ -35,35 +38,58 @@ function syncItemParam(code: string | null) {
 export function HospitalDetail({
   ykiho,
   initialItem,
+  back,
 }: {
   ykiho: string;
   initialItem: string | null;
+  /** 항목 가격 화면의 검색 조건(검증됨). 처음 들어온 항목으로 돌아갈 때만 붙인다. */
+  back: string | null;
 }) {
   const t = useTranslations('hospitals.detail');
   const tErrors = useTranslations('errors');
   const tActions = useTranslations('common.actions');
+  const tMeta = useTranslations('metadata');
   const [item, setItem] = useState(initialItem);
   const [variant, setVariant] = useState<string | null>(null);
   const detail = useQuery(hospitalQueries.detail(ykiho));
+  const prices = useItemPrices(ykiho, item);
+  const firstRow = prices.rows?.[0];
+  const activeVariant = variant ?? (firstRow ? priceRowName(firstRow) : null);
+  const trend = usePriceTrend(ykiho, item, activeVariant);
 
-  function handleSelectItem(code: string | null) {
+  const failure = useStickyError(detail.error, () => detail.refetch());
+  const isNotFound =
+    failure.error instanceof ApiError &&
+    (failure.error.code === 'HOSPITAL_NOT_FOUND' ||
+      failure.error.status === 404);
+  const pageTitle = detail.data
+    ? detail.data.name
+    : isNotFound
+      ? t('notFound.title')
+      : null;
+
+  useEffect(() => {
+    if (pageTitle)
+      document.title = tMeta('titleTemplate').replace('%s', pageTitle);
+  }, [pageTitle, tMeta]);
+
+  function handleSelectItem(
+    code: string | null,
+    nextVariant: string | null = null,
+  ) {
     setItem(code);
-    setVariant(null);
+    setVariant(nextVariant);
     syncItemParam(code);
     if (code) {
-      const card = document.getElementById('selected-item');
-      card?.scrollIntoView({ block: 'start' });
-      card?.focus({ preventScroll: true });
+      requestAnimationFrame(() => {
+        const card = document.getElementById('selected-item');
+        card?.scrollIntoView({ block: 'start' });
+        card?.focus({ preventScroll: true });
+      });
     }
   }
 
-  if (detail.isPending) return <DetailSkeleton />;
-
-  if (detail.isError) {
-    const isNotFound =
-      detail.error instanceof ApiError &&
-      (detail.error.code === 'HOSPITAL_NOT_FOUND' ||
-        detail.error.status === 404);
+  if (failure.error) {
     return (
       <PageContainer className="py-section">
         <h1 className="sr-only">{t('topBarTitle')}</h1>
@@ -81,12 +107,13 @@ export function HospitalDetail({
         ) : (
           <EmptyState
             icon={<CircleAlert />}
-            title={tErrors(errorMessageKey(detail.error))}
+            title={tErrors(errorMessageKey(failure.error))}
             action={
               <Button
                 variant="outline"
                 size="md"
-                onClick={() => void detail.refetch()}
+                isLoading={failure.isRetrying}
+                onClick={() => void failure.retry()}
               >
                 {tActions('retry')}
               </Button>
@@ -98,33 +125,56 @@ export function HospitalDetail({
   }
 
   const hospital = detail.data;
+  if (!hospital) return <DetailSkeleton />;
+  const itemHref =
+    item && item === initialItem && back
+      ? (`/items/${item}?${back}` as const)
+      : item
+        ? (`/items/${item}` as const)
+        : null;
 
   return (
     <>
-      <HospitalHeader hospital={hospital} />
+      <HospitalHeader
+        hospital={hospital}
+        itemCrumb={
+          itemHref && prices.displayName
+            ? { href: itemHref, name: prices.displayName }
+            : null
+        }
+      />
       <PageContainer className="flex flex-col gap-10 pt-6 pb-section lg:flex-row lg:items-start lg:pt-8">
         <div className="flex min-w-0 flex-1 flex-col gap-8 lg:gap-10">
-          <div className="flex flex-col gap-4">
-            <SelectedItemCard
-              ykiho={ykiho}
-              item={item}
-              variant={variant}
-              onVariantChange={setVariant}
-              onClear={() => handleSelectItem(null)}
-            />
-            {item && <PriceTrend ykiho={ykiho} item={item} variant={variant} />}
-          </div>
+          {item && (
+            <div className="flex flex-col gap-4">
+              <SelectedItemCard
+                item={item}
+                prices={prices}
+                trend={trend}
+                activeVariant={activeVariant}
+                onVariantChange={setVariant}
+                onClear={() => handleSelectItem(null)}
+              />
+              {trend.summary.kind === 'trend' && (
+                <PriceTrend
+                  summary={trend.summary}
+                  name={activeVariant ?? prices.displayName ?? item}
+                />
+              )}
+            </div>
+          )}
           <SectionNav />
           <PriceList
             ykiho={ykiho}
             selectedItem={item}
+            selectedRows={prices.rows}
             onSelect={handleSelectItem}
           />
           <OperatingSection hospital={hospital} />
           <LocationSection hospital={hospital} />
           <ReviewSection ykiho={ykiho} />
         </div>
-        <ItemRail item={item} />
+        <ItemRail item={item} itemName={prices.displayName} />
       </PageContainer>
     </>
   );

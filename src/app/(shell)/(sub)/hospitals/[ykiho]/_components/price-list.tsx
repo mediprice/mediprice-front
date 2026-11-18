@@ -13,26 +13,36 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PriceRange } from '@/components/ui/price-range';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  groupPriceRows,
+  lastSegment,
+  priceRowName,
+} from '@/features/hospitals/price-groups';
 import { hospitalQueries } from '@/features/hospitals/queries';
 import { npayQueries } from '@/features/npay/queries';
+import type { components } from '@/lib/api/schema';
 import { cn } from '@/lib/utils';
 
 import { SectionError } from './section-error';
-import { variantName } from './use-item-prices';
+import { useStickyError } from './use-sticky-error';
+
+type PriceRow = components['schemas']['HospitalItemPriceResponse'];
 
 const SEARCH_DELAY_MS = 300;
 
 export function PriceList({
   ykiho,
   selectedItem,
+  selectedRows,
   onSelect,
 }: {
   ykiho: string;
   selectedItem: string | null;
-  onSelect: (code: string) => void;
+  /** 선택한 항목의 행. 아직 불러오지 않은 페이지에 있어도 그 분류의 맨 위에 보인다. */
+  selectedRows: readonly PriceRow[] | undefined;
+  onSelect: (code: string, variant: string) => void;
 }) {
   const t = useTranslations('hospitals.detail.prices');
-  const format = useFormatter();
   const [input, setInput] = useState('');
   const [keyword, setKeyword] = useState('');
   const [categoryCode, setCategoryCode] = useState('');
@@ -53,8 +63,15 @@ export function PriceList({
     placeholderData: keepPreviousData,
   });
 
+  const failure = useStickyError(list.error, () => list.refetch());
   const rows = list.data?.pages.flatMap((page) => page.content) ?? [];
   const total = list.data?.pages[0]?.totalElements ?? 0;
+  const groups = groupPriceRows(
+    rows,
+    selectedItem && !isFiltered
+      ? { npayCode: selectedItem, rows: selectedRows ?? [] }
+      : null,
+  );
 
   return (
     <section
@@ -75,6 +92,9 @@ export function PriceList({
               ? t('filteredCount', { count: total })
               : t('count', { count: total }))}
         </p>
+        {!selectedItem && (
+          <p className="text-caption text-text-tertiary">{t('hint')}</p>
+        )}
       </div>
 
       <div
@@ -123,14 +143,18 @@ export function PriceList({
         )}
       </div>
 
-      {list.isPending ? (
+      {failure.error ? (
+        <SectionError
+          error={failure.error}
+          isRetrying={failure.isRetrying}
+          onRetry={() => void failure.retry()}
+        />
+      ) : list.isPending ? (
         <div className="flex flex-col gap-2">
           {Array.from({ length: 4 }, (_, index) => (
             <Skeleton key={index} className="h-18 rounded-lg" />
           ))}
         </div>
-      ) : list.isError ? (
-        <SectionError error={list.error} onRetry={() => void list.refetch()} />
       ) : rows.length === 0 ? (
         <EmptyState
           icon={<SearchX />}
@@ -142,65 +166,31 @@ export function PriceList({
         <ul
           aria-busy={list.isPlaceholderData || undefined}
           className={cn(
-            'flex flex-col rounded-xl bg-surface px-2 py-1.5 transition-opacity lg:px-3',
+            'flex flex-col gap-5 transition-opacity',
             list.isPlaceholderData && 'opacity-60',
           )}
         >
-          {rows.map((row, index) => {
-            const isSelected = row.npayCode === selectedItem;
-            const name = variantName(row);
-            return (
-              <li
-                key={`${row.npayCode}-${name}-${index}`}
-                className="border-b border-border last:border-b-0"
-              >
-                <button
-                  type="button"
-                  aria-current={isSelected || undefined}
-                  onClick={() => onSelect(row.npayCode)}
-                  className={cn(
-                    'my-1 flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors hover:bg-surface-strong',
-                    isSelected && 'bg-primary-tint hover:bg-primary-tint-hover',
-                  )}
-                >
-                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <span
-                      className={cn(
-                        'flex items-center gap-1.5 text-label text-text-primary',
-                        isSelected && 'text-label-bold text-primary-text',
-                      )}
-                    >
-                      {isSelected && (
-                        <Check
-                          aria-hidden="true"
-                          className="size-4 shrink-0"
-                          strokeWidth={2}
-                        />
-                      )}
-                      <span className="min-w-0">{name}</span>
-                    </span>
-                    <span className="text-caption text-text-tertiary">
-                      {name !== row.itemName && (
-                        <span className="block">{row.itemName}</span>
-                      )}
-                      {row.startDate &&
-                        t('appliedOn', {
-                          date: format.dateTime(
-                            new Date(row.startDate),
-                            'dateShort',
-                          ),
-                        })}
-                    </span>
-                  </span>
-                  <PriceRange
-                    min={row.price}
-                    max={row.price}
-                    className="shrink-0 text-label-bold text-text-primary"
-                  />
-                </button>
-              </li>
-            );
-          })}
+          {groups.map((group) => (
+            <li key={group.category ?? ''} className="flex flex-col gap-2">
+              <h3 className="text-label-bold text-text-secondary">
+                {group.category ?? t('otherCategory')}
+              </h3>
+              <ul className="flex flex-col rounded-xl bg-surface px-2 py-1 lg:px-3">
+                {group.rows.map((row, index) => (
+                  <li
+                    key={`${row.npayCode}-${row.hospitalItemName}-${row.price}-${index}`}
+                    className="border-b border-border last:border-b-0"
+                  >
+                    <PriceRowButton
+                      row={row}
+                      isSelected={row.npayCode === selectedItem}
+                      onSelect={onSelect}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
         </ul>
       )}
 
@@ -225,5 +215,66 @@ export function PriceList({
         {t('source')}
       </p>
     </section>
+  );
+}
+
+function PriceRowButton({
+  row,
+  isSelected,
+  onSelect,
+}: {
+  row: PriceRow;
+  isSelected: boolean;
+  onSelect: (code: string, variant: string) => void;
+}) {
+  const t = useTranslations('hospitals.detail.prices');
+  const format = useFormatter();
+  const name = priceRowName(row);
+  const standardName = lastSegment(row.itemName);
+
+  return (
+    <button
+      type="button"
+      aria-current={isSelected || undefined}
+      onClick={() => onSelect(row.npayCode, name)}
+      className={cn(
+        'my-1 flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors hover:bg-surface-strong',
+        isSelected && 'bg-primary-tint hover:bg-primary-tint-hover',
+      )}
+    >
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span
+          className={cn(
+            'flex items-center gap-1.5 text-label text-text-primary',
+            isSelected && 'text-label-bold text-primary-text',
+          )}
+        >
+          {isSelected && (
+            <Check
+              aria-hidden="true"
+              className="size-4 shrink-0"
+              strokeWidth={2}
+            />
+          )}
+          <span className="min-w-0">{name}</span>
+        </span>
+        <span className="text-caption text-text-tertiary">
+          {standardName !== name && (
+            <span title={row.itemName} className="block">
+              {standardName}
+            </span>
+          )}
+          {row.startDate &&
+            t('appliedOn', {
+              date: format.dateTime(new Date(row.startDate), 'dateShort'),
+            })}
+        </span>
+      </span>
+      <PriceRange
+        min={row.price}
+        max={row.price}
+        className="shrink-0 text-label-bold text-text-primary"
+      />
+    </button>
   );
 }

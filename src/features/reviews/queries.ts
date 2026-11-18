@@ -2,6 +2,7 @@ import { infiniteQueryOptions } from '@tanstack/react-query';
 
 import { apiClient } from '@/lib/api/client';
 import { unwrap } from '@/lib/api/unwrap';
+import { shouldRetryQuery } from '@/lib/query-client';
 
 export type ReviewSort = 'latest' | 'rating';
 
@@ -29,6 +30,9 @@ export const reviewQueries = {
             },
           }),
         ),
+      /** 후기는 부가 정보라 5xx에도 한 번만 다시 시도해 빨리 실패를 보여 준다. */
+      retry: (failureCount, error) =>
+        shouldRetryQuery(failureCount, error) && failureCount < 1,
       initialPageParam: 0,
       getNextPageParam: (last) =>
         last.page + 1 < last.totalPages ? last.page + 1 : undefined,

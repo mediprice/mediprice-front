@@ -2,6 +2,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 
+import {
+  pickSeries,
+  summarizePriceTrend,
+} from '@/features/hospitals/price-history';
 import { hospitalQueries } from '@/features/hospitals/queries';
 import { npayQueries } from '@/features/npay/queries';
 
@@ -17,25 +21,39 @@ export function useItemPrices(ykiho: string, item: string | null) {
     enabled: item != null && name != null,
   });
 
-  const displayName =
-    detail.data?.detailName ?? detail.data?.sdivName ?? detail.data?.name;
-  const error = detail.error ?? prices.error;
-
   return {
-    displayName,
+    displayName:
+      detail.data?.detailName ?? detail.data?.sdivName ?? detail.data?.name,
     rows: prices.data,
     isPending: detail.isPending || prices.isPending,
-    error,
-    refetch: () => {
-      if (detail.isError) void detail.refetch();
-      else void prices.refetch();
-    },
+    error: detail.error ?? prices.error,
+    refetch: () => (detail.isError ? detail.refetch() : prices.refetch()),
   };
 }
 
-export function variantName(row: {
-  hospitalItemName: string | null;
-  itemName: string;
-}) {
-  return row.hospitalItemName?.trim() || row.itemName;
+export type ItemPrices = ReturnType<typeof useItemPrices>;
+
+/** 선택한 세부 항목의 월별 가격 추이. 세부 항목 이름으로 시리즈를 고른다. */
+export function usePriceTrend(
+  ykiho: string,
+  item: string | null,
+  variant: string | null,
+) {
+  const history = useQuery({
+    ...hospitalQueries.priceHistory(ykiho, { npayCode: item ?? '' }),
+    enabled: item != null,
+  });
+  const series = history.data
+    ? pickSeries(history.data.series, variant)
+    : undefined;
+
+  return {
+    isPending: history.isPending,
+    error: history.error,
+    refetch: () => history.refetch(),
+    series,
+    summary: summarizePriceTrend(series?.points ?? []),
+  };
 }
+
+export type PriceTrendState = ReturnType<typeof usePriceTrend>;

@@ -4,7 +4,8 @@
     "topBarTitle": "병원 상세",
     "notFound": {
       "description": "주소가 바뀌었거나 더 이상 공개되지 않는 병원일 수 있어요.",
-      "home": "홈으로 가기"
+      "home": "홈으로 가기",
+      "title": "병원을 찾을 수 없어요"
     },
     "header": {
       "call": "전화 {phone}",
@@ -20,18 +21,13 @@
       "reviews": "후기"
     },
     "selected": {
-      "emptyTitle": "선택한 항목이 없어요",
-      "emptyDescription": "아래 가격 목록에서 항목을 고르면 세부 가격과 가격 추이를 볼 수 있어요.",
       "label": "선택 항목 · {name}",
-      "variants": "세부 항목",
-      "variantsDiffer": "세부 항목마다 가격이 달라요",
-      "rangeMeta": "세부 {count, plural, other {#건}} · {date}부터 적용",
-      "rangeMetaNoDate": "세부 {count, plural, other {#건}}",
+      "variants": "세부 항목 {count, plural, other {#개}}",
       "singleMeta": "{name} · {date} 적용",
-      "singleMetaNoDate": "{name}",
       "notOffered": "이 병원은 이 항목의 가격을 공개하지 않았어요.",
       "compare": "다른 병원 가격 비교",
-      "clear": "선택 해제"
+      "clear": "선택 해제",
+      "appliedOn": "{date} 적용"
     },
     "rail": {
       "emptyTitle": "항목을 선택하면",
@@ -41,19 +37,20 @@
     "trend": {
       "label": "가격 추이",
       "title": "최근 {count, plural, other {#개월}}",
-      "titleEmpty": "월별 기록",
       "expand": "가격 추이 펼치기",
       "collapse": "가격 추이 접기",
       "changed": "{month}부터 {price, number}원 · 이전 {previous, number}원",
       "unchanged": "기간 동안 {price, number}원으로 같아요",
-      "single": "{month} 기준 {price, number}원",
-      "insufficient": "아직 가격 변화를 보여 줄 기록이 부족해요.",
-      "chooseVariant": "세부 항목을 고르면 가격 추이를 볼 수 있어요.",
       "chartLabel": "{name} 월별 가격 추이. {from}부터 {to}까지 최저 {min, number}원, 최고 {max, number}원",
       "tableCaption": "월별 가격",
       "month": "월",
       "price": "가격",
-      "pointPrice": "{price, number}원"
+      "pointPrice": "{price, number}원",
+      "onlyMonth": "{month} 기준 가격만 있어서 추이를 그릴 수 없어요",
+      "none": "가격 추이 기록이 아직 없어요",
+      "up": "가격이 올랐어요",
+      "down": "가격이 내렸어요",
+      "same": "가격 변동 없음"
     },
     "prices": {
       "title": "공개 가격",
@@ -64,12 +61,13 @@
       "category": "분류",
       "categoryAll": "전체 분류",
       "appliedOn": "{date} 적용",
-      "selected": "선택됨",
       "source": "심평원 공개 가격 · 적용일은 병원이 신고한 날짜예요",
       "emptyTitle": "공개된 비급여 가격이 없어요",
       "noResultTitle": "조건에 맞는 항목이 없어요",
       "noResultDescription": "다른 이름으로 검색하거나 분류를 바꿔 보세요.",
-      "more": "더 보기 ({shown, number}/{total, number})"
+      "more": "더 보기 ({shown, number}/{total, number})",
+      "hint": "항목을 고르면 세부 가격과 가격 추이를 볼 수 있어요.",
+      "otherCategory": "기타"
     },
     "hours": {
       "title": "운영시간",

@@ -69,6 +69,45 @@ describe('reviewQueries.hospital', () => {
     ).rejects.toMatchObject({ status: 500, code: 'INTERNAL_ERROR' });
   });
 
+  it('5xx는 한 번만 다시 보내고 4xx는 다시 보내지 않는다', async () => {
+    let serverErrorCalls = 0;
+    let notFoundCalls = 0;
+    server.use(
+      http.get(`${BASE}/api/hospitals/H1/reviews`, () => {
+        serverErrorCalls += 1;
+        return HttpResponse.json(
+          { code: 'INTERNAL_ERROR', message: '오류', errors: [] },
+          { status: 500 },
+        );
+      }),
+      http.get(`${BASE}/api/hospitals/NOPE/reviews`, () => {
+        notFoundCalls += 1;
+        return HttpResponse.json(
+          { code: 'HOSPITAL_NOT_FOUND', message: '없음', errors: [] },
+          { status: 404 },
+        );
+      }),
+    );
+    const client = new QueryClient();
+    const retryFast = { retryDelay: 0 };
+
+    await expect(
+      client.fetchInfiniteQuery({
+        ...reviewQueries.hospital('H1'),
+        ...retryFast,
+      }),
+    ).rejects.toMatchObject({ status: 500 });
+    await expect(
+      client.fetchInfiniteQuery({
+        ...reviewQueries.hospital('NOPE'),
+        ...retryFast,
+      }),
+    ).rejects.toMatchObject({ status: 404 });
+
+    expect(serverErrorCalls).toBe(2);
+    expect(notFoundCalls).toBe(1);
+  });
+
   it('정렬이 다르면 키가 달라 따로 캐시된다', () => {
     expect(reviewKeys.hospital('H1', 'latest')).not.toEqual(
       reviewKeys.hospital('H1', 'rating'),

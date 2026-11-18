@@ -1,9 +1,16 @@
 import { ExternalLink, Globe, MapPin, Phone, Stethoscope } from 'lucide-react';
+import type { Route } from 'next';
 import { useTranslations } from 'next-intl';
 
+import {
+  Breadcrumb,
+  BreadcrumbCurrent,
+  BreadcrumbLink,
+} from '@/components/layout/breadcrumb';
 import { PageContainer } from '@/components/layout/page-container';
 import { Tag } from '@/components/ui/tag';
 import { toHomepageUrl, toTelHref } from '@/features/hospitals/detail-links';
+import { formatLocation } from '@/features/regions/format-location';
 import type { components } from '@/lib/api/schema';
 
 type Hospital = components['schemas']['HospitalDetailResponse'];
@@ -11,9 +18,20 @@ type Hospital = components['schemas']['HospitalDetailResponse'];
 const META_LINK =
   'inline-flex min-h-11 items-center gap-1.5 rounded-md text-label text-text-primary underline-offset-4 hover:underline [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-text-tertiary';
 
-export function HospitalHeader({ hospital }: { hospital: Hospital }) {
+export function HospitalHeader<T extends string>({
+  hospital,
+  itemCrumb,
+}: {
+  hospital: Hospital;
+  /** 항목에서 들어왔을 때 경로 가운데 칸(항목 이름 → 항목 가격 화면). */
+  itemCrumb: { href: Route<T>; name: string } | null;
+}) {
   const t = useTranslations('hospitals.detail.header');
-  const region = [hospital.sidoName, hospital.sgguName, hospital.emdongName]
+  const tNav = useTranslations('nav');
+  const region = [
+    formatLocation(hospital.sidoName, hospital.sgguName),
+    hospital.emdongName,
+  ]
     .filter(Boolean)
     .join(' ');
   const tel = toTelHref(hospital.phone);
@@ -21,7 +39,16 @@ export function HospitalHeader({ hospital }: { hospital: Hospital }) {
 
   return (
     <div className="bg-hero">
-      <PageContainer className="flex flex-col gap-2.5 pt-6 pb-5 lg:pt-8 lg:pb-7">
+      <PageContainer className="flex flex-col gap-2.5 pt-6 pb-5 lg:pt-4 lg:pb-7">
+        <Breadcrumb>
+          <BreadcrumbLink href="/">{tNav('home')}</BreadcrumbLink>
+          {itemCrumb && (
+            <BreadcrumbLink href={itemCrumb.href}>
+              {itemCrumb.name}
+            </BreadcrumbLink>
+          )}
+          <BreadcrumbCurrent>{hospital.name}</BreadcrumbCurrent>
+        </Breadcrumb>
         {(hospital.className || region) && (
           <p className="flex flex-wrap items-center gap-2 text-caption-strong text-primary-text">
             {hospital.className && (
