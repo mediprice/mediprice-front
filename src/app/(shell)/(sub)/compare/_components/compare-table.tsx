@@ -34,6 +34,7 @@ export function CompareTable<T extends string>({
   onRemove,
   regionRef,
   regionId,
+  headingId,
 }: {
   hospitals: readonly ComparisonHospital[];
   slots: number;
@@ -49,6 +50,8 @@ export function CompareTable<T extends string>({
   onRemove: (ykiho: string) => void;
   regionRef: Ref<HTMLDivElement>;
   regionId: string;
+  /** 표 위 SectionHeader의 제목. 스크롤 영역의 이름이 된다. */
+  headingId: string;
 }) {
   const t = useTranslations('comparison.table');
   const tPage = useTranslations('comparison.page');
@@ -61,7 +64,7 @@ export function CompareTable<T extends string>({
   return (
     <div className="flex flex-col gap-2">
       {hospitals.length >= 2 && (
-        <p className="text-caption text-text-tertiary lg:hidden">
+        <p className="text-caption text-text-tertiary md:hidden">
           {t('scrollHint')}
         </p>
       )}
@@ -69,7 +72,7 @@ export function CompareTable<T extends string>({
         ref={regionRef}
         id={regionId}
         role="region"
-        aria-labelledby={captionId}
+        aria-labelledby={headingId}
         tabIndex={0}
         className="overflow-x-auto overscroll-x-contain rounded-xl border border-hairline bg-bg outline-offset-2"
       >
@@ -81,7 +84,7 @@ export function CompareTable<T extends string>({
             {itemName ? t('caption', { item: itemName }) : t('captionNoItem')}
           </caption>
           <colgroup>
-            <col className="w-20 lg:w-47.5" />
+            <col className="w-20 md:w-32 lg:w-47.5" />
             {hospitals.map((hospital) => (
               <col key={hospital.ykiho} />
             ))}

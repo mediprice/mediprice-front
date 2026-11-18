@@ -23,11 +23,16 @@ export function CompareEmpty() {
       description={t('description')}
       action={
         hospitals.length >= 2 ? (
-          <Button asChild variant="primary" size="md">
-            <Link href={buildBasketHref(hospitals)}>
-              {t('fromBasket', { count: hospitals.length })}
-            </Link>
-          </Button>
+          <>
+            <Button asChild variant="tint" size="md">
+              <Link href={buildBasketHref(hospitals)}>
+                {t('fromBasket', { count: hospitals.length })}
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="md">
+              <Link href="/search">{t('search')}</Link>
+            </Button>
+          </>
         ) : (
           <Button asChild variant="tint" size="md">
             <Link href="/search">{t('search')}</Link>

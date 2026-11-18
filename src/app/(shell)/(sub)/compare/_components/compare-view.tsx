@@ -10,6 +10,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { SectionHeader } from '@/components/ui/section-header';
 import {
   buildCompareHref,
   MAX_COMPARE,
@@ -34,6 +35,21 @@ import { CompareTable } from './compare-table';
 /** 함께 공개한 항목은 많으면 100개라 처음에는 이만큼만 펼친다. */
 const INITIAL_COMMON_ITEMS = 8;
 
+/** 적용일은 보조 정보라 응답이 늦어도 표가 계속 불러오는 중으로 보이지 않게 이 시간 뒤에는 "–"로 둔다. */
+const DATE_TIMEOUT_MS = 8000;
+
+function withTimeout<T>(run: () => Promise<T>, ms: number) {
+  return new Promise<T>((resolve, reject) => {
+    const timer = window.setTimeout(
+      () => reject(new Error('Applied date request timed out')),
+      ms,
+    );
+    run()
+      .then(resolve, reject)
+      .finally(() => window.clearTimeout(timer));
+  });
+}
+
 const hasCode = (error: unknown, code: string) =>
   error instanceof ApiError && error.code === code;
 
@@ -50,6 +66,7 @@ export function CompareView({
   const tMeta = useTranslations('metadata');
   const router = useRouter();
   const regionId = useId();
+  const headingId = useId();
   const regionRef = useRef<HTMLDivElement>(null);
   const [isCommonExpanded, setIsCommonExpanded] = useState(false);
   const removeFromBasket = useCompareStore((state) => state.remove);
@@ -88,16 +105,26 @@ export function CompareView({
   const itemName = itemRow ? formatComparisonItemName(itemRow) : null;
 
   const datesQueries = useQueries({
-    queries: hospitals.map((hospital) => ({
-      ...hospitalQueries.itemPrices(
+    queries: hospitals.map((hospital) => {
+      const options = hospitalQueries.itemPrices(
         hospital.ykiho,
         itemRow?.npayCode ?? '',
         itemRow?.itemName ?? '',
-      ),
-      enabled: itemRow != null,
-      /** 보조 정보라 실패하면 다시 기다리게 하지 않고 바로 "–"로 둔다. */
-      retry: false,
-    })),
+      );
+      return {
+        ...options,
+        queryFn: (
+          context: Parameters<NonNullable<typeof options.queryFn>>[0],
+        ) =>
+          withTimeout(
+            async () => options.queryFn?.(context) ?? [],
+            DATE_TIMEOUT_MS,
+          ),
+        enabled: itemRow != null,
+        /** 보조 정보라 실패하면 다시 기다리게 하지 않고 바로 "–"로 둔다. */
+        retry: false,
+      };
+    }),
   });
   /** undefined는 불러오는 중, null은 날짜 없음(실패·미공개 포함)이다. */
   const dates = datesQueries.map((query) =>
@@ -171,7 +198,7 @@ export function CompareView({
           title={tErrors(errorMessageKey(error))}
           action={
             <Button
-              variant="outline"
+              variant="tint"
               size="md"
               isLoading={base.isFetching || selected.isFetching}
               onClick={() => {
@@ -189,7 +216,11 @@ export function CompareView({
 
     return (
       <div className="flex flex-col gap-4">
-        <Notice>{t('page.notice')}</Notice>
+        <SectionHeader
+          id={headingId}
+          title={t('page.sectionTitle')}
+          description={t('page.notice')}
+        />
         {isItemMissing && <Notice>{t('page.itemNotFound')}</Notice>}
         {hospitals.length < 2 && (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-warning-tint px-4 py-3 text-body-sm text-warning">
@@ -224,6 +255,7 @@ export function CompareView({
           onRemove={handleRemove}
           regionRef={regionRef}
           regionId={regionId}
+          headingId={headingId}
         />
         <div className="flex flex-col items-center gap-2">
           {otherItems.length > INITIAL_COMMON_ITEMS && (
