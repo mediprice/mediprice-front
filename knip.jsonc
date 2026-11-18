@@ -7,6 +7,5 @@
     "react-hook-form",
     "@hookform/resolvers",
     "zustand",
-    "shadcn",
   ],
 }
