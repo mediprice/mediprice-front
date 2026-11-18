@@ -360,6 +360,10 @@ export const hospitalQueries = {
 
 화면에서는 `useQuery(hospitalQueries.detail(id))`로 쓴다. `apiClient`는 브라우저 전용이라 서버 컴포넌트에서 이 옵션으로 prefetch할 수 없다. 서버에서 prefetch가 필요해지면 서버용 호출 경로를 따로 만든다.
 
+### 7.2.1 생성 타입에 아직 없는 엔드포인트
+
+백엔드 브랜치에만 있고 배포·`pnpm api:generate`가 되지 않은 엔드포인트는 `features/<도메인>/api.ts`에서 `createApiFetch`로 `/bff/api/...`를 부르고, 응답을 zod로 검증한다(예: `features/ai/api.ts`, `features/live-fee/api.ts`). 실패는 같은 `ApiError`/`NetworkError`로 던져 `errorMessageKey`가 그대로 동작하게 한다. 파일에 "배포 후 생성 클라이언트로 바꾼다"는 한 줄 TSDoc을 남기고, 배포되면 `apiClient` + `unwrap`으로 옮긴다.
+
 ### 7.3 변경과 캐시
 
 - 상태를 바꾸는 요청은 `useMutation`을 쓰고, 성공하면 관련 키를 무효화한다.
@@ -546,6 +550,7 @@ const t = await getTranslations('metadata');
 - 화면 높이는 `min-h-dvh`를 쓰고 `h-screen`을 쓰지 않는다(모바일 주소창 때문에 넘친다).
 - 포커스·앵커 이동이 고정된 상단 바와 하단 탭바에 가려지지 않게 `globals.css`가 `scroll-padding`을 준다. 화면마다 `scroll-mt-*`를 붙이지 않는다.
 - 하단 탭바 위에 붙는 바(비교함 등)는 `z-(--z-bottom-cta)`로 탭바 위에 쌓는다.
+- 모바일에서 입력창에 포커스가 있으면 하단 탭바가 숨는다(`globals.css`의 `[data-bottom-tab-bar]` 규칙). 입력창을 화면 아래에 붙이는 화면(AI 대화 등)은 탭바가 있을 때와 없을 때의 높이를 모두 계산한다.
 - 입력창 글자는 `text-field`(16px)를 쓴다. 16px보다 작으면 iOS Safari가 포커스할 때 화면을 확대한다.
 - `viewport`는 `app/layout.tsx`에 있다(`viewportFit: 'cover'`로 safe-area 사용). 확대를 막는 설정(`maximumScale`, `userScalable`)은 넣지 않는다.
 - 음성 입력·현재 위치·카메라는 `next.config.ts`의 `Permissions-Policy`에서 같은 출처(`self`)에만 허용돼 있다. 다른 출처의 iframe에서는 쓰지 않는다.
