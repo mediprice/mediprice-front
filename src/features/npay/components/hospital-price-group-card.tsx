@@ -3,10 +3,12 @@
 import { ChevronDown, Hospital } from 'lucide-react';
 import type { Route } from 'next';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useId, useState } from 'react';
 
 import { PriceRange } from '@/components/ui/price-range';
+import { CompareToggle } from '@/features/comparison/components/compare-toggle';
 import { formatLocation } from '@/features/regions/format-location';
 import { cn } from '@/lib/utils';
 
@@ -25,6 +27,8 @@ export function HospitalPriceGroupCard<T extends string>({
   href: Route<T>;
 }) {
   const t = useTranslations('items.card');
+  /** 항목 가격 화면(/items/[code])에서만 쓰여 경로의 항목 코드를 비교함에 함께 담는다. */
+  const { code: itemCode } = useParams<{ code?: string }>();
   const listId = useId();
   const [isExpanded, setIsExpanded] = useState(false);
   const location = formatLocation(group.sidoName, group.sgguName);
@@ -91,27 +95,35 @@ export function HospitalPriceGroupCard<T extends string>({
               )}
             </div>
           )}
-          {extraCount > 0 && (
-            <button
-              type="button"
-              aria-expanded={isExpanded}
-              aria-controls={listId}
-              onClick={() => setIsExpanded((value) => !value)}
-              className="relative z-10 -my-1 inline-flex min-h-11 w-fit items-center gap-1 rounded-md text-label text-primary-text hover:underline"
-            >
-              {isExpanded
-                ? t('hideVariants')
-                : t('showVariants', { count: group.variants.length })}
-              <ChevronDown
-                aria-hidden="true"
-                className={cn(
-                  'size-4 transition-transform duration-150 ease-standard',
-                  isExpanded && 'rotate-180',
-                )}
-                strokeWidth={1.75}
-              />
-            </button>
-          )}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {extraCount > 0 && (
+              <button
+                type="button"
+                aria-expanded={isExpanded}
+                aria-controls={listId}
+                onClick={() => setIsExpanded((value) => !value)}
+                className="relative z-10 -my-1 inline-flex min-h-11 w-fit items-center gap-1 rounded-md text-label text-primary-text hover:underline"
+              >
+                {isExpanded
+                  ? t('hideVariants')
+                  : t('showVariants', { count: group.variants.length })}
+                <ChevronDown
+                  aria-hidden="true"
+                  className={cn(
+                    'size-4 transition-transform duration-150 ease-standard',
+                    isExpanded && 'rotate-180',
+                  )}
+                  strokeWidth={1.75}
+                />
+              </button>
+            )}
+            <CompareToggle
+              ykiho={group.ykiho}
+              name={group.hospitalName}
+              itemCode={itemCode}
+              className="ml-auto"
+            />
+          </div>
         </div>
       )}
     </article>

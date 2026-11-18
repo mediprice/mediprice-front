@@ -1,5 +1,8 @@
+'use client';
+
 import { ExternalLink, Globe, MapPin, Phone, Stethoscope } from 'lucide-react';
 import type { Route } from 'next';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import {
@@ -9,6 +12,7 @@ import {
 } from '@/components/layout/breadcrumb';
 import { PageContainer } from '@/components/layout/page-container';
 import { Tag } from '@/components/ui/tag';
+import { CompareToggle } from '@/features/comparison/components/compare-toggle';
 import { toHomepageUrl, toTelHref } from '@/features/hospitals/detail-links';
 import { formatLocation } from '@/features/regions/format-location';
 import type { components } from '@/lib/api/schema';
@@ -28,6 +32,8 @@ export function HospitalHeader<T extends string>({
 }) {
   const t = useTranslations('hospitals.detail.header');
   const tNav = useTranslations('nav');
+  /** HospitalDetail이 선택 항목을 history로 바꿔도 useSearchParams가 따라온다. */
+  const itemCode = useSearchParams().get('item');
   const region = [
     formatLocation(hospital.sidoName, hospital.sgguName),
     hospital.emdongName,
@@ -59,7 +65,14 @@ export function HospitalHeader<T extends string>({
             {region && <span>{region}</span>}
           </p>
         )}
-        <h1 className="text-hero">{hospital.name}</h1>
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <h1 className="min-w-0 text-hero">{hospital.name}</h1>
+          <CompareToggle
+            ykiho={hospital.ykiho}
+            name={hospital.name}
+            itemCode={itemCode}
+          />
+        </div>
         {hospital.address && (
           <p className="flex items-start gap-1.5 text-body-sm text-text-secondary">
             <MapPin
