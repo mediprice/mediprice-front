@@ -47,5 +47,21 @@
     "1032B": "MRI 특수검사",
     "1025A": "초음파 기본검사",
     "1025B": "초음파 진단검사"
+  },
+  "rangeBar": {
+    "range": "가격 범위: 최저 {min, number}원, 최고 {max, number}원",
+    "rangeWithAverage": "가격 범위: 최저 {min, number}원, 평균 {average, number}원, 최고 {max, number}원",
+    "valueLabel": "이 병원",
+    "value": "{label} {value, number}원",
+    "valueComparison": "{label} {value, number}원, {position, select, below {평균보다 낮아요} above {평균보다 높아요} other {평균과 같아요}}",
+    "average": "평균",
+    "averageAmount": "평균 {amount, number}원"
+  },
+  "rotation": {
+    "pause": "자동 넘김 멈추기",
+    "play": "자동 넘김 다시 시작",
+    "next": "다음",
+    "prev": "이전",
+    "position": "{total, number}개 중 {current, number}번째"
   }
 }
