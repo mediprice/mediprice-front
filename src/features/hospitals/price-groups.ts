@@ -50,3 +50,11 @@ export function groupPriceRows(
     rows: groupRows,
   }));
 }
+
+/** "도수치료5[1일당]-N 20분"의 마지막 짧은 조각(단위)을 떼어 줄바꿈이 그 사이에서만 일어나게 한다. */
+export function splitTrailingUnit(name: string): [string, string] {
+  const index = name.trimEnd().lastIndexOf(' ');
+  const tail = index > 0 ? name.slice(index + 1).trim() : '';
+  if (!tail || tail.length > 8) return [name, ''];
+  return [name.slice(0, index + 1), tail];
+}

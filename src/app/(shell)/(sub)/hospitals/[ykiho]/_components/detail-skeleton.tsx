@@ -3,10 +3,11 @@ import { useTranslations } from 'next-intl';
 import { PageContainer } from '@/components/layout/page-container';
 import { Skeleton } from '@/components/ui/skeleton';
 
+/** 화면 높이만큼 자리를 잡아, 내용이 채워질 때 푸터가 화면 안에서 밀려나지 않게 한다. */
 export function DetailSkeleton() {
   const t = useTranslations('common.status');
   return (
-    <div role="status" aria-busy="true">
+    <div role="status" aria-busy="true" className="min-h-dvh">
       <span className="sr-only">{t('loading')}</span>
       <div className="bg-hero">
         <PageContainer className="flex flex-col gap-3 pt-6 pb-5 lg:pt-8 lg:pb-7">

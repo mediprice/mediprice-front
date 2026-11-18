@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PriceRange } from '@/components/ui/price-range';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   groupPriceRows,
@@ -25,6 +26,7 @@ import { cn } from '@/lib/utils';
 
 import { SectionError } from './section-error';
 import { useStickyError } from './use-sticky-error';
+import { VariantName } from './variant-name';
 
 type PriceRow = components['schemas']['HospitalItemPriceResponse'];
 
@@ -43,6 +45,7 @@ export function PriceList({
   onSelect: (code: string, variant: string, variantCount: number) => void;
 }) {
   const t = useTranslations('hospitals.detail.prices');
+  const tActions = useTranslations('common.actions');
   const [input, setInput] = useState('');
   const [keyword, setKeyword] = useState('');
   const [categoryCode, setCategoryCode] = useState('');
@@ -53,6 +56,12 @@ export function PriceList({
   }, [input]);
 
   const categories = useQuery(npayQueries.categories());
+
+  function handleReset() {
+    setInput('');
+    setKeyword('');
+    setCategoryCode('');
+  }
   const condition = {
     ...(keyword && { keyword }),
     ...(categoryCode && { categoryCode }),
@@ -80,9 +89,7 @@ export function PriceList({
       className="flex scroll-mt-14 flex-col gap-4"
     >
       <div className="flex flex-col gap-1">
-        <h2 id="prices-title" className="text-heading">
-          {t('title')}
-        </h2>
+        <SectionHeader id="prices-title" title={t('title')} />
         <p
           aria-live="polite"
           className="min-h-6 text-body-sm text-text-secondary"
@@ -155,6 +162,13 @@ export function PriceList({
           icon={<SearchX />}
           title={isFiltered ? t('noResultTitle') : t('emptyTitle')}
           description={isFiltered ? t('noResultDescription') : undefined}
+          action={
+            isFiltered ? (
+              <Button variant="tint" size="md" onClick={handleReset}>
+                {tActions('reset')}
+              </Button>
+            ) : undefined
+          }
           className="rounded-xl bg-surface py-10"
         />
       ) : (
@@ -174,7 +188,11 @@ export function PriceList({
                 {group.rows.map((row, index) => (
                   <li
                     key={`${row.npayCode}-${row.hospitalItemName}-${row.price}-${index}`}
-                    className="border-b border-border last:border-b-0"
+                    className={cn(
+                      'border-b border-border last:border-b-0',
+                      row.npayCode === selectedItem &&
+                        '-ml-2 border-l-2 border-l-primary pl-1.5 lg:-ml-3 lg:pl-2.5',
+                    )}
                   >
                     <PriceRowButton
                       row={row}
@@ -239,27 +257,28 @@ function PriceRowButton({
       aria-current={isSelected || undefined}
       onClick={() => onSelect(row.npayCode, name)}
       className={cn(
-        'my-1 flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors hover:bg-surface-strong',
-        isSelected && 'bg-primary-tint hover:bg-primary-tint-hover',
+        'my-1 flex w-full flex-col gap-0.5 rounded-lg px-3 py-3 text-left transition-colors hover:bg-surface-strong',
       )}
     >
-      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span
-          className={cn(
-            'flex items-center gap-1.5 text-label text-text-primary',
-            isSelected && 'text-label-bold text-primary-text',
-          )}
-        >
-          {isSelected && (
-            <Check
-              aria-hidden="true"
-              className="size-4 shrink-0"
-              strokeWidth={2}
-            />
-          )}
-          <span className="min-w-0">{name}</span>
+      <span
+        className={cn(
+          'flex items-center gap-1.5 text-label text-text-primary',
+          isSelected && 'text-label-bold text-primary-text',
+        )}
+      >
+        {isSelected && (
+          <Check
+            aria-hidden="true"
+            className="size-4 shrink-0"
+            strokeWidth={2}
+          />
+        )}
+        <span className="min-w-0">
+          <VariantName name={name} />
         </span>
-        <span className="text-caption text-text-tertiary">
+      </span>
+      <span className="flex items-end justify-between gap-3">
+        <span className="min-w-0 text-caption text-text-tertiary">
           {standardName !== name && (
             <span title={row.itemName} className="block">
               {standardName}
@@ -270,12 +289,12 @@ function PriceRowButton({
               date: format.dateTime(new Date(row.startDate), 'dateShort'),
             })}
         </span>
+        <PriceRange
+          min={row.price}
+          max={row.price}
+          className="shrink-0 text-label-bold text-text-primary"
+        />
       </span>
-      <PriceRange
-        min={row.price}
-        max={row.price}
-        className="shrink-0 text-label-bold text-text-primary"
-      />
     </button>
   );
 }
@@ -293,13 +312,15 @@ function PriceListSkeleton() {
             key={index}
             className="border-b border-border py-1 last:border-b-0"
           >
-            <div className="flex items-center gap-3 px-3 py-3">
-              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <Skeleton className="my-0.5 h-4.5 w-3/5" />
-                <Skeleton className="my-0.5 h-4 w-2/5" />
-                <Skeleton className="my-0.5 h-4 w-24" />
+            <div className="flex flex-col gap-0.5 px-3 py-3">
+              <Skeleton className="my-0.5 h-4.5 w-3/5" />
+              <div className="flex items-end justify-between gap-3">
+                <div className="flex flex-col">
+                  <Skeleton className="my-0.5 h-3.75 w-2/5 min-w-24" />
+                  <Skeleton className="my-0.5 h-3.75 w-24" />
+                </div>
+                <Skeleton className="my-0.5 h-4.5 w-16" />
               </div>
-              <Skeleton className="h-5 w-16" />
             </div>
           </div>
         ))}

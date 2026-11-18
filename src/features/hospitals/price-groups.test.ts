@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { groupPriceRows, lastSegment, priceRowName } from './price-groups';
+import {
+  groupPriceRows,
+  lastSegment,
+  priceRowName,
+  splitTrailingUnit,
+} from './price-groups';
 
 const row = (
   npayCode: string,
@@ -68,6 +73,23 @@ describe('groupPriceRows', () => {
       'b1',
       'b2',
       'x',
+    ]);
+  });
+});
+
+describe('splitTrailingUnit', () => {
+  it('마지막 짧은 조각을 떼어 낸다', () => {
+    expect(splitTrailingUnit('도수치료5[1일당]-N 20분')).toEqual([
+      '도수치료5[1일당]-N ',
+      '20분',
+    ]);
+  });
+
+  it('띄어쓰기가 없거나 마지막 조각이 길면 나누지 않는다', () => {
+    expect(splitTrailingUnit('스카이조스')).toEqual(['스카이조스', '']);
+    expect(splitTrailingUnit('A 아주아주긴마지막조각입니다')).toEqual([
+      'A 아주아주긴마지막조각입니다',
+      '',
     ]);
   });
 });

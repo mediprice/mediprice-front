@@ -35,10 +35,7 @@ export function LiveFeeResult({
   return (
     <div
       data-slot="live-fee-result"
-      className={cn(
-        'flex flex-col gap-3 rounded-lg bg-bg px-4 py-4',
-        className,
-      )}
+      className={cn('flex flex-col gap-3', className)}
     >
       {verdict === 'none' ? (
         <p className="flex items-center gap-2 text-label-bold text-text-primary">
@@ -56,11 +53,11 @@ export function LiveFeeResult({
       )}
 
       {result.items.length > 0 && (
-        <ul className="flex flex-col gap-3 rounded-lg bg-surface px-3.5 py-3">
+        <ul className="flex flex-col">
           {result.items.map((item) => (
             <li
               key={item.code}
-              className="flex flex-col gap-1 border-b border-hairline pb-3 last:border-b-0 last:pb-0"
+              className="flex flex-col gap-1 border-b border-hairline py-3 first:pt-0 last:border-b-0 last:pb-0"
             >
               {showNames && (
                 <p className="text-label-bold text-text-primary">

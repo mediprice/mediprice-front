@@ -23,6 +23,7 @@ type Hospital = components['schemas']['HospitalDetailResponse'];
 const META_LINK =
   'inline-flex min-h-11 items-center gap-1.5 rounded-md text-label text-text-primary underline-offset-4 hover:underline [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-text-tertiary';
 
+/** 관심·비교 버튼은 모바일에서 연락처 아래, 데스크톱에서 병원 이름 오른쪽(grid 둘째 칸)에 둔다. */
 export function HospitalHeader<T extends string>({
   hospital,
   itemCrumb,
@@ -46,48 +47,31 @@ export function HospitalHeader<T extends string>({
 
   return (
     <div className="bg-hero">
-      <PageContainer className="flex flex-col gap-2.5 pt-6 pb-5 lg:pt-4 lg:pb-7">
-        <Breadcrumb>
-          <BreadcrumbLink href="/">{tNav('home')}</BreadcrumbLink>
-          {itemCrumb && (
-            <BreadcrumbLink href={itemCrumb.href}>
-              {itemCrumb.name}
-            </BreadcrumbLink>
-          )}
-          <BreadcrumbCurrent>{hospital.name}</BreadcrumbCurrent>
-        </Breadcrumb>
+      <PageContainer className="flex flex-col gap-2.5 pt-6 pb-5 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-x-8 lg:pt-4 lg:pb-7">
+        <div className="hidden lg:col-span-2 lg:block">
+          <Breadcrumb>
+            <BreadcrumbLink href="/">{tNav('home')}</BreadcrumbLink>
+            {itemCrumb && (
+              <BreadcrumbLink href={itemCrumb.href}>
+                {itemCrumb.name}
+              </BreadcrumbLink>
+            )}
+            <BreadcrumbCurrent>{hospital.name}</BreadcrumbCurrent>
+          </Breadcrumb>
+        </div>
         {(hospital.className || region) && (
-          <p className="flex flex-wrap items-center gap-2 text-caption-strong text-primary-text">
+          <p className="flex flex-wrap items-center gap-2 text-caption-strong text-text-secondary lg:col-start-1">
             {hospital.className && (
-              <Tag className="bg-bg text-primary-text">
-                {hospital.className}
-              </Tag>
+              <Tag tone="onBand">{hospital.className}</Tag>
             )}
             {region && <span>{region}</span>}
           </p>
         )}
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          <h1 className="min-w-0 text-hero">{hospital.name}</h1>
-          <div className="flex flex-wrap items-center gap-2">
-            <FavoriteButton
-              ykiho={hospital.ykiho}
-              hospital={{
-                name: hospital.name,
-                className: hospital.className,
-                address: hospital.address,
-                phone: hospital.phone,
-              }}
-              variant="labeled"
-            />
-            <CompareToggle
-              ykiho={hospital.ykiho}
-              name={hospital.name}
-              itemCode={itemCode}
-            />
-          </div>
-        </div>
+        <h1 className="min-w-0 text-hero text-balance lg:col-start-1">
+          {hospital.name}
+        </h1>
         {hospital.address && (
-          <p className="flex items-start gap-1.5 text-body-sm text-text-secondary">
+          <p className="flex items-start gap-1.5 text-body-sm text-text-secondary lg:col-start-1">
             <MapPin
               aria-hidden="true"
               className="mt-0.5 size-4 shrink-0 text-text-tertiary"
@@ -97,7 +81,7 @@ export function HospitalHeader<T extends string>({
           </p>
         )}
         {(tel || homepage || hospital.doctorCount != null) && (
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-0">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 lg:col-start-1">
             {tel && hospital.phone && (
               <a href={tel} className={META_LINK}>
                 <Phone aria-hidden="true" strokeWidth={1.75} />
@@ -133,6 +117,23 @@ export function HospitalHeader<T extends string>({
             )}
           </div>
         )}
+        <div className="flex flex-wrap items-center gap-2 lg:col-start-2 lg:row-start-3 lg:self-center">
+          <FavoriteButton
+            ykiho={hospital.ykiho}
+            hospital={{
+              name: hospital.name,
+              className: hospital.className,
+              address: hospital.address,
+              phone: hospital.phone,
+            }}
+            variant="labeled"
+          />
+          <CompareToggle
+            ykiho={hospital.ykiho}
+            name={hospital.name}
+            itemCode={itemCode}
+          />
+        </div>
       </PageContainer>
     </div>
   );

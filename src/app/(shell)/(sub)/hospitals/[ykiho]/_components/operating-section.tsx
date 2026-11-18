@@ -1,5 +1,6 @@
 import { useFormatter, useTranslations } from 'next-intl';
 
+import { SectionHeader } from '@/components/ui/section-header';
 import { summarizeOperatingInfo } from '@/features/hospitals/operating-hours';
 import type { components } from '@/lib/api/schema';
 
@@ -125,9 +126,7 @@ export function OperatingSection({ hospital }: { hospital: Hospital }) {
       aria-labelledby="hours-title"
       className="flex scroll-mt-14 flex-col gap-4"
     >
-      <h2 id="hours-title" className="text-heading">
-        {t('hours.title')}
-      </h2>
+      <SectionHeader id="hours-title" title={t('hours.title')} />
       {hourRows.length > 0 ? (
         <InfoTable rows={hourRows} />
       ) : (

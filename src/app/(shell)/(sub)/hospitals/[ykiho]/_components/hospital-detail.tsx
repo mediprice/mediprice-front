@@ -150,7 +150,7 @@ export function HospitalDetail({
         : null;
 
   return (
-    <>
+    <div className="min-h-dvh">
       <HospitalHeader
         hospital={hospital}
         itemCrumb={
@@ -197,6 +197,6 @@ export function HospitalDetail({
         </div>
         <ItemRail item={item} itemName={prices.displayName} />
       </PageContainer>
-    </>
+    </div>
   );
 }

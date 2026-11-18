@@ -2,6 +2,7 @@ import { ExternalLink, MapPin } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { SectionHeader } from '@/components/ui/section-header';
 import { buildNaverMapUrl } from '@/features/hospitals/detail-links';
 import { formatLocation } from '@/features/regions/format-location';
 import type { components } from '@/lib/api/schema';
@@ -20,9 +21,7 @@ export function LocationSection({ hospital }: { hospital: Hospital }) {
       aria-labelledby="location-title"
       className="flex scroll-mt-14 flex-col gap-4"
     >
-      <h2 id="location-title" className="text-heading">
-        {t('title')}
-      </h2>
+      <SectionHeader id="location-title" title={t('title')} />
       <div className="flex items-start gap-4 rounded-xl bg-hero px-5 py-5 lg:px-6">
         <span
           aria-hidden="true"

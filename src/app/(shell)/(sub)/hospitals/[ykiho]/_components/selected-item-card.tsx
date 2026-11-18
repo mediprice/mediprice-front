@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { SectionError } from './section-error';
 import type { ItemPrices, PriceTrendState } from './use-item-prices';
 import { useStickyError } from './use-sticky-error';
+import { VariantName } from './variant-name';
 
 export function SelectedItemCard({
   item,
@@ -52,7 +53,7 @@ export function SelectedItemCard({
       tabIndex={-1}
       aria-labelledby="selected-item-title"
       aria-busy={isLoading || undefined}
-      className="flex scroll-mt-14 flex-col gap-3 rounded-xl bg-primary-tint px-5 py-5 outline-none focus-visible:outline-2 lg:px-7 lg:py-6"
+      className="flex scroll-mt-14 flex-col gap-3 rounded-xl border border-primary/30 bg-bg px-5 py-5 outline-none focus-visible:outline-2 lg:px-7 lg:py-6"
     >
       <div className="flex items-start justify-between gap-3">
         <h2
@@ -62,14 +63,14 @@ export function SelectedItemCard({
           {displayName ? (
             t('label', { name: displayName })
           ) : (
-            <Skeleton className="h-5 w-40 bg-primary-tint-pressed" />
+            <Skeleton className="h-5 w-40" />
           )}
         </h2>
         <button
           type="button"
           onClick={onClear}
           aria-label={t('clear')}
-          className="-mr-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-text-secondary hover:bg-primary-tint-hover active:bg-primary-tint-pressed"
+          className="-mr-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-text-secondary hover:bg-surface active:bg-surface-strong"
         >
           <X aria-hidden="true" className="size-5" strokeWidth={1.75} />
         </button>
@@ -80,7 +81,7 @@ export function SelectedItemCard({
           error={failure.error}
           onRetry={() => void failure.retry()}
           isRetrying={failure.isRetrying}
-          className="bg-bg"
+          className="bg-surface"
         />
       ) : isLoading || !rows ? (
         <SelectedItemSkeleton rowCount={expectedRows} />
@@ -109,7 +110,7 @@ export function SelectedItemCard({
               <legend className="mb-2 text-caption-strong text-text-secondary">
                 {t('variants', { count: rows.length })}
               </legend>
-              <div className="flex flex-col overflow-hidden rounded-lg bg-bg">
+              <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-bg">
                 {rows.map((row, index) => {
                   const name = priceRowName(row);
                   return (
@@ -117,7 +118,7 @@ export function SelectedItemCard({
                       key={`${name}-${index}`}
                       className={cn(
                         'flex min-h-12 cursor-pointer items-center gap-3 border-b border-border px-3.5 py-2.5 last:border-b-0 hover:bg-surface',
-                        'has-checked:bg-primary-tint-hover has-focus-visible:outline-2 has-focus-visible:-outline-offset-2 has-focus-visible:outline-focus-ring',
+                        'has-checked:bg-primary-tint has-focus-visible:outline-2 has-focus-visible:-outline-offset-2 has-focus-visible:outline-focus-ring',
                       )}
                     >
                       <input
@@ -136,21 +137,22 @@ export function SelectedItemCard({
                       </span>
                       <span className="flex min-w-0 flex-1 flex-col peer-checked:[&>span:first-child]:text-label-bold">
                         <span className="text-label text-text-primary">
-                          {name}
+                          <VariantName name={name} />
                         </span>
-                        {row.startDate && (
+                        <span className="flex items-baseline justify-between gap-3">
                           <span className="text-caption text-text-tertiary">
-                            {t('appliedOn', {
-                              date: formatDate(row.startDate),
-                            })}
+                            {row.startDate &&
+                              t('appliedOn', {
+                                date: formatDate(row.startDate),
+                              })}
                           </span>
-                        )}
+                          <PriceRange
+                            min={row.price}
+                            max={row.price}
+                            className="shrink-0 text-label-bold text-text-primary"
+                          />
+                        </span>
                       </span>
-                      <PriceRange
-                        min={row.price}
-                        max={row.price}
-                        className="shrink-0 text-label-bold text-text-primary"
-                      />
                     </label>
                   );
                 })}
@@ -193,7 +195,7 @@ function TrendNote({ trend }: { trend: PriceTrendState }) {
         error={failure.error}
         onRetry={() => void failure.retry()}
         isRetrying={failure.isRetrying}
-        className="bg-bg"
+        className="bg-surface"
       />
     );
   }
@@ -219,42 +221,42 @@ function TrendNote({ trend }: { trend: PriceTrendState }) {
   );
 }
 
-const SKELETON = 'bg-primary-tint-pressed';
-
 /** 가격·세부 항목 행·추이 한 줄·최신 가격 확인 버튼·비교 링크까지 실제 카드와 같은 높이로 자리를 잡는다. */
 function SelectedItemSkeleton({ rowCount }: { rowCount: number }) {
   return (
     <div aria-hidden="true" className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <Skeleton className={cn('my-1 h-6.5 w-40', SKELETON)} />
-        <Skeleton className={cn('my-0.5 h-3.75 w-56', SKELETON)} />
+        <Skeleton className="my-1 h-6.5 w-40" />
+        <Skeleton className="my-0.5 h-3.75 w-56" />
       </div>
       {rowCount > 1 && (
         <div className="flex flex-col">
-          <Skeleton className={cn('mb-2 h-4.75 w-20', SKELETON)} />
-          <div className="flex flex-col overflow-hidden rounded-lg bg-bg">
+          <Skeleton className="mb-2 h-4.75 w-20" />
+          <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-bg">
             {Array.from({ length: rowCount }, (_, index) => (
               <div
                 key={index}
                 className="flex min-h-12 items-center gap-3 border-b border-border px-3.5 py-2.5 last:border-b-0"
               >
                 <Skeleton className="size-5 rounded-full" />
-                <span className="flex min-w-0 flex-1 flex-col gap-1">
-                  <Skeleton className="h-4.5 w-3/5" />
-                  <Skeleton className="h-3.5 w-24" />
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <Skeleton className="my-0.5 h-4.5 w-3/5" />
+                  <span className="flex items-center justify-between gap-3">
+                    <Skeleton className="h-3.5 w-24" />
+                    <Skeleton className="my-0.5 h-4.5 w-16" />
+                  </span>
                 </span>
-                <Skeleton className="h-5 w-16" />
               </div>
             ))}
           </div>
         </div>
       )}
-      <Skeleton className={cn('h-4.75 w-52', SKELETON)} />
+      <Skeleton className="h-4.75 w-52" />
       <div className="flex flex-col gap-1.5">
-        <Skeleton className={cn('h-11 w-full rounded-lg lg:w-48', SKELETON)} />
-        <Skeleton className={cn('h-4.75 w-64 max-w-full', SKELETON)} />
+        <Skeleton className="h-11 w-full rounded-lg lg:w-48" />
+        <Skeleton className="h-4.75 w-64 max-w-full" />
       </div>
-      <Skeleton className={cn('h-11 w-40 lg:hidden', SKELETON)} />
+      <Skeleton className="h-11 w-40 lg:hidden" />
     </div>
   );
 }
