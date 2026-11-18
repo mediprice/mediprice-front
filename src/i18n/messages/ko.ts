@@ -1,3 +1,4 @@
+import ai from './ko/ai.json';
 import auth from './ko/auth.json';
 import common from './ko/common.json';
 import comparison from './ko/comparison.json';
@@ -5,9 +6,12 @@ import errors from './ko/errors.json';
 import home from './ko/home.json';
 import hospitals from './ko/hospitals.json';
 import items from './ko/items.json';
+import library from './ko/library.json';
+import map from './ko/map.json';
 import metadata from './ko/metadata.json';
 import mypage from './ko/mypage.json';
 import nav from './ko/nav.json';
+import reviews from './ko/reviews.json';
 import search from './ko/search.json';
 import validation from './ko/validation.json';
 
@@ -25,4 +29,8 @@ export const messages = {
   auth,
   mypage,
   comparison,
+  reviews,
+  library,
+  ai,
+  map,
 };

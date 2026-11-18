@@ -1,20 +1,13 @@
 import type { Metadata } from 'next';
-import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 
-import { PageContainer } from '@/components/layout/page-container';
+import { AiChat } from '@/features/ai/components/ai-chat';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('nav');
-  return { title: t('ai') };
+  const t = await getTranslations('ai.metadata');
+  return { title: t('title'), description: t('description') };
 }
 
-/** 화면 작업 전 탭 이동을 확인하기 위한 자리. 해당 화면을 만들 때 교체한다. */
-export default function Page() {
-  const t = useTranslations('nav');
-  return (
-    <PageContainer className="py-section">
-      <h1 className="text-title">{t('ai')}</h1>
-    </PageContainer>
-  );
+export default function AiPage() {
+  return <AiChat />;
 }

@@ -1,0 +1,55 @@
+import { RotateCcw, Sparkles } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+
+import { Button } from '@/components/ui/button';
+
+/** 제목·하루 한도·새 대화. 남은 횟수 API가 없어 하루 한도만 보여 준다. */
+export function ChatHeader({
+  titleId,
+  dailyLimit,
+  dailyRemaining,
+  onRestart,
+}: {
+  titleId: string;
+  /** 마지막 응답이 알려 준 오늘 남은 횟수. 있으면 한도 대신 보여 준다. */
+  dailyRemaining: number | null;
+  /** 로그인 상태를 확인하는 동안은 null이라 한도를 숨긴다. */
+  dailyLimit: number | null;
+  /** 대화가 있을 때만 넘긴다. */
+  onRestart?: () => void;
+}) {
+  const t = useTranslations('ai');
+  return (
+    <div className="flex min-h-15 items-center gap-2 px-4 py-2 lg:px-8 lg:pt-7 lg:pb-0">
+      <h1 id={titleId} className="min-w-0 flex-1 text-subheading lg:text-title">
+        {t('header.title')}
+      </h1>
+      {dailyLimit !== null && (
+        <p
+          aria-label={
+            dailyRemaining != null
+              ? t('usage.remainingToday', { count: dailyRemaining })
+              : t('usage.chipLabel', { count: dailyLimit })
+          }
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary-tint py-1.5 pr-3 pl-2 text-caption-strong text-primary-text"
+        >
+          <Sparkles aria-hidden="true" className="size-4" strokeWidth={1.75} />
+          {dailyRemaining != null
+            ? t('usage.remainingToday', { count: dailyRemaining })
+            : t('usage.chip', { count: dailyLimit })}
+        </p>
+      )}
+      {onRestart && (
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={t('header.restart')}
+          onClick={onRestart}
+          className="-mr-2 shrink-0 lg:mr-0"
+        >
+          <RotateCcw aria-hidden="true" />
+        </Button>
+      )}
+    </div>
+  );
+}
