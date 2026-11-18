@@ -23,7 +23,8 @@ import { AverageTag } from './average-tag';
 /**
  * 항목별 가격 목록의 병원 한 행. 대표 세부 항목(정렬 기준 쪽 끝)의 가격을 크게 쓰고 그 이름("도수치료F 기준")을 바로 아래에 둬서,
  * 꼬리표·막대·가격이 모두 같은 세부 항목을 말하게 한다. 링크도 그 세부 항목을 병원 화면에 넘긴다(hrefFor).
- * 모바일은 이름·가격 / 꼬리표·막대 / 버튼 세 줄, lg는 이름 | 꼬리표·막대 | 가격 | 버튼 한 줄이다.
+ * 행 폭이 50rem 미만이면 이름·가격 / 꼬리표·막대 / 버튼 세 줄, 이상이면 이름 | 꼬리표·막대 | 가격 | 버튼 한 줄이다.
+ * 화면 폭이 아니라 행 폭(rem)을 보므로, 필터 열 옆(1024)이나 글자를 키웠을 때는 세 줄이 된다.
  * 행 전체는 병원 이름 링크가 덮고, 펼치기·관심·비교함 버튼만 그 위(relative z-10)에 올린다. 목록이 구분선(divide-y divide-hairline)을 준다.
  */
 export function HospitalPriceGroupCard<T extends string>({
@@ -60,130 +61,135 @@ export function HospitalPriceGroupCard<T extends string>({
   const hasVariants = group.variants.length > 1;
 
   return (
-    <article className="relative grid grid-cols-1 gap-3 px-4 pt-5 pb-3 transition-colors duration-200 ease-standard hover:bg-surface active:bg-surface md:px-6 md:pt-6 md:pb-4 lg:grid-cols-[minmax(10rem,1fr)_14rem_minmax(9rem,auto)_auto] lg:items-center lg:gap-x-6 lg:gap-y-2 lg:py-5">
-      {/** 큰 글자로 이름 칸이 9rem보다 좁아지면 가격이 이름 아래 줄로 내려간다. lg에서는 풀어서 격자 칸으로 쓴다. */}
-      <div className="flex flex-wrap items-start gap-x-4 gap-y-1 md:gap-x-8 lg:contents">
-        <div className="flex min-w-[min(100%,9rem)] flex-1 flex-col gap-1 lg:col-start-1 lg:row-start-1">
-          <HospitalIdentity
-            as="h3"
-            nameClassName="wrap-break-word"
-            meta={meta}
-            name={
-              <Link
-                href={hrefFor(variant)}
-                className="rounded-sm after:absolute after:inset-0 hover:text-primary-text"
+    <article className="@container relative px-4 pt-5 pb-3 transition-colors duration-200 ease-standard hover:bg-surface active:bg-surface md:px-6 md:pt-6 md:pb-4 xl:py-5">
+      <div className="grid grid-cols-1 gap-3 @min-[50rem]:grid-cols-[minmax(10rem,1fr)_14rem_minmax(9rem,auto)_auto] @min-[50rem]:items-center @min-[50rem]:gap-x-6 @min-[50rem]:gap-y-2">
+        {/** 큰 글자로 이름 칸이 9rem보다 좁아지면 가격이 이름 아래 줄로 내려간다. 넓은 행에서는 풀어서 격자 칸으로 쓴다. */}
+        <div className="flex flex-wrap items-start gap-x-4 gap-y-1 md:gap-x-8 @min-[50rem]:contents">
+          <div className="flex min-w-[min(100%,9rem)] flex-1 flex-col gap-1 @min-[50rem]:col-start-1 @min-[50rem]:row-start-1">
+            <HospitalIdentity
+              as="h3"
+              nameClassName="wrap-break-word"
+              meta={meta}
+              name={
+                <Link
+                  href={hrefFor(variant)}
+                  className="rounded-sm after:absolute after:inset-0 hover:text-primary-text"
+                >
+                  {group.hospitalName}
+                </Link>
+              }
+            />
+            {hasVariants && (
+              <button
+                type="button"
+                aria-expanded={isExpanded}
+                aria-controls={listId}
+                onClick={() => setIsExpanded((value) => !value)}
+                className="relative z-10 -my-1 hidden min-h-11 w-fit items-center gap-1 rounded-md text-label text-primary-text hover:underline @min-[50rem]:inline-flex"
               >
-                {group.hospitalName}
-              </Link>
-            }
-          />
-          {hasVariants && (
+                <ExpandLabel
+                  isExpanded={isExpanded}
+                  count={group.variants.length}
+                />
+              </button>
+            )}
+            {!hasVariants && (
+              <span className="hidden @min-[50rem]:block">
+                <VariantDate startDate={variant.startDate} />
+              </span>
+            )}
+          </div>
+          <p className="ml-auto flex max-w-full flex-col items-end text-right @min-[50rem]:col-start-3 @min-[50rem]:row-start-1 @min-[50rem]:ml-0">
+            <span className="text-price-lg">
+              {tPrice('won', { amount: variant.price })}
+            </span>
+            {variant.itemName && (
+              <span className="max-w-60 text-body-sm text-balance text-text-secondary">
+                {t('basis', { name: variant.itemName })}
+              </span>
+            )}
+            {other && (
+              <span className="text-body-sm text-text-tertiary tabular-nums">
+                {other.kind === 'maximum'
+                  ? tPrice('maximum', { amount: other.price })
+                  : tPrice('minimum', { amount: other.price })}
+              </span>
+            )}
+          </p>
+        </div>
+
+        {summary?.avgPrice != null && (
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 md:justify-end @min-[50rem]:col-start-2 @min-[50rem]:row-start-1 @min-[50rem]:flex-col @min-[50rem]:items-start @min-[50rem]:justify-center">
+            <AverageTag price={variant.price} average={summary.avgPrice} />
+            <div
+              aria-hidden="true"
+              className="w-28 md:w-40 @min-[50rem]:w-full"
+            >
+              <RangeBar
+                size="sm"
+                min={summary.minPrice}
+                max={summary.maxPrice}
+                average={summary.avgPrice}
+                value={variant.price}
+                showAverageTick={showAverageTick}
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-x-3 @min-[50rem]:col-start-4 @min-[50rem]:row-start-1">
+          {hasVariants ? (
             <button
               type="button"
               aria-expanded={isExpanded}
               aria-controls={listId}
               onClick={() => setIsExpanded((value) => !value)}
-              className="relative z-10 -my-1 hidden min-h-11 w-fit items-center gap-1 rounded-md text-label text-primary-text hover:underline lg:inline-flex"
+              className="relative z-10 inline-flex min-h-11 w-fit items-center gap-1 rounded-md text-label text-primary-text hover:underline @min-[50rem]:hidden"
             >
               <ExpandLabel
                 isExpanded={isExpanded}
                 count={group.variants.length}
               />
             </button>
-          )}
-          {!hasVariants && (
-            <span className="hidden lg:block">
+          ) : (
+            <span className="py-1 @min-[50rem]:hidden">
               <VariantDate startDate={variant.startDate} />
             </span>
           )}
-        </div>
-        <p className="ml-auto flex max-w-full flex-col items-end text-right lg:col-start-3 lg:row-start-1 lg:ml-0">
-          <span className="text-price-lg">
-            {tPrice('won', { amount: variant.price })}
-          </span>
-          {variant.itemName && (
-            <span className="max-w-60 text-body-sm text-balance text-text-secondary">
-              {t('basis', { name: variant.itemName })}
-            </span>
-          )}
-          {other && (
-            <span className="text-body-sm text-text-tertiary tabular-nums">
-              {other.kind === 'maximum'
-                ? tPrice('maximum', { amount: other.price })
-                : tPrice('minimum', { amount: other.price })}
-            </span>
-          )}
-        </p>
-      </div>
-
-      {summary?.avgPrice != null && (
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 md:justify-end lg:col-start-2 lg:row-start-1 lg:flex-col lg:items-start lg:justify-center">
-          <AverageTag price={variant.price} average={summary.avgPrice} />
-          <div aria-hidden="true" className="w-28 md:w-40 lg:w-full">
-            <RangeBar
-              size="sm"
-              min={summary.minPrice}
-              max={summary.maxPrice}
-              average={summary.avgPrice}
-              value={variant.price}
-              showAverageTick={showAverageTick}
+          <div className="ml-auto flex max-w-full flex-wrap items-center justify-end gap-1">
+            <FavoriteButton
+              ykiho={group.ykiho}
+              hospital={{
+                name: group.hospitalName,
+                className: group.className,
+                address: null,
+                phone: null,
+              }}
+              variant="icon"
+            />
+            <CompareToggle
+              ykiho={group.ykiho}
+              name={group.hospitalName}
+              itemCode={itemCode}
             />
           </div>
         </div>
-      )}
 
-      <div className="flex flex-wrap items-center gap-x-3 lg:col-start-4 lg:row-start-1">
-        {hasVariants ? (
-          <button
-            type="button"
-            aria-expanded={isExpanded}
-            aria-controls={listId}
-            onClick={() => setIsExpanded((value) => !value)}
-            className="relative z-10 inline-flex min-h-11 w-fit items-center gap-1 rounded-md text-label text-primary-text hover:underline lg:hidden"
+        {hasVariants && (
+          <ul
+            id={listId}
+            hidden={!isExpanded}
+            aria-label={t('variantsLabel', { hospital: group.hospitalName })}
+            className="relative z-10 mb-1 flex flex-col divide-y divide-hairline rounded-xl border border-border bg-bg px-3 @min-[50rem]:col-span-full"
           >
-            <ExpandLabel
-              isExpanded={isExpanded}
-              count={group.variants.length}
-            />
-          </button>
-        ) : (
-          <span className="py-1 lg:hidden">
-            <VariantDate startDate={variant.startDate} />
-          </span>
+            {group.variants.map((row, index) => (
+              <li key={index}>
+                <VariantRow variant={row} />
+              </li>
+            ))}
+          </ul>
         )}
-        <div className="ml-auto flex max-w-full flex-wrap items-center justify-end gap-1">
-          <FavoriteButton
-            ykiho={group.ykiho}
-            hospital={{
-              name: group.hospitalName,
-              className: group.className,
-              address: null,
-              phone: null,
-            }}
-            variant="icon"
-          />
-          <CompareToggle
-            ykiho={group.ykiho}
-            name={group.hospitalName}
-            itemCode={itemCode}
-          />
-        </div>
       </div>
-
-      {hasVariants && (
-        <ul
-          id={listId}
-          hidden={!isExpanded}
-          aria-label={t('variantsLabel', { hospital: group.hospitalName })}
-          className="relative z-10 mb-1 flex flex-col divide-y divide-hairline rounded-xl border border-border bg-bg px-3 lg:col-span-full"
-        >
-          {group.variants.map((row, index) => (
-            <li key={index}>
-              <VariantRow variant={row} />
-            </li>
-          ))}
-        </ul>
-      )}
     </article>
   );
 }
