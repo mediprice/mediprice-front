@@ -1,6 +1,7 @@
 import 'server-only';
 
 import type { NextRequest } from 'next/server';
+import { z } from 'zod';
 
 import { env } from '@/env';
 
@@ -46,14 +47,37 @@ export function isSameOrigin(request: NextRequest) {
   }
 }
 
-/** 백엔드로 보낼 헤더. 브라우저의 Cookie·Authorization은 버리고 쿠키의 Access로 Authorization을 만든다. */
-export function forwardHeaders(incoming: Headers, accessToken?: string) {
+const CLIENT_IP_HEADER = 'x-mediprice-client-ip';
+const SECRET_HEADER = 'x-mediprice-bff-secret';
+
+/** 플랫폼(Vercel 등)이 붙인 사용자 IP. 형식이 IP가 아니면 버린다. */
+export function clientIpOf(incoming: Headers) {
+  const candidate =
+    incoming.get('x-real-ip') ??
+    incoming.get('x-forwarded-for')?.split(',')[0] ??
+    '';
+  const ip = candidate.trim();
+  return z.union([z.ipv4(), z.ipv6()]).safeParse(ip).success ? ip : null;
+}
+
+/** 백엔드로 보낼 헤더. 브라우저의 Cookie·Authorization은 버리고 쿠키의 Access로 Authorization을 만든다. 공유 비밀값이 있으면 사용자 IP를 함께 보낸다(AI 비회원 한도용). */
+export function forwardHeaders(
+  incoming: Headers,
+  accessToken?: string,
+  sharedSecret: string | undefined = env.BFF_SHARED_SECRET,
+) {
   const headers = new Headers();
   for (const name of ['content-type', 'accept']) {
     const value = incoming.get(name);
     if (value) headers.set(name, value);
   }
   if (accessToken) headers.set('authorization', `Bearer ${accessToken}`);
+
+  const clientIp = clientIpOf(incoming);
+  if (sharedSecret && clientIp) {
+    headers.set(SECRET_HEADER, sharedSecret);
+    headers.set(CLIENT_IP_HEADER, clientIp);
+  }
   return headers;
 }
 

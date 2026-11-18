@@ -101,6 +101,41 @@ describe('forwardHeaders', () => {
     expect(headers.has('x-custom')).toBe(false);
   });
 
+  it('공유 비밀값이 있으면 사용자 IP를 함께 보낸다', () => {
+    const withIp = new Headers({ 'x-forwarded-for': '203.0.113.7, 10.0.0.1' });
+
+    const headers = forwardHeaders(withIp, undefined, 'secret-0123456789');
+
+    expect(headers.get('x-mediprice-client-ip')).toBe('203.0.113.7');
+    expect(headers.get('x-mediprice-bff-secret')).toBe('secret-0123456789');
+  });
+
+  it('공유 비밀값이 없거나 IP 형식이 아니면 IP를 보내지 않는다', () => {
+    const withIp = new Headers({ 'x-real-ip': '203.0.113.7' });
+    const spoofed = new Headers({ 'x-forwarded-for': 'evil<script>' });
+
+    expect(
+      forwardHeaders(withIp, undefined, undefined).has('x-mediprice-client-ip'),
+    ).toBe(false);
+    expect(
+      forwardHeaders(spoofed, undefined, 'secret-0123456789').has(
+        'x-mediprice-client-ip',
+      ),
+    ).toBe(false);
+  });
+
+  it('브라우저가 보낸 비밀값·IP 헤더는 그대로 넘기지 않는다', () => {
+    const forged = new Headers({
+      'x-mediprice-bff-secret': 'guess',
+      'x-mediprice-client-ip': '1.2.3.4',
+    });
+
+    const headers = forwardHeaders(forged, undefined, undefined);
+
+    expect(headers.has('x-mediprice-bff-secret')).toBe(false);
+    expect(headers.has('x-mediprice-client-ip')).toBe(false);
+  });
+
   it('Access가 없으면 브라우저가 보낸 Authorization도 지운다', () => {
     expect(forwardHeaders(incoming, undefined).has('authorization')).toBe(
       false,
