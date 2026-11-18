@@ -18,5 +18,8 @@ export const forbidden = () =>
 export const unavailable = () =>
   errorResponse(502, 'UPSTREAM_UNAVAILABLE', '서버에 연결할 수 없습니다.');
 
+export const gatewayTimeout = () =>
+  errorResponse(504, 'UPSTREAM_TIMEOUT', '서버 응답이 지연되고 있습니다.');
+
 export const unauthenticated = () =>
   errorResponse(401, 'UNAUTHORIZED', '인증이 필요합니다.');

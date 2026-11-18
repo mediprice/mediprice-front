@@ -2,7 +2,12 @@ import type { Messages } from 'next-intl';
 
 import { ApiError, NetworkError } from './errors';
 
-export type ErrorMessageKey = keyof Messages['errors'];
+type ErrorMessages = Messages['errors'];
+
+/** errors.page.*(에러 화면 문구) 같은 묶음은 빼고 문자열 키만 고른다. */
+export type ErrorMessageKey = {
+  [K in keyof ErrorMessages]: ErrorMessages[K] extends string ? K : never;
+}[keyof ErrorMessages];
 
 /** 백엔드 message는 한국어 고정이고 fieldErrors.reason은 Bean Validation 기본 문구라서 화면 문구는 코드로만 고른다. */
 const MESSAGE_KEY_BY_CODE = {

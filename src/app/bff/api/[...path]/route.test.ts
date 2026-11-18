@@ -95,6 +95,34 @@ describe('GET /bff/api/**', () => {
     expect(response.headers.getSetCookie()).toEqual([]);
   });
 
+  it('로그인하지 않은 공개 조회는 CDN 캐시를 허용한다', async () => {
+    server.use(
+      http.get(`${API}/api/regions/sido`, () => HttpResponse.json([])),
+    );
+
+    const response = await GET(
+      bffRequest('/bff/api/regions/sido'),
+      ctx('regions', 'sido'),
+    );
+
+    expect(response.headers.get('cache-control')).toBe(
+      'public, s-maxage=300, stale-while-revalidate=3600',
+    );
+  });
+
+  it('로그인한 요청은 공개 조회라도 no-store다', async () => {
+    server.use(
+      http.get(`${API}/api/regions/sido`, () => HttpResponse.json([])),
+    );
+
+    const response = await GET(
+      bffRequest('/bff/api/regions/sido', { cookies: withAccess }),
+      ctx('regions', 'sido'),
+    );
+
+    expect(response.headers.get('cache-control')).toBe('no-store');
+  });
+
   it('백엔드에 닿지 못하면 502다', async () => {
     server.use(http.get(`${API}/api/x`, () => HttpResponse.error()));
 

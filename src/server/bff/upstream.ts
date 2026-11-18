@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 import { env } from '@/env';
 
-import { unavailable } from './responses';
+import { gatewayTimeout, unavailable } from './responses';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
@@ -81,11 +81,21 @@ export function forwardHeaders(
   return headers;
 }
 
-/** 연결 실패는 예외 대신 502 응답으로 바꾼다. */
+/** 플랫폼 함수 제한보다 먼저 끊어 AI 응답처럼 긴 호출도 우리 에러 본문으로 끝나게 한다. 본문 전송까지 포함한 시간이다. */
+const UPSTREAM_TIMEOUT_MS = 35_000;
+
+function isTimeout(error: unknown) {
+  return error instanceof Error && error.name === 'TimeoutError';
+}
+
+/** 연결 실패는 502, 제한 시간 초과는 504 응답으로 바꾼다. */
 export async function callBackend(url: URL, init: RequestInit) {
   try {
-    return await fetch(url, init);
-  } catch {
-    return unavailable();
+    return await fetch(url, {
+      ...init,
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+    });
+  } catch (error) {
+    return isTimeout(error) ? gatewayTimeout() : unavailable();
   }
 }

@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+
 import { PageContainer } from '@/components/layout/page-container';
 
 import { AiPreview } from './_components/ai-preview';
@@ -8,6 +10,8 @@ import { HowItWorks } from './_components/how-it-works';
 import { PopularItems } from './_components/popular-items';
 import { TodayPriceCard } from './_components/today-price-card';
 import { TrustSection } from './_components/trust-section';
+
+export const metadata: Metadata = { alternates: { canonical: '/' } };
 
 export default function HomePage() {
   return (

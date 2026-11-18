@@ -168,4 +168,29 @@ describe('callBackend', () => {
       code: 'UPSTREAM_UNAVAILABLE',
     });
   });
+
+  it('제한 시간 신호를 붙여 호출한다', async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 204 }));
+
+    await callBackend(new URL('http://api.test/api/x'), { method: 'GET' });
+
+    expect(fetchMock.mock.calls[0]?.[1]?.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('제한 시간을 넘기면 504 UPSTREAM_TIMEOUT을 돌려준다', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(
+      new DOMException(
+        'The operation was aborted due to timeout',
+        'TimeoutError',
+      ),
+    );
+
+    const response = await callBackend(new URL('http://api.test/api/x'), {});
+
+    expect(response.status).toBe(504);
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    expect(await response.json()).toMatchObject({ code: 'UPSTREAM_TIMEOUT' });
+  });
 });

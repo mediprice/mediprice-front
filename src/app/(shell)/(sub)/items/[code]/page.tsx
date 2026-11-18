@@ -12,9 +12,18 @@ import { parsePriceFilters } from './_components/price-filters';
 import { PriceResults } from './_components/price-results';
 
 /** 항목 이름은 브라우저 전용 apiClient로만 가져올 수 있어 공통 제목을 두고, ItemGate가 받은 뒤 바꾼다. */
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('items.metadata');
-  return { title: t('title'), description: t('description') };
+export async function generateMetadata({
+  params,
+}: PageProps<'/items/[code]'>): Promise<Metadata> {
+  const [{ code }, t] = await Promise.all([
+    params,
+    getTranslations('items.metadata'),
+  ]);
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: { canonical: `/items/${encodeURIComponent(code)}` },
+  };
 }
 
 export default async function ItemPricePage({
