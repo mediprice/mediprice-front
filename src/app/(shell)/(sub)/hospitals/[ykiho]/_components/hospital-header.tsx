@@ -13,6 +13,7 @@ import {
 import { PageContainer } from '@/components/layout/page-container';
 import { Tag } from '@/components/ui/tag';
 import { CompareToggle } from '@/features/comparison/components/compare-toggle';
+import { FavoriteButton } from '@/features/favorites/components/favorite-button';
 import { toHomepageUrl, toTelHref } from '@/features/hospitals/detail-links';
 import { formatLocation } from '@/features/regions/format-location';
 import type { components } from '@/lib/api/schema';
@@ -67,11 +68,23 @@ export function HospitalHeader<T extends string>({
         )}
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <h1 className="min-w-0 text-hero">{hospital.name}</h1>
-          <CompareToggle
-            ykiho={hospital.ykiho}
-            name={hospital.name}
-            itemCode={itemCode}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <FavoriteButton
+              ykiho={hospital.ykiho}
+              hospital={{
+                name: hospital.name,
+                className: hospital.className,
+                address: hospital.address,
+                phone: hospital.phone,
+              }}
+              variant="labeled"
+            />
+            <CompareToggle
+              ykiho={hospital.ykiho}
+              name={hospital.name}
+              itemCode={itemCode}
+            />
+          </div>
         </div>
         {hospital.address && (
           <p className="flex items-start gap-1.5 text-body-sm text-text-secondary">

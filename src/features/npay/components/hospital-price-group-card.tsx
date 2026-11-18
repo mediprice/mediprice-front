@@ -9,6 +9,7 @@ import { useId, useState } from 'react';
 
 import { PriceRange } from '@/components/ui/price-range';
 import { CompareToggle } from '@/features/comparison/components/compare-toggle';
+import { FavoriteButton } from '@/features/favorites/components/favorite-button';
 import { formatLocation } from '@/features/regions/format-location';
 import { cn } from '@/lib/utils';
 
@@ -117,12 +118,23 @@ export function HospitalPriceGroupCard<T extends string>({
                 />
               </button>
             )}
-            <CompareToggle
-              ykiho={group.ykiho}
-              name={group.hospitalName}
-              itemCode={itemCode}
-              className="ml-auto"
-            />
+            <div className="ml-auto flex items-center gap-1">
+              <FavoriteButton
+                ykiho={group.ykiho}
+                hospital={{
+                  name: group.hospitalName,
+                  className: group.className,
+                  address: null,
+                  phone: null,
+                }}
+                variant="icon"
+              />
+              <CompareToggle
+                ykiho={group.ykiho}
+                name={group.hospitalName}
+                itemCode={itemCode}
+              />
+            </div>
           </div>
         </div>
       )}
