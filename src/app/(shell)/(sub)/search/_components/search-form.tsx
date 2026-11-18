@@ -2,7 +2,10 @@ import { ArrowRight, ChevronDown, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
-import type { Region } from '@/features/search/search-params';
+import {
+  SERVICE_REGIONS,
+  type ServiceRegion,
+} from '@/features/regions/service-region';
 
 /** JS 없이 동작하는 GET 폼. 모바일은 입력 줄 아래에 대상·지역 두 칸, lg부터 한 줄 검색 바다. */
 export function SearchForm({
@@ -12,9 +15,10 @@ export function SearchForm({
 }: {
   type: 'item' | 'hospital';
   keyword: string;
-  region: Region;
+  region: ServiceRegion;
 }) {
   const t = useTranslations('search.form');
+  const tRegion = useTranslations('common.region');
   return (
     <form
       action="/search"
@@ -79,7 +83,7 @@ export function SearchForm({
           </div>
         </fieldset>
 
-        <label className="flex min-w-0 flex-1 flex-col gap-1 px-3.5 py-2.5 lg:order-3 lg:w-40 lg:flex-none lg:py-0">
+        <label className="flex min-w-0 flex-1 flex-col px-3.5 pt-2.5 pb-1 lg:order-3 lg:w-36 lg:flex-none lg:p-0 lg:pl-3.5">
           <span className="text-caption text-text-tertiary lg:sr-only">
             {t('region')}
           </span>
@@ -87,11 +91,13 @@ export function SearchForm({
             <select
               name="region"
               defaultValue={region}
-              className="min-h-9 w-full appearance-none rounded-md bg-transparent pr-7 text-label-bold text-text-primary -outline-offset-2 lg:min-h-11 lg:text-label"
+              className="min-h-11 w-full appearance-none rounded-md bg-transparent pr-7 text-field text-text-primary -outline-offset-2"
             >
-              <option value="all">{t('regionAll')}</option>
-              <option value="seoul">{t('regionSeoul')}</option>
-              <option value="gyeonggi">{t('regionGyeonggi')}</option>
+              {SERVICE_REGIONS.map((value) => (
+                <option key={value} value={value}>
+                  {tRegion(value)}
+                </option>
+              ))}
             </select>
             <ChevronDown
               aria-hidden="true"

@@ -56,8 +56,22 @@ export default async function SearchPage({
   const keyword = state.mode === 'prompt' ? '' : state.keyword;
   return (
     <>
-      <SubTopBar title={t('topBar.results')} backHref="/" />
-      <SearchHeader type={type} keyword={keyword} region={state.region} />
+      <SubTopBar
+        title={
+          state.mode === 'prompt' ? t('topBar.search') : t('topBar.results')
+        }
+        backHref="/"
+      />
+      <SearchHeader
+        type={type}
+        keyword={keyword}
+        region={state.region}
+        current={
+          state.mode === 'prompt'
+            ? t('breadcrumb.search')
+            : t('breadcrumb.results')
+        }
+      />
 
       {state.mode === 'item' && (
         <ItemSearchView

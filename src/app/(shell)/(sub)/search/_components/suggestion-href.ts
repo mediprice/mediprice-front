@@ -1,4 +1,7 @@
-import { type Region, withRegion } from '@/features/search/search-params';
+import {
+  regionQuery,
+  type ServiceRegion,
+} from '@/features/regions/service-region';
 
 export type SuggestionId = 'category' | 'allCategories' | 'hospital' | 'item';
 
@@ -6,7 +9,7 @@ export type SuggestionId = 'category' | 'allCategories' | 'hospital' | 'item';
 export function suggestionHref(
   id: SuggestionId,
   keyword: string,
-  region: Region,
+  region: ServiceRegion,
 ) {
   const query =
     id === 'category' || id === 'allCategories'
@@ -14,5 +17,8 @@ export function suggestionHref(
       : id === 'hospital'
         ? { type: 'hospital', q: keyword }
         : { q: keyword };
-  return { pathname: '/search', query: withRegion(query, region) } as const;
+  return {
+    pathname: '/search',
+    query: { ...query, ...regionQuery(region) },
+  } as const;
 }

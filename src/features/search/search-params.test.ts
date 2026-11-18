@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  parseSearchParams,
-  regionSidoCode,
-  regionSidoCodes,
-  withRegion,
-} from './search-params';
+import { parseSearchParams } from './search-params';
 
 describe('parseSearchParams', () => {
   it('검색어가 있으면 검색 대상(type)에 따라 항목·병원 검색이다', () => {
@@ -17,8 +12,16 @@ describe('parseSearchParams', () => {
     expect(parseSearchParams({ type: 'hospital', q: '정형외과' })).toEqual({
       mode: 'hospital',
       keyword: '정형외과',
-      region: 'all',
+      region: 'metro',
     });
+  });
+
+  it('지역이 없거나 잘못되면 서울·경기(metro)이고, 전국(all)도 받는다', () => {
+    expect(parseSearchParams({ q: '라식' }).region).toBe('metro');
+    expect(parseSearchParams({ q: '라식', region: 'busan' }).region).toBe(
+      'metro',
+    );
+    expect(parseSearchParams({ q: '라식', region: 'all' }).region).toBe('all');
   });
 
   it('검색어가 없고 분류가 있으면 분류 탐색이다', () => {
@@ -27,7 +30,7 @@ describe('parseSearchParams', () => {
         mode: 'category',
         category: 'physio',
         code: '1070Z050',
-        region: 'all',
+        region: 'metro',
       },
     );
   });
@@ -40,7 +43,7 @@ describe('parseSearchParams', () => {
     expect(parseSearchParams({ type: 'hospital', q: '   ' })).toEqual({
       mode: 'prompt',
       type: 'hospital',
-      region: 'all',
+      region: 'metro',
     });
   });
 
@@ -49,35 +52,16 @@ describe('parseSearchParams', () => {
       parseSearchParams({
         type: 'doctor',
         q: ['라식', '라섹'],
-        region: 'busan',
+        region: ['gyeonggi', 'seoul'],
       }),
-    ).toEqual({ mode: 'item', keyword: '라식', region: 'all' });
+    ).toEqual({ mode: 'item', keyword: '라식', region: 'gyeonggi' });
     expect(
       parseSearchParams({ category: '<script>', code: 'drop table' }),
-    ).toEqual({ mode: 'prompt', type: 'item', region: 'all' });
+    ).toEqual({ mode: 'prompt', type: 'item', region: 'metro' });
   });
 
   it('검색어는 100자까지만 쓴다', () => {
     const state = parseSearchParams({ q: '가'.repeat(150) });
     expect(state.mode === 'item' && state.keyword.length).toBe(100);
-  });
-});
-
-describe('지역', () => {
-  it('전체는 시도 조건 없이 조회한다', () => {
-    expect(regionSidoCodes('all')).toEqual([]);
-    expect(regionSidoCodes('gyeonggi')).toEqual(['310000']);
-    expect(regionSidoCode('all')).toBeUndefined();
-    expect(regionSidoCode('seoul')).toBe('110000');
-  });
-
-  it('링크에는 기본값이 아닌 지역만 붙인다', () => {
-    expect(withRegion({ category: 'all' }, 'all')).toEqual({
-      category: 'all',
-    });
-    expect(withRegion({ category: 'all' }, 'seoul')).toEqual({
-      category: 'all',
-      region: 'seoul',
-    });
   });
 });

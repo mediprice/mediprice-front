@@ -7,8 +7,9 @@ type CategoryNode = { code: string; name: string };
 export type CategoryView = {
   /** 전체 분류(와 홈 분야) 아래의 경로. 마지막이 지금 보는 분류다. */
   trail: CategoryNode[];
-  /** 항목을 조회할 백엔드 분류 코드 */
+  /** 항목을 조회할 백엔드 분류 코드와 그 공식 이름 */
   scopeCodes: string[];
+  scopeNames: string[];
   /** 하위 분류 칩. "전체" 칩은 parentCode로 간다. */
   chips: CategoryNode[];
   /** "전체" 칩이 가리키는 code 파라미터. undefined면 홈 분야 자체다. */
@@ -45,6 +46,9 @@ export function resolveCategoryView(
     return {
       trail: selected ? [selected] : [],
       scopeCodes: selected ? [selected.code] : [...homeCodes],
+      scopeNames: selected
+        ? [selected.name]
+        : majors.map((c) => toNode(c.code, c.name).name),
       chips,
       parentCode: undefined,
       selectedCode: selected?.code,
@@ -57,6 +61,7 @@ export function resolveCategoryView(
     return {
       trail: [toNode(major.code, major.name)],
       scopeCodes: [major.code],
+      scopeNames: [toNode(major.code, major.name).name],
       chips: childrenOf(major),
       parentCode: major.code,
       selectedCode: undefined,
@@ -69,10 +74,22 @@ export function resolveCategoryView(
     return {
       trail: [toNode(parent.code, parent.name), selected],
       scopeCodes: [code],
+      scopeNames: [selected.name],
       chips,
       parentCode: parent.code,
       selectedCode: code,
     };
   }
   return null;
+}
+
+/** 전체 분류에서 홈 분야에 들지 않는 대분류를 가나다순으로 돌려준다. */
+export function otherCategories(
+  categories: readonly NpayCategory[],
+  homeCodes: readonly string[],
+) {
+  return categories
+    .filter((category) => !homeCodes.includes(category.code))
+    .map((category) => toNode(category.code, category.name))
+    .sort((a, b) => a.name.localeCompare(b.name, 'ko'));
 }

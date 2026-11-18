@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { resolveCategoryView } from './category-tree';
+import { otherCategories, resolveCategoryView } from './category-tree';
 
 const CATEGORIES = [
   {
@@ -29,6 +29,7 @@ describe('resolveCategoryView', () => {
     expect(resolveCategoryView(CATEGORIES, { homeCodes: ['1070Z'] })).toEqual({
       trail: [],
       scopeCodes: ['1070Z'],
+      scopeNames: ['이학요법료'],
       chips: [
         { code: '1070Z050', name: '도수치료' },
         { code: '1070Z060', name: '증식치료' },
@@ -50,6 +51,7 @@ describe('resolveCategoryView', () => {
     ]);
     expect(view?.selectedCode).toBe('1180Z');
     expect(view?.scopeCodes).toEqual(['1180Z']);
+    expect(view?.scopeNames).toEqual(['1180Z']);
     expect(view?.trail).toEqual([{ code: '1180Z', name: '1180Z' }]);
   });
 
@@ -71,6 +73,7 @@ describe('resolveCategoryView', () => {
         { code: '1070Z060', name: '증식치료' },
       ],
       scopeCodes: ['1070Z060'],
+      scopeNames: ['증식치료'],
       chips: [
         { code: '1070Z050', name: '도수치료' },
         { code: '1070Z060', name: '증식치료' },
@@ -83,5 +86,23 @@ describe('resolveCategoryView', () => {
   it('없는 코드나 조건이 없으면 null이다', () => {
     expect(resolveCategoryView(CATEGORIES, { code: '9999Z' })).toBeNull();
     expect(resolveCategoryView(CATEGORIES, {})).toBeNull();
+  });
+});
+
+describe('otherCategories', () => {
+  it('홈 분야의 대분류를 빼고 공식 이름 가나다순으로 정렬한다', () => {
+    expect(
+      otherCategories(
+        [
+          ...CATEGORIES,
+          { code: '1010A', name: '상급병실료', subCategories: [] },
+          { code: '1021Z', name: '검체검사료', subCategories: [] },
+        ],
+        ['1070Z', '1100Z', '1180Z'],
+      ),
+    ).toEqual([
+      { code: '1021Z', name: '검체검사료' },
+      { code: '1010A', name: '상급병실료' },
+    ]);
   });
 });

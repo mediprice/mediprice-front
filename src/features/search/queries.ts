@@ -1,10 +1,13 @@
 import { infiniteQueryOptions } from '@tanstack/react-query';
 
+import { npayQueries } from '@/features/npay/queries';
 import { apiClient } from '@/lib/api/client';
 import type { components } from '@/lib/api/schema';
 import { unwrap } from '@/lib/api/unwrap';
 
-const PAGE_SIZE = 20;
+/** 항목은 페이지마다 가격 요약을 함께 받으므로 작게 나눈다. */
+const ITEM_PAGE_SIZE = 10;
+const HOSPITAL_PAGE_SIZE = 20;
 
 type Schemas = components['schemas'];
 type PageResponse<T> = {
@@ -31,6 +34,13 @@ export type ItemSearchParams = {
   keyword?: string;
   /** 비어 있으면 분류 조건 없이 검색한다. 백엔드는 코드 하나만 받으므로 여러 개는 차례로 조회한다. */
   categoryCodes?: readonly string[];
+  /** 가격 요약을 낼 지역(시도 코드). 비어 있으면 전국이다. */
+  sidoCodes: readonly string[];
+};
+
+/** hasPrice는 그 지역에 공개 가격이 있는지다. 요약 조회가 실패하면 null(모름)이다. */
+export type ItemResult = Schemas['NpayItemResponse'] & {
+  hasPrice: boolean | null;
 };
 
 export type HospitalSearchParams = {
@@ -96,12 +106,13 @@ export function totalCount(pages: readonly { totals: number[] }[]) {
 }
 
 export const searchQueries = {
+  /** 페이지마다 항목별 가격 요약을 캐시에 채워 두고 가격 유무를 붙인다. 화면이 가격 없는 항목을 따로 모아도 행이 나중에 움직이지 않는다. */
   items: (params: ItemSearchParams) =>
     infiniteQueryOptions({
       queryKey: searchKeys.items(params),
-      queryFn: ({ pageParam }) =>
-        fetchMergedPage<Schemas['NpayItemResponse']>(
-          (stream, page) =>
+      queryFn: async ({ pageParam, client }) => {
+        const page = await fetchMergedPage<Schemas['NpayItemResponse']>(
+          (stream, pageIndex) =>
             unwrap(
               apiClient.GET('/api/npay-items', {
                 params: {
@@ -110,14 +121,28 @@ export const searchQueries = {
                       keyword: params.keyword,
                       categoryCode: params.categoryCodes?.[stream],
                     },
-                    pageQuery: { page, size: PAGE_SIZE },
+                    pageQuery: { page: pageIndex, size: ITEM_PAGE_SIZE },
                   },
                 },
               }),
             ),
           Math.max(1, params.categoryCodes?.length ?? 0),
           pageParam,
-        ),
+        );
+        const content: ItemResult[] = await Promise.all(
+          page.content.map((item) =>
+            client
+              .ensureQueryData(
+                npayQueries.summaryIn(item.code, params.sidoCodes),
+              )
+              .then(
+                (summary) => ({ ...item, hasPrice: summary.avgPrice != null }),
+                () => ({ ...item, hasPrice: null }),
+              ),
+          ),
+        );
+        return { ...page, content };
+      },
       initialPageParam: FIRST_PAGE,
       getNextPageParam: nextCursor,
     }),
@@ -136,7 +161,7 @@ export const searchQueries = {
                       keyword: params.keyword,
                       sidoCode: params.sidoCodes[stream],
                     },
-                    pageQuery: { page, size: PAGE_SIZE },
+                    pageQuery: { page, size: HOSPITAL_PAGE_SIZE },
                   },
                 },
               }),

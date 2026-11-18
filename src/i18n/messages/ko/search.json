@@ -1,26 +1,23 @@
 {
   "metadata": {
-    "title": "검색 결과",
+    "title": "검색",
     "titleWithQuery": "''{query}'' 검색 결과",
     "category": "카테고리"
   },
   "topBar": {
+    "search": "검색",
     "results": "검색 결과",
     "category": "카테고리"
   },
   "form": {
     "label": "진료비 검색",
-    "backHome": "홈",
     "target": "검색 대상",
     "targetItem": "항목",
     "targetHospital": "병원",
     "keyword": "검색어",
-    "keywordPlaceholder": "진료 항목이나 병원 이름을 검색해 보세요",
+    "keywordPlaceholder": "진료 항목이나 병원 이름",
     "region": "지역",
-    "regionAll": "전체 지역",
-    "regionSeoul": "서울",
-    "regionGyeonggi": "경기",
-    "submit": "찾아보기"
+    "submit": "검색"
   },
   "header": {
     "itemTitle": "''{query}'' 항목 결과",
@@ -33,10 +30,9 @@
   },
   "item": {
     "viewPrices": "병원별 가격 보기",
-    "priceLabel": "공개 가격",
-    "hospitalCount": "{count, number}곳 기준",
-    "noPrice": "가격 공개 병원 없음",
-    "priceError": "가격을 불러오지 못했어요"
+    "priceError": "가격을 불러오지 못했어요",
+    "unpricedTitle": "가격 정보 없는 항목 {count, plural, other {#개}}",
+    "unpricedHint": "{region}에 공개된 가격이 아직 없는 항목이에요."
   },
   "hospital": {
     "notice": "병원 결과에는 가격이 없어요. 병원을 열고 항목을 고르면 가격을 볼 수 있어요.",
@@ -88,11 +84,9 @@
     "notice": "공개 가격은 병원이 신고한 기준 가격이라 실제 진료비와 다를 수 있어요."
   },
   "category": {
-    "breadcrumb": "현재 분류 경로",
     "root": "전체 분류",
-    "rootDescription": "건강보험심사평가원의 공식 분류예요. 분류를 고르면 항목을 볼 수 있어요.",
-    "rootCount": "{count, plural, other {#개}} 분류",
-    "description": "공식 분류예요. 하나씩 좁혀 보세요.",
+    "rootDescription": "자주 찾는 분야부터 골라 보세요. 그 밖의 항목은 건강보험심사평가원의 공식 분류로 찾을 수 있어요.",
+    "description": "하위 분류를 골라 범위를 좁혀 보세요.",
     "subCategories": "하위 분류",
     "popular": "자주 찾는 분야",
     "all": "전체",
@@ -107,6 +101,26 @@
       "eye": "안과·시력교정",
       "vaccine": "예방접종",
       "imaging": "MRI·초음파"
-    }
+    },
+    "official": "공식 분류 · {names}",
+    "others": "그 밖의 분류",
+    "othersCount": "{count, plural, other {#개}}",
+    "friendly": {
+      "1070Z": "물리치료·재활",
+      "1100Z": "치과 치료·수술",
+      "1180Z": "치과 보철·임플란트",
+      "1991B": "안과·시력교정",
+      "1991C": "예방접종",
+      "1032A": "MRI 기본검사",
+      "1032B": "MRI 특수검사",
+      "1025A": "초음파 기본검사",
+      "1025B": "초음파 진단검사"
+    },
+    "breadcrumb": "현재 분류 경로"
+  },
+  "breadcrumb": {
+    "home": "홈",
+    "results": "검색 결과",
+    "search": "검색"
   }
 }

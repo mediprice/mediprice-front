@@ -2,7 +2,7 @@ import { ChevronRight, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import type { Region } from '@/features/search/search-params';
+import type { ServiceRegion } from '@/features/regions/service-region';
 
 import { suggestionHref, type SuggestionId } from './suggestion-href';
 
@@ -16,7 +16,7 @@ export function SearchSuggestions({
 }: {
   links: SuggestionId[];
   keyword: string;
-  region: Region;
+  region: ServiceRegion;
   title: string;
   showPriceNotice?: boolean;
 }) {

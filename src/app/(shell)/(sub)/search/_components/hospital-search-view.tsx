@@ -6,8 +6,11 @@ import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
 import { PageContainer } from '@/components/layout/page-container';
+import {
+  type ServiceRegion,
+  sidoCodesOf,
+} from '@/features/regions/service-region';
 import { searchQueries, totalCount } from '@/features/search/queries';
-import { type Region, regionSidoCodes } from '@/features/search/search-params';
 
 import { HospitalCard } from './hospital-card';
 import { ListSkeleton } from './list-skeleton';
@@ -25,18 +28,29 @@ export function HospitalSearchView({
   emptyActions,
 }: {
   keyword: string;
-  region: Region;
+  region: ServiceRegion;
   aside: ReactNode;
   emptyActions: ReactNode;
 }) {
   const t = useTranslations('search');
   const query = useInfiniteQuery(
-    searchQueries.hospitals({ keyword, sidoCodes: regionSidoCodes(region) }),
+    searchQueries.hospitals({ keyword, sidoCodes: sidoCodesOf(region) }),
   );
   const total = query.data ? totalCount(query.data.pages) : undefined;
   const hospitals = query.data?.pages.flatMap((page) => page.content) ?? [];
   const names = hospitals.map((hospital) => hospital.name);
   const hasSameNames = new Set(names).size < names.length;
+
+  const notice = (
+    <p className="mt-2 flex items-start gap-2 rounded-lg bg-primary-tint px-4 py-3 text-body-sm text-text-primary">
+      <Info
+        aria-hidden="true"
+        className="mt-0.5 size-4.5 shrink-0 text-primary"
+        strokeWidth={1.75}
+      />
+      {t('hospital.notice')}
+    </p>
+  );
 
   const header = (
     <ResultHeader
@@ -60,7 +74,8 @@ export function HospitalSearchView({
       <>
         {header}
         <ResultsLayout>
-          <ListSkeleton />
+          {notice}
+          <ListSkeleton variant="hospital" />
         </ResultsLayout>
       </>
     );
@@ -98,14 +113,7 @@ export function HospitalSearchView({
     <>
       {header}
       <ResultsLayout aside={aside}>
-        <p className="mt-2 flex items-start gap-2 rounded-lg bg-primary-tint px-4 py-3 text-body-sm text-text-primary">
-          <Info
-            aria-hidden="true"
-            className="mt-0.5 size-4.5 shrink-0 text-primary"
-            strokeWidth={1.75}
-          />
-          {t('hospital.notice')}
-        </p>
+        {notice}
         <ul className="space-y-3 lg:space-y-4">
           {hospitals.map((hospital) => (
             <li key={hospital.ykiho}>

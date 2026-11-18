@@ -7,22 +7,25 @@ import { useTranslations } from 'next-intl';
 
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import type { HomeCategoryId } from '@/features/npay/catalog';
 import { npayQueries } from '@/features/npay/queries';
+import {
+  regionQuery,
+  type ServiceRegion,
+} from '@/features/regions/service-region';
 import { resolveCategoryView } from '@/features/search/category-tree';
-import { type Region, withRegion } from '@/features/search/search-params';
 
 import { CategoryHeader } from './category-header';
 import { CategoryItems } from './category-items';
 import { CategoryRoot } from './category-root';
-import { ListSkeleton } from './list-skeleton';
 import { ResultsError } from './results-error';
-import { ResultsLayout } from './results-layout';
 import { SearchSuggestions } from './search-suggestions';
 import { StatusPanel } from './status-panel';
 
-/** S-02 C 분류 모드. 백엔드 분류 목록으로 경로와 하위 분류를 만들고, 고른 분류의 항목을 보여 준다. */
+/**
+ * S-02 C 분류 모드. 백엔드 분류 목록으로 경로·하위 분류를 만들고 고른 분류의 항목을 보여 준다.
+ * 분류 목록을 기다리는 동안에도 머리와 목록 자리를 같은 높이로 그려 화면이 밀리지 않게 한다.
+ */
 export function CategoryView({
   home,
   code,
@@ -30,28 +33,17 @@ export function CategoryView({
 }: {
   home: { id: HomeCategoryId; codes: readonly string[] } | undefined;
   code: string | undefined;
-  region: Region;
+  region: ServiceRegion;
 }) {
   const t = useTranslations('search');
   const categories = useQuery(npayQueries.categories());
 
-  if (categories.isPending) {
-    return (
-      <>
-        <PageContainer className="space-y-3 pt-5 pb-4 lg:pt-10 lg:pb-6">
-          <Skeleton className="h-5 w-32" />
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-9 w-full max-w-md" />
-        </PageContainer>
-        <ResultsLayout>
-          <ListSkeleton />
-        </ResultsLayout>
-      </>
-    );
+  if (!home && !code) {
+    return <CategoryRoot categories={categories} region={region} />;
   }
   if (categories.isError) {
     return (
-      <PageContainer className="pb-section">
+      <PageContainer className="pb-section lg:pt-10">
         <h1 className="sr-only">{t('topBar.category')}</h1>
         <ResultsError
           error={categories.error}
@@ -61,15 +53,11 @@ export function CategoryView({
       </PageContainer>
     );
   }
-  if (!home && !code) {
-    return <CategoryRoot categories={categories.data} region={region} />;
-  }
 
-  const view = resolveCategoryView(categories.data, {
-    homeCodes: home?.codes,
-    code,
-  });
-  if (!view) {
+  const view = categories.data
+    ? resolveCategoryView(categories.data, { homeCodes: home?.codes, code })
+    : undefined;
+  if (view === null) {
     return (
       <PageContainer className="pb-section lg:pt-10">
         <StatusPanel
@@ -82,7 +70,7 @@ export function CategoryView({
               <Link
                 href={{
                   pathname: '/search',
-                  query: withRegion({ category: 'all' }, region),
+                  query: { category: 'all', ...regionQuery(region) },
                 }}
               >
                 {t('suggestions.allCategories.title')}
@@ -96,8 +84,15 @@ export function CategoryView({
 
   return (
     <>
-      <CategoryHeader homeId={home?.id} view={view} region={region} />
-      <ResultsLayout
+      <CategoryHeader
+        homeId={home?.id}
+        code={code}
+        view={view}
+        region={region}
+      />
+      <CategoryItems
+        codes={view?.scopeCodes}
+        region={region}
         aside={
           <SearchSuggestions
             links={['allCategories']}
@@ -107,9 +102,7 @@ export function CategoryView({
             showPriceNotice
           />
         }
-      >
-        <CategoryItems codes={view.scopeCodes} region={region} />
-      </ResultsLayout>
+      />
     </>
   );
 }

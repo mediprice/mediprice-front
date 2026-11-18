@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatItemName, groupItems } from './item-groups';
+import { formatItemName, groupItems, partitionByPrice } from './item-groups';
 
 function item(
   code: string,
@@ -36,7 +36,7 @@ describe('formatItemName', () => {
 });
 
 describe('groupItems', () => {
-  it('중분류로 묶고 처음 나온 순서를 지킨다', () => {
+  it('중분류로 묶고 처음 나온 순서를 지키며, 대분류는 코드와 함께 둔다', () => {
     const groups = groupItems([
       item('A', '이학요법료/도수치료'),
       item('B', '이학요법료/증식치료', ['1070Z060', '증식치료']),
@@ -45,17 +45,31 @@ describe('groupItems', () => {
 
     expect(groups.map((g) => g.key)).toEqual(['1070Z050', '1070Z060']);
     expect(groups[0]?.items.map((i) => i.code)).toEqual(['A', 'C']);
-    expect(groups[0]?.path).toEqual(['이학요법료', '도수치료']);
+    expect(groups[0]?.major).toEqual({ code: '1070Z', name: '이학요법료' });
+    expect(groups[0]?.minor).toEqual({ code: '1070Z050', name: '도수치료' });
   });
 
-  it('중분류가 대분류와 같거나 없으면 경로에 한 번만 쓴다', () => {
+  it('중분류가 대분류와 같거나 없으면 중분류를 비운다', () => {
     const groups = groupItems([
       item('1070Z', '이학요법료', ['1070Z', '이학요법료']),
       item('X', '이학요법료/기타', null),
     ]);
 
     expect(groups).toHaveLength(1);
-    expect(groups[0]?.path).toEqual(['이학요법료']);
+    expect(groups[0]?.minor).toBeNull();
     expect(groups[0]?.items.map((i) => i.code)).toEqual(['1070Z', 'X']);
+  });
+});
+
+describe('partitionByPrice', () => {
+  it('가격이 없다고 확인된 항목만 빼고, 모르는 항목은 남긴다', () => {
+    const { priced, unpriced } = partitionByPrice([
+      { code: 'A', hasPrice: false },
+      { code: 'B', hasPrice: true },
+      { code: 'C', hasPrice: null },
+    ]);
+
+    expect(priced.map((i) => i.code)).toEqual(['B', 'C']);
+    expect(unpriced.map((i) => i.code)).toEqual(['A']);
   });
 });

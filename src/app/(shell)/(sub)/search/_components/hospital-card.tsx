@@ -2,16 +2,16 @@ import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
+import { formatLocation } from '@/features/regions/format-location';
 import type { components } from '@/lib/api/schema';
 
 type HospitalSummary = components['schemas']['HospitalSummaryResponse'];
 
-/** 병원 결과 카드. 진료과 정보는 목록 API에 없어 종별(className)만 보여 준다. */
+/** 병원 결과 카드. 진료과 정보는 목록 API에 없어 종별과 시군구를 함께 보여 준다. */
 export function HospitalCard({ hospital }: { hospital: HospitalSummary }) {
   const t = useTranslations('search.hospital');
-  const address =
-    hospital.address ??
-    [hospital.sidoName, hospital.sgguName].filter(Boolean).join(' ');
+  const location = formatLocation(hospital.sidoName, hospital.sgguName);
+  const meta = [hospital.className, location].filter(Boolean).join(' · ');
 
   return (
     <Link
@@ -20,13 +20,15 @@ export function HospitalCard({ hospital }: { hospital: HospitalSummary }) {
     >
       <span className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="text-subheading">{hospital.name}</span>
-        {hospital.className && (
+        {meta && (
           <span className="text-body-sm text-text-secondary lg:order-first lg:text-primary-text">
-            {hospital.className}
+            {meta}
           </span>
         )}
-        {address && (
-          <span className="text-body-sm text-text-secondary">{address}</span>
+        {hospital.address && (
+          <span className="text-body-sm text-text-tertiary">
+            {hospital.address}
+          </span>
         )}
       </span>
       <ChevronRight

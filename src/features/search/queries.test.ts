@@ -2,6 +2,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 
+import { npayQueries } from '@/features/npay/queries';
 import type * as ClientModule from '@/lib/api/client';
 import { ApiError } from '@/lib/api/errors';
 import { server } from '@/test/server';
@@ -29,14 +30,47 @@ function item(code: string, categoryCode = '1070Z') {
   };
 }
 
-function page<T>(content: T[], pageIndex: number, totalElements: number) {
+function page<T>(
+  content: T[],
+  pageIndex: number,
+  totalElements: number,
+  size = 10,
+) {
   return {
     content,
     page: pageIndex,
-    size: 20,
+    size,
     totalElements,
-    totalPages: Math.ceil(totalElements / 20),
+    totalPages: Math.ceil(totalElements / size),
   };
+}
+
+function summary(npayCode: string, avgPrice: number | null) {
+  return {
+    npayCode,
+    minPrice: avgPrice,
+    maxPrice: avgPrice,
+    avgPrice,
+    priceCount: avgPrice == null ? 0 : 1,
+    hospitalCount: avgPrice == null ? 0 : 1,
+  };
+}
+
+/** 항목마다 가격 요약을 돌려준다. unpriced에 든 코드는 가격이 없다. */
+function serveSummaries(unpriced: string[] = [], sidoCodes: string[] = []) {
+  server.use(
+    http.get(
+      `${BASE}/api/npay-items/:code/price-summary`,
+      ({ params, request }) => {
+        const code = String(params.code);
+        sidoCodes.push(new URL(request.url).searchParams.get('sidoCode') ?? '');
+        return HttpResponse.json(
+          summary(code, unpriced.includes(code) ? null : 10000),
+        );
+      },
+    ),
+  );
+  return sidoCodes;
 }
 
 /** 분류 코드별 전체 항목을 페이지로 잘라 돌려주는 가짜 백엔드 */
@@ -61,6 +95,7 @@ function serveItems(byCode: Record<string, number>, requests: URL[] = []) {
 
 describe('searchQueries.items', () => {
   it('검색어와 페이지를 평평한 쿼리 문자열로 보낸다', async () => {
+    serveSummaries();
     let url: URL | undefined;
     server.use(
       http.get(`${BASE}/api/npay-items`, ({ request }) => {
@@ -70,13 +105,13 @@ describe('searchQueries.items', () => {
     );
 
     const data = await new QueryClient().fetchInfiniteQuery(
-      searchQueries.items({ keyword: '도수' }),
+      searchQueries.items({ keyword: '도수', sidoCodes: [] }),
     );
 
     expect(url?.searchParams.get('keyword')).toBe('도수');
     expect(url?.searchParams.has('categoryCode')).toBe(false);
     expect(url?.searchParams.get('page')).toBe('0');
-    expect(url?.searchParams.get('size')).toBe('20');
+    expect(url?.searchParams.get('size')).toBe('10');
     expect(data.pages[0]?.content.map(({ code }) => code)).toEqual([
       'MX1220000',
     ]);
@@ -84,14 +119,18 @@ describe('searchQueries.items', () => {
   });
 
   it('분류 코드가 여럿이면 전체 개수를 합치고 코드 순서대로 이어서 불러온다', async () => {
-    serveItems({ '1100Z': 25, '1180Z': 3 });
+    serveItems({ '1100Z': 15, '1180Z': 3 });
+    serveSummaries();
     const queryClient = new QueryClient();
-    const options = searchQueries.items({ categoryCodes: ['1100Z', '1180Z'] });
+    const options = searchQueries.items({
+      categoryCodes: ['1100Z', '1180Z'],
+      sidoCodes: [],
+    });
 
     const data = await queryClient.fetchInfiniteQuery({ ...options, pages: 3 });
 
-    expect(totalCount(data.pages)).toBe(28);
-    expect(data.pages.map((p) => p.content.length)).toEqual([20, 5, 3]);
+    expect(totalCount(data.pages)).toBe(18);
+    expect(data.pages.map((p) => p.content.length)).toEqual([10, 5, 3]);
     expect(data.pages[2]?.content[0]?.code).toBe('1180Z-0');
     expect(
       options.getNextPageParam(
@@ -105,8 +144,10 @@ describe('searchQueries.items', () => {
 
   it('결과가 없는 분류 코드는 건너뛴다', async () => {
     serveItems({ '1032A': 0, '1032B': 2, '1025A': 0, '1025B': 1 });
+    serveSummaries();
     const options = searchQueries.items({
       categoryCodes: ['1032A', '1032B', '1025A', '1025B'],
+      sidoCodes: [],
     });
 
     const data = await new QueryClient().fetchInfiniteQuery({
@@ -141,11 +182,59 @@ describe('searchQueries.items', () => {
     );
 
     const promise = new QueryClient().fetchInfiniteQuery(
-      searchQueries.items({ categoryCodes: ['1100Z', '1180Z'] }),
+      searchQueries.items({ categoryCodes: ['1100Z', '1180Z'], sidoCodes: [] }),
     );
 
     await expect(promise).rejects.toBeInstanceOf(ApiError);
     await expect(promise).rejects.toMatchObject({ code: 'INTERNAL_ERROR' });
+  });
+});
+
+describe('searchQueries.items 가격 유무', () => {
+  it('지역의 시도마다 요약을 받아 가격 유무를 붙이고, 요약은 행이 다시 쓰도록 캐시에 남긴다', async () => {
+    serveItems({ '1070Z': 3 });
+    const sidoCodes = serveSummaries(['1070Z-1']);
+    const queryClient = new QueryClient();
+
+    const data = await queryClient.fetchInfiniteQuery(
+      searchQueries.items({
+        categoryCodes: ['1070Z'],
+        sidoCodes: ['110000', '310000'],
+      }),
+    );
+
+    expect(
+      data.pages[0]?.content.map(({ code, hasPrice }) => [code, hasPrice]),
+    ).toEqual([
+      ['1070Z-0', true],
+      ['1070Z-1', false],
+      ['1070Z-2', true],
+    ]);
+    expect(new Set(sidoCodes)).toEqual(new Set(['110000', '310000']));
+    expect(sidoCodes).toHaveLength(6);
+    expect(
+      queryClient.getQueryData(
+        npayQueries.summaryIn('1070Z-0', ['110000', '310000']).queryKey,
+      )?.avgPrice,
+    ).toBe(10000);
+  });
+
+  it('요약 조회가 실패한 항목은 가격 유무를 모름(null)으로 두고 목록은 그대로 보여 준다', async () => {
+    serveItems({ '1070Z': 1 });
+    server.use(
+      http.get(`${BASE}/api/npay-items/:code/price-summary`, () =>
+        HttpResponse.json(
+          { code: 'INTERNAL_ERROR', message: '오류', errors: [] },
+          { status: 500 },
+        ),
+      ),
+    );
+
+    const data = await new QueryClient().fetchInfiniteQuery(
+      searchQueries.items({ categoryCodes: ['1070Z'], sidoCodes: [] }),
+    );
+
+    expect(data.pages[0]?.content[0]?.hasPrice).toBeNull();
   });
 });
 
@@ -167,7 +256,7 @@ describe('searchQueries.hospitals', () => {
           phone: null,
         };
         expect(url.searchParams.get('keyword')).toBe('정형');
-        return HttpResponse.json(page([hospital], 0, 1));
+        return HttpResponse.json(page([hospital], 0, 1, 20));
       }),
     );
     const options = searchQueries.hospitals({
@@ -211,9 +300,14 @@ describe('searchQueries.hospitals', () => {
 
 describe('searchKeys', () => {
   it('키는 도메인에서 조건으로 좁혀지는 계층이다', () => {
-    const key = searchKeys.items({ keyword: '도수' });
+    const key = searchKeys.items({ keyword: '도수', sidoCodes: [] });
     expect(key.slice(0, searchKeys.all.length)).toEqual(searchKeys.all);
-    expect(key).not.toEqual(searchKeys.items({ keyword: '라식' }));
+    expect(key).not.toEqual(
+      searchKeys.items({ keyword: '라식', sidoCodes: [] }),
+    );
+    expect(key).not.toEqual(
+      searchKeys.items({ keyword: '도수', sidoCodes: ['110000'] }),
+    );
     expect(
       searchKeys.hospitals({ keyword: '도수', sidoCodes: [] }),
     ).not.toEqual(key);

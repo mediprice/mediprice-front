@@ -6,8 +6,11 @@ import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
 import { PageContainer } from '@/components/layout/page-container';
+import {
+  type ServiceRegion,
+  sidoCodesOf,
+} from '@/features/regions/service-region';
 import { searchQueries, totalCount } from '@/features/search/queries';
-import type { Region } from '@/features/search/search-params';
 
 import { ItemGroupList } from './item-group-list';
 import { ListSkeleton } from './list-skeleton';
@@ -25,12 +28,14 @@ export function ItemSearchView({
   emptyActions,
 }: {
   keyword: string;
-  region: Region;
+  region: ServiceRegion;
   aside: ReactNode;
   emptyActions: ReactNode;
 }) {
   const t = useTranslations('search');
-  const query = useInfiniteQuery(searchQueries.items({ keyword }));
+  const query = useInfiniteQuery(
+    searchQueries.items({ keyword, sidoCodes: sidoCodesOf(region) }),
+  );
   const total = query.data ? totalCount(query.data.pages) : undefined;
   const items = query.data?.pages.flatMap((page) => page.content) ?? [];
 
@@ -45,7 +50,7 @@ export function ItemSearchView({
               em: (chunks) => <em>{chunks}</em>,
             })
       }
-      description={total ? t('header.itemDescription') : undefined}
+      description={t('header.itemDescription')}
       status={
         total === undefined ? '' : t('header.itemStatus', { count: total })
       }
