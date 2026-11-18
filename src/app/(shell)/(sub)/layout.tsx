@@ -1,0 +1,15 @@
+import type { ReactNode } from 'react';
+
+import { SiteFooter } from '@/components/layout/site-footer';
+
+/** 하위 화면(검색 결과·항목 가격·병원 상세). 모바일은 페이지가 SubTopBar를 직접 렌더하고 하단 탭바가 없다. */
+export default function SubLayout({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <main id="main" tabIndex={-1} className="outline-none">
+        {children}
+      </main>
+      <SiteFooter />
+    </>
+  );
+}
