@@ -21,6 +21,7 @@ import { signOut } from '@/features/auth/session';
 import { errorMessageKey } from '@/lib/api/error-message';
 
 import { AccountInfoCard } from './account-info-card';
+import { MyDataSection } from './my-data-section';
 import { WithdrawSection } from './withdraw-section';
 
 export function AccountView() {
@@ -43,6 +44,7 @@ export function AccountView() {
               <div className="flex flex-col gap-10">
                 <AccountInfoCard user={user} />
                 <LogoutRow />
+                <MyDataSection />
                 <WithdrawSection />
               </div>
             )}

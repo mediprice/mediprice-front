@@ -107,6 +107,7 @@ src/
   lib/                    도메인을 모르는 공용 코드
     api/                  HTTP 클라이언트, 에러, 에러 코드 → 문구 키, 쿼리 직렬화, 재발급, 세션 만료 이벤트, schema.d.ts
   server/bff/             서버 전용 코드: 쿠키, 업스트림 호출, 재발급, 응답 헬퍼
+  server/api/             서버 컴포넌트의 익명 공개 조회(publicApi, 요청마다 QueryClient, 404 판정)
   test/                   테스트 공용 설정 (msw 서버, 요청 헬퍼)
 ```
 
@@ -121,7 +122,7 @@ app ──▶ features ──▶ components, lib
 ```
 
 - `lib`, `components`는 `features`, `app`, `server`를 import하지 않는다. 도메인을 알면 `features`에 둔다.
-- 클라이언트 코드(`features`, `components`, `lib`, `app`의 화면)는 `server`를 import하지 않는다. 예외는 `app/bff/**` 라우트와 테스트다.
+- 클라이언트 코드(`features`, `components`, `lib`, `app`의 화면)는 `server`를 import하지 않는다. 예외는 `app/bff/**` 라우트, 서버 컴포넌트(`page.tsx`·`sitemap.ts`와 `import 'server-only'`를 둔 그 라우트의 조각)가 쓰는 `server/api/**`, 테스트다.
 - `server/**`의 파일은 첫 줄에 `import 'server-only';`를 둔다.
 - 다른 feature의 코드는 `queries.ts`와 `components/`, 그리고 여러 화면이 함께 쓰도록 만든 공용 모듈(`regions/service-region.ts`, `regions/format-location.ts`, `npay/price-summary.ts`, `npay/catalog.ts`, `npay/use-category-label.ts`)만 import한다. 그 밖의 내부 파일을 직접 가져오지 않는다.
 - 폴더를 넘나드는 import는 `@/` 절대 경로를 쓰고 `../..`는 쓰지 않는다.
@@ -359,11 +360,14 @@ export const hospitalQueries = {
 };
 ```
 
-화면에서는 `useQuery(hospitalQueries.detail(id))`로 쓴다. `apiClient`는 브라우저 전용이라 서버 컴포넌트에서 이 옵션으로 prefetch할 수 없다. 서버에서 prefetch가 필요해지면 서버용 호출 경로를 따로 만든다.
+화면에서는 `useQuery(hospitalQueries.detail(id))`로 쓴다. `apiClient`는 브라우저 전용이라, 검색에 노출할 화면(항목·병원 상세)은 같은 옵션에 마지막 인자로 `publicApi`(`server/api/public-client.ts`, 쿠키 없는 익명 호출, Next 데이터 캐시 5분)를 넘겨 서버에서 채우고 `HydrationBoundary`로 넘긴다. 키가 같아 브라우저는 다시 읽지 않는다.
+
+- 없는 코드는 서버에서 `loadOrNotFound`로 `notFound()`를 불러 HTTP 404로 끝낸다. 그 밖의 실패는 그 쿼리만 빼고 그려 브라우저가 다시 읽게 한다.
+- 백엔드가 로그인 사용자의 상세 조회에 최근 본 기록을 남기므로, 서버가 채운 상세는 `useRecordView`(`features/history`)로 로그인했을 때만 BFF로 한 번 더 읽는다.
 
 ### 7.2.1 생성 타입에 아직 없는 엔드포인트
 
-백엔드 브랜치에만 있고 배포·`pnpm api:generate`가 되지 않은 엔드포인트는 `features/<도메인>/api.ts`에서 `createApiFetch`로 `/bff/api/...`를 부르고, 응답을 zod로 검증한다(예: `features/ai/api.ts`, `features/live-fee/api.ts`). 실패는 같은 `ApiError`/`NetworkError`로 던져 `errorMessageKey`가 그대로 동작하게 한다. 파일에 "배포 후 생성 클라이언트로 바꾼다"는 한 줄 TSDoc을 남기고, 배포되면 `apiClient` + `unwrap`으로 옮긴다.
+백엔드 브랜치에만 있고 배포·`pnpm api:generate`가 되지 않은 엔드포인트는 `features/<도메인>/api.ts`에서 `createApiFetch`로 `/bff/api/...`를 부르고, 응답을 zod로 검증한다(예: `features/ai/api.ts`, `features/live-fee/api.ts`). JSON을 주고받는 단순한 호출은 `createUntypedRequest`(`lib/api/untyped-request.ts`)를 쓴다(예: `features/auth/consent-api.ts`, `features/medical-profile/api.ts`). 배포된 백엔드에 아직 없는 경로는 404 `RESOURCE_NOT_FOUND`로 오므로, 화면은 이를 "아직 지원하지 않음"으로 다루고 막지 않는다(예: `/users/me`의 `requiredConsentsMissing`이 없으면 동의 화면을 띄우지 않는다). 실패는 같은 `ApiError`/`NetworkError`로 던져 `errorMessageKey`가 그대로 동작하게 한다. 파일에 "배포 후 생성 클라이언트로 바꾼다"는 한 줄 TSDoc을 남기고, 배포되면 `apiClient` + `unwrap`으로 옮긴다.
 
 ### 7.3 변경과 캐시
 
@@ -571,6 +575,15 @@ const t = await getTranslations('metadata');
 - 입력창 글자는 `text-field`(16px)를 쓴다. 16px보다 작으면 iOS Safari가 포커스할 때 화면을 확대한다.
 - `viewport`는 `app/layout.tsx`에 있다(`viewportFit: 'cover'`로 safe-area 사용). 확대를 막는 설정(`maximumScale`, `userScalable`)은 넣지 않는다.
 - 음성 입력·현재 위치는 `next.config.ts`의 `Permissions-Policy`에서 같은 출처(`self`)에만 허용돼 있고, 카메라는 쓰지 않아 막혀 있다(`camera=()`). 다른 출처의 iframe에서는 쓰지 않는다.
+
+### 13.5 현재 위치: 개인위치정보를 받지 않게 설계 (MUST)
+
+「위치정보의 보호 및 이용 등에 관한 법률」은 특정 개인의 위치를 알 수 있는 정보(개인위치정보)를 다루는 사업자에게 신고·동의·기록 보관 의무를 지운다. 주변 병원 찾기에는 1m 정밀도의 좌표가 필요 없으므로, 서버가 개인위치정보를 받지 않게 만든다.
+
+- 서버(`/api/hospitals/nearby`)로 보내는 좌표는 `coarsenLatLng`(`features/map/map-geo.ts`)로 소수 둘째 자리(약 1km 격자)로 흐린다. 현재 위치든 지도 중심이든 같다. 정확한 좌표는 브라우저 상태로만 두고 URL·저장소에 남기지 않는다.
+- 이 조회는 로그인 정보 없이 보낸다. 요청에 `ANONYMOUS_REQUEST_HEADER`(`lib/api/paths.ts`)를 붙이면 BFF가 쿠키가 있어도 Authorization을 붙이지 않는다(`isAnonymousRequest`). 흐린 위치도 계정과 묶이지 않는다.
+- 정확한 좌표는 지도의 내 위치 점과 거리 계산에만 쓴다. 병원 좌표가 응답에 있으므로 거리와 가까운 순서는 `withExactDistances`로 브라우저에서 다시 잰다. 검색 범위는 흐린 중심 기준이라 "반경 약 N km"로 쓴다.
+- 권한을 묻기 전 안내(`map.location.promptDescription`)와 개인정보 처리방침 14항에 같은 내용을 쓴다. 이 설계를 바꾸면(정확한 좌표를 서버로 보내는 기능 등) 위치정보법 검토부터 한다.
 
 ## 14. 가격·지역 데이터 표시
 

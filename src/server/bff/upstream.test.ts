@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   callBackend,
   forwardHeaders,
+  isAnonymousRequest,
   isSameOrigin,
   resolveBackendUrl,
 } from './upstream';
@@ -136,10 +137,36 @@ describe('forwardHeaders', () => {
     expect(headers.has('x-mediprice-client-ip')).toBe(false);
   });
 
+  it('브라우저의 User-Agent를 그대로 전달한다(동의 기록 근거)', () => {
+    const withAgent = new Headers({ 'user-agent': 'Mozilla/5.0 Test' });
+
+    expect(forwardHeaders(withAgent).get('user-agent')).toBe(
+      'Mozilla/5.0 Test',
+    );
+  });
+
+  it('익명 요청 표시 헤더는 백엔드로 넘기지 않는다', () => {
+    const anonymous = new Headers({ 'x-mediprice-anonymous': '1' });
+
+    expect(forwardHeaders(anonymous).has('x-mediprice-anonymous')).toBe(false);
+  });
+
   it('Access가 없으면 브라우저가 보낸 Authorization도 지운다', () => {
     expect(forwardHeaders(incoming, undefined).has('authorization')).toBe(
       false,
     );
+  });
+});
+
+describe('isAnonymousRequest', () => {
+  it('익명 요청 헤더가 1일 때만 익명으로 본다', () => {
+    expect(
+      isAnonymousRequest(new Headers({ 'x-mediprice-anonymous': '1' })),
+    ).toBe(true);
+    expect(
+      isAnonymousRequest(new Headers({ 'x-mediprice-anonymous': 'yes' })),
+    ).toBe(false);
+    expect(isAnonymousRequest(new Headers())).toBe(false);
   });
 });
 

@@ -46,6 +46,26 @@ describe('GET /bff/api/**', () => {
     expect(seen?.has('authorization')).toBe(false);
   });
 
+  it('익명 요청 헤더가 있으면 Access 쿠키가 있어도 Authorization 없이 전달한다', async () => {
+    let seen: Headers | undefined;
+    server.use(
+      http.get(`${API}/api/hospitals/nearby`, ({ request }) => {
+        seen = request.headers;
+        return HttpResponse.json({ content: [] });
+      }),
+    );
+    const request = bffRequest('/bff/api/hospitals/nearby?lat=37.57', {
+      cookies: withAccess,
+    });
+    request.headers.set('x-mediprice-anonymous', '1');
+
+    const response = await GET(request, ctx('hospitals', 'nearby'));
+
+    expect(response.status).toBe(200);
+    expect(seen?.has('authorization')).toBe(false);
+    expect(seen?.has('x-mediprice-anonymous')).toBe(false);
+  });
+
   it('쿼리 문자열을 그대로 전달한다', async () => {
     let seenUrl = '';
     server.use(

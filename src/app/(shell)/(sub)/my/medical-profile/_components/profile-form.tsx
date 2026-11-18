@@ -13,6 +13,7 @@ import {
 } from '@/features/medical-profile/queries';
 import {
   createMedicalProfileSchema,
+  hasCurrentConsent,
   type MedicalProfileForm,
   TEXT_FIELDS,
   toFormField,
@@ -37,6 +38,14 @@ function isFieldRejection(error: unknown) {
   );
 }
 
+/** 저장하는 사이 동의 문서가 바뀌었다. 동의 칸을 비우고 다시 묻는다. */
+function isConsentRejection(error: unknown) {
+  return (
+    error instanceof ApiError &&
+    error.code === 'MEDICAL_PROFILE_CONSENT_REQUIRED'
+  );
+}
+
 export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
   const t = useTranslations('library.medicalProfile');
   const tErrors = useTranslations('errors');
@@ -52,6 +61,7 @@ export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
     reset,
     setError,
     setFocus,
+    setValue,
     formState: { errors, isDirty },
   } = useForm<MedicalProfileForm>({
     resolver: zodResolver(schema),
@@ -61,7 +71,7 @@ export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
   const [status, setStatus] = useState<'saved' | 'deleted' | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const save = useMutation(medicalProfileMutations.save());
-  const remove = useMutation(medicalProfileMutations.remove());
+  const remove = useMutation(medicalProfileMutations.withdraw());
   const leaveGuard = useLeaveGuard(isDirty);
 
   function handleSave(values: MedicalProfileForm) {
@@ -72,6 +82,12 @@ export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
         setStatus('saved');
       },
       onError: (error) => {
+        if (isConsentRejection(error)) {
+          setValue('consent', false, { shouldDirty: true });
+          setError('consent', { message: 'consentOutdated' });
+          setFocus('consent');
+          return;
+        }
         if (!(error instanceof ApiError) || !isFieldRejection(error)) return;
         const fields = error.fieldErrors
           .map(({ field }) => toFormField(field))
@@ -107,6 +123,7 @@ export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
       <ConsentField
         id={`${id}-consent`}
         error={errors.consent?.message}
+        consentedAt={hasCurrentConsent(profile) ? profile?.consentedAt : null}
         {...register('consent')}
       />
       <BasicInfoFields
@@ -148,11 +165,13 @@ export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
       </p>
       {/** 긴 폼이라 모바일은 저장 바를 화면 아래에 붙인다. 폼 안에서만 붙어 있어 끝에 오면 제자리에 놓이고 내용을 가리지 않는다. */}
       <div className="sticky bottom-0 z-(--z-bottom-cta) mx-[calc(50%-50vw)] -mt-4 flex flex-col gap-2 border-t border-hairline bg-bg px-[calc(50vw-50%)] pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-bar lg:static lg:mx-0 lg:mt-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
-        {save.isError && !isFieldRejection(save.error) && (
-          <p role="alert" className="text-body-sm text-danger">
-            {tErrors(errorMessageKey(save.error))}
-          </p>
-        )}
+        {save.isError &&
+          !isFieldRejection(save.error) &&
+          !isConsentRejection(save.error) && (
+            <p role="alert" className="text-body-sm text-danger">
+              {tErrors(errorMessageKey(save.error))}
+            </p>
+          )}
         <p role="status" className="text-body text-positive empty:hidden">
           {status && !isDirty && t(status)}
         </p>

@@ -17,11 +17,13 @@ const ITEM_ROWS = [
   'ai',
   'aiQuota',
   'location',
+  'consent',
   'auto',
 ] as const;
 
 const FIXED_RETENTION_ROWS = [
   'account',
+  'consent',
   'medical',
   'cookie',
   'ai',

@@ -30,7 +30,9 @@ import {
   useConversation,
 } from '../conversation-store';
 import { AI_DAILY_LIMIT } from '../usage-limits';
+import { useAiNotice } from '../use-ai-notice';
 import { useVoiceInput } from '../use-voice-input';
+import { AiNoticeDialog } from './ai-notice-dialog';
 import { AiSideRail } from './ai-side-rail';
 import { AssistantMessage } from './assistant-message';
 import { ChatEnded } from './chat-ended';
@@ -76,6 +78,7 @@ export function AiChat() {
   const isMember = sessionStatus === 'authenticated';
   const scope: DailyScope = isMember ? 'member' : 'anonymous';
   const voice = useVoiceInput();
+  const notice = useAiNotice();
   const logRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [dismissedQuota, setDismissedQuota] = useState<string | null>(null);
@@ -133,12 +136,28 @@ export function AiChat() {
     resetMobileScroll();
   }, [isLocked]);
 
+  /** 안내를 처음 확인하면 입력창을 다시 제출해, 보낸 뒤 입력창을 비우는 흐름을 그대로 탄다. */
   function handleSend(text: string) {
+    const resubmit = () => textareaRef.current?.form?.requestSubmit();
+    if (!notice.ensure(['ai'], resubmit)) return false;
     return send(text, scope);
   }
 
   function handlePick(text: string) {
+    if (!notice.ensure(['ai'], () => handlePick(text))) return;
     if (send(text, scope)) logRef.current?.focus({ preventScroll: true });
+  }
+
+  function handleMic() {
+    if (notice.ensure(['ai', 'voice'], voice.start)) voice.start();
+  }
+
+  function handleVoiceSend(text: string) {
+    if (!notice.ensure(['ai'], () => handleVoiceSend(text))) return;
+    if (send(text, scope)) {
+      voice.cancel();
+      logRef.current?.focus({ preventScroll: true });
+    }
   }
 
   function handleRestart() {
@@ -278,12 +297,7 @@ export function AiChat() {
               }}
               onRetry={voice.retry}
               onRerecord={voice.start}
-              onSend={(text) => {
-                if (send(text, scope)) {
-                  voice.cancel();
-                  logRef.current?.focus({ preventScroll: true });
-                }
-              }}
+              onSend={handleVoiceSend}
               onTypeInstead={() => {
                 voice.cancel();
                 requestAnimationFrame(focusComposer);
@@ -302,7 +316,7 @@ export function AiChat() {
                   : t('ended.placeholder')
               }
               onSend={handleSend}
-              onMic={voice.engine ? voice.start : undefined}
+              onMic={voice.engine ? handleMic : undefined}
             />
           )}
         </section>
@@ -311,6 +325,12 @@ export function AiChat() {
           dailyRemaining={dailyRemaining(conversation, scope)}
         />
       </div>
+      <AiNoticeDialog
+        kinds={notice.kinds}
+        engine={voice.engine}
+        onConfirm={notice.confirm}
+        onDismiss={notice.dismiss}
+      />
       <QuotaDialog
         open={
           isOverDaily && failure === 'quota' && dismissedQuota !== requestId

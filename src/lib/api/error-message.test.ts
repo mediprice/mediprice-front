@@ -15,6 +15,10 @@ describe('errorMessageKey', () => {
     ['UPSTREAM_UNAVAILABLE', 502, 'serverUnavailable'],
     ['AI_QUOTA_EXCEEDED', 429, 'aiQuotaExceeded'],
     ['AI_UNAVAILABLE', 503, 'aiUnavailable'],
+    ['RATE_LIMITED', 429, 'tooManyRequests'],
+    ['CONSENT_VERSION_OUTDATED', 409, 'consentVersionOutdated'],
+    ['CONSENT_WITHDRAWAL_NOT_ALLOWED', 400, 'consentWithdrawalNotAllowed'],
+    ['MEDICAL_PROFILE_CONSENT_REQUIRED', 409, 'medicalProfileConsentRequired'],
   ])('알려진 코드 %s는 해당 문구 키로 바꾼다', (code, status, key) => {
     expect(errorMessageKey(new ApiError(status, code, 'ignored'))).toBe(key);
   });

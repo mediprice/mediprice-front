@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 
 import { env } from '@/env';
+import { ANONYMOUS_REQUEST_HEADER } from '@/lib/api/paths';
 
 import { gatewayTimeout, unavailable } from './responses';
 
@@ -60,14 +61,19 @@ function clientIpOf(incoming: Headers) {
   return z.union([z.ipv4(), z.ipv6()]).safeParse(ip).success ? ip : null;
 }
 
-/** 백엔드로 보낼 헤더. 브라우저의 Cookie·Authorization은 버리고 쿠키의 Access로 Authorization을 만든다. 공유 비밀값이 있으면 사용자 IP를 함께 보낸다(AI 비회원 한도용). */
+/** 브라우저가 계정 없이 보내 달라고 한 공개 조회(주변 병원 등). 로그인 쿠키가 있어도 Access를 붙이지 않는다. */
+export function isAnonymousRequest(incoming: Headers) {
+  return incoming.get(ANONYMOUS_REQUEST_HEADER) === '1';
+}
+
+/** 백엔드로 보낼 헤더. 브라우저의 Cookie·Authorization은 버리고 쿠키의 Access로 Authorization을 만든다. User-Agent는 백엔드가 동의 기록의 근거로 남긴다. 공유 비밀값이 있으면 사용자 IP를 함께 보낸다(AI 비회원 한도용). */
 export function forwardHeaders(
   incoming: Headers,
   accessToken?: string,
   sharedSecret: string | undefined = env.BFF_SHARED_SECRET,
 ) {
   const headers = new Headers();
-  for (const name of ['content-type', 'accept']) {
+  for (const name of ['content-type', 'accept', 'user-agent']) {
     const value = incoming.get(name);
     if (value) headers.set(name, value);
   }

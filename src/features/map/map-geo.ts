@@ -53,6 +53,19 @@ export function roundLatLng({ lat, lng }: LatLng): LatLng {
   return { lat: round(lat), lng: round(lng) };
 }
 
+/** 서버로 보내는 좌표의 소수 자릿수. 둘째 자리는 위도 약 1.1km, 서울 경도 약 0.9km 간격이다. */
+const COARSE_DECIMALS = 2;
+
+/**
+ * 서버로 보낼 좌표를 약 1km 격자로 흐린다(소수 둘째 자리). 정확한 현재 위치는 브라우저에만 두고 서버에는 이 값만 보내
+ * 위치정보법의 개인위치정보(특정 개인의 위치를 알 수 있는 정보)를 서버가 받지 않게 한다(docs 13.5).
+ */
+export function coarsenLatLng({ lat, lng }: LatLng): LatLng {
+  const factor = 10 ** COARSE_DECIMALS;
+  const round = (value: number) => Math.round(value * factor) / factor;
+  return { lat: round(lat), lng: round(lng) };
+}
+
 /** 위치를 쓸 수 없을 때 보여 줄 지역 중심. 서울·경기와 전국은 서울시청이다. */
 export function regionCenter(region: ServiceRegion): LatLng {
   return region === 'gyeonggi' ? GYEONGGI_PROVINCIAL_OFFICE : SEOUL_CITY_HALL;

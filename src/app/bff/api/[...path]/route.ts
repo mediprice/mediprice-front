@@ -6,6 +6,7 @@ import { errorResponse, forbidden } from '@/server/bff/responses';
 import {
   callBackend,
   forwardHeaders,
+  isAnonymousRequest,
   isSameOrigin,
   resolveBackendUrl,
 } from '@/server/bff/upstream';
@@ -27,7 +28,9 @@ async function relay(
   const url = resolveBackendUrl(backendPath, request.nextUrl.search);
   if (!url) return errorResponse(404, 'NOT_FOUND', '존재하지 않는 경로입니다.');
 
-  const { accessToken } = readTokens(request);
+  const { accessToken } = isAnonymousRequest(request.headers)
+    ? { accessToken: undefined }
+    : readTokens(request);
   const init: StreamingInit = {
     method: request.method,
     headers: forwardHeaders(request.headers, accessToken),
