@@ -568,7 +568,7 @@ const t = await getTranslations('metadata');
 - 모바일에서 입력창에 포커스가 있으면 하단 탭바가 숨는다(`globals.css`의 `[data-bottom-tab-bar]` 규칙). 입력창을 화면 아래에 붙이는 화면(AI 대화 등)은 탭바가 있을 때와 없을 때의 높이를 모두 계산한다.
 - 입력창 글자는 `text-field`(16px)를 쓴다. 16px보다 작으면 iOS Safari가 포커스할 때 화면을 확대한다.
 - `viewport`는 `app/layout.tsx`에 있다(`viewportFit: 'cover'`로 safe-area 사용). 확대를 막는 설정(`maximumScale`, `userScalable`)은 넣지 않는다.
-- 음성 입력·현재 위치·카메라는 `next.config.ts`의 `Permissions-Policy`에서 같은 출처(`self`)에만 허용돼 있다. 다른 출처의 iframe에서는 쓰지 않는다.
+- 음성 입력·현재 위치는 `next.config.ts`의 `Permissions-Policy`에서 같은 출처(`self`)에만 허용돼 있고, 카메라는 쓰지 않아 막혀 있다(`camera=()`). 다른 출처의 iframe에서는 쓰지 않는다.
 
 ## 14. 가격·지역 데이터 표시
 
