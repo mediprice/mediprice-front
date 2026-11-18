@@ -31,6 +31,30 @@ describe('rotationReducer', () => {
     expect(rotationReducer(at(1), { type: 'tick', length: 3 }).index).toBe(2);
   });
 
+  it('once면 한 바퀴 돌아 처음으로 돌아온 뒤 더 넘기지 않는다', () => {
+    const last = at(2);
+    const finished = rotationReducer(last, {
+      type: 'tick',
+      length: 3,
+      once: true,
+    });
+    expect(finished).toMatchObject({ index: 0, isFinished: true });
+    expect(isRotationPaused(finished)).toBe(true);
+    expect(
+      rotationReducer(finished, { type: 'tick', length: 3, once: true }),
+    ).toBe(finished);
+    expect(
+      rotationReducer(at(0), { type: 'tick', length: 3, once: true }),
+    ).toMatchObject({ index: 1, isFinished: false });
+  });
+
+  it('once가 아니면 끝에서 처음으로 이어 돈다', () => {
+    expect(rotationReducer(at(2), { type: 'tick', length: 3 })).toMatchObject({
+      index: 0,
+      isFinished: false,
+    });
+  });
+
   it('멈춘 동안에도 사용자가 누른 다음·이전은 동작한다', () => {
     const paused = at(0, { isUserPaused: true });
     expect(rotationReducer(paused, { type: 'next', length: 3 }).index).toBe(1);

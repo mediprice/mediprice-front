@@ -3,10 +3,13 @@ export type RotationState = {
   isHovered: boolean;
   hasFocus: boolean;
   isUserPaused: boolean;
+  /** 한 바퀴만 도는 회전(once)이 처음으로 돌아와 멈췄다. */
+  isFinished: boolean;
 };
 
 export type RotationAction =
-  | { type: 'next' | 'prev' | 'tick'; length: number }
+  | { type: 'next' | 'prev'; length: number }
+  | { type: 'tick'; length: number; once?: boolean }
   | { type: 'goTo'; index: number; length: number }
   | { type: 'hover' | 'focus'; value: boolean }
   | { type: 'toggle' }
@@ -17,6 +20,7 @@ export const initialRotation: RotationState = {
   isHovered: false,
   hasFocus: false,
   isUserPaused: false,
+  isFinished: false,
 };
 
 function wrap(index: number, length: number) {
@@ -24,9 +28,11 @@ function wrap(index: number, length: number) {
   return ((index % length) + length) % length;
 }
 
-/** 마우스·포커스·사용자 멈춤 중 하나라도 있으면 자동 넘김을 멈춘다. 탭 숨김·reduced-motion은 훅이 더한다. */
+/** 마우스·포커스·사용자 멈춤·한 바퀴 끝 중 하나라도 있으면 자동 넘김을 멈춘다. 탭 숨김·reduced-motion은 훅이 더한다. */
 export function isRotationPaused(state: RotationState) {
-  return state.isHovered || state.hasFocus || state.isUserPaused;
+  return (
+    state.isHovered || state.hasFocus || state.isUserPaused || state.isFinished
+  );
 }
 
 export function rotationReducer(
@@ -38,9 +44,15 @@ export function rotationReducer(
       return { ...state, index: wrap(state.index + 1, action.length) };
     case 'prev':
       return { ...state, index: wrap(state.index - 1, action.length) };
-    case 'tick':
+    case 'tick': {
       if (isRotationPaused(state)) return state;
-      return { ...state, index: wrap(state.index + 1, action.length) };
+      const index = wrap(state.index + 1, action.length);
+      return {
+        ...state,
+        index,
+        isFinished: Boolean(action.once) && index === 0,
+      };
+    }
     case 'goTo':
       return { ...state, index: wrap(action.index, action.length) };
     case 'hover':

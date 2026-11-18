@@ -78,11 +78,11 @@ export function HospitalContact({
                   <Phone />
                 </RowIcon>
                 <RowText label={t('phone')}>
-                  <span className="tabular-nums">{hospital.phone}</span>
+                  <PhoneNumber phone={hospital.phone} />
                 </RowText>
                 <ChevronRight
                   aria-hidden="true"
-                  className="size-5 shrink-0 text-text-tertiary"
+                  className="size-5 shrink-0 text-text-tertiary max-[22rem]:hidden"
                   strokeWidth={1.75}
                 />
               </a>
@@ -124,6 +124,18 @@ export function HospitalContact({
         </ul>
       )}
     </aside>
+  );
+}
+
+/** 좁은 화면(큰 글자)에서는 지역번호 뒤에서만 줄을 바꾸고 번호 묶음은 끊지 않는다. */
+function PhoneNumber({ phone }: { phone: string }) {
+  const cut = phone.indexOf('-') + 1;
+  return (
+    <span className="tabular-nums">
+      <span className="whitespace-nowrap">{phone.slice(0, cut)}</span>
+      <wbr />
+      <span className="whitespace-nowrap">{phone.slice(cut)}</span>
+    </span>
   );
 }
 

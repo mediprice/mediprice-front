@@ -319,6 +319,10 @@ export function AiChat() {
           if (!open) setDismissedQuota(requestId);
         }}
         isMember={isMember}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          logRef.current?.focus({ preventScroll: true });
+        }}
       />
     </PageContainer>
   );

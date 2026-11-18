@@ -67,22 +67,22 @@ function LogoutRow() {
   });
   return (
     <section aria-labelledby="account-session-title" className="flex flex-col">
-      <h2 id="account-session-title" className="pb-2 text-heading">
+      <h2 id="account-session-title" className="pb-2 text-section">
         {t('sessionTitle')}
       </h2>
-      <div className="border-y border-hairline">
+      <div className="flex flex-col border-y border-hairline">
         <button
           type="button"
           onClick={() => setIsConfirming(true)}
-          className="group -mx-3 flex min-h-16 w-[calc(100%+1.5rem)] items-center gap-4 rounded-xl px-3 py-3 text-left transition-colors duration-200 ease-standard hover:bg-surface active:bg-surface-strong"
+          className="group -mx-3 flex min-h-16 items-center gap-4 rounded-xl px-3 py-3 text-left transition-colors duration-200 ease-standard hover:bg-surface active:bg-surface-strong"
         >
           <span
             aria-hidden="true"
-            className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-surface text-text-secondary [&_svg]:size-5.5"
+            className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary-tint text-primary max-[22rem]:hidden [&_svg]:size-5.5"
           >
             <LogOut strokeWidth={1.75} />
           </span>
-          <span className="flex-1 text-subheading break-keep">
+          <span className="min-w-0 flex-1 text-subheading break-keep">
             {t('logout')}
           </span>
           <ChevronRight

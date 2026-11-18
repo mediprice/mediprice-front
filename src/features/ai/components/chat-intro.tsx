@@ -22,7 +22,7 @@ export function ChatIntro({
     <div className="flex flex-col gap-5 lg:gap-8">
       <div className="flex flex-col gap-3">
         <AiAvatar className="size-10 text-label-bold" />
-        <h2 className="text-display text-balance">{t('intro.title')}</h2>
+        <h2 className="text-section text-balance">{t('intro.title')}</h2>
         <p className="max-w-xl text-body text-text-secondary">
           {t('intro.description')}
         </p>

@@ -39,6 +39,7 @@ export function CompareTray() {
   const coveredHeight = useCoveredHeight(barRef, isVisible);
   const isFull = notice?.kind === 'full' && notice.id !== dismissedNotice;
   const canCompare = hospitals.length >= 2;
+  const names = hospitals.map((hospital) => hospital.name).join(' · ');
 
   useEffect(() => {
     void useCompareStore.persist.rehydrate();
@@ -84,20 +85,25 @@ export function CompareTray() {
                   {t('full', { max: MAX_COMPARE })}
                 </p>
               )}
-              <div className="flex items-center gap-2 py-3 lg:pointer-events-auto lg:gap-4 lg:rounded-2xl lg:border lg:border-border lg:bg-bg lg:py-3 lg:pr-3 lg:pl-5 lg:shadow-float">
-                <div className="flex min-w-0 flex-1 flex-col gap-0.5 lg:flex-row lg:items-center lg:gap-4">
-                  <div className="flex shrink-0 items-center gap-2">
+              {/** 정보가 남는 폭을 거의 다 가져가서, 큰 글자로 줄이 나뉠 때만 비교하기가 한 줄을 다 쓴다. */}
+              <div className="flex flex-wrap items-center gap-2 py-3 lg:pointer-events-auto lg:gap-x-4 lg:rounded-2xl lg:border lg:border-border lg:bg-bg lg:py-3 lg:pr-3 lg:pl-5 lg:shadow-float">
+                <div className="flex min-w-0 flex-[999_1_12rem] flex-col gap-0.5 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-4 lg:gap-y-2">
+                  {/** 진행 막대는 옆에 들어갈 폭이 없으면 다음 줄로 밀려 잘린다(큰 글자). */}
+                  <div className="flex h-lh flex-wrap items-center gap-x-2 overflow-hidden text-label-bold">
                     <p
                       ref={countRef}
                       tabIndex={-1}
-                      className="text-label-bold text-text-primary tabular-nums outline-none"
+                      className="text-label-bold whitespace-nowrap text-text-primary tabular-nums outline-none"
                     >
                       {t('count', {
                         count: hospitals.length,
                         max: MAX_COMPARE,
                       })}
                     </p>
-                    <span aria-hidden="true" className="flex gap-1">
+                    <span
+                      aria-hidden="true"
+                      className="flex h-lh items-center gap-1"
+                    >
                       {Array.from({ length: MAX_COMPARE }, (_, index) => (
                         <span
                           key={index}
@@ -111,9 +117,12 @@ export function CompareTray() {
                       ))}
                     </span>
                   </div>
-                  <p className="truncate text-body-sm text-text-secondary lg:hidden">
+                  <p
+                    title={canCompare ? names : undefined}
+                    className="line-clamp-2 text-body-sm break-keep text-text-secondary lg:hidden"
+                  >
                     {canCompare
-                      ? hospitals.map((hospital) => hospital.name).join(' · ')
+                      ? names
                       : t('needMore', { count: 2 - hospitals.length })}
                   </p>
                   <ul className="hidden min-w-0 flex-wrap items-center gap-2 lg:flex">
@@ -123,7 +132,9 @@ export function CompareTray() {
                         className="inline-flex h-10 max-w-64 items-center gap-2 rounded-full bg-surface pr-1 pl-1.5 text-body-sm text-text-primary"
                       >
                         <CompareNumber value={index + 1} size="sm" />
-                        <span className="truncate">{hospital.name}</span>
+                        <span title={hospital.name} className="truncate">
+                          {hospital.name}
+                        </span>
                         <button
                           type="button"
                           aria-label={t('remove', { name: hospital.name })}
@@ -162,13 +173,13 @@ export function CompareTray() {
                   </Button>
                 </ClearCompareDialog>
                 {canCompare ? (
-                  <Button asChild size="md" elevated>
+                  <Button asChild size="md" elevated className="grow">
                     <Link href={buildBasketHref(hospitals)}>
                       {t('compare')}
                     </Link>
                   </Button>
                 ) : (
-                  <Button size="md" disabled>
+                  <Button size="md" disabled className="grow">
                     {t('compare')}
                   </Button>
                 )}

@@ -106,7 +106,7 @@ export function ReviewForm({
       )}
       className="flex flex-col gap-8"
     >
-      <fieldset className="flex flex-col gap-2">
+      <fieldset className="flex min-w-0 flex-col gap-2">
         <legend id={`${id}-rating`} className="mb-2 text-subheading">
           {t('rating')}
         </legend>
@@ -145,10 +145,10 @@ export function ReviewForm({
         />
         <div
           id={`${id}-content-hint`}
-          className="flex items-start justify-between gap-4 text-body-sm text-text-secondary"
+          className="flex flex-wrap items-start justify-between gap-x-4 text-body-sm text-text-secondary"
         >
           <span>{t('contentRange')}</span>
-          <span aria-hidden="true" className="shrink-0 tabular-nums">
+          <span aria-hidden="true" className="ml-auto tabular-nums">
             {t('contentCount', {
               count: content.length,
               max: REVIEW_CONTENT_MAX,

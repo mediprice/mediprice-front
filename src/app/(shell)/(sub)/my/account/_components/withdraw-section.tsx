@@ -15,7 +15,7 @@ export function WithdrawSection() {
       aria-labelledby="withdraw-title"
       className="flex flex-col items-start gap-2 rounded-2xl bg-surface p-5 lg:p-6"
     >
-      <h2 id="withdraw-title" className="text-subheading">
+      <h2 id="withdraw-title" className="text-heading">
         {t('dangerTitle')}
       </h2>
       <p className="text-body text-text-secondary">{t('dangerDescription')}</p>

@@ -58,7 +58,7 @@ export function MyHome() {
     return (
       <>
         <MyPageHeader>
-          <h1 className="text-hero">{tNav('my')}</h1>
+          <h1 className="text-display">{tNav('my')}</h1>
         </MyPageHeader>
         <PageContainer className={containerClass}>
           <EmptyState
@@ -85,7 +85,7 @@ export function MyHome() {
         <div className="flex items-center gap-4 lg:gap-5">
           <UserAvatar name={name} />
           <div className="flex min-w-0 flex-col gap-1">
-            <h1 className="text-hero text-balance break-all">
+            <h1 className="text-display text-balance break-all">
               {t('greeting', { name })}
             </h1>
             <p className="text-body break-all text-text-secondary">

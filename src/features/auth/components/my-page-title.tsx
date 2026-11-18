@@ -17,7 +17,7 @@ export function MyPageTitle({
       <h1
         id={id}
         tabIndex={id ? -1 : undefined}
-        className="text-title text-balance outline-none"
+        className="text-display text-balance outline-none"
       >
         {title}
       </h1>

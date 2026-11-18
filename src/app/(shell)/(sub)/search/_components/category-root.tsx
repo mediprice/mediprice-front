@@ -1,6 +1,7 @@
 import type { UseQueryResult } from '@tanstack/react-query';
 import {
   Activity,
+  ArrowRight,
   ChevronRight,
   Eye,
   ScanLine,
@@ -90,16 +91,23 @@ export function CategoryRoot({
                       pathname: '/search',
                       query: { category: id, ...regionQuery(region) },
                     }}
-                    className="flex h-full min-h-36 flex-col justify-between gap-4 rounded-2xl bg-surface p-5 transition-[background-color,scale] duration-200 ease-standard hover:bg-surface-strong active:scale-98 active:bg-surface-strong lg:min-h-44 lg:p-6"
+                    className="group flex h-full min-h-36 flex-col justify-between gap-4 rounded-2xl bg-surface p-5 transition-[background-color,scale] duration-200 ease-standard hover:bg-surface-strong active:scale-97 active:bg-primary-tint lg:min-h-44 lg:p-6"
                   >
                     <span
                       aria-hidden="true"
-                      className="flex size-14 items-center justify-center rounded-2xl bg-bg text-primary [&_svg]:size-7 [&_svg]:[stroke-width:1.75]"
+                      className="flex size-12 items-center justify-center rounded-full bg-bg text-primary-text [&_svg]:size-6 [&_svg]:[stroke-width:1.75]"
                     >
                       {ICONS[id]}
                     </span>
-                    <span className="text-heading">
-                      <KeepPhrase text={t(`home.${id}`)} />
+                    <span className="flex items-end justify-between gap-2">
+                      <span className="min-w-0 text-heading">
+                        <KeepPhrase text={t(`home.${id}`)} />
+                      </span>
+                      <ArrowRight
+                        aria-hidden="true"
+                        className="size-5 shrink-0 text-text-tertiary transition-transform duration-200 ease-standard group-hover:translate-x-0.5 group-hover:text-primary-text"
+                        strokeWidth={1.75}
+                      />
                     </span>
                   </Link>
                 </li>

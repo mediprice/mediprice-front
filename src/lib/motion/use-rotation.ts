@@ -18,9 +18,14 @@ function subscribeVisibility(onChange: () => void) {
 
 /**
  * length개를 intervalMs마다 돌린다. 마우스를 올리거나 포커스가 안에 있거나 탭이 숨겨지면 멈추고,
- * reduced-motion이면 사용자 멈춤으로 시작한다(재생을 누르면 돈다). rootProps는 돌아가는 영역 전체에 붙인다.
+ * reduced-motion이면 사용자 멈춤으로 시작한다(재생을 누르면 돈다). once면 한 바퀴 돌아 처음에서 멈춘다.
+ * rootProps는 돌아가는 영역 전체에 붙인다.
  */
-export function useRotation(length: number, intervalMs: number) {
+export function useRotation(
+  length: number,
+  intervalMs: number,
+  { once = false }: { once?: boolean } = {},
+) {
   const [state, dispatch] = useReducer(rotationReducer, initialRotation);
   const reducedMotion = usePrefersReducedMotion();
   const isDocumentHidden = useSyncExternalStore(
@@ -37,11 +42,11 @@ export function useRotation(length: number, intervalMs: number) {
   useEffect(() => {
     if (paused || length < 2) return;
     const timer = window.setInterval(
-      () => dispatch({ type: 'tick', length }),
+      () => dispatch({ type: 'tick', length, once }),
       intervalMs,
     );
     return () => window.clearInterval(timer);
-  }, [paused, length, intervalMs, state.index]);
+  }, [paused, length, intervalMs, once, state.index]);
 
   return {
     index: Math.min(state.index, Math.max(length - 1, 0)),

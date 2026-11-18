@@ -51,6 +51,27 @@ export function groupItems<T extends NpayItem>(
   return [...groups.values()];
 }
 
+/** 묶음 머리에 보일 단계. omitSharedMajor면 모두 같은 대분류일 때 대분류를 빼고, 항목 하나뿐인 묶음의 머리가 그 이름과 같으면 null이다. */
+export function groupHeadingParts<T extends NpayItem>(
+  groups: readonly ItemGroup<T>[],
+  { omitSharedMajor = false }: { omitSharedMajor?: boolean } = {},
+) {
+  const firstMajor = groups[0]?.major?.code;
+  const isShared =
+    omitSharedMajor &&
+    firstMajor !== undefined &&
+    groups.every((group) => group.major?.code === firstMajor);
+  return groups.map((group) => {
+    if (!isShared) return { major: group.major, minor: group.minor };
+    const [only, ...rest] = group.items;
+    const label = group.minor?.name ?? group.major?.name;
+    if (only && rest.length === 0 && formatItemName(only) === label) {
+      return null;
+    }
+    return { major: group.minor ? null : group.major, minor: group.minor };
+  });
+}
+
 /** 그 지역에 가격이 없다고 확인된 항목만 따로 뺀다. 모르는 항목(null)은 가격이 있는 쪽에 둔다. */
 export function partitionByPrice<T extends { hasPrice: boolean | null }>(
   items: readonly T[],

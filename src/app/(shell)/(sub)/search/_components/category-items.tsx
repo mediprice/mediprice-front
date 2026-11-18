@@ -78,7 +78,12 @@ export function CategoryItems({
           />
         ) : (
           <>
-            <ItemGroupList items={items} region={region} headingAs="h3" />
+            <ItemGroupList
+              items={items}
+              region={region}
+              headingAs="h3"
+              omitSharedMajor
+            />
             <LoadMore
               hasNextPage={query.hasNextPage}
               isFetchingNextPage={query.isFetchingNextPage}

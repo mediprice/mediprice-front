@@ -12,8 +12,6 @@
     "keywordPlaceholder": "진료 항목이나 병원 이름",
     "example": "예: {name}",
     "hospitalExample": "병원 이름을 입력하세요",
-    "pauseExamples": "예시 문구 바꾸기 멈추기",
-    "playExamples": "예시 문구 바꾸기 다시 시작",
     "region": "지역",
     "regionAll": "서울·경기",
     "regionSeoul": "서울",
@@ -35,7 +33,7 @@
   },
   "popular": {
     "title": "많이 찾는 항목",
-    "description": "지역을 고르면 평균 가격이 바뀌어요",
+    "description": "평균 가격과 세부 항목별 가격 범위예요. 지역을 고르면 바뀌어요",
     "regionLabel": "지역 선택",
     "rank": "{rank, number}위",
     "viewAll": "전체 항목 보기",
@@ -93,7 +91,7 @@
       },
       "compare": {
         "title": "평균 가격 확인",
-        "description": "지역 평균과 최저·최고 가격을 막대 하나로 한눈에 봐요"
+        "description": "지역 평균을 먼저 보고, 세부 항목별 최저·최고 가격을 함께 봐요"
       },
       "decide": {
         "title": "병원 고르기",

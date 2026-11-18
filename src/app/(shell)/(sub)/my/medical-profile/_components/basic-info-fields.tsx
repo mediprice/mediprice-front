@@ -34,7 +34,7 @@ export function BasicInfoFields({
       aria-labelledby={`${id}-basic`}
       className="flex flex-col gap-5 border-t border-hairline pt-8"
     >
-      <h2 id={`${id}-basic`} className="text-heading">
+      <h2 id={`${id}-basic`} className="text-section">
         {t('basicTitle')}
       </h2>
       <div className="flex flex-col gap-6 md:flex-row md:gap-8">

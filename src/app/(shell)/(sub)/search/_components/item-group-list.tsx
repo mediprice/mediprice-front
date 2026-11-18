@@ -2,7 +2,11 @@ import { ChevronRight } from 'lucide-react';
 
 import { useCategoryLabel } from '@/features/npay/use-category-label';
 import type { ServiceRegion } from '@/features/regions/service-region';
-import { groupItems, partitionByPrice } from '@/features/search/item-groups';
+import {
+  groupHeadingParts,
+  groupItems,
+  partitionByPrice,
+} from '@/features/search/item-groups';
 import type { ItemResult } from '@/features/search/queries';
 
 import { ItemRow } from './item-row';
@@ -17,42 +21,54 @@ export function ItemGroupList({
   items,
   region,
   headingAs: Heading = 'h2',
+  omitSharedMajor = false,
 }: {
   items: readonly ItemResult[];
   region: ServiceRegion;
   headingAs?: 'h2' | 'h3';
+  /** 분류 화면처럼 대분류가 이미 제목에 있으면 묶음 머리마다 되풀이하지 않는다. */
+  omitSharedMajor?: boolean;
 }) {
   const label = useCategoryLabel();
   const { priced, unpriced } = partitionByPrice(items);
+  const groups = groupItems(priced);
+  const headings = groupHeadingParts(groups, { omitSharedMajor });
 
   return (
     <div className="space-y-6 lg:space-y-8">
-      {groupItems(priced).map((group) => (
-        <section key={group.key} className="space-y-1">
-          <Heading className="flex min-h-6 flex-wrap items-center gap-x-1 text-label-bold text-text-secondary">
-            {group.major && (
-              <span>
-                <KeepPhrase text={label(group.major.code, group.major.name)} />
-              </span>
+      {groups.map((group, index) => {
+        const heading = headings[index];
+        return (
+          <section key={group.key} className="space-y-1">
+            {heading && (
+              <Heading className="flex min-h-6 flex-wrap items-center gap-x-1 text-label-bold text-text-secondary">
+                {heading.major && (
+                  <span>
+                    <KeepPhrase
+                      text={label(heading.major.code, heading.major.name)}
+                    />
+                  </span>
+                )}
+                {heading.major && heading.minor && (
+                  <ChevronRight
+                    aria-hidden="true"
+                    className="size-4"
+                    strokeWidth={1.75}
+                  />
+                )}
+                {heading.minor && <span>{heading.minor.name}</span>}
+              </Heading>
             )}
-            {group.major && group.minor && (
-              <ChevronRight
-                aria-hidden="true"
-                className="size-4"
-                strokeWidth={1.75}
-              />
-            )}
-            {group.minor && <span>{group.minor.name}</span>}
-          </Heading>
-          <ul className="divide-y divide-hairline border-b border-hairline">
-            {group.items.map((item) => (
-              <li key={item.code}>
-                <ItemRow item={item} region={region} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+            <ul className="divide-y divide-hairline border-b border-hairline">
+              {group.items.map((item) => (
+                <li key={item.code}>
+                  <ItemRow item={item} region={region} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        );
+      })}
       {unpriced.length > 0 && (
         <UnpricedItems
           items={unpriced}

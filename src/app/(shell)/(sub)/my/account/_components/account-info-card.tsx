@@ -19,7 +19,7 @@ export function AccountInfoCard({ user }: { user: CurrentUser }) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   return (
     <section aria-labelledby="account-info-title" className="flex flex-col">
-      <h2 id="account-info-title" className="pb-2 text-heading">
+      <h2 id="account-info-title" className="pb-2 text-section">
         {t('infoTitle')}
       </h2>
       <dl className="flex flex-col divide-y divide-hairline border-y border-hairline">

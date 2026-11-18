@@ -120,7 +120,7 @@ export function ProfileForm({ profile }: { profile: MedicalProfile | null }) {
         className="flex flex-col gap-6 border-t border-hairline pt-8"
       >
         <div className="flex flex-col gap-1">
-          <h2 id={`${id}-health`} className="text-heading">
+          <h2 id={`${id}-health`} className="text-section">
             {t('healthTitle')}
           </h2>
           <p className="text-body text-text-secondary">

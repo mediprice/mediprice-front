@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown, Pause, Play, Search } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useId, useState } from 'react';
 
@@ -11,15 +11,17 @@ import { useRotation } from '@/lib/motion/use-rotation';
 const EXAMPLE_INTERVAL_MS = 3000;
 
 /**
- * JS 없이도 동작하는 GET 폼(/search가 type·q·region을 읽는다). 빈 입력창에는 인기 항목 이름이 예시로 바뀌어 나온다.
- * 예시는 aria-hidden 겹침 글자이고, 화면 낭독기는 고정된 placeholder를 읽는다. 마우스·포커스·멈춤 버튼에 멈춘다.
+ * JS 없이도 동작하는 GET 폼(/search가 type·q·region을 읽는다). 빈 입력창에는 인기 항목 이름이 예시로 한 바퀴 바뀌고 첫 예시에 멈춘다.
+ * 예시는 aria-hidden 겹침 글자이고, 화면 낭독기는 고정된 placeholder를 읽는다. 마우스·포커스에 멈추고 reduced-motion이면 돌지 않는다.
  */
 export function HomeSearchForm() {
   const t = useTranslations('home.search');
   const tItems = useTranslations('home.popular.items');
   const inputId = useId();
   const [type, setType] = useState<'item' | 'hospital'>('item');
-  const rotation = useRotation(POPULAR_ITEMS.length, EXAMPLE_INTERVAL_MS);
+  const rotation = useRotation(POPULAR_ITEMS.length, EXAMPLE_INTERVAL_MS, {
+    once: true,
+  });
   const example = POPULAR_ITEMS[rotation.index] ?? POPULAR_ITEMS[0];
 
   return (
@@ -110,23 +112,6 @@ export function HomeSearchForm() {
             )}
           </span>
         </div>
-        {type === 'item' && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-text-tertiary hover:text-text-primary"
-            aria-label={
-              rotation.isUserPaused ? t('playExamples') : t('pauseExamples')
-            }
-            onClick={rotation.toggle}
-          >
-            {rotation.isUserPaused ? (
-              <Play aria-hidden="true" />
-            ) : (
-              <Pause aria-hidden="true" />
-            )}
-          </Button>
-        )}
         <Button type="submit" size="md" className="min-h-12 px-5 lg:px-7">
           {t('submit')}
         </Button>

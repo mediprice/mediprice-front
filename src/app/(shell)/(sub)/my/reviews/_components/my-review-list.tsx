@@ -94,7 +94,7 @@ export function MyReviewList() {
   return (
     <section aria-labelledby="my-reviews-count" className="flex flex-col gap-3">
       {banner}
-      <h2 id="my-reviews-count" className="text-heading">
+      <h2 id="my-reviews-count" className="text-section">
         {t('count', { count: total })}
       </h2>
       <ul className="flex flex-col divide-y divide-hairline border-y border-hairline">

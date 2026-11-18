@@ -15,10 +15,10 @@ import { formatItemName } from '@/features/search/item-groups';
 import type { ItemResult } from '@/features/search/queries';
 import { cn } from '@/lib/utils';
 
-/** 가격 영역 높이(평균 + 범위 막대 + 최저·최고 줄 + 간격). 상태가 바뀌어도 행 높이가 같게 둔다. */
-const PRICE_SLOT = 'min-h-20 lg:min-h-21';
+/** 가격 영역 높이(평균 + 최저~최고 글자 + 병원 수). 상태가 바뀌어도 행 높이가 같게 둔다. */
+const PRICE_SLOT = 'min-h-23 lg:min-h-24';
 
-/** 가격이 있는 항목 한 줄. 모바일은 이름 아래, lg부터 오른쪽 열에 평균·범위 막대·병원 수를 둔다. 요약은 목록 조회 때 캐시에 채워져 있어 바로 보인다. */
+/** 가격이 있는 항목 한 줄. 모바일은 이름 아래, lg부터 오른쪽 열에 평균·최저~최고·병원 수를 둔다. 요약은 목록 조회 때 캐시에 채워져 있어 바로 보인다. */
 export function ItemRow({
   item,
   region,
@@ -64,10 +64,10 @@ export function ItemRow({
 /** PriceOverview(md)와 같은 높이를 차지한다. */
 export function PriceSkeleton() {
   return (
-    <div className={cn('flex flex-col gap-1.5', PRICE_SLOT)}>
+    <div className={cn('flex flex-col gap-1', PRICE_SLOT)}>
       <Skeleton className="h-8 w-40 lg:h-9" />
-      <Skeleton className="h-4 w-full max-w-60" />
-      <Skeleton className="h-4.75 w-48 max-w-full lg:h-5" />
+      <Skeleton className="my-0.5 h-4.75 w-60 max-w-full lg:h-5" />
+      <Skeleton className="my-0.5 h-4.75 w-20 lg:h-5" />
     </div>
   );
 }

@@ -23,7 +23,7 @@ export function MySignedOut() {
   return (
     <>
       <MyPageHeader>
-        <h1 className="text-hero text-balance">{t('signedOutTitle')}</h1>
+        <h1 className="text-display text-balance">{t('signedOutTitle')}</h1>
         <p className="text-body-lg text-text-secondary">
           {t('signedOutDescription')}
         </p>
@@ -48,7 +48,7 @@ export function MySignedOut() {
               >
                 <span
                   aria-hidden="true"
-                  className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-surface text-text-secondary [&_svg]:size-5.5"
+                  className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary-tint text-primary [&_svg]:size-5.5"
                 >
                   {icons[benefit]}
                 </span>

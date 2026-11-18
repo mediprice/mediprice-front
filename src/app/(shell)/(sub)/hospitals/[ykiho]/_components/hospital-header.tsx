@@ -52,7 +52,7 @@ export function HospitalHeader<T extends string>({
           {region && <span>{region}</span>}
         </p>
       )}
-      <h1 className="min-w-0 text-hero text-balance break-keep">
+      <h1 className="min-w-0 text-display text-balance break-keep">
         {hospital.name}
       </h1>
       {hospital.address && (
