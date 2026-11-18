@@ -85,8 +85,11 @@ export function CompareTray() {
                   {t('full', { max: MAX_COMPARE })}
                 </p>
               )}
-              {/** 정보가 남는 폭을 거의 다 가져가서, 큰 글자로 줄이 나뉠 때만 비교하기가 한 줄을 다 쓴다. */}
-              <div className="flex flex-wrap items-center gap-2 py-3 lg:pointer-events-auto lg:gap-x-4 lg:rounded-2xl lg:border lg:border-border lg:bg-bg lg:py-3 lg:pr-3 lg:pl-5 lg:shadow-float">
+              {/**
+               * 정보가 남는 폭을 거의 다 가져가서, 큰 글자로 줄이 나뉠 때만 비교하기가 한 줄을 다 쓴다.
+               * 컨테이너 쿼리 단위가 rem이라 글자를 키웠을 때만 좁은 배치가 된다: 모바일은 이름을 한 줄로, 데스크톱은 칩 대신 이름 한 줄로.
+               */}
+              <div className="@container/tray flex flex-wrap items-center gap-2 py-3 lg:pointer-events-auto lg:gap-x-4 lg:rounded-2xl lg:border lg:border-border lg:bg-bg lg:py-3 lg:pr-3 lg:pl-5 lg:shadow-float">
                 <div className="flex min-w-0 flex-[999_1_12rem] flex-col gap-0.5 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-4 lg:gap-y-2">
                   {/** 진행 막대는 옆에 들어갈 폭이 없으면 다음 줄로 밀려 잘린다(큰 글자). */}
                   <div className="flex h-lh flex-wrap items-center gap-x-2 overflow-hidden text-label-bold">
@@ -119,13 +122,13 @@ export function CompareTray() {
                   </div>
                   <p
                     title={canCompare ? names : undefined}
-                    className="line-clamp-2 text-body-sm break-keep text-text-secondary lg:hidden"
+                    className="line-clamp-2 text-body-sm break-keep text-text-secondary lg:line-clamp-1 @max-[16rem]/tray:line-clamp-1 lg:@min-[48rem]/tray:hidden"
                   >
                     {canCompare
                       ? names
                       : t('needMore', { count: 2 - hospitals.length })}
                   </p>
-                  <ul className="hidden min-w-0 flex-wrap items-center gap-2 lg:flex">
+                  <ul className="hidden min-w-0 flex-wrap items-center gap-2 lg:@min-[48rem]/tray:flex">
                     {hospitals.map((hospital, index) => (
                       <li
                         key={hospital.ykiho}
@@ -161,7 +164,7 @@ export function CompareTray() {
                     </p>
                   ) : (
                     !canCompare && (
-                      <p className="hidden text-body-sm text-text-secondary lg:block">
+                      <p className="hidden text-body-sm text-text-secondary lg:@min-[48rem]/tray:block">
                         {t('needMore', { count: 2 - hospitals.length })}
                       </p>
                     )
