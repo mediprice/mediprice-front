@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "title": "MediPrice",
+    "titleTemplate": "%s | MediPrice",
+    "description": "병원마다 다른 비급여 진료비를 한눈에 비교하세요."
+  },
+  "common": {
+    "brand": "MediPrice",
+    "actions": {
+      "close": "닫기",
+      "cancel": "취소",
+      "confirm": "확인",
+      "reset": "초기화",
+      "apply": "적용",
+      "more": "더 보기",
+      "retry": "다시 시도",
+      "back": "뒤로 가기"
+    },
+    "price": {
+      "won": "{amount, number}원",
+      "range": "{min, number}~{max, number}원",
+      "none": "가격 정보 없음"
+    }
+  },
+  "home": {
+    "docsLink": "Next.js 문서"
+  }
+}
