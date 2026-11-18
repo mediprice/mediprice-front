@@ -118,7 +118,7 @@ export function HospitalPriceGroupCard<T extends string>({
                 />
               </button>
             )}
-            <div className="ml-auto flex items-center gap-1">
+            <div className="ml-auto flex flex-wrap items-center justify-end gap-1">
               <FavoriteButton
                 ykiho={group.ykiho}
                 hospital={{

@@ -11,10 +11,10 @@ export function HomeSearchForm() {
       action="/search"
       role="search"
       aria-label={t('label')}
-      className="flex w-full flex-col gap-4 lg:max-w-3xl lg:flex-row lg:items-center lg:gap-2 lg:rounded-xl lg:bg-bg lg:p-2 lg:shadow-card"
+      className="flex w-full min-w-0 flex-col gap-4 lg:max-w-3xl lg:flex-row lg:items-center lg:gap-2 lg:rounded-xl lg:bg-bg lg:p-2 lg:shadow-card"
     >
-      <div className="flex flex-col rounded-xl bg-bg shadow-card lg:flex-1 lg:flex-row lg:items-center lg:rounded-none lg:shadow-none">
-        <fieldset className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3 lg:border-b-0 lg:p-0">
+      <div className="flex min-w-0 flex-col rounded-xl bg-bg shadow-card lg:flex-1 lg:flex-row lg:items-center lg:rounded-none lg:shadow-none">
+        <fieldset className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-4 py-3 lg:border-b-0 lg:p-0">
           <legend className="sr-only">{t('target')}</legend>
           <span
             aria-hidden="true"
@@ -22,9 +22,12 @@ export function HomeSearchForm() {
           >
             {t('target')}
           </span>
-          <div className="flex rounded-md bg-surface-strong p-1">
+          <div className="flex max-w-full min-w-0 rounded-md bg-surface-strong p-1">
             {(['item', 'hospital'] as const).map((type) => (
-              <label key={type} className="touch-target cursor-pointer">
+              <label
+                key={type}
+                className="touch-target min-w-0 flex-1 cursor-pointer"
+              >
                 <input
                   type="radio"
                   name="type"
@@ -32,7 +35,7 @@ export function HomeSearchForm() {
                   defaultChecked={type === 'item'}
                   className="peer sr-only"
                 />
-                <span className="flex min-h-10 items-center rounded-md px-4 text-label text-text-secondary peer-checked:bg-primary peer-checked:text-label-bold peer-checked:text-on-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus-ring">
+                <span className="flex min-h-10 items-center justify-center rounded-md px-3 text-label text-text-secondary peer-checked:bg-primary peer-checked:text-label-bold peer-checked:text-on-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus-ring lg:px-4">
                   {type === 'item' ? t('targetItem') : t('targetHospital')}
                 </span>
               </label>

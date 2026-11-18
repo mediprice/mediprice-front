@@ -16,7 +16,7 @@ export function TrustSection() {
             {t('title')}
           </h2>
         </div>
-        <ul className="grid gap-3 lg:grid-cols-2 lg:gap-4">
+        <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4 [&_li>span:last-child]:min-w-0 [&>li]:min-w-0">
           <li className="flex items-center gap-3 rounded-xl bg-bg p-4 shadow-card lg:p-6">
             <span className="relative size-15 shrink-0">
               <Image

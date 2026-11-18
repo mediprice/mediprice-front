@@ -52,6 +52,8 @@ export function ReviewForm({
     formState: { errors, isDirty },
   } = useForm<ReviewFormInput, unknown, ReviewFormValues>({
     resolver: zodResolver(reviewFormSchema),
+    /** 별점 Controller가 본문보다 늦게 등록돼 기본 포커스가 화면 순서와 어긋나므로 직접 고른다. */
+    shouldFocusError: false,
     defaultValues: review
       ? { rating: review.rating, content: review.content }
       : { rating: undefined, content: '' },
@@ -80,8 +82,9 @@ export function ReviewForm({
   return (
     <form
       noValidate
-      onSubmit={handleSubmit((form) =>
-        save.mutate(form, { onSuccess: (saved) => onSuccess(saved) }),
+      onSubmit={handleSubmit(
+        (form) => save.mutate(form, { onSuccess: (saved) => onSuccess(saved) }),
+        (invalid) => setFocus(invalid.rating ? 'rating' : 'content'),
       )}
       className="flex flex-col gap-6"
     >

@@ -11,7 +11,7 @@ export function HowItWorks() {
 
   return (
     <section aria-labelledby="home-how">
-      <PageContainer className="grid gap-6 py-section lg:grid-cols-2 lg:items-center lg:gap-16">
+      <PageContainer className="grid grid-cols-1 gap-6 py-section lg:grid-cols-2 lg:items-center lg:gap-16 [&>*]:min-w-0">
         <div className="space-y-6">
           <div className="space-y-2">
             <p className="text-caption-bold text-primary-text">

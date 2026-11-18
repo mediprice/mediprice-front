@@ -2,7 +2,7 @@
 
 import { PenLine } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import type { CurrentUser } from '@/features/auth/queries';
@@ -12,6 +12,8 @@ import { NicknameDialog } from './nickname-dialog';
 export function AccountInfoCard({ user }: { user: CurrentUser }) {
   const t = useTranslations('mypage.account');
   const [isEditing, setIsEditing] = useState(false);
+  /** 다이얼로그를 Trigger 없이 열어 Radix가 포커스를 돌려주지 못하므로 직접 돌려준다. */
+  const triggerRef = useRef<HTMLButtonElement>(null);
   return (
     <section
       aria-labelledby="account-info-title"
@@ -47,6 +49,7 @@ export function AccountInfoCard({ user }: { user: CurrentUser }) {
               variant="ghost"
               size="icon"
               aria-label={t('editNickname')}
+              ref={triggerRef}
               onClick={() => setIsEditing(true)}
               className="-mr-2"
             >
@@ -57,7 +60,10 @@ export function AccountInfoCard({ user }: { user: CurrentUser }) {
       </dl>
       <NicknameDialog
         open={isEditing}
-        onOpenChange={setIsEditing}
+        onOpenChange={(next) => {
+          setIsEditing(next);
+          if (!next) requestAnimationFrame(() => triggerRef.current?.focus());
+        }}
         currentName={user.name ?? ''}
       />
     </section>

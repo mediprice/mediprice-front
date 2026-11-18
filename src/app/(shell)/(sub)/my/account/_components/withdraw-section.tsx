@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 
@@ -10,6 +10,8 @@ import { WithdrawDialog } from './withdraw-dialog';
 export function WithdrawSection() {
   const t = useTranslations('mypage.account');
   const [isConfirming, setIsConfirming] = useState(false);
+  /** 다이얼로그를 Trigger 없이 열어 Radix가 포커스를 돌려주지 못하므로 직접 돌려준다. */
+  const triggerRef = useRef<HTMLButtonElement>(null);
   return (
     <section
       aria-labelledby="withdraw-title"
@@ -26,12 +28,19 @@ export function WithdrawSection() {
       <Button
         variant="dangerText"
         size="md"
+        ref={triggerRef}
         onClick={() => setIsConfirming(true)}
         className="w-full lg:w-auto lg:bg-bg"
       >
         {t('withdraw')}
       </Button>
-      <WithdrawDialog open={isConfirming} onOpenChange={setIsConfirming} />
+      <WithdrawDialog
+        open={isConfirming}
+        onOpenChange={(next) => {
+          setIsConfirming(next);
+          if (!next) requestAnimationFrame(() => triggerRef.current?.focus());
+        }}
+      />
     </section>
   );
 }

@@ -30,7 +30,7 @@ export function LeaveConfirmDialog({
             <Button variant="tint" size="md" onClick={onLeave}>
               {t('leave')}
             </Button>
-            <Button size="md" onClick={onStay}>
+            <Button size="md" onClick={onStay} autoFocus>
               {t('stay')}
             </Button>
           </div>

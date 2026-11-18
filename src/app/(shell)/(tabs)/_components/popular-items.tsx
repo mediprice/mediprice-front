@@ -34,7 +34,7 @@ export function PopularItems() {
           </div>
           <div className="hidden lg:block">{viewAll}</div>
         </div>
-        <ul className="grid gap-4 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 lg:grid-cols-3 [&>li]:min-w-0">
           {POPULAR_ITEMS.map((item, index) => (
             <li key={item.id} className={index >= 3 ? 'hidden lg:block' : ''}>
               <Link

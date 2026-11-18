@@ -8,6 +8,7 @@ export function BottomTabBar({ items }: { items: NavItem[] }) {
   const t = useTranslations('nav');
   return (
     <nav
+      data-bottom-tab-bar
       aria-label={t('tabMenu')}
       className="fixed inset-x-0 bottom-0 z-(--z-tab-bar) bg-bg px-safe pb-safe shadow-bar before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-border lg:hidden"
     >

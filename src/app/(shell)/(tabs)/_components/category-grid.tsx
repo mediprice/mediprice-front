@@ -32,7 +32,7 @@ export function CategoryGrid() {
         <h2 id="home-categories" className="text-section">
           {t('title')}
         </h2>
-        <ul className="grid grid-cols-2 gap-2.5 md:grid-cols-3 lg:grid-cols-6 lg:gap-4">
+        <ul className="grid grid-cols-2 gap-2.5 md:grid-cols-3 lg:grid-cols-6 lg:gap-4 [&>li]:min-w-0">
           {tiles.map((id) => (
             <li key={id}>
               <Link
@@ -46,7 +46,9 @@ export function CategoryGrid() {
                   {ICONS[id]}
                 </span>
                 <span className="flex items-center justify-between gap-1 text-label-bold">
-                  {t(id)}
+                  <span className="min-w-0 [overflow-wrap:anywhere]">
+                    {t(id)}
+                  </span>
                   <ChevronRight
                     aria-hidden="true"
                     className="size-5 shrink-0 text-text-tertiary lg:hidden"

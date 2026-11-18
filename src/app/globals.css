@@ -290,6 +290,24 @@
   }
 }
 
+/* 모바일에서 글을 입력하는 동안에는 하단 탭바를 숨겨 키보드 위 입력창을 가리지 않게 한다. */
+@media (width < 64rem) {
+  body:has(
+      :is(
+        textarea,
+        input:not(
+          [type='checkbox'],
+          [type='radio'],
+          [type='button'],
+          [type='submit']
+        )
+      ):focus
+    )
+    [data-bottom-tab-bar] {
+    display: none;
+  }
+}
+
 @layer base {
   :root {
     color-scheme: light;

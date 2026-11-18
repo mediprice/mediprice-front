@@ -23,7 +23,6 @@ export function TypingIndicator() {
               {DOT_DELAYS.map((delay) => (
                 <span
                   key={delay}
-                  data-allow-motion
                   className={cn(
                     'size-2 animate-pulse rounded-full bg-border-strong',
                     delay,
