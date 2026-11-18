@@ -1,6 +1,3 @@
 {
   "$schema": "https://unpkg.com/knip/schema.json",
-  // Intentionally installed for upcoming UI, forms, client state, and testing.
-  // Remove each exception when the package is used in application code.
-  "ignoreDependencies": ["react-hook-form", "@hookform/resolvers", "zustand"],
 }
