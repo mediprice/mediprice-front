@@ -2,11 +2,14 @@
 
 import { ChartLine, ChevronRight, X } from 'lucide-react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 
 import { PriceRange } from '@/components/ui/price-range';
 import { Skeleton } from '@/components/ui/skeleton';
+import { decodeYkiho } from '@/features/hospitals/detail-links';
 import { priceRowName } from '@/features/hospitals/price-groups';
+import { LiveFeeCheck } from '@/features/live-fee/components/live-fee-check';
 import { cn } from '@/lib/utils';
 
 import { SectionError } from './section-error';
@@ -29,6 +32,7 @@ export function SelectedItemCard({
   onClear: () => void;
 }) {
   const t = useTranslations('hospitals.detail.selected');
+  const ykiho = decodeYkiho(useParams<{ ykiho: string }>().ykiho);
   const format = useFormatter();
   const { displayName, rows } = prices;
   const failure = useStickyError(prices.error, prices.refetch);
@@ -153,6 +157,12 @@ export function SelectedItemCard({
           )}
 
           <TrendNote trend={trend} />
+
+          <LiveFeeCheck
+            key={`${ykiho}:${item}`}
+            ykiho={ykiho}
+            npayCode={item}
+          />
         </>
       )}
 

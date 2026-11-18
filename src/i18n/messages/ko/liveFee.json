@@ -1,0 +1,31 @@
+{
+  "check": {
+    "action": "최신 가격 확인",
+    "again": "다시 확인",
+    "cooldown": "{seconds, plural, other {#초}} 뒤에 다시 확인할 수 있어요.",
+    "hint": "심평원 누리집에 지금 공개된 가격과 맞춰 봐요."
+  },
+  "checking": {
+    "title": "최신 가격을 확인하고 있어요",
+    "description": "심평원 누리집의 공개 가격과 맞춰 보는 중이에요."
+  },
+  "result": {
+    "same": "공개 가격과 같아요",
+    "changed": "공개 가격과 달라요",
+    "none": "누리집에서 가격을 찾지 못했어요",
+    "ourPrice": "앱에 있는 가격",
+    "webPrice": "심평원 최신",
+    "publishedMonth": "{month} 공개",
+    "notListed": "정보 없음",
+    "changedNote": "앱의 가격은 심평원 자료로 매주 업데이트해서, 최근에 바뀐 가격은 아직 반영되지 않았을 수 있어요.",
+    "noneNote": "누리집에 이 항목이 아직 올라오지 않았거나 이름이 달라 찾지 못했을 수 있어요.",
+    "disclaimer": "공개 가격은 병원이 신고한 기준 가격이라 실제 진료비와 다를 수 있어요. 병원에 확인하세요.",
+    "source": "건강보험심사평가원 누리집 · {time} 확인"
+  },
+  "failure": {
+    "title": "지금은 확인하지 못했어요",
+    "unavailable": "심평원 누리집이 바뀌었거나 접속이 잠시 막혔을 수 있어요. 잠시 후 다시 시도해 주세요.",
+    "retry": "다시 시도",
+    "retryIn": "{seconds, plural, other {#초}} 뒤 다시 시도"
+  }
+}
