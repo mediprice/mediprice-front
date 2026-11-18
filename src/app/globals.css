@@ -364,6 +364,21 @@
     [data-bottom-tab-bar] {
     display: none;
   }
+
+  /* 탭바가 숨는 동안에는 그 높이만큼의 하단 스크롤 여백도 없앤다(입력 포커스 때 화면이 밀려 올라가지 않게). */
+  :root:has(
+    :is(
+      textarea,
+      input:not(
+        [type='checkbox'],
+        [type='radio'],
+        [type='button'],
+        [type='submit']
+      )
+    ):focus
+  ) {
+    scroll-padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+  }
 }
 
 @layer base {
