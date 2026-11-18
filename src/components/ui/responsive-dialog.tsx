@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 export const ResponsiveDialog = Dialog.Root;
 export const ResponsiveDialogTrigger = Dialog.Trigger;
 
-/** lg 미만은 바텀시트, lg부터 가운데 모달. 화면 폭을 JS로 재지 않고 CSS로만 바꾼다(docs 13.3). */
+/** md(768px) 미만은 바텀시트, md부터 가운데 모달. 화면 폭을 JS로 재지 않고 CSS로만 바꾼다(docs 13.3). */
 export function ResponsiveDialogContent({
   title,
   description,

@@ -539,7 +539,7 @@ const t = await getTranslations('metadata');
 
 ### 13.3 모달과 바텀시트
 
-- 모바일은 바텀시트, 데스크톱은 가운데 모달인 화면(필터, 로그인)은 `components/ui/responsive-dialog.tsx` 하나로 만든다(첫 사용 화면에서 추가). Radix Dialog 하나를 CSS로만 바꾼다: 기본은 `fixed inset-x-0 bottom-0 rounded-t-3xl shadow-sheet pb-safe`, `lg:`부터 `top-1/2 left-1/2 -translate-1/2 rounded-xl shadow-float`.
+- 모바일은 바텀시트, 데스크톱은 가운데 모달인 화면(필터, 로그인)은 `components/ui/responsive-dialog.tsx` 하나로 만든다(첫 사용 화면에서 추가). Radix Dialog 하나를 CSS로만 바꾼다: 기본은 `fixed inset-x-0 bottom-0 rounded-t-3xl shadow-sheet pb-safe`, `md:`(768px, 태블릿)부터 `top-1/2 left-1/2 -translate-1/2 rounded-xl shadow-float`. 태블릿에서 화면 폭 전체를 덮는 시트는 어색해서 모달 전환을 레이아웃 전환(`lg:`)보다 먼저 한다.
 - JS로 화면 폭을 재서 다른 컴포넌트를 렌더하지 않는다(MUST). 서버 렌더링 결과와 달라져 하이드레이션 오류와 깜빡임이 생긴다.
 - 확인 다이얼로그(삭제 확인 등, 320px)는 모든 크기에서 가운데 모달이다.
 - 데스크톱은 옆 열, 모바일은 시트인 필터는 같은 `FilterPanel`을 두 곳(`hidden lg:block`인 열과 `lg:hidden`인 시트)에 렌더한다. 상태가 URL 쿼리에 있어 두 곳이 어긋나지 않는다(6.3).
