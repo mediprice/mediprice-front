@@ -158,7 +158,7 @@ function RangeBarBody({
               </span>
             </div>
           )}
-          <div className="flex justify-between gap-3 text-text-tertiary">
+          <div className="flex flex-wrap justify-between gap-x-3 text-text-tertiary">
             <span>{tPrice('minimum', { amount: min })}</span>
             <span className="text-right">
               {tPrice('maximum', { amount: max })}
