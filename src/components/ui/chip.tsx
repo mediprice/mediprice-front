@@ -9,15 +9,15 @@ import { cn } from '@/lib/utils';
 /** Figma M/Chip. 고른 칩은 색과 함께 굵기도 바뀐다. 보이는 높이는 36px이고 누르는 영역은 44px이다. */
 const chipVariants = cva(
   [
-    'touch-target inline-flex h-9 shrink-0 items-center gap-1 rounded-full border px-3.5 whitespace-nowrap',
-    'transition-colors duration-150 ease-standard motion-reduce:transition-none',
+    'touch-target inline-flex h-9 shrink-0 items-center gap-1 rounded-full border px-4 whitespace-nowrap',
+    'transition-[color,background-color,border-color,scale] duration-200 ease-standard active:scale-97 motion-reduce:transition-none',
   ],
   {
     variants: {
       selected: {
         true: 'border-primary bg-primary-tint text-label text-primary-text',
         false:
-          'border-border-strong bg-bg text-body-sm text-text-secondary hover:bg-surface active:bg-surface-strong',
+          'border-border-strong bg-bg text-body-sm text-text-primary hover:bg-surface active:bg-surface-strong',
       },
     },
     defaultVariants: { selected: false },

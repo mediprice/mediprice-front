@@ -10,8 +10,8 @@ import { cn } from '@/lib/utils';
 /** 변형 이름은 Figma M/Button 변형을 따른다. 긴 문구는 줄바꿈되고, 모바일 전체 폭은 className="w-full"로 준다. */
 const buttonVariants = cva(
   [
-    'relative inline-flex max-w-full shrink-0 items-center justify-center gap-2 rounded-lg text-center text-label-bold text-balance',
-    'transition-[color,background-color,border-color,box-shadow] duration-150 ease-standard motion-reduce:transition-none',
+    'relative inline-flex max-w-full shrink-0 items-center justify-center gap-2 rounded-xl text-center text-label-bold text-balance',
+    'transition-[color,background-color,border-color,box-shadow,scale] duration-200 ease-standard active:scale-98 motion-reduce:transition-none',
     'data-loading:pointer-events-none inactive:pointer-events-none inactive:text-text-disabled inactive:shadow-none',
     '[&_svg]:size-5 [&_svg]:shrink-0 [&_svg]:[stroke-width:1.75]',
   ],
@@ -24,7 +24,7 @@ const buttonVariants = cva(
         neutral:
           'bg-surface text-text-primary hover:bg-surface-strong active:bg-border inactive:bg-surface-strong',
         outline:
-          'border border-border-strong bg-bg text-text-primary hover:bg-surface active:bg-surface-strong inactive:border-border',
+          'border border-border-strong bg-bg text-text-primary hover:border-text-tertiary hover:bg-surface active:bg-surface-strong inactive:border-border',
         danger:
           'bg-danger text-on-primary hover:bg-danger-hover active:bg-danger-pressed inactive:bg-surface-strong',
         dangerText:
@@ -37,7 +37,7 @@ const buttonVariants = cva(
       size: {
         lg: 'min-h-13 px-5 py-3',
         md: 'min-h-11 px-4 py-2.5',
-        sm: 'touch-target min-h-9 px-3 py-1.5',
+        sm: 'touch-target min-h-9 rounded-lg px-3 py-1.5',
         icon: 'size-11',
       },
       /** 화면의 대표 행동 하나(페이지 CTA, 하단 고정 버튼)에만 쓴다. */

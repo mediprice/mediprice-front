@@ -19,21 +19,21 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center gap-3 px-4 py-12 text-center',
+        'flex flex-col items-center gap-3 px-4 py-14 text-center',
         className,
       )}
     >
       {icon && (
         <span
           aria-hidden="true"
-          className="flex size-14 items-center justify-center rounded-full bg-surface text-text-tertiary [&_svg]:size-7 [&_svg]:[stroke-width:1.75]"
+          className="mb-1 flex size-16 items-center justify-center rounded-2xl bg-surface text-text-tertiary [&_svg]:size-7 [&_svg]:[stroke-width:1.75]"
         >
           {icon}
         </span>
       )}
-      <p className="text-subheading">{title}</p>
+      <p className="text-heading text-balance">{title}</p>
       {description && (
-        <p className="max-w-sm text-body-sm text-text-secondary">
+        <p className="max-w-sm text-body text-balance text-text-secondary">
           {description}
         </p>
       )}

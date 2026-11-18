@@ -12,7 +12,7 @@ export function BrandLink() {
     >
       <span
         aria-hidden="true"
-        className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-on-primary"
+        className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary text-on-primary"
       >
         <Tag className="size-4" strokeWidth={2} />
       </span>

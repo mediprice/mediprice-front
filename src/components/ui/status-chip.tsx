@@ -5,7 +5,7 @@ import type { ComponentProps } from 'react';
 import { cn } from '@/lib/utils';
 
 const statusChipVariants = cva(
-  'inline-flex w-fit items-center gap-1 rounded-full py-1 pr-2.5 pl-2 text-caption-strong [&_svg]:size-3 [&_svg]:shrink-0 [&_svg]:[stroke-width:2]',
+  'inline-flex w-fit items-center gap-1 rounded-full py-1 pr-2.5 pl-2 text-caption-bold [&_svg]:size-3.5 [&_svg]:shrink-0 [&_svg]:[stroke-width:2.25]',
   {
     variants: {
       status: {

@@ -25,7 +25,7 @@ export function TopNav({
             <NavLink
               key={item.href}
               href={item.href}
-              className="relative inline-flex h-full min-w-11 items-center justify-center px-3 text-label text-text-secondary -outline-offset-8 after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-primary after:opacity-0 hover:text-text-primary aria-[current=page]:text-primary-text aria-[current=page]:after:opacity-100"
+              className="relative inline-flex h-full min-w-11 items-center justify-center px-3 text-label text-text-secondary -outline-offset-8 transition-colors duration-200 ease-standard after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity after:duration-200 hover:text-text-primary aria-[current=page]:text-text-primary aria-[current=page]:after:opacity-100"
             >
               {item.label}
             </NavLink>
