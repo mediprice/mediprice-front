@@ -20,8 +20,9 @@
     "remainingToday": "오늘 {count, number}회 남음"
   },
   "intro": {
-    "greeting": "어떤 도움이 필요하세요?\n아래에서 고르거나 편하게 말씀해 주세요.",
-    "examplesLabel": "이렇게 물어볼 수 있어요",
+    "title": "증상을 말하면 맞는 진료비를 찾아 드려요",
+    "description": "어디가 어떻게 불편한지, 받으려는 치료가 있는지 편하게 적어 주세요. 관련 비급여 항목과 서울·경기 평균 가격을 보여 드려요.",
+    "examplesLabel": "이렇게 물어보세요",
     "examples": {
       "manualTherapy": "도수치료 받으려는데 얼마나 나와요?",
       "shoulder": "어깨가 아파서 병원 가려는데 얼마나 나올까요?",
@@ -44,9 +45,9 @@
   },
   "result": {
     "title": "관련 비급여 항목",
-    "count": "{count, number}개",
+    "titleWithCount": "관련 비급여 항목 {count, number}개",
     "free": "가격을 확인해도 AI 횟수는 차감되지 않아요.",
-    "priceLabel": "{region} 평균",
+    "priceLabel": "{region} 기준",
     "viewPrices": "병원별 가격 보기",
     "priceError": "가격을 불러오지 못했어요.",
     "notice": "건강보험이 적용되는 진료비(진찰료 등)는 포함되지 않은 비급여 가격이에요.",
@@ -56,7 +57,9 @@
   },
   "noMatch": {
     "category": "카테고리로 찾기",
+    "categoryHint": "분류를 하나씩 좁혀 보세요",
     "search": "항목 이름으로 검색",
+    "searchHint": "도수치료, MRI처럼 이름으로 찾아요",
     "reply": "말씀하신 상황과 맞는 비급여 항목을 찾지 못했어요. 항목 이름으로 직접 검색해 보시겠어요?"
   },
   "failure": {

@@ -1,3 +1,4 @@
+import { RotateCcw } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
@@ -5,19 +6,18 @@ import { Button } from '@/components/ui/button';
 
 import { SESSION_TURN_LIMIT } from '../conversation';
 
-/** 한 대화에서 말할 수 있는 횟수를 다 썼을 때. 행동은 빈 상태 규칙대로 tint 하나와 ghost 보조다. */
+/** 한 대화에서 말할 수 있는 횟수를 다 썼을 때. 새 대화를 앞세우고 카테고리는 ghost 보조로 둔다. */
 export function ChatEnded({ onRestart }: { onRestart: () => void }) {
   const t = useTranslations('ai.ended');
   return (
-    <div className="flex flex-col items-center gap-3 text-center">
-      <p className="flex w-full items-center gap-3 text-caption-strong text-text-tertiary before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border">
-        {t('divider')}
-      </p>
-      <p className="text-body-sm text-text-secondary">
+    <div className="flex flex-col items-center gap-2 rounded-2xl bg-surface px-5 py-6 text-center">
+      <h2 className="text-heading text-balance">{t('divider')}</h2>
+      <p className="max-w-md text-body text-text-secondary">
         {t('description', { count: SESSION_TURN_LIMIT })}
       </p>
-      <div className="flex flex-col items-center gap-1">
-        <Button variant="tint" size="md" onClick={onRestart}>
+      <div className="mt-2 flex flex-wrap justify-center gap-2">
+        <Button size="md" onClick={onRestart}>
+          <RotateCcw aria-hidden="true" />
           {t('restart')}
         </Button>
         <Button asChild variant="ghost" size="md">

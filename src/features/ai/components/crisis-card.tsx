@@ -7,20 +7,27 @@ import { Button } from '@/components/ui/button';
 export function CrisisCard() {
   const t = useTranslations('ai.safety');
   return (
-    <div className="flex flex-col gap-2">
-      <Button asChild size="md" className="w-full">
-        <a href="tel:109">
-          <Phone aria-hidden="true" />
-          {t('call109')}
-        </a>
-      </Button>
-      <Button asChild variant="outline" size="md" className="w-full">
-        <a href="tel:119">
-          <Phone aria-hidden="true" />
-          {t('call119')}
-        </a>
-      </Button>
-      <p className="pt-1 text-body-sm text-text-secondary">{t('stopped')}</p>
+    <div className="flex max-w-md flex-col gap-3">
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Button asChild size="lg" className="w-full sm:flex-1">
+          <a href="tel:109">
+            <Phone aria-hidden="true" />
+            {t('call109')}
+          </a>
+        </Button>
+        <Button
+          asChild
+          variant="outline"
+          size="lg"
+          className="w-full sm:flex-1"
+        >
+          <a href="tel:119">
+            <Phone aria-hidden="true" />
+            {t('call119')}
+          </a>
+        </Button>
+      </div>
+      <p className="text-body-sm text-text-secondary">{t('stopped')}</p>
     </div>
   );
 }
