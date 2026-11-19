@@ -14,14 +14,19 @@ export function reviewWriteHref(
   return params.size > 0 ? (`${path}?${params.toString()}` as const) : path;
 }
 
+/** 남의 후기 권리침해 신고 화면 주소. 로그인 없이 들어올 수 있다. */
+export function reviewClaimHref(ykiho: string, reviewId: number) {
+  return `/hospitals/${encodeURIComponent(ykiho)}/review/${reviewId}/claim` as const;
+}
+
 const reviewIdSchema = z.coerce
   .number()
   .int()
   .positive()
   .max(Number.MAX_SAFE_INTEGER);
 
-/** URL의 edit 파라미터. 배열이거나 양의 정수가 아니면 새 후기 작성으로 본다. */
-export function parseEditParam(value: unknown): number | null {
+/** URL의 후기 번호(edit 파라미터, 신고 화면 경로). 배열이거나 양의 정수가 아니면 null이고, edit이면 새 후기 작성으로 본다. */
+export function parseReviewId(value: unknown): number | null {
   if (typeof value !== 'string' || !/^\d{1,16}$/.test(value)) return null;
   const result = reviewIdSchema.safeParse(value);
   return result.success ? result.data : null;

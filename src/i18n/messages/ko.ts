@@ -1,6 +1,7 @@
 import admin from './ko/admin.json';
 import ai from './ko/ai.json';
 import auth from './ko/auth.json';
+import claims from './ko/claims.json';
 import common from './ko/common.json';
 import comparison from './ko/comparison.json';
 import errors from './ko/errors.json';
@@ -33,6 +34,7 @@ export const messages = {
   mypage,
   comparison,
   reviews,
+  claims,
   library,
   ai,
   map,
