@@ -1,4 +1,4 @@
-import { ArrowDown } from 'lucide-react';
+import { BadgeCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
@@ -13,10 +13,14 @@ import { cn } from '@/lib/utils';
 export const LABEL_CELL =
   'sticky left-0 z-10 border-r border-hairline bg-surface px-2.5 py-3 align-top text-left text-caption-strong text-text-secondary lg:px-6 lg:py-4 lg:text-label';
 
-/** 항목 하나의 병원별 가격. 한 병원 안의 세부 가격은 최저~최고로 보여 주고, 가장 낮은 곳에 "최저" 표시를 단다. */
+/**
+ * 항목 하나의 병원별 가격. 한 병원 안의 세부 가격은 최저~최고로 보여 주고, 가장 낮은 곳에 아이콘과 "최저"를 단다.
+ * 병원 번호 점 막대는 머리 요약에 하나만 둔다. 행마다 그리면 열을 가로질러 점이 다른 병원 열 아래에 놓여 헷갈린다.
+ */
 export function PriceRow({
   hospitals,
   row,
+  lowest: lowestOverride,
   label,
   sublabel,
   isEmphasized = false,
@@ -24,6 +28,8 @@ export function PriceRow({
 }: {
   hospitals: readonly ComparisonHospital[];
   row: ComparisonItem;
+  /** "최저"를 달 병원. 없으면 병원별 가장 낮은 가격으로 고른다. */
+  lowest?: ReadonlySet<string>;
   label: string;
   sublabel?: string | null;
   isEmphasized?: boolean;
@@ -31,11 +37,7 @@ export function PriceRow({
   trailing?: ReactNode;
 }) {
   const t = useTranslations('comparison.table');
-  const lowest = findLowest(
-    row.prices.filter((price) =>
-      hospitals.some((hospital) => hospital.ykiho === price.ykiho),
-    ),
-  );
+  const lowest = lowestOverride ?? findLowest(row.prices);
 
   return (
     <tr
@@ -80,10 +82,10 @@ export function PriceRow({
                 </span>
               )}
               {isLowest && (
-                <span className="inline-flex items-center gap-0.5 rounded-full bg-positive-tint py-0.5 pr-2 pl-1.5 text-caption-bold text-positive">
-                  <ArrowDown
+                <span className="inline-flex items-center gap-1 rounded-full bg-positive-tint py-0.5 pr-2 pl-1.5 text-caption-bold text-positive">
+                  <BadgeCheck
                     aria-hidden="true"
-                    className="size-3"
+                    className="size-3.5"
                     strokeWidth={2}
                   />
                   {t('lowest')}

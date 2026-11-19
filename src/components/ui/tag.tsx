@@ -12,7 +12,7 @@ export function Tag({
     <span
       data-slot="tag"
       className={cn(
-        'inline-flex items-center rounded-md px-2 py-1 text-caption-strong text-text-secondary',
+        'inline-flex items-center rounded-md px-2 py-0.5 text-caption-strong text-text-secondary',
         tone === 'onBand' ? 'bg-bg' : 'bg-surface-strong',
         className,
       )}

@@ -25,14 +25,14 @@ export function ClearCompareDialog({
       <AlertDialog.Trigger asChild>{children}</AlertDialog.Trigger>
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="fixed inset-0 z-(--z-overlay) bg-overlay duration-200 ease-standard data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
-        <AlertDialog.Content className="fixed top-1/2 left-1/2 z-(--z-overlay) flex w-[calc(100%-2.5rem)] max-w-80 -translate-1/2 flex-col gap-2 rounded-xl bg-bg p-5 shadow-float duration-200 ease-standard outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
+        <AlertDialog.Content className="fixed inset-x-4 inset-y-0 z-(--z-overlay) m-auto flex h-fit max-h-[80dvh] max-w-80 flex-col gap-2 overflow-y-auto rounded-xl bg-bg p-5 shadow-float duration-200 ease-standard outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 max-[22rem]:inset-x-2 max-[22rem]:p-4">
           <AlertDialog.Title className="text-subheading">
             {t('title')}
           </AlertDialog.Title>
           <AlertDialog.Description className="text-body-sm text-text-secondary">
             {t('description', { count })}
           </AlertDialog.Description>
-          <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="mt-3 flex flex-wrap gap-2 *:flex-[1_1_8rem]">
             <AlertDialog.Cancel asChild>
               <Button variant="neutral" size="md">
                 {tActions('cancel')}

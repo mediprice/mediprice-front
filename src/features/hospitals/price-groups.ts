@@ -58,3 +58,38 @@ export function splitTrailingUnit(name: string): [string, string] {
   if (!tail || tail.length > 8) return [name, ''];
   return [name.slice(0, index + 1), tail];
 }
+
+/** 선택 카드의 세부 항목 순서. 값을 훑어보기 쉽게 낮은 가격부터 두고, 같은 값은 받은 순서를 지킨다. */
+export function sortVariantRows<R extends Pick<PriceRow, 'price'>>(
+  rows: readonly R[],
+) {
+  return [...rows].sort((a, b) => a.price - b.price);
+}
+
+/**
+ * 고른 세부 항목(이름·가격)과 맞는 행. 이름과 가격이 모두 맞는 행, 이름만 맞는 행, 맨 앞 행 순서로 찾는다.
+ * 목록 행이 보여 준 세부 항목을 병원 화면이 그대로 잇게 한다.
+ */
+export function pickVariantRow<R extends PriceRow>(
+  rows: readonly R[],
+  selection: { name: string; price: number | null } | null,
+): R | undefined {
+  if (selection) {
+    const name = selection.name.trim();
+    const byName = rows.filter((row) => priceRowName(row) === name);
+    const exact = byName.find((row) => row.price === selection.price);
+    if (exact ?? byName[0]) return exact ?? byName[0];
+  }
+  return rows[0];
+}
+
+/** 접힌 카드에 보일 세부 항목. 앞에서 limit개를 두되 고른 행이 그 밖에 있으면 마지막 자리를 그 행에 준다. */
+export function visibleVariantRows<R>(
+  rows: readonly R[],
+  active: R | undefined,
+  limit: number,
+): R[] {
+  const head = rows.slice(0, limit);
+  if (active === undefined || head.includes(active) || limit < 1) return head;
+  return [...head.slice(0, limit - 1), active];
+}

@@ -14,11 +14,13 @@ import { isSideBySide, scrollListTo } from './list-scroll';
 import { LocationNoticeBanner } from './location-notice-banner';
 import { MapToolbar, type MobileView } from './map-toolbar';
 import { hospitalCardId, NearbyList } from './nearby-list';
-import { SelectedHospitalPanel } from './selected-hospital-panel';
 import { useMapSearch } from './use-map-search';
 import { useNearbyResults } from './use-nearby-results';
 
-/** S-07 지도 탐색. 목록이 주 수단이고 지도는 위치를 보여 주는 보조 수단이다. 선택은 지도와 목록이 함께 쓴다. */
+/**
+ * S-07 지도 탐색. 목록이 주 수단이고 지도는 위치를 보여 주는 보조 수단이다. 선택은 지도와 목록이 함께 쓴다.
+ * 데스크톱은 옆 목록 열, 모바일 지도 보기는 지도 아래 시트(안에서 스크롤해 지도가 끌려가지 않음)에 목록이 있다.
+ */
 export function MapView({ initialParams }: { initialParams: MapParams }) {
   const t = useTranslations('map');
   const item = initialParams.item;
@@ -33,23 +35,21 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
     ? selectedId
     : null;
 
-  const selected = hospitals.find((hospital) => hospital.ykiho === activeId);
-
-  /** 지도에서 고르면 데스크톱 목록 열에서 그 카드가 보이게 옮긴다. 모바일은 지도 아래 "선택한 병원"이 대신한다. */
+  /** 지도에서 고르면 옆 목록 열(모바일은 지도 아래 시트)에서 그 행이 보이게 옮긴다. 지도는 이 둘 중 하나와 늘 함께 보인다. */
   const handleMarkerSelect = useCallback((id: string) => {
     setSelectedId(id);
-    if (!isSideBySide()) return;
     requestAnimationFrame(() => scrollListTo(hospitalCardId(id)));
   }, []);
 
-  /** 데스크톱은 지도가 옆에 있어 켜고 끄는 토글이고, 모바일은 고른 뒤 지도 보기로 넘어간다. */
+  /** 지도가 함께 보이면(데스크톱, 모바일 시트) 켜고 끄는 토글이고, 모바일 목록 보기에서는 고른 뒤 지도 보기로 넘어간다. */
   function handleShowOnMap(id: string) {
-    if (isSideBySide()) {
+    if (isSideBySide() || view === 'map') {
       setSelectedId((current) => (current === id ? null : id));
       return;
     }
     setSelectedId(id);
     handleViewChange('map');
+    requestAnimationFrame(() => scrollListTo(hospitalCardId(id)));
   }
 
   /** 지도 보기는 화면 높이에 맞춰 그리므로 맨 위로 올리고, 목록으로 돌아오면 고른 카드를 보여 준다. */
@@ -116,7 +116,7 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
                   }
                   isLoading={state.isLocating}
                   onClick={state.requestLocation}
-                  className="rounded-full shadow-card"
+                  className="rounded-full border border-border-strong shadow-float"
                 >
                   <LocateFixed aria-hidden="true" />
                 </Button>
@@ -156,15 +156,9 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
           selectedId={activeId}
           onShowOnMap={handleShowOnMap}
           onRadiusChange={state.changeRadius}
-          className={cn(view === 'map' && 'hidden md:block')}
+          onExpand={() => handleViewChange('list')}
+          isSheet={view === 'map'}
         />
-        {view === 'map' && selected && (
-          <SelectedHospitalPanel
-            hospital={selected}
-            item={item}
-            onClear={() => setSelectedId(null)}
-          />
-        )}
       </div>
       <ConfirmDialog
         open={state.isPromptOpen}

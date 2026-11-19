@@ -7,7 +7,11 @@ import {
   readTokens,
   setSessionCookies,
 } from '@/server/bff/cookies';
-import { refreshResponse, refreshSession } from '@/server/bff/refresh-session';
+import {
+  jsonHeaders,
+  refreshResponse,
+  refreshSession,
+} from '@/server/bff/refresh-session';
 import { errorResponse, forbidden, jsonNoStore } from '@/server/bff/responses';
 import { callBackend, isSameOrigin } from '@/server/bff/upstream';
 
@@ -37,7 +41,7 @@ export async function GET(request: NextRequest) {
   if (accessToken) return jsonNoStore({ authenticated: true });
   if (!refreshToken) return jsonNoStore({ authenticated: false });
 
-  const result = await refreshSession(refreshToken);
+  const result = await refreshSession(refreshToken, request.headers);
   return refreshResponse(result, () => jsonNoStore({ authenticated: false }));
 }
 
@@ -49,7 +53,7 @@ export async function DELETE(request: NextRequest) {
   if (refreshToken) {
     await callBackend(new URL('/api/auth/logout', env.NEXT_PUBLIC_API_URL), {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: jsonHeaders(request.headers),
       body: JSON.stringify({ refreshToken }),
     });
   }

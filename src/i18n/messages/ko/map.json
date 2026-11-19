@@ -19,7 +19,8 @@
     "label": "보기 방식",
     "list": "목록",
     "map": "지도",
-    "showList": "목록으로 보기"
+    "showList": "목록으로 보기",
+    "expandList": "목록 크게 보기"
   },
   "radius": {
     "label": "검색 반경",
@@ -40,8 +41,8 @@
   "list": {
     "title": "병원 {count, number}곳",
     "titleLoading": "병원을 찾는 중",
-    "sortNote": "가까운 순 · 반경 {km, number}km",
-    "priceNote": "가격은 병원마다 신고한 세부 항목 중 가장 낮은 값이에요.",
+    "sortNote": "가까운 순 · 반경 약 {km, number}km",
+    "priceNote": "가격은 병원마다 공개한 세부 항목 중 평균과 견줄 수 있는(평균의 1/3~3배) 가장 낮은 값이고, 평균은 {region} 공개 가격 기준이에요.",
     "progress": "{total, number}곳 중 {shown, number}곳",
     "noPosition": "위치 정보가 없는 {count, number}곳은 지도에 없고 목록에만 있어요.",
     "loadMoreError": "더 불러오지 못했어요.",
@@ -55,17 +56,15 @@
     "distance": "직선 {distance}",
     "meters": "{value, number}m",
     "kilometers": "{value, number, ::.#}km",
-    "minPrice": "최저 {amount, number}원",
+    "priceLabel": "가장 낮은 가격",
     "showOnMap": "지도에서 보기",
     "showOnMapLabel": "{name} 지도에서 보기",
     "noPosition": "지도 위치 정보 없음",
-    "selected": "지도에서 선택됨",
-    "selectedHeading": "선택한 병원",
-    "clearSelection": "선택 해제"
+    "selected": "지도에서 선택됨"
   },
   "location": {
     "promptTitle": "현재 위치를 사용할까요?",
-    "promptDescription": "가까운 병원과 거리를 보여 드릴 때만 써요. 위치는 저장하지 않아요.",
+    "promptDescription": "가까운 병원을 찾을 때만 써요. 서버에는 약 1km 단위로 흐린 위치만 보내고 저장하지 않아요. 거리는 이 기기에서 계산하고, 지도는 네이버 지도가 표시해요.",
     "promptAllow": "허용",
     "promptLater": "지금은 안 할래요",
     "deniedTitle": "위치를 사용할 수 없어요",

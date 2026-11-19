@@ -12,6 +12,11 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SectionHeader } from '@/components/ui/section-header';
 import {
+  comparisonBasis,
+  lowestOf,
+  summarizeComparison,
+} from '@/features/comparison/compare-basis';
+import {
   buildCompareHref,
   MAX_COMPARE,
 } from '@/features/comparison/compare-params';
@@ -22,6 +27,7 @@ import {
 } from '@/features/comparison/compare-rows';
 import { useCompareStore } from '@/features/comparison/compare-store';
 import { comparisonQueries } from '@/features/comparison/queries';
+import { priceRowName } from '@/features/hospitals/price-groups';
 import { hospitalQueries } from '@/features/hospitals/queries';
 import { errorMessageKey } from '@/lib/api/error-message';
 import { ApiError } from '@/lib/api/errors';
@@ -104,7 +110,8 @@ export function CompareView({
       null);
   const itemName = itemRow ? formatComparisonItemName(itemRow) : null;
 
-  const datesQueries = useQueries({
+  /** 병원별 세부 항목. 적용일과, 같은 세부 항목끼리 견줄 수 있는지 보는 데 쓴다. */
+  const variantQueries = useQueries({
     queries: hospitals.map((hospital) => {
       const options = hospitalQueries.itemPrices(
         hospital.ykiho,
@@ -126,8 +133,29 @@ export function CompareView({
       };
     }),
   });
+  const isVariantsPending = variantQueries.some(
+    (query) => query.fetchStatus === 'fetching' && !query.data,
+  );
+  const basis = itemRow
+    ? comparisonBasis(
+        itemRow,
+        hospitals,
+        variantQueries.map((query) =>
+          query.data?.map((row) => ({
+            name: priceRowName(row),
+            price: row.price,
+          })),
+        ),
+      )
+    : null;
+  /** 세부 항목을 받을 때까지(최대 DATE_TIMEOUT_MS) 결론을 미뤄, 제목이 "가장 낮은 공개 가격"에서 "가장 저렴"으로 바뀌지 않게 한다. */
+  const summary =
+    basis && !error && !isPending && !isVariantsPending
+      ? summarizeComparison(basis, hospitals)
+      : null;
+
   /** undefined는 불러오는 중, null은 날짜 없음(실패·미공개 포함)이다. */
-  const dates = datesQueries.map((query) =>
+  const dates = variantQueries.map((query) =>
     query.data
       ? latestDate(query.data.map((row) => row.startDate))
       : query.fetchStatus === 'fetching'
@@ -223,7 +251,7 @@ export function CompareView({
         />
         {isItemMissing && <Notice>{t('page.itemNotFound')}</Notice>}
         {hospitals.length < 2 && (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-warning-tint px-4 py-3 text-body-sm text-warning">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-warning-tint px-4 py-3 text-body-sm text-warning">
             <span className="flex items-start gap-2">
               <CircleAlert
                 aria-hidden="true"
@@ -248,6 +276,7 @@ export function CompareView({
           addHref={addHref}
           item={activeItem}
           itemRow={itemRow}
+          itemLowest={basis ? lowestOf(basis.entries) : undefined}
           itemName={itemName}
           dates={dates}
           commonItems={visibleItems}
@@ -295,17 +324,25 @@ export function CompareView({
         item={activeItem}
         itemName={itemName}
         count={base.data && !error ? hospitals.length : null}
+        summary={summary}
+        isSummaryLoading={
+          hasHospitals &&
+          item != null &&
+          (isPending || (itemRow != null && isVariantsPending)) &&
+          !error
+        }
+        itemRow={itemRow}
+        basis={basis}
+        hospitals={hospitals}
       />
-      <PageContainer className="pt-2 pb-section lg:pt-4">
-        {renderBody()}
-      </PageContainer>
+      <PageContainer className="pb-section">{renderBody()}</PageContainer>
     </>
   );
 }
 
 function Notice({ children }: { children: string }) {
   return (
-    <p className="flex items-start gap-2 rounded-lg bg-primary-tint px-4 py-3 text-body-sm text-primary-text">
+    <p className="flex items-start gap-2 rounded-2xl bg-primary-tint px-4 py-3 text-body-sm text-primary-text">
       <Info
         aria-hidden="true"
         className="mt-0.5 size-4 shrink-0"

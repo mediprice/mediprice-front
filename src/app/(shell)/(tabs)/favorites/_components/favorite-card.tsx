@@ -1,3 +1,4 @@
+import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
@@ -7,7 +8,7 @@ import type { FavoriteHospital } from '@/features/favorites/queries';
 import { HospitalIdentity } from '@/features/hospitals/components/hospital-identity';
 import { cn } from '@/lib/utils';
 
-/** 카드 전체가 병원 상세 링크다(이름 링크를 카드 크기로 넓힌다). 하트는 링크 위에 따로 놓인다. */
+/** 관심 병원 한 줄. 줄 전체가 병원 상세 링크다(이름 링크를 줄 크기로 넓힌다). 하트는 링크 위에 따로 놓인다. */
 export function FavoriteCard({
   favorite,
   onRemove,
@@ -26,15 +27,14 @@ export function FavoriteCard({
   return (
     <article
       className={cn(
-        'relative flex h-full items-start gap-1 rounded-xl bg-bg py-4 pr-1 pl-4 lg:py-5 lg:pl-5',
-        isAvailable
-          ? 'pressable shadow-card'
-          : 'border border-dashed border-border-strong',
+        'relative -mx-3 flex items-center gap-2 rounded-xl py-4 pr-1 pl-3',
+        isAvailable &&
+          'transition-colors duration-200 ease-standard hover:bg-surface active:bg-surface-strong',
       )}
     >
       <HospitalIdentity
         as="h3"
-        className="flex-1 pt-0.5"
+        className="flex-1"
         nameClassName={cn(!isAvailable && 'text-text-secondary')}
         name={
           isAvailable ? (
@@ -53,7 +53,7 @@ export function FavoriteCard({
         {!isAvailable && (
           <p className="mt-1 flex flex-wrap items-center gap-2">
             <Tag>{t('unavailable')}</Tag>
-            <span className="text-caption text-text-tertiary">
+            <span className="text-body-sm text-text-secondary">
               {t('unavailableHint')}
             </span>
           </p>
@@ -66,8 +66,15 @@ export function FavoriteCard({
         onToggle={(isFavorite) => {
           if (!isFavorite) onRemove();
         }}
-        className="relative -mt-2.5 shrink-0"
+        className="relative shrink-0"
       />
+      {isAvailable && (
+        <ChevronRight
+          aria-hidden="true"
+          className="hidden size-5 shrink-0 text-text-tertiary md:block"
+          strokeWidth={1.75}
+        />
+      )}
     </article>
   );
 }

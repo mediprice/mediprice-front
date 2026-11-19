@@ -1,5 +1,10 @@
 {
   "title": "MediPrice",
   "titleTemplate": "%s | MediPrice",
-  "description": "병원마다 다른 비급여 진료비를 한눈에 비교하세요."
+  "description": "병원마다 다른 비급여 진료비를 한눈에 비교하세요.",
+  "ogImage": {
+    "alt": "MediPrice — 병원마다 다른 비급여 진료비를 한눈에 비교",
+    "headline": "병원마다 다른 비급여 진료비, 한눈에 비교해요",
+    "caption": "건강보험심사평가원 공개 자료 기반"
+  }
 }

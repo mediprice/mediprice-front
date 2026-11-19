@@ -8,11 +8,13 @@ import { type CSSProperties, useEffect, useRef, useState } from 'react';
 
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 import { MAX_COMPARE } from '../compare-params';
 import { buildBasketHref, useCompareStore } from '../compare-store';
 import { ClearCompareDialog } from './clear-compare-dialog';
 import { CompareAnnouncer } from './compare-announcer';
+import { CompareNumber } from './compare-number';
 import { useCoveredHeight } from './use-covered-height';
 
 const FULL_NOTICE_MS = 5000;
@@ -37,6 +39,7 @@ export function CompareTray() {
   const coveredHeight = useCoveredHeight(barRef, isVisible);
   const isFull = notice?.kind === 'full' && notice.id !== dismissedNotice;
   const canCompare = hospitals.length >= 2;
+  const names = hospitals.map((hospital) => hospital.name).join(' · ');
 
   useEffect(() => {
     void useCompareStore.persist.rehydrate();
@@ -69,7 +72,7 @@ export function CompareTray() {
           <aside
             ref={barRef}
             aria-label={t('label')}
-            className="fixed inset-x-0 bottom-0 z-(--z-bottom-cta) border-t border-hairline bg-bg pb-safe shadow-bar lg:pointer-events-none lg:bottom-6 lg:border-0 lg:bg-transparent lg:pb-0 lg:shadow-none"
+            className="fixed inset-x-0 bottom-0 z-(--z-bottom-cta) border-t border-border bg-bg pb-safe shadow-bar lg:pointer-events-none lg:bottom-6 lg:border-0 lg:bg-transparent lg:pb-0 lg:shadow-none"
           >
             <PageContainer className="lg:px-page">
               {isFull && (
@@ -82,35 +85,64 @@ export function CompareTray() {
                   {t('full', { max: MAX_COMPARE })}
                 </p>
               )}
-              <div className="flex items-center gap-2 py-3 lg:pointer-events-auto lg:gap-4 lg:rounded-xl lg:border lg:border-primary lg:bg-bg lg:py-3 lg:pr-3 lg:pl-6 lg:shadow-float">
-                <div className="flex min-w-0 flex-1 flex-col lg:flex-row lg:items-center lg:gap-4">
+              {/**
+               * 정보가 남는 폭을 거의 다 가져가서, 큰 글자로 줄이 나뉠 때만 비교하기가 한 줄을 다 쓴다.
+               * 컨테이너 쿼리 단위가 rem이라 글자를 키웠을 때만 좁은 배치가 된다: 모바일은 이름을 한 줄로, 데스크톱은 칩 대신 이름 한 줄로.
+               */}
+              <div className="@container/tray flex flex-wrap items-center gap-2 py-3 lg:pointer-events-auto lg:gap-x-4 lg:rounded-2xl lg:border lg:border-border lg:bg-bg lg:py-3 lg:pr-3 lg:pl-5 lg:shadow-float">
+                <div className="flex min-w-0 flex-[999_1_12rem] flex-col gap-0.5 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-4 lg:gap-y-2">
+                  {/** 진행 막대는 옆에 들어갈 폭이 없으면 다음 줄로 밀려 잘린다(큰 글자). */}
+                  <div className="flex h-lh flex-wrap items-center gap-x-2 overflow-hidden text-label-bold">
+                    <p
+                      ref={countRef}
+                      tabIndex={-1}
+                      className="text-label-bold whitespace-nowrap text-text-primary tabular-nums outline-none"
+                    >
+                      {t('count', {
+                        count: hospitals.length,
+                        max: MAX_COMPARE,
+                      })}
+                    </p>
+                    <span
+                      aria-hidden="true"
+                      className="flex h-lh items-center gap-1"
+                    >
+                      {Array.from({ length: MAX_COMPARE }, (_, index) => (
+                        <span
+                          key={index}
+                          className={cn(
+                            'h-1.5 w-4 rounded-full',
+                            index < hospitals.length
+                              ? 'bg-primary'
+                              : 'bg-surface-strong',
+                          )}
+                        />
+                      ))}
+                    </span>
+                  </div>
                   <p
-                    ref={countRef}
-                    tabIndex={-1}
-                    className="shrink-0 text-label-bold text-text-primary tabular-nums outline-none"
+                    title={canCompare ? names : undefined}
+                    className="line-clamp-2 text-body-sm break-keep text-text-secondary lg:line-clamp-1 @max-[16rem]/tray:line-clamp-1 lg:@min-[48rem]/tray:hidden"
                   >
-                    {t('count', {
-                      count: hospitals.length,
-                      max: MAX_COMPARE,
-                    })}
-                  </p>
-                  <p className="truncate text-body-sm text-text-secondary lg:hidden">
                     {canCompare
-                      ? hospitals.map((hospital) => hospital.name).join(' · ')
+                      ? names
                       : t('needMore', { count: 2 - hospitals.length })}
                   </p>
-                  <ul className="hidden min-w-0 flex-wrap items-center gap-2 lg:flex">
-                    {hospitals.map((hospital) => (
+                  <ul className="hidden min-w-0 flex-wrap items-center gap-2 lg:@min-[48rem]/tray:flex">
+                    {hospitals.map((hospital, index) => (
                       <li
                         key={hospital.ykiho}
-                        className="inline-flex h-9 max-w-60 items-center gap-0.5 rounded-full border border-border bg-bg pr-1 pl-3.5 text-body-sm text-text-primary"
+                        className="inline-flex h-10 max-w-64 items-center gap-2 rounded-full bg-surface pr-1 pl-1.5 text-body-sm text-text-primary"
                       >
-                        <span className="truncate">{hospital.name}</span>
+                        <CompareNumber value={index + 1} size="sm" />
+                        <span title={hospital.name} className="truncate">
+                          {hospital.name}
+                        </span>
                         <button
                           type="button"
                           aria-label={t('remove', { name: hospital.name })}
                           onClick={() => handleRemove(hospital.ykiho)}
-                          className="touch-target flex size-7 shrink-0 items-center justify-center rounded-full text-text-secondary hover:bg-surface active:bg-surface-strong"
+                          className="touch-target flex size-8 shrink-0 items-center justify-center rounded-full text-text-secondary hover:bg-surface-strong active:bg-border"
                         >
                           <X
                             aria-hidden="true"
@@ -132,7 +164,7 @@ export function CompareTray() {
                     </p>
                   ) : (
                     !canCompare && (
-                      <p className="hidden text-body-sm text-text-secondary lg:block">
+                      <p className="hidden text-body-sm text-text-secondary lg:@min-[48rem]/tray:block">
                         {t('needMore', { count: 2 - hospitals.length })}
                       </p>
                     )
@@ -144,13 +176,13 @@ export function CompareTray() {
                   </Button>
                 </ClearCompareDialog>
                 {canCompare ? (
-                  <Button asChild size="md" elevated>
+                  <Button asChild size="md" elevated className="grow">
                     <Link href={buildBasketHref(hospitals)}>
                       {t('compare')}
                     </Link>
                   </Button>
                 ) : (
-                  <Button size="md" disabled>
+                  <Button size="md" disabled className="grow">
                     {t('compare')}
                   </Button>
                 )}

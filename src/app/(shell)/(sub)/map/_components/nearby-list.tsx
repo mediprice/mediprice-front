@@ -1,8 +1,9 @@
 'use client';
 
-import type {
-  InfiniteData,
-  UseInfiniteQueryResult,
+import {
+  type InfiniteData,
+  type UseInfiniteQueryResult,
+  useQuery,
 } from '@tanstack/react-query';
 import { CircleAlert, MapPinned } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -13,6 +14,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { NearbyHospitalCard } from '@/features/map/components/nearby-hospital-card';
 import { RADIUS_OPTIONS, type RadiusOption } from '@/features/map/map-geo';
 import type { NearbyHospital } from '@/features/map/queries';
+import { npayQueries } from '@/features/npay/queries';
+import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
 import { errorMessageKey } from '@/lib/api/error-message';
 import { cn } from '@/lib/utils';
 
@@ -20,7 +23,7 @@ type NearbyPage = { content: NearbyHospital[]; totalElements: number };
 
 export const hospitalCardId = (ykiho: string) => `map-hospital-${ykiho}`;
 
-export function hospitalHref(ykiho: string, item: string | null) {
+function hospitalHref(ykiho: string, item: string | null) {
   const path = `/hospitals/${encodeURIComponent(ykiho)}` as const;
   return item ? (`${path}?item=${encodeURIComponent(item)}` as const) : path;
 }
@@ -35,6 +38,8 @@ export function NearbyList({
   selectedId,
   onShowOnMap,
   onRadiusChange,
+  onExpand,
+  isSheet = false,
   className,
 }: {
   query: UseInfiniteQueryResult<InfiniteData<NearbyPage>>;
@@ -46,11 +51,22 @@ export function NearbyList({
   selectedId: string | null;
   onShowOnMap: (id: string) => void;
   onRadiusChange: (radius: RadiusOption) => void;
+  /** 모바일 지도 보기의 시트에서 목록 보기로 넘어간다. */
+  onExpand?: () => void;
+  /** 모바일 지도 보기에서 지도 아래 시트로 보인다(안에서 스크롤). md부터는 옆 목록 열이다. */
+  isSheet?: boolean;
   className?: string;
 }) {
+  const tView = useTranslations('map.view');
   const t = useTranslations('map.list');
   const tErrors = useTranslations('errors');
   const tActions = useTranslations('common.actions');
+  const tRegion = useTranslations('common.region');
+  /** 꼬리표의 기준. 지도는 어디든 볼 수 있어 항목 화면의 기본 지역(서울·경기) 평균을 쓴다. */
+  const regionSummary = useQuery({
+    ...npayQueries.summaryIn(item ?? '', sidoCodesOf(DEFAULT_REGION)),
+    enabled: item !== null,
+  });
   const total = query.data?.pages[0]?.totalElements;
   const noPositionCount = hospitals.filter(
     (h) => h.latitude === null || h.longitude === null,
@@ -61,43 +77,87 @@ export function NearbyList({
   return (
     <section
       aria-labelledby="map-list-title"
+      data-sheet={isSheet || undefined}
       className={cn(
-        'bg-surface md:w-88 md:shrink-0 md:overflow-y-auto md:border-r md:border-hairline lg:w-100 xl:w-115',
+        'bg-bg md:w-88 md:shrink-0 md:overflow-y-auto md:border-r md:border-border lg:w-100 xl:w-115',
+        'max-md:data-sheet:max-h-[45%] max-md:data-sheet:shrink-0 max-md:data-sheet:overflow-y-auto max-md:data-sheet:overscroll-contain max-md:data-sheet:rounded-t-3xl max-md:data-sheet:pb-safe max-md:data-sheet:shadow-sheet',
         className,
       )}
     >
-      <div className="flex flex-col gap-4 pt-5 px-page pb-section md:px-4 md:pb-8 lg:px-6">
-        <div className="flex flex-col gap-1">
-          <h2
-            id="map-list-title"
-            tabIndex={-1}
-            className="text-subheading outline-none"
-          >
-            {isLoading || total === undefined
-              ? t('titleLoading')
-              : t('title', { count: total })}
-          </h2>
+      <div className="flex flex-col pb-section md:pb-8">
+        <div
+          data-list-header
+          className={cn(
+            'flex flex-col gap-1 bg-bg pt-5 px-page pb-3 md:px-5 lg:px-6',
+            isSheet && 'max-md:sticky max-md:top-0 max-md:z-20 max-md:pt-2',
+          )}
+        >
+          {isSheet && (
+            <span
+              aria-hidden="true"
+              className="mx-auto mb-2 h-1 w-10 rounded-full bg-border-strong md:hidden"
+            />
+          )}
+          <div className="flex items-center justify-between gap-3">
+            <h2
+              id="map-list-title"
+              tabIndex={-1}
+              className="text-subheading outline-none"
+            >
+              {isLoading || total === undefined
+                ? t('titleLoading')
+                : t('title', { count: total })}
+            </h2>
+            {isSheet && onExpand && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onExpand}
+                className="-mr-2 md:hidden"
+              >
+                {tView('expandList')}
+              </Button>
+            )}
+          </div>
           <p className="text-body-sm text-text-tertiary">
             {t('sortNote', { km: radius / 1000 })}
           </p>
           {item && (
-            <p className="text-body-sm text-text-tertiary">{t('priceNote')}</p>
+            <p
+              className={cn(
+                'text-body-sm text-text-tertiary',
+                isSheet && 'max-md:hidden',
+              )}
+            >
+              {t('priceNote', { region: tRegion(DEFAULT_REGION) })}
+            </p>
           )}
           {noPositionCount > 0 && (
-            <p className="text-body-sm text-text-secondary">
+            <p
+              className={cn(
+                'text-body-sm text-text-secondary',
+                isSheet && 'max-md:hidden',
+              )}
+            >
               {t('noPosition', { count: noPositionCount })}
             </p>
           )}
         </div>
 
         {isLoading ? (
-          <ul aria-hidden="true" className="flex flex-col gap-3">
+          <ul
+            aria-hidden="true"
+            className="flex flex-col divide-y divide-hairline border-t border-hairline"
+          >
             {[0, 1, 2].map((index) => (
               <li
                 key={index}
-                className="flex flex-col gap-2 rounded-xl bg-bg p-4 shadow-card"
+                className="flex flex-col gap-2 py-4 px-page md:px-5 lg:px-6"
               >
-                <Skeleton className="h-6 w-40" />
+                <div className="flex justify-between gap-4">
+                  <Skeleton className="h-6 w-40" />
+                  {item && <Skeleton className="h-8 w-28" />}
+                </div>
                 <Skeleton className="h-4 w-56" />
                 <Skeleton className="h-9 w-32" />
               </li>
@@ -107,7 +167,7 @@ export function NearbyList({
           <EmptyState
             icon={<CircleAlert />}
             title={tErrors(errorMessageKey(query.error))}
-            className="rounded-xl bg-bg"
+            className="px-page"
             action={
               <Button
                 variant="tint"
@@ -123,7 +183,7 @@ export function NearbyList({
             icon={<MapPinned />}
             title={item ? t('emptyItemTitle') : t('emptyTitle')}
             description={t('emptyDescription')}
-            className="rounded-xl bg-bg"
+            className="px-page"
             action={
               wider && (
                 <Button
@@ -138,7 +198,7 @@ export function NearbyList({
           />
         ) : (
           <>
-            <ul className="flex flex-col gap-3">
+            <ul className="flex flex-col divide-y divide-hairline border-y border-hairline">
               {hospitals.map((hospital) => (
                 <li
                   key={hospital.ykiho}
@@ -149,13 +209,15 @@ export function NearbyList({
                     hospital={hospital}
                     href={hospitalHref(hospital.ykiho, item)}
                     hasItem={item !== null}
+                    average={regionSummary.data?.avgPrice}
                     isSelected={hospital.ykiho === selectedId}
                     onShowOnMap={() => onShowOnMap(hospital.ykiho)}
+                    className="px-page md:px-5 lg:px-6"
                   />
                 </li>
               ))}
             </ul>
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-3 pt-5 px-page md:px-5">
               {total !== undefined && total > hospitals.length && (
                 <p className="text-caption text-text-tertiary tabular-nums">
                   {t('progress', { total, shown: hospitals.length })}

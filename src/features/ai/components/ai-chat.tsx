@@ -30,7 +30,9 @@ import {
   useConversation,
 } from '../conversation-store';
 import { AI_DAILY_LIMIT } from '../usage-limits';
+import { useAiNotice } from '../use-ai-notice';
 import { useVoiceInput } from '../use-voice-input';
+import { AiNoticeDialog } from './ai-notice-dialog';
 import { AiSideRail } from './ai-side-rail';
 import { AssistantMessage } from './assistant-message';
 import { ChatEnded } from './chat-ended';
@@ -38,6 +40,7 @@ import { ChatHeader } from './chat-header';
 import { ChatIntro } from './chat-intro';
 import { Composer } from './composer';
 import { DailyLimitNotice } from './daily-limit-notice';
+import { Disclaimer } from './disclaimer';
 import { EmergencyBanner } from './emergency-banner';
 import { QuotaDialog } from './quota-dialog';
 import { TurnFailure } from './turn-failure';
@@ -46,11 +49,14 @@ import { UserBubble } from './user-bubble';
 import { VoicePanel } from './voice-panel';
 
 const MOBILE_QUERY = '(width < 64rem)';
+/** 화면이 낮거나 글자를 크게 키워 대화 칸이 남지 않을 때. 이때는 화면 높이에 맞추지 않고 창 전체가 스크롤된다. */
+const SHORT_QUERY = '(max-height: 36rem)';
 
 /** 대화 영역은 상단 바 바로 아래에서 화면 높이를 채우므로 모바일에서는 창 스크롤 0이 제자리다. */
 function resetMobileScroll() {
   requestAnimationFrame(() => {
     if (document.activeElement?.tagName === 'TEXTAREA') return;
+    if (window.matchMedia(SHORT_QUERY).matches) return;
     if (window.matchMedia(MOBILE_QUERY).matches && window.scrollY > 0) {
       window.scrollTo({ top: 0 });
     }
@@ -72,6 +78,7 @@ export function AiChat() {
   const isMember = sessionStatus === 'authenticated';
   const scope: DailyScope = isMember ? 'member' : 'anonymous';
   const voice = useVoiceInput();
+  const notice = useAiNotice();
   const logRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [dismissedQuota, setDismissedQuota] = useState<string | null>(null);
@@ -90,9 +97,14 @@ export function AiChat() {
     const log = logRef.current;
     const content = log?.firstElementChild;
     if (!log || !content) return;
+    const hasMessages = messages.length > 0;
     function pin(log: HTMLElement) {
       const items = log.querySelectorAll<HTMLElement>('[data-chat-item]');
       const last = items[items.length - 1];
+      if (window.matchMedia(SHORT_QUERY).matches) {
+        if (hasMessages) last?.scrollIntoView({ block: 'start' });
+        return;
+      }
       const bottom = log.scrollHeight - log.clientHeight;
       const target = last ? Math.min(last.offsetTop - 12, bottom) : bottom;
       log.scrollTo({ top: Math.max(target, 0) });
@@ -124,12 +136,28 @@ export function AiChat() {
     resetMobileScroll();
   }, [isLocked]);
 
+  /** 안내를 처음 확인하면 입력창을 다시 제출해, 보낸 뒤 입력창을 비우는 흐름을 그대로 탄다. */
   function handleSend(text: string) {
+    const resubmit = () => textareaRef.current?.form?.requestSubmit();
+    if (!notice.ensure(['ai'], resubmit)) return false;
     return send(text, scope);
   }
 
   function handlePick(text: string) {
+    if (!notice.ensure(['ai'], () => handlePick(text))) return;
     if (send(text, scope)) logRef.current?.focus({ preventScroll: true });
+  }
+
+  function handleMic() {
+    if (notice.ensure(['ai', 'voice'], voice.start)) voice.start();
+  }
+
+  function handleVoiceSend(text: string) {
+    if (!notice.ensure(['ai'], () => handleVoiceSend(text))) return;
+    if (send(text, scope)) {
+      voice.cancel();
+      logRef.current?.focus({ preventScroll: true });
+    }
   }
 
   function handleRestart() {
@@ -162,11 +190,12 @@ export function AiChat() {
           onMouseDown={keepTypingFocus}
           onBlur={handleBlur}
           className={cn(
-            'flex min-w-0 flex-1 flex-col bg-surface md:mx-auto md:max-w-2xl lg:mx-0 lg:max-w-none',
+            'flex min-w-0 flex-1 flex-col bg-bg md:mx-auto md:max-w-2xl lg:mx-0 lg:max-w-none',
             /** 모바일은 상단 바와 하단 탭바 사이를 채운다. 입력 중에는 탭바가 숨으므로(globals.css) 그 높이까지 쓴다. 키보드가 열리면 dvh가 줄어든다. */
             'h-[calc(100dvh-var(--spacing-top-bar)-var(--spacing-tab-bar)-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))]',
             'max-lg:has-[textarea:focus]:h-[calc(100dvh-var(--spacing-top-bar)-env(safe-area-inset-top,0px))]',
-            'lg:h-[calc(100dvh-var(--spacing-top-nav)-5rem)] lg:max-h-240 lg:min-h-150 lg:overflow-hidden lg:rounded-xl',
+            'lg:h-[calc(100dvh-var(--spacing-top-nav)-5rem)] lg:max-h-240 lg:min-h-150 lg:overflow-hidden lg:rounded-3xl lg:border lg:border-border',
+            '[@media(max-height:36rem)]:h-auto! [@media(max-height:36rem)]:min-h-0 [@media(max-height:36rem)]:overflow-visible',
           )}
         >
           <ChatHeader
@@ -181,9 +210,7 @@ export function AiChat() {
             dailyRemaining={dailyRemaining(conversation, scope)}
             onRestart={messages.length > 0 ? handleRestart : undefined}
           />
-          <p className="bg-surface-strong py-2 px-page text-body-sm text-text-secondary lg:mx-8 lg:mt-4 lg:rounded-lg lg:px-4 lg:py-2.5">
-            {t('header.disclaimer')}
-          </p>
+          <Disclaimer className="mx-8 max-lg:hidden" />
           {hasEmergency && (
             <div className="pt-3 px-page lg:px-8">
               <EmergencyBanner />
@@ -196,13 +223,21 @@ export function AiChat() {
             tabIndex={-1}
             className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain outline-none"
           >
-            <div className="flex min-h-full flex-col justify-end gap-4 py-4 px-page lg:px-8 lg:py-5">
-              <div data-chat-item>
-                <ChatIntro
-                  onPick={messages.length === 0 ? handlePick : undefined}
-                  isAnonymous={sessionStatus === 'anonymous'}
-                />
-              </div>
+            <div
+              className={cn(
+                '@container flex min-h-full flex-col justify-end gap-5 py-5 px-page lg:px-8 lg:py-6',
+                messages.length === 0 && 'lg:justify-center',
+              )}
+            >
+              <Disclaimer className="mb-auto lg:hidden" />
+              {messages.length === 0 && (
+                <div data-chat-item>
+                  <ChatIntro
+                    onPick={handlePick}
+                    isAnonymous={sessionStatus === 'anonymous'}
+                  />
+                </div>
+              )}
               {messages.map((message) => (
                 <div key={message.id} data-chat-item>
                   {message.role === 'user' ? (
@@ -234,7 +269,7 @@ export function AiChat() {
                 </div>
               )}
               {isNearEnd(conversation) && !isOverDaily && (
-                <p className="text-center text-caption text-text-tertiary">
+                <p className="text-center text-body-sm text-text-secondary">
                   {t('turns.nearEnd', { count: SESSION_TURN_LIMIT })}
                 </p>
               )}
@@ -262,12 +297,7 @@ export function AiChat() {
               }}
               onRetry={voice.retry}
               onRerecord={voice.start}
-              onSend={(text) => {
-                if (send(text, scope)) {
-                  voice.cancel();
-                  logRef.current?.focus({ preventScroll: true });
-                }
-              }}
+              onSend={handleVoiceSend}
               onTypeInstead={() => {
                 voice.cancel();
                 requestAnimationFrame(focusComposer);
@@ -286,7 +316,7 @@ export function AiChat() {
                   : t('ended.placeholder')
               }
               onSend={handleSend}
-              onMic={voice.engine ? voice.start : undefined}
+              onMic={voice.engine ? handleMic : undefined}
             />
           )}
         </section>
@@ -295,6 +325,12 @@ export function AiChat() {
           dailyRemaining={dailyRemaining(conversation, scope)}
         />
       </div>
+      <AiNoticeDialog
+        kinds={notice.kinds}
+        engine={voice.engine}
+        onConfirm={notice.confirm}
+        onDismiss={notice.dismiss}
+      />
       <QuotaDialog
         open={
           isOverDaily && failure === 'quota' && dismissedQuota !== requestId
@@ -303,6 +339,10 @@ export function AiChat() {
           if (!open) setDismissedQuota(requestId);
         }}
         isMember={isMember}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          logRef.current?.focus({ preventScroll: true });
+        }}
       />
     </PageContainer>
   );

@@ -45,3 +45,12 @@ export async function toApiError(response: Response): Promise<ApiError> {
     await response.json().catch(() => null),
   );
 }
+
+/** 배포된 백엔드에 아직 없는 경로는 일반 404(RESOURCE_NOT_FOUND)로 온다(docs 7.2.1). 도메인 404(REVIEW_NOT_FOUND 등)와 구분한다. */
+export function isUnsupportedEndpoint(error: unknown) {
+  return (
+    error instanceof ApiError &&
+    error.status === 404 &&
+    (error.code === 'RESOURCE_NOT_FOUND' || error.code === 'NOT_FOUND')
+  );
+}

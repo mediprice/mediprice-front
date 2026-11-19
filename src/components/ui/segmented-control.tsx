@@ -23,7 +23,7 @@ export function SegmentedControl<T extends string>({
       role="radiogroup"
       data-slot="segmented-control"
       className={cn(
-        'flex flex-wrap gap-1 rounded-md bg-surface-strong p-1',
+        'flex flex-wrap gap-1 rounded-xl bg-surface-strong p-1',
         className,
       )}
       {...props}
@@ -41,7 +41,7 @@ export function SegmentedControl<T extends string>({
             onChange={() => onValueChange(option.value)}
             className="peer sr-only"
           />
-          <span className="flex min-h-11 items-center justify-center rounded-md px-2 text-center text-label text-balance text-text-secondary transition-colors duration-150 ease-standard peer-checked:bg-bg peer-checked:text-label-bold peer-checked:text-primary-text peer-checked:shadow-card peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus-ring hover:text-text-primary">
+          <span className="flex min-h-11 items-center justify-center rounded-lg px-3 text-center text-label text-balance text-text-secondary transition-[color,background-color,box-shadow] duration-200 ease-standard peer-checked:bg-bg peer-checked:text-label-bold peer-checked:text-primary-text peer-checked:shadow-card peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus-ring hover:text-text-primary">
             {option.label}
           </span>
         </label>

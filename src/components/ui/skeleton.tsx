@@ -9,7 +9,7 @@ export function Skeleton({ className, ...props }: ComponentProps<'span'>) {
       aria-hidden="true"
       data-slot="skeleton"
       className={cn(
-        'block animate-pulse rounded-md bg-surface-strong',
+        'block animate-pulse rounded-lg bg-surface-strong',
         className,
       )}
       {...props}

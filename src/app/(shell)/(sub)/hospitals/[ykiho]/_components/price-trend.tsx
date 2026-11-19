@@ -33,14 +33,14 @@ export function PriceTrend({
   return (
     <section
       aria-label={t('label')}
-      className="flex flex-col gap-3 rounded-xl bg-surface px-5 py-4 lg:px-6 lg:py-5"
+      className="flex flex-col gap-3 rounded-2xl bg-surface px-5 py-4 md:px-7 md:py-6"
     >
       <button
         type="button"
         aria-expanded={isExpanded}
         aria-controls={panelId}
         onClick={() => setIsExpanded((value) => !value)}
-        className="-mx-2 -my-1 flex min-h-11 items-center justify-between gap-3 rounded-lg px-2 py-1 text-left hover:bg-surface-strong"
+        className="-mx-2 -my-1 flex min-h-11 items-center justify-between gap-3 rounded-lg px-2 py-1 text-left transition-colors duration-200 ease-standard hover:bg-surface-strong"
       >
         <span className="flex min-w-0 flex-col gap-1">
           <span className="text-caption text-text-secondary">{t('label')}</span>

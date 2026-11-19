@@ -1,6 +1,6 @@
 import {
   Activity,
-  ChevronRight,
+  ArrowRight,
   Eye,
   LayoutGrid,
   ScanLine,
@@ -28,29 +28,29 @@ export function CategoryGrid() {
   const t = useTranslations('home.categories');
   const tiles = [...HOME_CATEGORIES.map(({ id }) => id), 'all' as const];
   return (
-    <section aria-labelledby="home-categories" className="bg-surface">
-      <PageContainer className="space-y-4 py-section">
+    <section aria-labelledby="home-categories">
+      <PageContainer className="space-y-6 py-section lg:space-y-8">
         <SectionHeader id="home-categories" title={t('title')} />
-        <ul className="grid grid-cols-2 gap-2.5 md:grid-cols-3 lg:grid-cols-6 lg:gap-4 [&>li]:min-w-0">
+        <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:gap-4 xl:grid-cols-6 [&>li]:min-w-0">
           {tiles.map((id) => (
             <li key={id}>
               <Link
                 href={{ pathname: '/search', query: { category: id } }}
-                className="flex h-full flex-col gap-3.5 rounded-xl pressable bg-bg px-3.5 py-4 shadow-card lg:items-center lg:py-6"
+                className="group flex h-full min-h-32 flex-col justify-between gap-4 rounded-2xl bg-surface p-4 transition-[background-color,scale] duration-200 ease-standard hover:bg-surface-strong active:scale-97 active:bg-primary-tint lg:min-h-40 lg:p-5"
               >
                 <span
                   aria-hidden="true"
-                  className="flex size-12 items-center justify-center rounded-xl bg-primary-tint text-primary [&_svg]:size-6 [&_svg]:[stroke-width:1.75]"
+                  className="flex size-12 items-center justify-center rounded-full bg-bg text-primary-text [&_svg]:size-6 [&_svg]:[stroke-width:1.75]"
                 >
                   {ICONS[id]}
                 </span>
-                <span className="flex items-center justify-between gap-1 text-label-bold">
-                  <span className="min-w-0 [overflow-wrap:anywhere]">
+                <span className="flex items-end justify-between gap-2">
+                  <span className="min-w-0 text-subheading [overflow-wrap:anywhere]">
                     {t(id)}
                   </span>
-                  <ChevronRight
+                  <ArrowRight
                     aria-hidden="true"
-                    className="size-5 shrink-0 text-text-tertiary lg:hidden"
+                    className="size-5 shrink-0 text-text-tertiary transition-transform duration-200 ease-standard group-hover:translate-x-0.5 group-hover:text-primary-text"
                     strokeWidth={1.75}
                   />
                 </span>

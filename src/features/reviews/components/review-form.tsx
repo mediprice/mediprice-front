@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CircleAlert } from 'lucide-react';
+import { CircleAlert, Info } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useId, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
@@ -104,10 +104,10 @@ export function ReviewForm({
           if (first) setFocus(first);
         },
       )}
-      className="flex flex-col gap-6"
+      className="flex flex-col gap-8"
     >
-      <fieldset className="flex flex-col gap-2">
-        <legend id={`${id}-rating`} className="mb-2 text-label-bold">
+      <fieldset className="flex min-w-0 flex-col gap-2">
+        <legend id={`${id}-rating`} className="mb-2 text-subheading">
           {t('rating')}
         </legend>
         <Controller
@@ -130,7 +130,7 @@ export function ReviewForm({
       </fieldset>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor={`${id}-content`} className="text-label-bold">
+        <label htmlFor={`${id}-content`} className="text-subheading">
           {t('content')}
         </label>
         <textarea
@@ -140,15 +140,15 @@ export function ReviewForm({
           placeholder={t('contentPlaceholder')}
           aria-invalid={contentError ? true : undefined}
           aria-describedby={`${id}-content-hint${contentError ? ` ${id}-content-error` : ''}`}
-          className="min-h-44 w-full resize-y rounded-xl border border-border-strong bg-bg px-4 py-3.5 text-field placeholder:text-text-tertiary aria-invalid:border-danger"
+          className="min-h-48 w-full resize-y rounded-xl border border-border-strong bg-bg px-4 py-3.5 text-field transition-colors duration-200 ease-standard placeholder:text-text-tertiary hover:border-text-tertiary focus:border-primary aria-invalid:border-danger"
           {...register('content')}
         />
         <div
           id={`${id}-content-hint`}
-          className="flex items-start justify-between gap-4 text-caption text-text-secondary"
+          className="flex flex-wrap items-start justify-between gap-x-4 text-body-sm text-text-secondary"
         >
           <span>{t('contentRange')}</span>
-          <span aria-hidden="true" className="shrink-0 tabular-nums">
+          <span aria-hidden="true" className="ml-auto tabular-nums">
             {t('contentCount', {
               count: content.length,
               max: REVIEW_CONTENT_MAX,
@@ -171,16 +171,23 @@ export function ReviewForm({
         isEdit={isEdit}
       />
 
-      <ul className="flex flex-col gap-1 rounded-xl bg-surface px-4 py-4 text-body-sm text-text-secondary lg:px-5">
-        <li>{t('noticeName')}</li>
-        <li>{t('noticePrivacy')}</li>
-        <li>{t('noticePublic')}</li>
-      </ul>
+      <div className="flex items-start gap-3 rounded-2xl bg-surface px-5 py-4 md:px-6 md:py-5">
+        <Info
+          aria-hidden="true"
+          className="mt-0.5 size-5 shrink-0 text-text-secondary"
+          strokeWidth={1.75}
+        />
+        <ul className="flex flex-col gap-1.5 text-body-sm text-text-secondary">
+          <li>{t('noticeName')}</li>
+          <li>{t('noticePrivacy')}</li>
+          <li>{t('noticePublic')}</li>
+        </ul>
+      </div>
 
       {save.isError && !hasFieldErrors && (
         <div
           role="alert"
-          className="flex items-start gap-2 rounded-xl bg-danger-tint px-4 py-4 text-danger"
+          className="flex items-start gap-2 rounded-2xl bg-danger-tint px-5 py-4 text-danger"
         >
           <CircleAlert
             aria-hidden="true"
@@ -200,8 +207,8 @@ export function ReviewForm({
 
       <div className="flex flex-col gap-2 lg:flex-row lg:justify-end">
         <Button
-          variant="neutral"
-          size="md"
+          variant="outline"
+          size="lg"
           onClick={onCancel}
           className="max-lg:hidden"
         >
@@ -212,7 +219,7 @@ export function ReviewForm({
           size="lg"
           elevated
           isLoading={save.isPending}
-          className="w-full lg:min-h-11 lg:w-auto"
+          className="w-full lg:w-auto lg:min-w-40"
         >
           {isEdit ? t('submitEdit') : t('submit')}
         </Button>

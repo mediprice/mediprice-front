@@ -23,11 +23,13 @@ const twMerge = extendTailwindMerge({
         'price-md',
         'price-lg',
         'price-xl',
+        'price-hero',
         'field',
       ],
       shadow: ['card', 'cta-glow', 'float', 'sheet', 'bar'],
       spacing: ['top-nav', 'top-bar', 'tab-bar', 'section', 'page'],
       container: ['page'],
+      ease: ['standard', 'enter'],
     },
   },
 });

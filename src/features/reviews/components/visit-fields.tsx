@@ -10,7 +10,7 @@ import type { ReviewFormInput } from '../schemas';
 import { FieldError } from './field-error';
 
 const INPUT =
-  'h-12 w-full rounded-lg border border-border-strong bg-bg px-4 text-field aria-invalid:border-danger';
+  'h-12 w-full rounded-xl border border-border-strong bg-bg px-4 text-field transition-colors duration-200 ease-standard hover:border-text-tertiary focus:border-primary aria-invalid:border-danger';
 
 /** 선택 입력인 방문일과 결제 금액. 수정(PATCH)은 빈 값을 무시해서, 한 번 넣은 값은 바꿀 수만 있고 지울 수 없다고 미리 알린다. */
 export function VisitFields({
@@ -33,10 +33,13 @@ export function VisitFields({
 
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="mb-1 text-label-bold">{t('visitTitle')}</legend>
+      <legend className="mb-2 text-subheading">{t('visitTitle')}</legend>
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="flex min-w-0 flex-col gap-2">
-          <label htmlFor={`${id}-visited`} className="text-label">
+          <label
+            htmlFor={`${id}-visited`}
+            className="text-label text-text-secondary"
+          >
             {t('visitedOn')}
           </label>
           <input
@@ -51,7 +54,10 @@ export function VisitFields({
           <FieldError id={`${id}-visited-error`} message={visitedError} />
         </div>
         <div className="flex min-w-0 flex-col gap-2">
-          <label htmlFor={`${id}-paid`} className="text-label">
+          <label
+            htmlFor={`${id}-paid`}
+            className="text-label text-text-secondary"
+          >
             {t('paidAmount')}
           </label>
           <input

@@ -15,6 +15,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LoginRequired } from '@/features/auth/components/login-required';
 import { MyPageHeader } from '@/features/auth/components/my-page-header';
+import { MyPageTitle } from '@/features/auth/components/my-page-title';
 import { MySideNav } from '@/features/auth/components/my-side-nav';
 import { medicalProfileQueries } from '@/features/medical-profile/queries';
 import { errorMessageKey } from '@/lib/api/error-message';
@@ -26,26 +27,24 @@ export function MedicalProfileView() {
   const tNav = useTranslations('nav');
   return (
     <>
-      <MyPageHeader className="max-lg:bg-none max-lg:[&>div]:pt-5 max-lg:[&>div]:pb-0">
+      <MyPageHeader>
         <Breadcrumb>
           <BreadcrumbLink href="/my">{tNav('my')}</BreadcrumbLink>
           <BreadcrumbCurrent>{t('title')}</BreadcrumbCurrent>
         </Breadcrumb>
-        <h1
+        <MyPageTitle
           id="medical-profile-title"
-          tabIndex={-1}
-          className="text-title outline-none"
-        >
-          <span className="lg:hidden">{t('heading')}</span>
-          <span className="hidden lg:inline">{t('title')}</span>
-        </h1>
-        <p className="text-body-sm text-text-secondary">{t('description')}</p>
+          title={t('heading')}
+          description={t('description')}
+        />
       </MyPageHeader>
-      <PageContainer className="pt-4 pb-section md:max-w-2xl lg:grid lg:max-w-page lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8 lg:pt-0">
+      <PageContainer className="pb-section md:max-w-2xl lg:grid lg:max-w-page lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-10">
         <MySideNav />
-        <LoginRequired reason="medicalProfile" fallback={<ProfileSkeleton />}>
-          <ProfileLoader />
-        </LoginRequired>
+        <div className="min-w-0 lg:max-w-3xl">
+          <LoginRequired reason="medicalProfile" fallback={<ProfileSkeleton />}>
+            <ProfileLoader />
+          </LoginRequired>
+        </div>
       </PageContainer>
     </>
   );
@@ -83,10 +82,17 @@ function ProfileLoader() {
 function ProfileSkeleton() {
   const t = useTranslations('common.status');
   return (
-    <div role="status" className="flex flex-col gap-4">
-      <Skeleton className="h-24 w-full rounded-xl" />
-      <Skeleton className="h-44 w-full rounded-xl" />
-      <Skeleton className="h-40 w-full rounded-xl" />
+    <div role="status" className="flex flex-col gap-8">
+      <Skeleton className="h-44 w-full rounded-2xl" />
+      <div className="flex flex-col gap-4">
+        <Skeleton className="h-7 w-24" />
+        <Skeleton className="h-13 w-full rounded-xl md:w-44" />
+      </div>
+      <div className="flex flex-col gap-4">
+        <Skeleton className="h-7 w-24" />
+        <Skeleton className="h-28 w-full rounded-xl" />
+        <Skeleton className="h-28 w-full rounded-xl" />
+      </div>
       <span className="sr-only">{t('loading')}</span>
     </div>
   );

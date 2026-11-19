@@ -9,7 +9,7 @@ export function EmergencyBanner() {
   return (
     <div
       role="alert"
-      className="flex flex-col gap-2 rounded-lg bg-danger-tint px-4 py-3 lg:flex-row lg:items-center lg:gap-4"
+      className="flex flex-col gap-3 rounded-2xl bg-danger-tint px-4 py-3.5 sm:flex-row sm:items-center sm:gap-4"
     >
       <p className="flex flex-1 gap-2.5 text-body-sm text-text-primary">
         <CircleAlert
@@ -26,8 +26,8 @@ export function EmergencyBanner() {
       <Button
         asChild
         variant="danger"
-        size="sm"
-        className="ml-7.5 w-fit lg:ml-0"
+        size="md"
+        className="ml-7.5 w-fit sm:ml-0"
       >
         <a href="tel:119">
           <Phone aria-hidden="true" />

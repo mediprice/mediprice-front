@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import type { MedicalProfile } from './queries';
 import {
   createMedicalProfileSchema,
+  hasCurrentConsent,
+  MEDICAL_CONSENT_VERSION,
   medicalProfileErrorKey,
   type MedicalProfileForm,
   toFormField,
@@ -84,6 +86,48 @@ describe('toMedicalProfileForm', () => {
     });
   });
 
+  it('이전 버전에 동의했거나 동의 기록이 없는 프로필은 다시 동의를 받는다', () => {
+    const base: MedicalProfile = {
+      birthYear: null,
+      gender: null,
+      chronicConditions: null,
+      medications: null,
+      allergies: null,
+      note: null,
+      updatedAt: '2026-10-12T01:00:00Z',
+    };
+
+    expect(
+      toMedicalProfileForm({ ...base, consentVersion: '2026-01-01' }).consent,
+    ).toBe(false);
+    expect(
+      toMedicalProfileForm({ ...base, consentVersion: null, consentedAt: null })
+        .consent,
+    ).toBe(false);
+    expect(
+      toMedicalProfileForm({
+        ...base,
+        consentVersion: MEDICAL_CONSENT_VERSION,
+        consentedAt: '2026-11-19T01:00:00Z',
+      }).consent,
+    ).toBe(true);
+  });
+
+  it('동의 값을 모르는 예전 백엔드의 프로필은 저장돼 있으면 동의한 것으로 본다', () => {
+    expect(hasCurrentConsent(null)).toBe(false);
+    expect(
+      hasCurrentConsent({
+        birthYear: null,
+        gender: null,
+        chronicConditions: null,
+        medications: null,
+        allergies: null,
+        note: null,
+        updatedAt: '2026-10-12T01:00:00Z',
+      }),
+    ).toBe(true);
+  });
+
   it('저장한 프로필은 동의한 상태로 채우고 모르는 성별 값은 비운다', () => {
     const profile: MedicalProfile = {
       birthYear: 1990,
@@ -115,7 +159,12 @@ describe('toMedicalProfileRequest', () => {
         allergies: '  ',
         note: ' 메모 ',
       }),
-    ).toEqual({ birthYear: 1985, chronicConditions: '고혈압', note: '메모' });
+    ).toEqual({
+      birthYear: 1985,
+      chronicConditions: '고혈압',
+      note: '메모',
+      consentVersion: MEDICAL_CONSENT_VERSION,
+    });
   });
 });
 

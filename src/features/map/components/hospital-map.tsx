@@ -26,6 +26,8 @@ export type HospitalMapProps = {
   controls?: ReactNode;
   /** 지도를 못 불러왔을 때 안내 아래에 둘 행동(모바일 "목록 보기" 등). */
   fallbackAction?: ReactNode;
+  /** 검색 반경 원. 기본은 그린다. */
+  showArea?: boolean;
 };
 
 /**
@@ -41,6 +43,7 @@ export function HospitalMap({
   userPosition = null,
   controls,
   fallbackAction,
+  showArea = true,
 }: HospitalMapProps) {
   const t = useTranslations('map.mapControls');
   const isReducedMotion = useReducedMotion();
@@ -56,6 +59,7 @@ export function HospitalMap({
     userPosition,
     onMoveEnd,
     isReducedMotion,
+    showArea,
   });
 
   if (status === 'unavailable') {
@@ -92,7 +96,7 @@ export function HospitalMap({
       {handle && (
         <div className="absolute right-3 bottom-10 flex flex-col items-end gap-3">
           {controls}
-          <div className="flex flex-col overflow-hidden rounded-lg bg-bg shadow-card">
+          <div className="flex flex-col overflow-hidden rounded-xl border border-border-strong bg-bg shadow-float">
             <button
               type="button"
               aria-label={t('zoomIn')}

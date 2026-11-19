@@ -76,7 +76,7 @@ export function CategoryHeader({
   const parents = isTitleKnown ? crumbs.slice(0, -1) : crumbs;
 
   return (
-    <PageContainer className="space-y-1 pt-3 pb-4 lg:pt-4 lg:pb-6">
+    <PageContainer className="space-y-1 pt-3 pb-6 lg:pt-6 lg:pb-8">
       <Breadcrumb>
         <BreadcrumbLink href="/">{t('breadcrumb.home')}</BreadcrumbLink>
         {parents.map((crumb) => (
@@ -119,11 +119,11 @@ export function CategoryHeader({
         </ol>
       </nav>
 
-      <h1 className="flex min-h-8 items-center text-title lg:min-h-8.5">
+      <h1 className="flex min-h-9 items-center text-display lg:min-h-10">
         {current ? (
           <KeepPhrase text={current.label} />
         ) : (
-          <Skeleton className="h-7 w-40" />
+          <Skeleton className="h-8 w-48" />
         )}
       </h1>
       <p className="min-h-5.75 text-body-sm text-text-secondary">

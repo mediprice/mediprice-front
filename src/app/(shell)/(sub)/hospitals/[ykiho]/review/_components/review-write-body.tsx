@@ -78,8 +78,9 @@ function EditBody<T extends string>({
     );
   }
   const review = query.data;
-  if (!review || review.ykiho !== props.ykiho || review.status === 'HIDDEN') {
-    const isHidden = review?.status === 'HIDDEN';
+  /** 임시조치·삭제 처리된 후기도 백엔드가 수정을 막으므로 숨김과 같이 다룬다. */
+  const isHidden = review !== null && review.status !== 'ACTIVE';
+  if (!review || review.ykiho !== props.ykiho || isHidden) {
     return (
       <EmptyState
         icon={isHidden ? <EyeOff /> : <MessageSquareText />}

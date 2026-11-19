@@ -130,18 +130,18 @@ export function OperatingSection({ hospital }: { hospital: Hospital }) {
       {hourRows.length > 0 ? (
         <InfoTable rows={hourRows} />
       ) : (
-        <p className="rounded-xl bg-surface px-5 py-4 text-body-sm text-text-secondary lg:px-6">
+        <p className="rounded-2xl bg-surface px-5 py-5 text-body text-text-secondary md:px-6">
           {t('hours.empty')}
         </p>
       )}
       {infoRows.length > 0 && (
         <>
-          <h3 className="mt-2 text-subheading">{t('info.title')}</h3>
+          <h3 className="mt-4 text-heading">{t('info.title')}</h3>
           <InfoTable rows={infoRows} />
         </>
       )}
       {(hourRows.length > 0 || infoRows.length > 0) && (
-        <p className="text-caption text-text-secondary">{t('hours.notice')}</p>
+        <p className="text-body-sm text-text-secondary">{t('hours.notice')}</p>
       )}
     </section>
   );

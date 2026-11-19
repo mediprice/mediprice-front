@@ -20,12 +20,23 @@
     "hospitals": "병원 {count, number}곳",
     "averageParts": "평균 <nb>{amount, number}원</nb>",
     "minimum": "최저 {amount, number}원",
-    "maximum": "최고 {amount, number}원"
+    "maximum": "최고 {amount, number}원",
+    "spreadParts": "<nb>최저 {min, number}원</nb> ~ <nb>최고 {max, number}원</nb> <note>(세부 항목별 가격)</note>",
+    "compactRange": "{min, number, ::compact-short}~{max, number, ::compact-short}원"
   },
   "footer": {
     "source": "데이터 출처: 건강보험심사평가원 비급여 진료비 공개 자료",
     "notice": "공개 가격은 병원이 신고한 기준 가격이며, 실제 진료비와 다를 수 있어요.",
-    "copyright": "© MediPrice"
+    "copyright": "© MediPrice",
+    "policies": "약관 및 정책",
+    "terms": "이용약관",
+    "privacy": "개인정보 처리방침",
+    "reviewPolicy": "후기 운영정책",
+    "operatorInfo": "운영자 정보",
+    "operator": "운영자 {name}",
+    "officer": "개인정보 보호책임자 {name}",
+    "officerContact": "개인정보 보호책임자 {name} ({contact})",
+    "contact": "문의 <link>{email}</link>"
   },
   "status": {
     "loading": "불러오는 중"
@@ -47,5 +58,32 @@
     "1032B": "MRI 특수검사",
     "1025A": "초음파 기본검사",
     "1025B": "초음파 진단검사"
+  },
+  "rangeBar": {
+    "range": "가격 범위: 최저 {min, number}원, 최고 {max, number}원",
+    "rangeWithAverage": "가격 범위: 최저 {min, number}원, 평균 {average, number}원, 최고 {max, number}원",
+    "valueLabel": "이 병원",
+    "value": "{label} {value, number}원",
+    "valueComparison": "{label} {value, number}원, {position, select, below {평균보다 낮아요} above {평균보다 높아요} other {평균과 비슷해요}}",
+    "average": "평균",
+    "averageAmount": "평균 {amount, number}원"
+  },
+  "rotation": {
+    "pause": "자동 넘김 멈추기",
+    "play": "자동 넘김 다시 시작",
+    "next": "다음",
+    "prev": "이전",
+    "position": "{total, number}개 중 {current, number}번째"
+  },
+  "averageTag": {
+    "below": "평균보다 {percent, number}% 저렴",
+    "above": "평균보다 {percent, number}% 비쌈",
+    "same": "평균 수준",
+    "incomparable": "구성이 달라 비교 어려움",
+    "incomparableDescription": "이 가격은 평균의 1/3보다 낮거나 3배보다 높아, 시간·횟수 같은 세부 구성이 다른 항목일 수 있어요."
+  },
+  "directions": {
+    "label": "길찾기",
+    "description": "{name}까지 네이버 지도에서 길찾기 (앱 또는 새 창)"
   }
 }

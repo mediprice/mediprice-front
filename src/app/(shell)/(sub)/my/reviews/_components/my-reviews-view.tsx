@@ -10,29 +10,31 @@ import {
 import { PageContainer } from '@/components/layout/page-container';
 import { LoginRequired } from '@/features/auth/components/login-required';
 import { MyPageHeader } from '@/features/auth/components/my-page-header';
+import { MyPageTitle } from '@/features/auth/components/my-page-title';
 import { MySideNav } from '@/features/auth/components/my-side-nav';
 
 import { MyReviewList } from './my-review-list';
 
 export function MyReviewsView() {
   const t = useTranslations('reviews.my');
+  const tPage = useTranslations('mypage.reviews');
   const tNav = useTranslations('nav');
   return (
     <>
-      <MyPageHeader className="max-lg:hidden">
+      <MyPageHeader>
         <Breadcrumb>
           <BreadcrumbLink href="/my">{tNav('my')}</BreadcrumbLink>
           <BreadcrumbCurrent>{t('title')}</BreadcrumbCurrent>
         </Breadcrumb>
-        <h1 className="text-title">{t('title')}</h1>
-        <p className="text-body-sm text-text-secondary">{t('description')}</p>
+        <MyPageTitle title={tPage('heading')} description={t('description')} />
       </MyPageHeader>
-      <h1 className="sr-only lg:hidden">{t('title')}</h1>
-      <PageContainer className="pt-4 pb-section lg:grid lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8 lg:pt-0">
+      <PageContainer className="pb-section md:max-w-2xl lg:grid lg:max-w-page lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-10">
         <MySideNav />
-        <LoginRequired>
-          <MyReviewList />
-        </LoginRequired>
+        <div className="min-w-0 lg:max-w-3xl">
+          <LoginRequired reason="review">
+            <MyReviewList />
+          </LoginRequired>
+        </div>
       </PageContainer>
     </>
   );

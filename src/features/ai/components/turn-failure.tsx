@@ -19,7 +19,7 @@ export function TurnFailure({
   const t = useTranslations('ai.failure');
   return (
     <AssistantBubble text={t(failure)}>
-      <div className="flex flex-col items-start gap-1">
+      <div className="flex flex-wrap items-center gap-2">
         {onRetry && (
           <Button variant="tint" size="md" onClick={onRetry}>
             <RotateCcw aria-hidden="true" />

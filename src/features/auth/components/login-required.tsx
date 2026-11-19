@@ -13,7 +13,7 @@ import type { CurrentUser } from '../queries';
 import { useSession } from '../use-session';
 import { GoogleLoginButton } from './google-login-button';
 
-/** 로그인한 사용자에게만 children을 보여 준다. 로그인하지 않았으면 이유와 로그인 버튼을, 확인 중에는 fallback을 보여 준다. */
+/** 로그인한 사용자에게만 children을 보여 준다. 로그인하지 않았으면 권하는 문장과 큰 로그인 버튼을, 확인 중에는 fallback을 보여 준다. */
 export function LoginRequired({
   reason = 'general',
   fallback,
@@ -32,7 +32,7 @@ export function LoginRequired({
     return (
       fallback ?? (
         <div role="status">
-          <Skeleton className="h-40 w-full rounded-xl" />
+          <Skeleton className="h-40 w-full rounded-2xl" />
           <span className="sr-only">{t('account.checking')}</span>
         </div>
       )
@@ -44,6 +44,7 @@ export function LoginRequired({
       <EmptyState
         icon={<LockKeyhole />}
         title={t('required.errorTitle')}
+        description={t('required.errorDescription')}
         action={
           <Button variant="tint" size="md" onClick={refetch}>
             {tCommon('actions.retry')}
@@ -55,12 +56,24 @@ export function LoginRequired({
 
   if (!user) {
     return (
-      <EmptyState
-        icon={<LockKeyhole />}
-        title={t('loginDialog.title')}
-        description={t(`loginDialog.reason.${reason}`)}
-        action={<GoogleLoginButton variant="tint" size="md" />}
-      />
+      <div className="flex flex-col items-center gap-3 rounded-3xl bg-surface px-5 py-10 text-center lg:py-14">
+        <span
+          aria-hidden="true"
+          className="mb-1 flex size-16 items-center justify-center rounded-2xl bg-bg text-primary [&_svg]:size-7"
+        >
+          <LockKeyhole strokeWidth={1.75} />
+        </span>
+        <p className="text-heading text-balance">
+          {t(`required.invite.${reason}`)}
+        </p>
+        <p className="max-w-sm text-body text-balance text-text-secondary">
+          {t('required.hint')}
+        </p>
+        <GoogleLoginButton
+          size="lg"
+          className="mt-3 min-h-14 w-full max-w-80 text-subheading"
+        />
+      </div>
     );
   }
 

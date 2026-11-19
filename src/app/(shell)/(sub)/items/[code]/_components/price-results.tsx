@@ -1,30 +1,38 @@
 'use client';
 
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { CircleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
+import { variantQuery } from '@/features/hospitals/detail-links';
+import { comparableBand } from '@/features/npay/average-verdict';
 import { HospitalPriceGroupCard } from '@/features/npay/components/hospital-price-group-card';
 import { groupPricesByHospital } from '@/features/npay/group-prices';
-import { npayQueries } from '@/features/npay/queries';
-import { errorMessageKey } from '@/lib/api/error-message';
-
-import { ActiveFilterChips } from './active-filter-chips';
 import {
   buildPriceFiltersQuery,
   type PriceFilters,
   toPriceConditions,
-} from './price-filters';
+} from '@/features/npay/price-filters';
+import type { HospitalPrice } from '@/features/npay/price-stream';
+import { npayQueries } from '@/features/npay/queries';
+import { errorMessageKey } from '@/lib/api/error-message';
+
+import { ActiveFilterChips } from './active-filter-chips';
+import { PriceScopeNotice } from './price-scope-notice';
 import { SortMenu } from './sort-menu';
 import { RESULTS_HEADING_ID } from './use-apply-filters';
 import { useItemReady } from './use-item-ready';
 import { usePriceSummary } from './use-price-summary';
 import { ZeroResults } from './zero-results';
 
-/** 병원 수·적용된 조건·정렬과 병원별 가격 카드. "더 보기"로 읽은 행은 기존 병원 카드에 합쳐진다. */
+/** 흰 바탕의 행 목록. 모바일은 화면 끝까지, 행 사이는 옅은 구분선이다. */
+const LIST =
+  '-mx-4 flex flex-col divide-y divide-hairline border-y border-hairline md:-mx-6';
+
+/** 적용된 조건·정렬과 병원별 가격 행. "더 보기"로 읽은 행은 기존 병원 행에 합쳐진다. 병원 수는 머리에 크게 있어 여기서는 읽어 주기만 한다. */
 export function PriceResults({
   code,
   filters,
@@ -37,41 +45,55 @@ export function PriceResults({
   const tActions = useTranslations('common.actions');
   const isReady = useItemReady(code);
   const summary = usePriceSummary(code, filters);
+  /** 기본은 평균의 1/3~3배 가격만 받는다. 범위가 평균에서 나오므로 요약을 받은 뒤 목록을 읽고, 요약이 실패하면 범위 없이 읽는다. */
+  const band =
+    filters.prices === 'all' ? null : comparableBand(summary.data?.avgPrice);
+  const conditions = toPriceConditions(filters, band);
   const query = useInfiniteQuery({
-    ...npayQueries.priceList(code, {
-      conditions: toPriceConditions(filters),
-      sort: filters.sort,
-    }),
-    enabled: isReady,
+    ...npayQueries.priceList(code, { conditions, sort: filters.sort }),
+    enabled: isReady && (filters.prices === 'all' || !summary.isPending),
+  });
+  const bandSummary = useQuery({
+    ...npayQueries.summaryOf(code, conditions),
+    enabled: isReady && band !== null,
   });
   const groups = groupPricesByHospital(
     query.data?.pages.flatMap((page) => page.rows) ?? [],
   );
-  const total = summary.data?.hospitalCount;
+  const total = band
+    ? bandSummary.data?.hospitalCount
+    : summary.data?.hospitalCount;
+  const excludedCount =
+    band && summary.data && bandSummary.data
+      ? summary.data.priceCount - bandSummary.data.priceCount
+      : 0;
   const backQuery = buildPriceFiltersQuery(filters);
-  const hospitalQuery = new URLSearchParams({
-    item: code,
-    ...(backQuery && { back: backQuery }),
-  }).toString();
+  /** 행이 크게 보여 준 세부 항목을 넘겨, 병원 화면의 가격·평균 비교 문장이 그 행과 같은 세부 항목을 말하게 한다. */
+  const hospitalQuery = (variant: HospitalPrice) =>
+    new URLSearchParams({
+      item: code,
+      ...(backQuery && { back: backQuery }),
+      ...(variant.itemName &&
+        variantQuery({ name: variant.itemName, price: variant.price })),
+    }).toString();
 
   return (
     <section
       aria-labelledby={RESULTS_HEADING_ID}
-      className="flex flex-col gap-3"
+      className="flex flex-col gap-4"
     >
-      <h2 id={RESULTS_HEADING_ID} tabIndex={-1} className="sr-only">
-        {t('title')}
-      </h2>
-      <div className="flex min-h-11 items-center gap-3">
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 lg:gap-3">
-          <p
-            aria-live="polite"
-            className="text-label-bold text-text-primary lg:text-heading"
-          >
-            {total !== undefined
-              ? t('count', { count: total })
-              : summary.isPending && <Skeleton className="h-5.5 w-24 lg:h-7" />}
-          </p>
+      <div className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-2">
+        <h2
+          id={RESULTS_HEADING_ID}
+          tabIndex={-1}
+          className="text-heading text-text-primary"
+        >
+          {t('title')}
+        </h2>
+        <p aria-live="polite" className="sr-only">
+          {total !== undefined && t('countStatus', { count: total })}
+        </p>
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
           <ActiveFilterChips code={code} filters={filters} />
         </div>
         <div className="hidden lg:block">
@@ -79,22 +101,35 @@ export function PriceResults({
         </div>
       </div>
 
+      <PriceScopeNotice
+        code={code}
+        filters={filters}
+        excludedCount={excludedCount}
+      />
+
       {query.isPending ? (
-        <ul aria-busy="true" className="flex flex-col gap-3">
+        <ul aria-busy="true" className={LIST}>
           {Array.from({ length: 4 }, (_, index) => (
             <li
               key={index}
-              className="flex flex-col gap-3 rounded-xl bg-bg p-4 shadow-card lg:p-6"
+              className="flex flex-col gap-3 px-4 pt-5 pb-3 md:px-6 md:pt-6 md:pb-4"
             >
-              <span className="flex items-center gap-3">
-                <Skeleton className="size-11 rounded-lg" />
-                <span className="flex flex-1 flex-col gap-1.5">
-                  <Skeleton className="h-5 w-40" />
-                  <Skeleton className="h-4 w-28" />
+              <span className="flex items-start justify-between gap-4 md:gap-8">
+                <span className="flex min-w-0 flex-1 flex-col gap-1">
+                  <Skeleton className="h-6 w-40 max-w-full" />
+                  <Skeleton className="h-5.75 w-28 lg:h-6" />
                 </span>
+                <Skeleton className="h-8 w-24" />
               </span>
-              <Skeleton className="h-7 w-32" />
-              <Skeleton className="h-4 w-48" />
+              <span className="flex items-center justify-between gap-4 md:justify-end">
+                <Skeleton className="h-6.5 w-36" />
+                <Skeleton className="h-4 w-28 md:w-40" />
+              </span>
+              <span className="flex min-h-11 items-center gap-3">
+                <Skeleton className="h-5.75 w-40 max-w-full lg:h-6" />
+                <Skeleton className="ml-auto size-11 shrink-0 rounded-xl" />
+                <Skeleton className="h-9 w-28 shrink-0 rounded-lg" />
+              </span>
             </li>
           ))}
         </ul>
@@ -102,7 +137,6 @@ export function PriceResults({
         <EmptyState
           icon={<CircleAlert />}
           title={tErrors(errorMessageKey(query.error))}
-          className="rounded-xl bg-bg shadow-card"
           action={
             <Button
               variant="tint"
@@ -117,12 +151,17 @@ export function PriceResults({
         <ZeroResults code={code} filters={filters} />
       ) : (
         <>
-          <ul className="flex flex-col gap-3">
-            {groups.map((group) => (
+          <ul className={LIST}>
+            {groups.map((group, index) => (
               <li key={group.ykiho}>
                 <HospitalPriceGroupCard
                   group={group}
-                  href={`/hospitals/${encodeURIComponent(group.ykiho)}?${hospitalQuery}`}
+                  hrefFor={(variant) =>
+                    `/hospitals/${encodeURIComponent(group.ykiho)}?${hospitalQuery(variant)}`
+                  }
+                  summary={summary.data}
+                  sort={filters.sort}
+                  showAverageTick={index === 0}
                 />
               </li>
             ))}

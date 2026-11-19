@@ -1,15 +1,22 @@
 {
   "detail": {
     "metaTitle": "병원 상세",
+    "metadata": {
+      "title": "{name} 비급여 진료비",
+      "titleWithLocation": "{name}({location}) 비급여 진료비",
+      "description": "{name}의 비급여 진료비 공개 가격과 진료 시간, 위치를 확인해요. 건강보험심사평가원 공개 자료 기준이에요.",
+      "descriptionWithLocation": "{location}에 있는 {name}의 비급여 진료비 공개 가격과 진료 시간, 위치를 확인해요. 건강보험심사평가원 공개 자료 기준이에요."
+    },
     "topBarTitle": "병원 상세",
     "notFound": {
       "description": "주소가 바뀌었거나 더 이상 공개되지 않는 병원일 수 있어요.",
-      "home": "홈으로 가기",
-      "title": "병원을 찾을 수 없어요"
+      "home": "홈으로 가기"
     },
     "header": {
-      "call": "전화 {phone}",
+      "contactLabel": "병원 연락처",
+      "phone": "전화",
       "homepage": "홈페이지",
+      "doctorsTitle": "의료진",
       "doctors": "의사 {count, plural, other {#명}}",
       "newWindow": "새 창"
     },
@@ -21,18 +28,20 @@
       "reviews": "후기"
     },
     "selected": {
-      "label": "선택 항목 · {name}",
+      "eyebrow": "선택한 항목",
       "variants": "세부 항목 {count, plural, other {#개}}",
       "singleMeta": "{name} · {date} 적용",
       "notOffered": "이 병원은 이 항목의 가격을 공개하지 않았어요.",
       "compare": "다른 병원 가격 비교",
       "clear": "선택 해제",
-      "appliedOn": "{date} 적용"
-    },
-    "rail": {
-      "emptyTitle": "항목을 선택하면",
-      "emptyDescription": "가격 목록에서 항목을 고르면 이 병원의 세부 가격과 가격 추이를 볼 수 있어요.",
-      "compareDescription": "같은 항목을 공개한 다른 병원의 가격과 비교해 보세요."
+      "appliedOn": "{date} 적용",
+      "comparison": "{direction, select, below {{region} 평균보다 <em>{percent, number}% 저렴해요</em>} above {{region} 평균보다 <em>{percent, number}% 비싸요</em>} other {{region} 평균과 <em>비슷해요</em>}}",
+      "basis": "{region} 병원 {count, plural, other {#곳}}의 세부 항목별 공개 가격 기준",
+      "noRegionPrice": "{region}에는 비교할 공개 가격이 아직 없어요.",
+      "incomparable": "이 세부 항목은 단위·구성이 달라 {region} 평균과 비교하기 어려워요",
+      "incomparableNote": "평균({average, number}원)의 1/3보다 낮거나 3배보다 높은 가격은 시간·횟수 같은 구성이 다른 항목일 수 있어 % 차이를 쓰지 않아요.",
+      "showAll": "세부 항목 {count, plural, other {#개}} 모두 보기",
+      "showLess": "세부 항목 접기"
     },
     "trend": {
       "label": "가격 추이",
@@ -67,7 +76,8 @@
       "noResultDescription": "다른 이름으로 검색하거나 분류를 바꿔 보세요.",
       "more": "더 보기 ({shown, number}/{total, number})",
       "hint": "항목을 고르면 세부 가격과 가격 추이를 볼 수 있어요.",
-      "otherCategory": "기타"
+      "otherCategory": "기타",
+      "groupCount": "{count, plural, other {#개}}"
     },
     "hours": {
       "title": "운영시간",

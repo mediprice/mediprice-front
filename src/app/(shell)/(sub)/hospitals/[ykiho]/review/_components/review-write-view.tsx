@@ -67,14 +67,14 @@ export function ReviewWriteView({
             <BreadcrumbCurrent>{title}</BreadcrumbCurrent>
           </Breadcrumb>
         )}
-        <h1 className="text-title">{title}</h1>
+        <h1 className="text-display">{title}</h1>
       </MyPageHeader>
       <h1 className="sr-only lg:hidden">{title}</h1>
       <PageContainer
         className={
           isMyContext
             ? 'pt-4 pb-section lg:grid lg:grid-cols-[14rem_1fr] lg:items-start lg:gap-8 lg:pt-0'
-            : 'pt-4 pb-section lg:pt-0 [&>*]:lg:max-w-3xl'
+            : 'pt-4 pb-section md:max-w-2xl lg:max-w-page lg:pt-0 [&>*]:lg:max-w-3xl'
         }
       >
         {isMyContext && <MySideNav />}

@@ -22,7 +22,7 @@ export function SubTopBar<T extends string>({
         <Link
           href={backHref}
           aria-label={t('back')}
-          className="flex size-11 shrink-0 items-center justify-center rounded-lg text-text-primary active:bg-surface"
+          className="flex size-11 shrink-0 items-center justify-center rounded-xl text-text-primary transition-colors duration-200 ease-standard active:bg-surface"
         >
           <ChevronLeft aria-hidden="true" className="size-6" strokeWidth={2} />
         </Link>

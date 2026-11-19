@@ -38,7 +38,7 @@ export function QuestionOptions({
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       {questions.map((question, index) => {
         const labelId = `${baseId}-${index}`;
         return (
@@ -60,7 +60,7 @@ export function QuestionOptions({
                     isSingle ? undefined : selected[index] === option
                   }
                   onClick={() => handlePick(index, option)}
-                  className="h-auto min-h-9 py-1.5 whitespace-normal"
+                  className="h-auto min-h-11 max-w-full px-4.5 py-2 text-left whitespace-normal"
                 >
                   {option}
                 </Chip>
@@ -72,7 +72,6 @@ export function QuestionOptions({
       {!isSingle && (
         <Button
           size="md"
-          variant="tint"
           className="w-fit"
           disabled={answers.length === 0}
           onClick={() => onAnswer(answers.join(', '))}

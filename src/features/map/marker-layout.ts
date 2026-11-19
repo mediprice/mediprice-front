@@ -6,8 +6,8 @@ export type LabelCandidate = {
   label: string;
 };
 
-/** text-caption-bold(13px) 알약의 대략적인 크기. 실제 글자 폭보다 조금 넉넉하게 잡는다. */
-const CHAR_WIDTH = 7.5;
+/** text-label-bold(15–16px) 핀의 대략적인 크기. 실제 글자 폭보다 조금 넉넉하게 잡는다. */
+const CHAR_WIDTH = 8.5;
 const PILL_PADDING = 28;
 const PILL_HEIGHT = 32;
 const GAP = 4;

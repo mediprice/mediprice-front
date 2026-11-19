@@ -6,13 +6,13 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
-
-import { FilterSheet } from './filter-sheet';
 import {
   clearConditions,
   countActiveFilters,
   type PriceFilters,
-} from './price-filters';
+} from '@/features/npay/price-filters';
+
+import { FilterSheet } from './filter-sheet';
 import { useApplyFilters } from './use-apply-filters';
 
 /** 결과 0건. 조건이 있으면 바꾸거나 모두 풀게 하고, 조건 없이도 0건이면 다른 항목을 찾게 한다. */
@@ -32,7 +32,6 @@ export function ZeroResults({
         icon={<SearchX />}
         title={t('noPriceTitle')}
         description={t('noPriceDescription')}
-        className="rounded-xl bg-bg shadow-card"
         action={
           <Button asChild variant="tint" size="md">
             <Link href="/search">{t('search')}</Link>
