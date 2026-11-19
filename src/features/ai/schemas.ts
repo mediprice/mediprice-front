@@ -34,6 +34,17 @@ export const turnItemSchema = z.object({
   reason: z.string(),
 });
 
+/** 사용자가 말한 장소를 AI 서버가 DB의 시도·시군구로 맞춘 결과. 형식이 다르면 지역 없이 보여 준다. */
+export const turnAreaSchema = z.object({
+  sidoCode: z.string().regex(/^\d{6}$/),
+  sgguCode: z
+    .string()
+    .regex(/^\d{6}$/)
+    .nullish()
+    .transform((value) => value ?? null),
+  label: z.string().trim().min(1).max(40),
+});
+
 export const turnResponseSchema = z.object({
   state: turnStateSchema,
   kind: z.enum(TURN_KINDS),
@@ -44,6 +55,7 @@ export const turnResponseSchema = z.object({
     .default([])
     .transform((items) => items.slice(0, MAX_RESULT_ITEMS)),
   emergencyBanner: z.boolean().default(false),
+  area: turnAreaSchema.nullable().catch(null),
   remainingTurns: z
     .number()
     .int()
@@ -58,4 +70,5 @@ export type TurnKind = (typeof TURN_KINDS)[number];
 export type TurnState = z.infer<typeof turnStateSchema>;
 export type TurnQuestion = z.infer<typeof turnQuestionSchema>;
 export type TurnItem = z.infer<typeof turnItemSchema>;
+export type TurnArea = z.infer<typeof turnAreaSchema>;
 export type TurnResponse = z.infer<typeof turnResponseSchema>;

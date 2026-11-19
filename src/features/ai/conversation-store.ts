@@ -15,6 +15,7 @@ import {
 } from './conversation';
 import {
   TURN_KINDS,
+  turnAreaSchema,
   turnInputSchema,
   turnItemSchema,
   turnQuestionSchema,
@@ -41,6 +42,8 @@ const storedSchema = z.object({
         text: z.string(),
         questions: z.array(turnQuestionSchema),
         items: z.array(turnItemSchema),
+        /** 장소를 받기 전에 저장된 대화에는 없다. */
+        area: turnAreaSchema.nullable().catch(null),
       }),
     ]),
   ),

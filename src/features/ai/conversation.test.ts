@@ -25,6 +25,7 @@ function response(overrides: Partial<TurnResponse> = {}): TurnResponse {
     ],
     items: [],
     emergencyBanner: false,
+    area: null,
     remainingTurns: 5,
     ...overrides,
   };

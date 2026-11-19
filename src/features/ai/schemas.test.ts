@@ -15,8 +15,33 @@ describe('turnResponseSchema', () => {
       questions: [],
       items: [],
       emergencyBanner: false,
+      area: null,
       remainingTurns: null,
     });
+  });
+
+  it('장소는 시도·시군구 코드와 이름으로 받는다', () => {
+    const area = {
+      sidoCode: '110000',
+      sgguCode: '110015',
+      label: '서울 은평구',
+    };
+    expect(turnResponseSchema.parse({ ...base, area }).area).toEqual(area);
+    expect(
+      turnResponseSchema.parse({
+        ...base,
+        area: { sidoCode: '310000', label: '경기' },
+      }).area,
+    ).toEqual({ sidoCode: '310000', sgguCode: null, label: '경기' });
+  });
+
+  it('장소 형식이 다르면 대화는 그대로 두고 장소만 버린다', () => {
+    const parsed = turnResponseSchema.parse({
+      ...base,
+      area: { sidoCode: '서울', label: '서울' },
+    });
+    expect(parsed.area).toBeNull();
+    expect(parsed.reply).toBe(base.reply);
   });
 
   it('후보는 3개까지만 받는다', () => {

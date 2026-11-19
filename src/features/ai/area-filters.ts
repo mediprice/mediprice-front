@@ -1,0 +1,41 @@
+import type { PriceFilters } from '@/features/npay/price-filters';
+import { DEFAULT_REGION } from '@/features/regions/service-region';
+
+import type { TurnArea } from './schemas';
+
+const METRO = { '110000': 'seoul', '310000': 'gyeonggi' } as const;
+
+export type AreaScope =
+  /** 장소를 말하지 않아 기본 지역(서울·경기)이다. */
+  | { kind: 'default'; filters: PriceFilters }
+  /** 서울·경기 안이라 그 시도(와 시군구)로 좁힌다. */
+  | { kind: 'area'; filters: PriceFilters; label: string }
+  /** 지역 선택은 서울·경기만 되므로 그 밖의 장소는 전국으로 보여 준다. */
+  | { kind: 'outside'; filters: PriceFilters; label: string };
+
+/** AI가 알려 준 장소를 항목 가격 화면의 필터로 바꾼다. 시군구는 시도 코드 앞 두 자리가 같을 때만 쓴다. */
+export function areaScope(area: TurnArea | null): AreaScope {
+  if (!area) {
+    return {
+      kind: 'default',
+      filters: { region: DEFAULT_REGION, sort: 'price_asc' },
+    };
+  }
+  const region = METRO[area.sidoCode as keyof typeof METRO];
+  if (!region) {
+    return {
+      kind: 'outside',
+      filters: { region: 'all', sort: 'price_asc' },
+      label: area.label,
+    };
+  }
+  const sggu =
+    area.sgguCode && area.sgguCode.slice(0, 2) === area.sidoCode.slice(0, 2)
+      ? area.sgguCode
+      : undefined;
+  return {
+    kind: 'area',
+    filters: { region, sort: 'price_asc', ...(sggu && { sggu }) },
+    label: area.label,
+  };
+}
