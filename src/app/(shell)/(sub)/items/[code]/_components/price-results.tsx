@@ -1,6 +1,6 @@
 'use client';
 
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { CircleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { variantQuery } from '@/features/hospitals/detail-links';
+import { comparableBand } from '@/features/npay/average-verdict';
 import { HospitalPriceGroupCard } from '@/features/npay/components/hospital-price-group-card';
 import { groupPricesByHospital } from '@/features/npay/group-prices';
 import {
@@ -20,6 +21,7 @@ import { npayQueries } from '@/features/npay/queries';
 import { errorMessageKey } from '@/lib/api/error-message';
 
 import { ActiveFilterChips } from './active-filter-chips';
+import { PriceScopeNotice } from './price-scope-notice';
 import { SortMenu } from './sort-menu';
 import { RESULTS_HEADING_ID } from './use-apply-filters';
 import { useItemReady } from './use-item-ready';
@@ -43,17 +45,28 @@ export function PriceResults({
   const tActions = useTranslations('common.actions');
   const isReady = useItemReady(code);
   const summary = usePriceSummary(code, filters);
+  /** 기본은 평균의 1/3~3배 가격만 받는다. 범위가 평균에서 나오므로 요약을 받은 뒤 목록을 읽고, 요약이 실패하면 범위 없이 읽는다. */
+  const band =
+    filters.prices === 'all' ? null : comparableBand(summary.data?.avgPrice);
+  const conditions = toPriceConditions(filters, band);
   const query = useInfiniteQuery({
-    ...npayQueries.priceList(code, {
-      conditions: toPriceConditions(filters),
-      sort: filters.sort,
-    }),
-    enabled: isReady,
+    ...npayQueries.priceList(code, { conditions, sort: filters.sort }),
+    enabled: isReady && (filters.prices === 'all' || !summary.isPending),
+  });
+  const bandSummary = useQuery({
+    ...npayQueries.summaryOf(code, conditions),
+    enabled: isReady && band !== null,
   });
   const groups = groupPricesByHospital(
     query.data?.pages.flatMap((page) => page.rows) ?? [],
   );
-  const total = summary.data?.hospitalCount;
+  const total = band
+    ? bandSummary.data?.hospitalCount
+    : summary.data?.hospitalCount;
+  const excludedCount =
+    band && summary.data && bandSummary.data
+      ? summary.data.priceCount - bandSummary.data.priceCount
+      : 0;
   const backQuery = buildPriceFiltersQuery(filters);
   /** 행이 크게 보여 준 세부 항목을 넘겨, 병원 화면의 가격·평균 비교 문장이 그 행과 같은 세부 항목을 말하게 한다. */
   const hospitalQuery = (variant: HospitalPrice) =>
@@ -87,6 +100,12 @@ export function PriceResults({
           <SortMenu code={code} filters={filters} />
         </div>
       </div>
+
+      <PriceScopeNotice
+        code={code}
+        filters={filters}
+        excludedCount={excludedCount}
+      />
 
       {query.isPending ? (
         <ul aria-busy="true" className={LIST}>

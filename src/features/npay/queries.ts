@@ -4,6 +4,7 @@ import { type ApiClient, apiClient } from '@/lib/api/client';
 import type { paths } from '@/lib/api/schema';
 import { unwrap } from '@/lib/api/unwrap';
 
+import type { PriceBand } from './average-verdict';
 import {
   createPriceCursor,
   type PriceSortOrder,
@@ -24,7 +25,8 @@ export type NpayPriceParams = NonNullable<
 >;
 export type NpayPriceCondition = NonNullable<
   paths['/api/npay-items/{npayCode}/price-summary']['get']['parameters']['query']
->['condition'];
+>['condition'] &
+  Partial<PriceBand>;
 /** 여러 조건(시도별)을 가격순으로 합쳐 한 목록으로 본다. */
 export type NpayPriceListParams = {
   conditions: NpayPriceCondition[];

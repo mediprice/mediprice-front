@@ -59,6 +59,13 @@
     "loadMoreError": "다음 목록을 불러오지 못했어요.",
     "countStatus": "병원 {count, number}곳을 찾았어요."
   },
+  "scope": {
+    "comparable": "평균과 견주기 어려운 가격 {count, number}건은 빼고 보여 드려요.",
+    "all": "평균과 견주기 어려운 가격까지 모두 보여 드려요.",
+    "reason": "평균의 1/3보다 낮거나 3배보다 높은 가격은 시간·횟수 같은 구성이 다른 세부 항목일 수 있어요.",
+    "showAll": "모두 보기",
+    "showComparable": "견줄 수 있는 가격만 보기"
+  },
   "empty": {
     "title": "조건에 맞는 병원이 없어요",
     "description": "조건을 하나씩 풀어 보거나 초기화해 보세요.",

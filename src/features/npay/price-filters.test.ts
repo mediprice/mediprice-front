@@ -22,6 +22,18 @@ describe('parsePriceFilters', () => {
     expect(parsePriceFilters({ region: 'all' }).region).toBe('all');
   });
 
+  it('모든 가격 보기는 prices=all일 때만 켠다', () => {
+    expect(parsePriceFilters({ prices: 'all' })).toEqual({
+      region: 'metro',
+      sort: 'price_asc',
+      prices: 'all',
+    });
+    expect(parsePriceFilters({ prices: 'some' })).toEqual({
+      region: 'metro',
+      sort: 'price_asc',
+    });
+  });
+
   it('모르는 값은 기본값으로 돌린다', () => {
     expect(
       parsePriceFilters({
@@ -66,11 +78,12 @@ describe('buildPriceFiltersQuery', () => {
       sggu: '110001',
       institution: '21',
       sort: 'price_desc',
+      prices: 'all',
     });
     const query = buildPriceFiltersQuery(filters);
 
     expect(query).toBe(
-      'region=seoul&sggu=110001&institution=21&sort=price_desc',
+      'region=seoul&sggu=110001&institution=21&sort=price_desc&prices=all',
     );
     expect(
       parsePriceFilters(Object.fromEntries(new URLSearchParams(query))),
@@ -101,6 +114,22 @@ describe('toPriceConditions', () => {
         sort: 'price_asc',
       }),
     ).toEqual([{ institutionCode: '11' }]);
+  });
+
+  it('가격 범위를 주면 조건마다 담는다', () => {
+    const band = { minPrice: 39_462, maxPrice: 355_152 };
+    expect(
+      toPriceConditions({ region: 'metro', sort: 'price_asc' }, band),
+    ).toEqual([
+      { sidoCode: '110000', ...band },
+      { sidoCode: '310000', ...band },
+    ]);
+    expect(
+      toPriceConditions({ region: 'all', sort: 'price_asc' }, band),
+    ).toEqual([band]);
+    expect(
+      toPriceConditions({ region: 'all', sort: 'price_asc' }, null),
+    ).toEqual([]);
   });
 
   it('한 지역은 시군구까지 한 조건에 담는다', () => {
