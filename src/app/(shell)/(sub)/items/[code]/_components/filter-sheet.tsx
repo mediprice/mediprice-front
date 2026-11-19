@@ -9,9 +9,12 @@ import {
   ResponsiveDialogContent,
   ResponsiveDialogTrigger,
 } from '@/components/ui/responsive-dialog';
+import {
+  clearConditions,
+  type PriceFilters,
+} from '@/features/npay/price-filters';
 
 import { FilterPanel } from './filter-panel';
-import { clearConditions, type PriceFilters } from './price-filters';
 import { useApplyFilters } from './use-apply-filters';
 
 /** 모바일 필터 시트. 고른 값은 적용을 누를 때까지 임시로 두고, 열 때마다 URL 값으로 다시 시작한다. */

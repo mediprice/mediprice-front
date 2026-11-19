@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { PageContainer } from '@/components/layout/page-container';
 import { SubTopBar } from '@/components/layout/sub-top-bar';
+import { parsePriceFilters } from '@/features/npay/price-filters';
 
 import { FilterColumn } from './_components/filter-column';
 import {
@@ -15,7 +16,6 @@ import { ItemGate } from './_components/item-gate';
 import { ItemHeader } from './_components/item-header';
 import { buildItemMetadata } from './_components/item-metadata';
 import { MobileToolbar } from './_components/mobile-toolbar';
-import { parsePriceFilters } from './_components/price-filters';
 import { PriceResults } from './_components/price-results';
 
 export async function generateMetadata({

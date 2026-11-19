@@ -3,9 +3,9 @@
 import { X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { type PriceFilters, withRegion } from '@/features/npay/price-filters';
 import { DEFAULT_REGION } from '@/features/regions/service-region';
 
-import { type PriceFilters, withRegion } from './price-filters';
 import { useApplyFilters } from './use-apply-filters';
 import { useFilterLabels } from './use-filter-labels';
 

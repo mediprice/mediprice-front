@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { RollingNumber } from '@/components/ui/rolling-number';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PriceSpread } from '@/features/npay/components/price-spread';
+import type { PriceFilters } from '@/features/npay/price-filters';
 import { errorMessageKey } from '@/lib/api/error-message';
 
-import type { PriceFilters } from './price-filters';
 import { usePriceSummary } from './use-price-summary';
 
 /**

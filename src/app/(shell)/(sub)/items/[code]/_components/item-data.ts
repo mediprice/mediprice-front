@@ -4,16 +4,15 @@ import { dehydrate } from '@tanstack/react-query';
 import { notFound } from 'next/navigation';
 
 import { parseItemParam } from '@/features/hospitals/detail-links';
-import { npayQueries } from '@/features/npay/queries';
-import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
-import { getRequestQueryClient, loadOrNotFound } from '@/server/api/prefetch';
-import { publicApi } from '@/server/api/public-client';
-
 import {
   buildPriceFiltersQuery,
   type PriceFilters,
   toPriceConditions,
-} from './price-filters';
+} from '@/features/npay/price-filters';
+import { npayQueries } from '@/features/npay/queries';
+import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
+import { getRequestQueryClient, loadOrNotFound } from '@/server/api/prefetch';
+import { publicApi } from '@/server/api/public-client';
 
 /** 형식이 맞지 않는 코드는 백엔드에 묻지 않고 404다. 백엔드가 늦거나 실패하면 null이라 브라우저가 다시 읽는다. */
 export function loadItem(code: string) {

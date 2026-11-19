@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tag } from '@/components/ui/tag';
+import { type PriceFilters, withRegion } from '@/features/npay/price-filters';
 import { npayQueries } from '@/features/npay/queries';
 import { useCategoryLabel } from '@/features/npay/use-category-label';
 import {
@@ -23,7 +24,6 @@ import {
 import { errorMessageKey } from '@/lib/api/error-message';
 
 import { formatItemTitle } from './item-title';
-import { type PriceFilters, withRegion } from './price-filters';
 import { PriceSummary } from './price-summary';
 import { useApplyFilters } from './use-apply-filters';
 import { useFilterLabels } from './use-filter-labels';

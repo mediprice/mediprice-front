@@ -10,16 +10,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { variantQuery } from '@/features/hospitals/detail-links';
 import { HospitalPriceGroupCard } from '@/features/npay/components/hospital-price-group-card';
 import { groupPricesByHospital } from '@/features/npay/group-prices';
+import {
+  buildPriceFiltersQuery,
+  type PriceFilters,
+  toPriceConditions,
+} from '@/features/npay/price-filters';
 import type { HospitalPrice } from '@/features/npay/price-stream';
 import { npayQueries } from '@/features/npay/queries';
 import { errorMessageKey } from '@/lib/api/error-message';
 
 import { ActiveFilterChips } from './active-filter-chips';
-import {
-  buildPriceFiltersQuery,
-  type PriceFilters,
-  toPriceConditions,
-} from './price-filters';
 import { SortMenu } from './sort-menu';
 import { RESULTS_HEADING_ID } from './use-apply-filters';
 import { useItemReady } from './use-item-ready';

@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-import type { NpayPriceCondition } from '@/features/npay/queries';
 import {
   DEFAULT_REGION,
   parseServiceRegion,
@@ -8,6 +7,8 @@ import {
   type ServiceRegion,
   sidoCodesOf,
 } from '@/features/regions/service-region';
+
+import type { NpayPriceCondition } from './queries';
 
 export const SORTS = ['price_asc', 'price_desc'] as const;
 export type PriceSort = (typeof SORTS)[number];
