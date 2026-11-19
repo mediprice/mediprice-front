@@ -1,0 +1,126 @@
+{
+  "write": {
+    "metaTitle": "후기 작성",
+    "metaTitleEdit": "후기 수정",
+    "title": "후기 작성",
+    "titleEdit": "후기 수정",
+    "notFoundTitle": "수정할 후기를 찾을 수 없어요",
+    "notFoundDescription": "삭제됐거나 내가 쓴 후기가 아니에요.",
+    "hiddenTitle": "숨김 처리된 후기는 수정할 수 없어요",
+    "hiddenDescription": "운영 정책에 따라 숨김 처리된 후기는 고치거나 지울 수 없어요.",
+    "backToHospital": "병원으로 돌아가기",
+    "backToMyReviews": "내 후기로 돌아가기",
+    "loadError": "후기를 불러오지 못했어요"
+  },
+  "form": {
+    "target": "대상 병원",
+    "locked": "바꿀 수 없어요",
+    "rating": "평점",
+    "ratingValue": "{rating}점",
+    "ratingOption": "5점 중 {rating}점",
+    "ratingNone": "별을 눌러 골라 주세요",
+    "content": "후기",
+    "contentPlaceholder": "병원을 이용한 경험을 10자 이상 남겨 주세요.",
+    "contentRange": "10~2,000자",
+    "contentCount": "{count, number} / {max, number}",
+    "contentCountLabel": "{max, number}자 중 {count, number}자 입력",
+    "visitTitle": "방문 정보 (선택)",
+    "visitedOn": "방문일",
+    "paidAmount": "결제 금액(원)",
+    "paidAmountPlaceholder": "예: 45000",
+    "visitHint": "입력하면 후기에 함께 보여요. 게시한 뒤에는 바꿀 수만 있고 지울 수는 없어요.",
+    "visitHintEdit": "이미 입력한 방문일과 결제 금액은 바꿀 수만 있고 지울 수는 없어요.",
+    "noticeName": "후기에는 별칭이 일부 가려져서 공개돼요(예: 건*하루).",
+    "noticePrivacy": "실명·전화번호는 쓰지 마세요. 이미지는 첨부할 수 없어요.",
+    "noticePublic": "게시하면 바로 공개돼요.",
+    "cancel": "취소",
+    "submit": "후기 게시",
+    "submitEdit": "수정 저장",
+    "failedTitle": "후기를 게시하지 못했어요.",
+    "failedTitleEdit": "후기를 수정하지 못했어요.",
+    "errors": {
+      "ratingRequired": "평점을 골라 주세요.",
+      "contentTooShort": "후기를 10자 이상 남겨 주세요.",
+      "contentTooLong": "2,000자 이내로 줄여 주세요.",
+      "visitedOnInvalid": "날짜를 다시 확인해 주세요.",
+      "visitedOnFuture": "오늘 이후 날짜는 고를 수 없어요.",
+      "paidAmountInvalid": "1억 원 이하의 숫자로 입력해 주세요.",
+      "cannotClear": "이미 입력한 값은 지울 수 없어요. 바꿀 값을 입력해 주세요.",
+      "invalid": "입력한 내용을 다시 확인해 주세요."
+    }
+  },
+  "leave": {
+    "title": "작성 중인 내용이 있어요",
+    "description": "나가면 입력한 내용이 사라져요.",
+    "leave": "나가기",
+    "stay": "계속 편집"
+  },
+  "notice": {
+    "created": "후기를 게시했어요.",
+    "updated": "후기를 수정했어요.",
+    "deleted": "후기를 삭제했어요."
+  },
+  "section": {
+    "write": "후기 쓰기",
+    "count": "후기 {count, plural, other {#건}}"
+  },
+  "menu": {
+    "title": "후기 메뉴",
+    "edit": "수정",
+    "editLong": "수정하기",
+    "delete": "삭제",
+    "deleteLong": "삭제하기",
+    "report": "신고",
+    "reportLong": "신고하기",
+    "openFor": "{name} 후기 더보기",
+    "editFor": "{name} 후기 수정",
+    "deleteFor": "{name} 후기 삭제",
+    "reportFor": "{name} 후기 신고"
+  },
+  "delete": {
+    "title": "후기를 삭제할까요?",
+    "description": "삭제한 후기는 되돌릴 수 없어요.",
+    "confirm": "삭제"
+  },
+  "report": {
+    "title": "이 후기를 신고할까요?",
+    "target": "신고할 후기",
+    "reason": "신고 사유",
+    "reasons": {
+      "PRIVACY": "개인정보 노출",
+      "SPAM": "광고·도배",
+      "ABUSE": "욕설·비방",
+      "FALSE_INFO": "허위 정보",
+      "ETC": "기타"
+    },
+    "reasonRequired": "신고 사유를 골라 주세요.",
+    "detail": "설명 (선택)",
+    "detailPlaceholder": "신고 이유를 자세히 알려 주세요.",
+    "detailCount": "{count, number} / {max, number}",
+    "detailTooLong": "500자 이내로 줄여 주세요.",
+    "submit": "신고 접수",
+    "doneTitle": "신고를 접수했어요",
+    "doneDescription": "운영 정책을 확인한 뒤 처리해요. 처리 결과는 따로 알려 드리지 않아요.",
+    "alreadyTitle": "이미 신고한 후기예요",
+    "alreadyDescription": "같은 후기는 한 번만 신고할 수 있어요. 접수된 신고를 확인하고 있어요.",
+    "failed": "신고를 접수하지 못했어요.",
+    "reasonHint": "신고 사유를 고르면 접수할 수 있어요."
+  },
+  "my": {
+    "metaTitle": "내 후기",
+    "title": "내 후기",
+    "count": "내가 쓴 후기 {count, plural, other {#개}}",
+    "description": "공개 후기는 병원 상세에 표시돼요.",
+    "viewHospital": "{name} 병원 보기",
+    "unknownHospital": "병원 정보 없음",
+    "meta": "{rating}점 · {date}",
+    "public": "공개",
+    "hidden": "숨김",
+    "hiddenNote": "운영 정책에 따라 숨김 처리돼 병원 상세에 보이지 않아요. 숨김 처리된 후기는 수정하거나 삭제할 수 없어요.",
+    "emptyTitle": "작성한 후기가 없어요",
+    "emptyDescription": "방문한 병원의 후기를 남기면 여기에서 볼 수 있어요.",
+    "browse": "병원 둘러보기",
+    "loadError": "내 후기를 불러오지 못했어요",
+    "more": "후기 더 보기"
+  }
+}

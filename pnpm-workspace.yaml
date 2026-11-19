@@ -1,7 +1,10 @@
 engineStrict: true
 saveExact: true
 
+# next-intl's message extractor deps ship prebuilt binaries; their install scripts aren't needed (extractor unused).
 allowBuilds:
+  '@parcel/watcher': false
+  '@swc/core': false
   unrs-resolver: true
 
 # eslint-config-next's bundled plugins (react, import, jsx-a11y) don't declare ESLint 10 yet,

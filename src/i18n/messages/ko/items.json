@@ -1,0 +1,81 @@
+{
+  "metadata": {
+    "title": "항목별 가격",
+    "description": "병원마다 다른 비급여 진료비를 건강보험심사평가원 공개 가격으로 비교해요.",
+    "documentTitle": "{name} 병원별 가격 | MediPrice",
+    "notFoundTitle": "찾을 수 없는 항목 | MediPrice"
+  },
+  "topBar": {
+    "title": "항목별 가격"
+  },
+  "header": {
+    "source": "건강보험심사평가원 공개 가격 기준",
+    "loading": "항목 정보를 불러오는 중",
+    "fallbackTitle": "항목별 가격"
+  },
+  "notFound": {
+    "description": "주소가 바뀌었거나 더 이상 공개되지 않는 항목일 수 있어요.",
+    "search": "다른 항목 찾기"
+  },
+  "summary": {
+    "label": "공개 가격",
+    "regionWithSggu": "{region} {sggu}",
+    "scopeWithInstitution": "{scope} · {institution}",
+    "scope": "{scope} 기준",
+    "counts": "병원 {hospitals, number}곳 · 가격 {prices, number}건"
+  },
+  "filters": {
+    "title": "필터",
+    "open": "필터",
+    "openWithCount": "필터 {count, number}개 적용됨",
+    "reset": "초기화",
+    "sheetDescription": "조건을 고른 뒤 적용을 누르면 목록이 바뀌어요.",
+    "region": "지역",
+    "sggu": "시·군·구",
+    "sgguAll": "전체 시·군·구",
+    "sgguNeedsRegion": "지역을 서울이나 경기 하나로 고르면 <nowrap>시·군·구</nowrap>를 고를 수 있어요.",
+    "institution": "기관 종별",
+    "institutionAll": "전체 종별",
+    "loading": "불러오는 중",
+    "loadError": "목록을 불러오지 못했어요.",
+    "mapShort": "지도"
+  },
+  "chips": {
+    "remove": "{label} 조건 해제",
+    "sggu": "시·군·구",
+    "institution": "기관 종별"
+  },
+  "sort": {
+    "title": "정렬",
+    "current": "정렬: {label}",
+    "priceAsc": "가격 낮은 순",
+    "priceDesc": "가격 높은 순"
+  },
+  "list": {
+    "title": "병원별 공개 가격",
+    "count": "병원 {count, number}곳",
+    "progress": "전체 {total, number}곳 중 {shown, number}곳",
+    "loadMoreError": "다음 목록을 불러오지 못했어요."
+  },
+  "empty": {
+    "title": "조건에 맞는 병원이 없어요",
+    "description": "조건을 하나씩 풀어 보거나 초기화해 보세요.",
+    "change": "조건 바꾸기",
+    "reset": "조건 모두 초기화",
+    "noPriceTitle": "아직 공개된 가격이 없어요",
+    "noPriceDescription": "이 항목의 가격을 공개한 병원이 없어요. 다른 항목을 찾아보세요.",
+    "search": "다른 항목 찾기"
+  },
+  "card": {
+    "meta": "{kind} · {region}",
+    "startDate": "{date}부터 적용",
+    "startDateUnknown": "적용일 미확인",
+    "showVariants": "세부 {count, number}건 보기",
+    "hideVariants": "세부 접기",
+    "variantsLabel": "{hospital}의 세부 가격",
+    "moreVariants": "외 {count, number}건"
+  },
+  "breadcrumb": {
+    "home": "홈"
+  }
+}

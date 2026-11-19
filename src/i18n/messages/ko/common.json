@@ -1,0 +1,51 @@
+{
+  "brand": "MediPrice",
+  "actions": {
+    "close": "닫기",
+    "cancel": "취소",
+    "confirm": "확인",
+    "reset": "초기화",
+    "apply": "적용",
+    "more": "더 보기",
+    "retry": "다시 시도",
+    "back": "뒤로 가기"
+  },
+  "price": {
+    "won": "{amount, number}원",
+    "range": "{min, number}~{max, number}원",
+    "none": "가격 정보 없음",
+    "rangeParts": "<amount>{min, number}</amount>~<amount>{max, number}원</amount>",
+    "average": "평균 {amount, number}원",
+    "minMax": "최저 {min, number}원 · 최고 {max, number}원",
+    "hospitals": "병원 {count, number}곳",
+    "averageParts": "평균 <nb>{amount, number}원</nb>",
+    "minimum": "최저 {amount, number}원",
+    "maximum": "최고 {amount, number}원"
+  },
+  "footer": {
+    "source": "데이터 출처: 건강보험심사평가원 비급여 진료비 공개 자료",
+    "notice": "공개 가격은 병원이 신고한 기준 가격이며, 실제 진료비와 다를 수 있어요.",
+    "copyright": "© MediPrice"
+  },
+  "status": {
+    "loading": "불러오는 중"
+  },
+  "region": {
+    "metro": "서울·경기",
+    "seoul": "서울",
+    "gyeonggi": "경기",
+    "all": "전국"
+  },
+  "breadcrumb": "현재 위치",
+  "category": {
+    "1070Z": "물리치료·재활",
+    "1100Z": "치과 치료·수술",
+    "1180Z": "치과 보철·임플란트",
+    "1991B": "안과·시력교정",
+    "1991C": "예방접종",
+    "1032A": "MRI 기본검사",
+    "1032B": "MRI 특수검사",
+    "1025A": "초음파 기본검사",
+    "1025B": "초음파 진단검사"
+  }
+}

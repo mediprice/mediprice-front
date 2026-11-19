@@ -14,12 +14,15 @@
     "start": "dotenv -c -- next start",
     "lint": "eslint . --cache --cache-location node_modules/.cache/eslint/ --max-warnings=0",
     "lint:fix": "eslint . --cache --cache-location node_modules/.cache/eslint/ --fix --max-warnings=0",
-    "typecheck": "next typegen && tsc --noEmit",
+    "typecheck": "dotenv -e .env.example -- next typegen && tsc --noEmit",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "knip": "knip",
-    "check": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm knip",
-    "prepare": "husky"
+    "knip": "dotenv -e .env.example -- knip",
+    "check": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm knip && pnpm test",
+    "prepare": "husky",
+    "test": "vitest run",
+    "api:generate": "dotenv -c -- node scripts/generate-api.mjs",
+    "ui:add": "node scripts/ui-add.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "5.9.1",
@@ -30,10 +33,16 @@
     "clsx": "2.1.1",
     "lucide-react": "1.57.0",
     "next": "16.4.3",
+    "next-intl": "4.15.1",
+    "openapi-fetch": "0.17.0",
+    "pretendard": "1.3.9",
+    "radix-ui": "1.8.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-hook-form": "7.90.0",
+    "server-only": "0.0.1",
     "tailwind-merge": "3.7.0",
+    "tw-animate-css": "1.4.0",
     "zod": "4.6.7",
     "zustand": "5.0.15"
   },
@@ -56,11 +65,13 @@
     "knip": "6.41.0",
     "lint-staged": "17.6.0",
     "msw": "3.0.3",
+    "openapi-typescript": "7.13.0",
     "postcss": "8.5.30",
     "prettier": "3.9.10",
     "prettier-plugin-tailwindcss": "0.8.1",
     "shadcn": "4.21.4",
     "tailwindcss": "4.3.3",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "5.1.0"
   }
 }
