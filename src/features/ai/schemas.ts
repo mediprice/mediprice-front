@@ -34,7 +34,21 @@ export const turnItemSchema = z.object({
   reason: z.string(),
 });
 
-/** 사용자가 말한 장소를 AI 서버가 DB의 시도·시군구로 맞춘 결과. 형식이 다르면 지역 없이 보여 준다. */
+const coordinate = (min: number, max: number) =>
+  z
+    .number()
+    .finite()
+    .min(min)
+    .max(max)
+    .nullish()
+    .catch(null)
+    .transform((value) => value ?? null);
+
+/**
+ * 사용자가 말한 장소를 AI 서버가 DB의 시도·시군구로 맞춘 결과. 네이버 지역 검색으로 찾았으면 장소 이름과 좌표(WGS84)도 온다.
+ * 좌표가 한국 밖이거나 형식이 다르면 좌표만 버린다. 시도·이름이 틀리면 지역 전체를 버리고 대화는 이어 간다.
+ * 대화를 저장했다가 다시 읽을 때도 같은 스키마를 쓰므로 모양을 바꾸지(transform) 않는다.
+ */
 export const turnAreaSchema = z.object({
   sidoCode: z.string().regex(/^\d{6}$/),
   sgguCode: z
@@ -43,6 +57,16 @@ export const turnAreaSchema = z.object({
     .nullish()
     .transform((value) => value ?? null),
   label: z.string().trim().min(1).max(40),
+  place: z
+    .string()
+    .trim()
+    .min(1)
+    .max(40)
+    .nullish()
+    .catch(null)
+    .transform((value) => value ?? null),
+  lat: coordinate(33, 39),
+  lng: coordinate(124, 132),
 });
 
 export const turnResponseSchema = z.object({

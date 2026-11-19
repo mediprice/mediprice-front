@@ -1,5 +1,6 @@
 import { infiniteQueryOptions } from '@tanstack/react-query';
 
+import type { PriceBand } from '@/features/npay/average-verdict';
 import { apiClient } from '@/lib/api/client';
 import { ANONYMOUS_REQUEST_HEADER } from '@/lib/api/paths';
 import type { components } from '@/lib/api/schema';
@@ -8,12 +9,17 @@ import { unwrap } from '@/lib/api/unwrap';
 import { clampRadius, clampToKorea, coarsenLatLng } from './map-geo';
 
 export type NearbyHospital = components['schemas']['NearbyHospitalResponse'];
-export type NearbyCondition = components['schemas']['NearbyCondition'];
+export type NearbyCondition = components['schemas']['NearbyCondition'] &
+  Partial<PriceBand>;
 export type NearbySearch = {
   lat: number;
   lng: number;
   radius: number;
   npayCode?: string;
+  /** 항목 코드와 함께 주면 이 범위의 가격만으로 병원별 최저가를 매기고, 범위 안 가격이 없는 병원은 뺀다. */
+  band?: PriceBand | null;
+  /** 한 번에 받을 병원 수. 기본은 지도에 올리는 50곳이다. */
+  size?: number;
 };
 
 /** 지도에 한꺼번에 올려도 느려지지 않는 크기. 더 보려면 목록에서 다음 페이지를 받는다. */
@@ -26,7 +32,7 @@ export function toNearbyCondition(search: NearbySearch): NearbyCondition {
     lat: center.lat,
     lng: center.lng,
     radius: clampRadius(search.radius),
-    ...(search.npayCode && { npayCode: search.npayCode }),
+    ...(search.npayCode && { npayCode: search.npayCode, ...search.band }),
   };
 }
 
@@ -40,8 +46,9 @@ export const mapQueries = {
   /** 가까운 순. 항목 코드를 주면 그 항목 가격이 있는 병원만, 병원별 최저가(minPrice)와 함께 온다. 흐린 위치가 계정과 묶이지 않게 로그인 없이 보낸다. */
   nearby: (search: NearbySearch) => {
     const condition = toNearbyCondition(search);
+    const size = search.size ?? NEARBY_PAGE_SIZE;
     return infiniteQueryOptions({
-      queryKey: mapKeys.nearby(condition),
+      queryKey: [...mapKeys.nearby(condition), size] as const,
       queryFn: ({ pageParam }) =>
         unwrap(
           apiClient.GET('/api/hospitals/nearby', {
@@ -49,7 +56,7 @@ export const mapQueries = {
             params: {
               query: {
                 condition,
-                pageQuery: { page: pageParam, size: NEARBY_PAGE_SIZE },
+                pageQuery: { page: pageParam, size },
               },
             },
           }),

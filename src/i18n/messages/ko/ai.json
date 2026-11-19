@@ -54,7 +54,16 @@
     "notice": "건강보험이 적용되는 진료비(진찰료 등)는 포함되지 않은 비급여 가격이에요.",
     "askMore": "추가 질문하기",
     "restart": "다시 찾기",
-    "loadError": "찾은 항목을 불러오지 못했어요."
+    "loadError": "찾은 항목을 불러오지 못했어요.",
+    "near": {
+      "title": "{place} 근처 {km, number}km",
+      "empty": "{place} 근처 {km, number}km 안에는 이 항목 가격을 공개한 병원이 없어요.",
+      "error": "주변 병원을 불러오지 못했어요.",
+      "count": "{total, number}곳 중 가까운 {shown, number}곳",
+      "distance": "직선 {distance}",
+      "from": "{amount, number}원부터",
+      "map": "지도에서 주변 병원 보기"
+    }
   },
   "noMatch": {
     "category": "카테고리로 찾기",

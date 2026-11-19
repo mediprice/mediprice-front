@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { comparableBand } from '@/features/npay/average-verdict';
 import { PriceOverview } from '@/features/npay/components/price-overview';
 import {
   buildPriceFiltersQuery,
@@ -19,6 +20,7 @@ import type { components } from '@/lib/api/schema';
 import type { AreaScope } from '../area-filters';
 import { formatItemName } from '../item-name';
 import type { TurnItem } from '../schemas';
+import { NearbyPreview } from './nearby-preview';
 import { PriceOverviewSkeleton } from './price-overview-skeleton';
 
 type NpayItemDetail = components['schemas']['NpayItemDetailResponse'];
@@ -96,6 +98,13 @@ export function ResultItemCard({
           </Link>
         </Button>
       </div>
+      {scope.near && !summary.isPending && (
+        <NearbyPreview
+          code={item.code}
+          near={scope.near}
+          band={comparableBand(summary.data?.avgPrice)}
+        />
+      )}
     </article>
   );
 }

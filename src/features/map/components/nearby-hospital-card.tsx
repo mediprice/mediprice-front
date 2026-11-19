@@ -13,6 +13,7 @@ import { AverageTag } from '@/features/npay/components/average-tag';
 import { cn } from '@/lib/utils';
 
 import type { NearbyHospital } from '../queries';
+import { useDistanceLabel } from '../use-distance-label';
 
 /**
  * 주변 병원 한 행. 행 전체가 병원 상세 링크이고(이름 링크를 행 크기로 넓힘) 하트·지도에서 보기만 그 위에 놓인다.
@@ -139,11 +140,4 @@ export function NearbyHospitalCard<T extends string>({
       </div>
     </article>
   );
-}
-
-function useDistanceLabel(meters: number) {
-  const t = useTranslations('map.card');
-  return meters < 1000
-    ? t('meters', { value: meters })
-    : t('kilometers', { value: meters / 1000 });
 }
