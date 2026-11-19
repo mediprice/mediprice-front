@@ -25,7 +25,6 @@ const popularItemsSchema = z.array(
 );
 
 export type SiteStats = z.infer<typeof siteStatsSchema>;
-export type PopularItem = z.infer<typeof popularItemsSchema>[number];
 
 /** 아직 배포되지 않았거나(404) 장애면 null이다. 홈은 이 값 없이도 그려진다. */
 async function readPublic<T>(path: string, schema: z.ZodType<T>) {
