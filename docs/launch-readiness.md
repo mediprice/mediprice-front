@@ -14,11 +14,13 @@
 | backend  | `feature/public-stats`         | `fix/frontend-integration` | 홈 통계(`/api/stats`), 사이트맵 병원 목록, 인기 항목 순위(최근 30일, 5명 미만 제외)                                      | 안 됨 |
 | backend  | `feature/review-claims`        | `feature/privacy-consent`  | 후기 권리침해 신고(비회원 가능)와 임시조치 30일(V5), 작성자 재게시 요청, 관리자 처리·알림 기록, 기한 지난 신고 표시      | 안 됨 |
 | backend  | `feature/retention-jobs`       | `feature/review-claims`    | 보관 기간이 지난 최근 기록·처리된 신고·권리침해 신고·관리자 접속 기록 일일 삭제(기간을 정하지 않으면 꺼짐, dry-run 기본) | 안 됨 |
+| backend  | `feature/price-band-ai-area`   | `fix/frontend-integration` | 가격 목록·요약의 가격 범위(`minPrice`·`maxPrice`), AI 상담 응답의 지역(`area`) 전달                                      | 안 됨 |
 | ai       | `fix/launch-hardening`         | main                       | LLM 시간 제한·재시도, 심평원 캐시·요청 간격, non-root, 422 입력 미노출                                                   | 안 됨 |
 
 - backend는 `feature/launch-hardening`(V3)을 먼저, `feature/privacy-consent`(V4)를 다음에, `feature/review-claims`(V5)와 그 위의 `feature/retention-jobs`를 마지막에 합친다.
 - backend 작업 폴더는 git worktree로 나뉘어 있다: `../mediprice-backend-hardening`, `../mediprice-backend-privacy`, `../mediprice-backend-claims`(`feature/retention-jobs`), `../mediprice-ai-hardening`.
 - frontend의 권리침해 신고 화면(`/hospitals/[ykiho]/review/[reviewId]/claim`, 내 후기의 임시조치·재게시 요청, `/admin/claims`)은 이 API가 없으면(404) 입구를 숨기거나 "아직 서버에 없음"으로 보여 준다.
+- ai `feature/ai-area`(`fix/launch-hardening` 기준)는 사용자가 말한 장소를 DB의 시도·시군구로 맞춰 `area`로 돌려주고, 병원을 골라 달라거나 평점 순위를 물으면 하지 않는다고 고지한다. backend `feature/price-band-ai-area`와 함께 합친다.
 - ai의 열린 PR 두 개(`feature/ai-tuning`, `feature/runyour-llm`)는 합치지 않았다. 합칠 때 확인할 것:
   - `metered.py`의 `UsageLog`가 운영에서 끝없이 쌓인다.
   - `openai_compat.py`는 시간 제한이 60초다.
