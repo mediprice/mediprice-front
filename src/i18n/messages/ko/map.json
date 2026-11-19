@@ -42,7 +42,7 @@
     "title": "병원 {count, number}곳",
     "titleLoading": "병원을 찾는 중",
     "sortNote": "가까운 순 · 반경 약 {km, number}km",
-    "priceNote": "가격은 병원마다 공개한 세부 항목 중 가장 낮은 값이고, 평균은 {region} 공개 가격 기준이에요.",
+    "priceNote": "가격은 병원마다 공개한 세부 항목 중 평균과 견줄 수 있는(평균의 1/3~3배) 가장 낮은 값이고, 평균은 {region} 공개 가격 기준이에요.",
     "progress": "{total, number}곳 중 {shown, number}곳",
     "noPosition": "위치 정보가 없는 {count, number}곳은 지도에 없고 목록에만 있어요.",
     "loadMoreError": "더 불러오지 못했어요.",
