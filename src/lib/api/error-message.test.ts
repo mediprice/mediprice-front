@@ -19,6 +19,18 @@ describe('errorMessageKey', () => {
     ['CONSENT_VERSION_OUTDATED', 409, 'consentVersionOutdated'],
     ['CONSENT_WITHDRAWAL_NOT_ALLOWED', 400, 'consentWithdrawalNotAllowed'],
     ['MEDICAL_PROFILE_CONSENT_REQUIRED', 409, 'medicalProfileConsentRequired'],
+    ['CLAIM_UNAVAILABLE', 503, 'claimUnavailable'],
+    ['CLAIM_NOTICE_VERSION_OUTDATED', 409, 'claimNoticeOutdated'],
+    ['CLAIM_RATE_LIMITED', 429, 'claimRateLimited'],
+    ['CLAIM_OBJECTION_FORBIDDEN', 403, 'claimObjectionForbidden'],
+    ['ACTIVE_CLAIM_NOT_FOUND', 404, 'activeClaimNotFound'],
+    [
+      'CLAIM_OBJECTION_ALREADY_SUBMITTED',
+      409,
+      'claimObjectionAlreadySubmitted',
+    ],
+    ['CLAIM_NOT_FOUND', 404, 'claimNotFound'],
+    ['CLAIM_ALREADY_RESOLVED', 409, 'claimAlreadyResolved'],
   ])('알려진 코드 %s는 해당 문구 키로 바꾼다', (code, status, key) => {
     expect(errorMessageKey(new ApiError(status, code, 'ignored'))).toBe(key);
   });

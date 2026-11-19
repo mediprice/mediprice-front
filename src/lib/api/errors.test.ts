@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { ApiError, fromErrorBody, NetworkError, toApiError } from './errors';
+import {
+  ApiError,
+  fromErrorBody,
+  isUnsupportedEndpoint,
+  NetworkError,
+  toApiError,
+} from './errors';
 
 function json(status: number, body: unknown) {
   return new Response(JSON.stringify(body), {
@@ -88,5 +94,23 @@ describe('fromErrorBody', () => {
   it('형식이 맞지 않으면 UNKNOWN이다', () => {
     expect(fromErrorBody(500, 'oops').code).toBe('UNKNOWN');
     expect(fromErrorBody(500, undefined).code).toBe('UNKNOWN');
+  });
+});
+
+describe('isUnsupportedEndpoint', () => {
+  it('일반 404만 아직 없는 경로로 본다', () => {
+    expect(
+      isUnsupportedEndpoint(new ApiError(404, 'RESOURCE_NOT_FOUND', '')),
+    ).toBe(true);
+    expect(isUnsupportedEndpoint(new ApiError(404, 'NOT_FOUND', ''))).toBe(
+      true,
+    );
+    expect(
+      isUnsupportedEndpoint(new ApiError(404, 'REVIEW_NOT_FOUND', '')),
+    ).toBe(false);
+    expect(
+      isUnsupportedEndpoint(new ApiError(503, 'CLAIM_UNAVAILABLE', '')),
+    ).toBe(false);
+    expect(isUnsupportedEndpoint(new Error('x'))).toBe(false);
   });
 });

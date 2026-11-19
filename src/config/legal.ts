@@ -11,6 +11,9 @@ export const LEGAL_DOCUMENT_VERSIONS = {
   MEDICAL_PROFILE: '2026-11-19',
 } as const;
 
+/** 권리침해 신고 화면의 개인정보 수집·이용 안내문 버전. 백엔드 CLAIMS_PRIVACY_NOTICE_VERSION과 같아야 접수를 받는다. 안내문(reviews.claim.notice)을 고치면 양쪽을 함께 올린다. */
+export const CLAIM_PRIVACY_NOTICE_VERSION = '2026-11-19';
+
 const COUNTRY_CODES = [
   'KR',
   'US',
@@ -69,6 +72,8 @@ const legalFactsSchema = z.object({
     accessLogMonths: count,
     backupDays: count,
     reviewOnWithdrawal: z.enum(['anonymize', 'delete']).nullable(),
+    /** 처리를 마친 권리침해 신고(신청인 이름·이메일 포함)를 지우기까지의 일수. 백엔드 RETENTION_REVIEW_CLAIM_DAYS와 같은 값이다. */
+    rightsClaimDays: count,
   }),
   ai: z.object({
     providerTrainingUse: z.boolean().nullable(),

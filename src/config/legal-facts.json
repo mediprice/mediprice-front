@@ -22,7 +22,8 @@
   "retention": {
     "accessLogMonths": null,
     "backupDays": null,
-    "reviewOnWithdrawal": null
+    "reviewOnWithdrawal": null,
+    "rightsClaimDays": null
   },
   "ai": {
     "providerTrainingUse": null,
