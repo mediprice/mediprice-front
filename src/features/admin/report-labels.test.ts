@@ -35,6 +35,8 @@ describe('사유·후기 상태 키', () => {
     expect(reportReasonKey('FALSE_INFO')).toBe('FALSE_INFO');
     expect(reportReasonKey('COPYRIGHT')).toBe('unknown');
     expect(reviewStatusKey('HIDDEN')).toBe('HIDDEN');
-    expect(reviewStatusKey('DELETED')).toBe('unknown');
+    expect(reviewStatusKey('TEMPORARILY_HIDDEN')).toBe('TEMPORARILY_HIDDEN');
+    expect(reviewStatusKey('DELETED')).toBe('DELETED');
+    expect(reviewStatusKey('ARCHIVED')).toBe('unknown');
   });
 });

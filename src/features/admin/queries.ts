@@ -11,6 +11,7 @@ import { ApiError } from '@/lib/api/errors';
 import type { components } from '@/lib/api/schema';
 import { unwrap } from '@/lib/api/unwrap';
 
+import type { ClaimFilters } from './claim-filters';
 import { type ReportFilters, toReportsRequest } from './report-filters';
 
 export type AdminReport = components['schemas']['AdminReportResponse'];
@@ -27,6 +28,13 @@ export const adminKeys = {
   reportList: (filters: ReportFilters) =>
     [...adminKeys.reports(), 'list', filters.status, filters.page] as const,
   pendingCount: () => [...adminKeys.reports(), 'pending-count'] as const,
+  claims: () => [...adminKeys.all, 'claims'] as const,
+  claimList: (filters: ClaimFilters) =>
+    [...adminKeys.claims(), 'list', filters.status, filters.page] as const,
+  claimDetail: (claimId: number) =>
+    [...adminKeys.claims(), 'detail', claimId] as const,
+  claimCount: (status: string) =>
+    [...adminKeys.claims(), 'count', status] as const,
 };
 
 export const adminQueries = {

@@ -5,12 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-type AdminNavItem = { key: 'overview' | 'reports'; href: Route };
+type AdminNavItem = { key: 'overview' | 'reports' | 'claims'; href: Route };
 
-/** 처리 대기열이 늘면(권리침해 신고 등) 항목을 더한다. */
+/** 처리 대기열이 늘면 항목을 더한다. */
 const ITEMS: readonly AdminNavItem[] = [
   { key: 'overview', href: '/admin' },
   { key: 'reports', href: '/admin/reports' },
+  { key: 'claims', href: '/admin/claims' },
 ];
 
 function isCurrent(pathname: string, href: string) {

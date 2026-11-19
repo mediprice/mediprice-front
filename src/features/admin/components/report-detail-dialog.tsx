@@ -3,7 +3,6 @@
 import { ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useFormatter, useTranslations } from 'next-intl';
-import type { ReactNode } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -14,16 +13,8 @@ import { RatingStars } from '@/features/reviews/components/rating-stars';
 
 import type { AdminReport, ReportAction } from '../queries';
 import { reportReasonKey, reviewStatusKey } from '../report-labels';
+import { DetailField } from './detail-field';
 import { ReportOutcomeChip } from './report-outcome-chip';
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-3">
-      <dt className="text-body-sm text-text-secondary">{label}</dt>
-      <dd className="min-w-0 text-body-sm wrap-anywhere">{children}</dd>
-    </div>
-  );
-}
 
 /** 신고 한 건의 전체 내용. 대기 중이면 아래에 처리 버튼을 두고, 누르면 확인을 한 번 더 받는다(onChoose). */
 export function ReportDetailDialog({
@@ -83,32 +74,32 @@ export function ReportDetailDialog({
               {t('detail.report')}
             </h3>
             <dl className="flex flex-col gap-2">
-              <Field label={t('detail.reason')}>
+              <DetailField label={t('detail.reason')}>
                 {t(`reason.${reportReasonKey(report.reason)}`)}
-              </Field>
-              <Field label={t('detail.detail')}>
+              </DetailField>
+              <DetailField label={t('detail.detail')}>
                 <span className="whitespace-pre-line">
                   {report.detail || t('noDetail')}
                 </span>
-              </Field>
-              <Field label={t('detail.reportedAt')}>
+              </DetailField>
+              <DetailField label={t('detail.reportedAt')}>
                 {dateTime(report.createdAt)}
-              </Field>
-              <Field label={t('detail.reporter')}>
+              </DetailField>
+              <DetailField label={t('detail.reporter')}>
                 {t('detail.memberId', { id: report.reporterId })}
-              </Field>
-              <Field label={t('detail.status')}>
+              </DetailField>
+              <DetailField label={t('detail.status')}>
                 <ReportOutcomeChip report={report} />
-              </Field>
+              </DetailField>
               {report.resolvedAt && (
-                <Field label={t('detail.resolvedAt')}>
+                <DetailField label={t('detail.resolvedAt')}>
                   {dateTime(report.resolvedAt)}
-                </Field>
+                </DetailField>
               )}
               {report.resolvedBy !== null && (
-                <Field label={t('detail.resolvedBy')}>
+                <DetailField label={t('detail.resolvedBy')}>
                   {t('detail.memberId', { id: report.resolvedBy })}
-                </Field>
+                </DetailField>
               )}
             </dl>
           </section>
@@ -120,20 +111,20 @@ export function ReportDetailDialog({
             {review ? (
               <div className="flex flex-col gap-3">
                 <dl className="flex flex-col gap-2">
-                  <Field label={t('detail.reviewId')}>
+                  <DetailField label={t('detail.reviewId')}>
                     {t('detail.reviewNumber', { id: review.id })}
-                  </Field>
-                  <Field label={t('detail.author')}>
+                  </DetailField>
+                  <DetailField label={t('detail.author')}>
                     {review.authorId === null
                       ? t('detail.authorWithdrawn')
                       : t('detail.memberId', { id: review.authorId })}
-                  </Field>
-                  <Field label={t('detail.writtenAt')}>
+                  </DetailField>
+                  <DetailField label={t('detail.writtenAt')}>
                     {dateTime(review.createdAt)}
-                  </Field>
-                  <Field label={t('detail.reviewStatus')}>
+                  </DetailField>
+                  <DetailField label={t('detail.reviewStatus')}>
                     {t(`reviewStatus.${reviewStatusKey(review.status)}`)}
-                  </Field>
+                  </DetailField>
                 </dl>
                 <div className="flex flex-col gap-2 rounded-xl bg-surface p-3">
                   <RatingStars

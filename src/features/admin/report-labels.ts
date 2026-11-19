@@ -3,7 +3,12 @@ import type { AdminReport } from './queries';
 const REASONS = ['PRIVACY', 'SPAM', 'ABUSE', 'FALSE_INFO', 'ETC'] as const;
 type ReasonKey = (typeof REASONS)[number] | 'unknown';
 
-const REVIEW_STATUSES = ['ACTIVE', 'HIDDEN'] as const;
+const REVIEW_STATUSES = [
+  'ACTIVE',
+  'HIDDEN',
+  'TEMPORARILY_HIDDEN',
+  'DELETED',
+] as const;
 type ReviewStatusKey = (typeof REVIEW_STATUSES)[number] | 'unknown';
 
 export type ReportOutcome = 'pending' | 'hidden' | 'dismissed' | 'resolved';
