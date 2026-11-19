@@ -1,7 +1,7 @@
-import './src/env';
-
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+
+import { env } from './src/env';
 
 const isDev = process.env.NODE_ENV === 'development';
 const isProduction = process.env.NODE_ENV === 'production';
@@ -61,6 +61,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  /** 미리보기에서 서버가 대신 정한 사이트 주소를 브라우저 번들에도 같은 값으로 넣는다. */
+  ...(env.NEXT_PUBLIC_SITE_URL
+    ? { env: { NEXT_PUBLIC_SITE_URL: env.NEXT_PUBLIC_SITE_URL } }
+    : {}),
   reactStrictMode: true,
   poweredByHeader: false,
   typedRoutes: true,

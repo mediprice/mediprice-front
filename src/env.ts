@@ -1,6 +1,8 @@
 import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod';
 
+import { resolveSiteUrl } from './config/site-url';
+
 /** 클라이언트에도 인라인되는 값이라 서버·브라우저가 같은 결과를 내도록 NODE_ENV만 본다(Vercel 미리보기 빌드 포함). */
 const isProductionBuild = process.env.NODE_ENV === 'production';
 /** 서버 전용 값은 실제 운영 배포(Vercel production)에서만 강제한다. 로컬 `next build`와 미리보기는 비워 둘 수 있다. */
@@ -27,7 +29,7 @@ export const env = createEnv({
   },
   client: {
     NEXT_PUBLIC_API_URL: z.url(),
-    /** canonical·OG·sitemap의 절대 주소 기준(origin). 운영 빌드에서는 필수이고 개발에서는 localhost:3000이다. */
+    /** canonical·OG·sitemap의 절대 주소 기준(origin). 운영 빌드에서는 필수(Vercel 미리보기는 브랜치 주소)이고 개발에서는 localhost:3000이다. */
     NEXT_PUBLIC_SITE_URL: z
       .url()
       .optional()
@@ -41,7 +43,11 @@ export const env = createEnv({
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NEXT_PUBLIC_SITE_URL: resolveSiteUrl({
+      NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+      VERCEL_ENV: process.env.VERCEL_ENV,
+      VERCEL_BRANCH_URL: process.env.VERCEL_BRANCH_URL,
+    }),
     NEXT_PUBLIC_NAVER_MAP_CLIENT_ID:
       process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID,
     BFF_SHARED_SECRET: process.env.BFF_SHARED_SECRET,
