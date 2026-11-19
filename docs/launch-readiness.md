@@ -20,7 +20,7 @@
 - backend는 `feature/launch-hardening`(V3)을 먼저, `feature/privacy-consent`(V4)를 다음에, `feature/review-claims`(V5)와 그 위의 `feature/retention-jobs`를 마지막에 합친다.
 - backend 작업 폴더는 git worktree로 나뉘어 있다: `../mediprice-backend-hardening`, `../mediprice-backend-privacy`, `../mediprice-backend-claims`(`feature/retention-jobs`), `../mediprice-ai-hardening`.
 - frontend의 권리침해 신고 화면(`/hospitals/[ykiho]/review/[reviewId]/claim`, 내 후기의 임시조치·재게시 요청, `/admin/claims`)은 이 API가 없으면(404) 입구를 숨기거나 "아직 서버에 없음"으로 보여 준다.
-- ai `feature/ai-area`(`fix/launch-hardening` 기준)는 사용자가 말한 장소를 DB의 시도·시군구로 맞춰 `area`로 돌려주고, 병원을 골라 달라거나 평점 순위를 물으면 하지 않는다고 고지한다. backend `feature/price-band-ai-area`와 함께 합친다.
+- ai `feature/ai-area`(`fix/launch-hardening` 기준)는 사용자가 말한 장소를 네이버 지역 검색(NAVER API HUB)으로 좌표·주소를 찾고 주소로 DB의 시도·시군구를 맞춰 `area`(좌표 포함)로 돌려준다. 네이버를 쓸 수 없을 때만 AI 추정으로 구까지 맞춘다. 프론트는 좌표가 있으면 PostGIS 반경 검색으로 주변 병원을 가까운 순으로 보여 준다. 또 병원을 골라 달라거나 평점 순위를 물으면 하지 않는다고 고지한다. backend `feature/price-band-ai-area`와 함께 합친다.
 - ai의 열린 PR 두 개(`feature/ai-tuning`, `feature/runyour-llm`)는 합치지 않았다. 합칠 때 확인할 것:
   - `metered.py`의 `UsageLog`가 운영에서 끝없이 쌓인다.
   - `openai_compat.py`는 시간 제한이 60초다.
@@ -46,7 +46,7 @@
   - `CONSENT_*_VERSION`은 프론트 `src/config/legal.ts`의 `LEGAL_DOCUMENT_VERSIONS`와 같아야 한다. 다르면 동의 저장이 모두 409가 된다.
   - `CLAIMS_PRIVACY_NOTICE_VERSION`: 권리침해 신고 화면의 개인정보 수집·이용 안내문 버전. 프론트 `src/config/legal.ts`의 `CLAIM_PRIVACY_NOTICE_VERSION`(지금 `2026-11-19`)과 같아야 한다. 비어 있으면 접수가 503이고, 값이 다르면 프론트가 양식을 막는다("지금은 온라인 접수를 받을 수 없어요"). 안내문(`claims.notice`)을 고치면 양쪽을 함께 올린다.
   - 선택: `CLAIMS_RATE_LIMIT_*`, `CLAIMS_EXPIRY_*`, `RETENTION_*`(backend `docs/operations.md` 6·7장).
-- **ai**: `LLM_TIMEOUT_SECONDS`, `LLM_ATTEMPT_TIMEOUT_SECONDS`, `TURN_TIMEOUT_SECONDS`. 운영에서는 `ENABLE_DOCS`·`ENABLE_DEMO`를 끈다.
+- **ai**: `NAVER_API_HUB_CLIENT_ID`·`NAVER_API_HUB_CLIENT_SECRET`(NCP NAVER API HUB에서 지역 검색 API를 고른 앱의 키. 없으면 장소를 좌표로 찾지 못함), `LLM_TIMEOUT_SECONDS`, `LLM_ATTEMPT_TIMEOUT_SECONDS`, `TURN_TIMEOUT_SECONDS`. 운영에서는 `ENABLE_DOCS`·`ENABLE_DEMO`를 끈다.
 
 ## 4. 운영자가 정해야 할 것
 
@@ -60,6 +60,7 @@
 4. **최소 나이**: 지금은 만 14세 확인을 받는다.
 5. **동의를 거부했을 때**: 지금은 로그아웃만 한다. Google 로그인 때 만들어진 계정이 남으므로, 첫 동의를 거부하면 계정을 지울지 정한다.
 6. **위치**: 서버에는 약 1km로 흐린 좌표를 로그인 정보 없이 보내도록 바꿨다. 이 구조로 위치기반서비스사업 신고 대상에서 빠지는지 법률 검토가 필요하다.
+   - AI 상담에서 사용자가 말한 장소 이름(예: "응암역")은 네이버(NCP NAVER API HUB 지역 검색)로 보낸다. 대화 내용·계정·IP는 보내지 않는다. 처리방침의 위탁·제공 항목에 넣을지 정한다.
 7. **법률 검토**: 처리방침·이용약관·후기 운영정책 최종본. 약관 변경 동의 간주 조항, 처리 기한(10일) 같은 약속이 실제 운영 절차와 맞는지 본다.
 8. **도메인과 모니터링**
    - 운영 도메인: canonical, CORS, OAuth, 네이버 지도 허용 URL, HSTS.
