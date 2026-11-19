@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { comparableBand } from '@/features/npay/average-verdict';
 import { PriceOverview } from '@/features/npay/components/price-overview';
 import {
@@ -20,7 +21,7 @@ import type { components } from '@/lib/api/schema';
 import type { AreaScope } from '../area-filters';
 import { formatItemName } from '../item-name';
 import type { TurnItem } from '../schemas';
-import { NearbyPreview } from './nearby-preview';
+import { NearbyMapPanel } from './nearby-map-panel';
 import { PriceOverviewSkeleton } from './price-overview-skeleton';
 
 type NpayItemDetail = components['schemas']['NpayItemDetailResponse'];
@@ -61,19 +62,65 @@ export function ResultItemCard({
     scope.kind === 'area' ? scope.label : tRegion(filters.region);
   const query = buildPriceFiltersQuery(filters);
 
+  const href =
+    `/items/${encodeURIComponent(item.code)}${query ? `?${query}` : ''}` as const;
+  const heading = (
+    <div className="flex min-w-0 flex-col gap-1">
+      {detail.mdivName && (
+        <p className="text-caption-strong text-text-secondary">
+          {categoryLabel(detail.mdivCode, detail.mdivName)}
+        </p>
+      )}
+      <h3 className="text-heading">{formatItemName(detail)}</h3>
+      {item.reason && (
+        <p className="mt-1 text-body-sm text-text-secondary">{item.reason}</p>
+      )}
+    </div>
+  );
+
+  /** 장소를 알면 병원을 찾는 일이 먼저다: 지도와 주변 병원 목록을 크게 두고, 지역 평균은 한 줄로 줄인다. */
+  if (scope.near) {
+    const average = summary.data?.avgPrice;
+    return (
+      <article className="flex flex-col gap-5 rounded-2xl bg-surface p-5 lg:p-6">
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between md:gap-6">
+          {heading}
+          <div className="flex shrink-0 flex-col gap-0.5 md:items-end md:text-right">
+            {summary.isPending ? (
+              <Skeleton className="h-5 w-48" />
+            ) : average != null && summary.data ? (
+              <p className="text-body-sm text-text-secondary tabular-nums">
+                {t('areaAverage', {
+                  region: regionLabel,
+                  amount: average,
+                  count: summary.data.hospitalCount,
+                })}
+              </p>
+            ) : null}
+            <Link
+              href={href}
+              className="inline-flex min-h-11 items-center gap-1 rounded-md text-label text-primary-text hover:underline md:min-h-9"
+            >
+              {t('viewPrices')}
+              <ChevronRight aria-hidden="true" className="size-4" />
+            </Link>
+          </div>
+        </div>
+        {!summary.isPending && (
+          <NearbyMapPanel
+            code={item.code}
+            itemName={formatItemName(detail)}
+            near={scope.near}
+            band={comparableBand(summary.data?.avgPrice)}
+          />
+        )}
+      </article>
+    );
+  }
+
   return (
     <article className="flex flex-col gap-4 rounded-2xl bg-surface p-5 lg:p-6 xl:grid xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-x-8">
-      <div className="flex min-w-0 flex-col gap-1">
-        {detail.mdivName && (
-          <p className="text-caption-strong text-text-secondary">
-            {categoryLabel(detail.mdivCode, detail.mdivName)}
-          </p>
-        )}
-        <h3 className="text-heading">{formatItemName(detail)}</h3>
-        {item.reason && (
-          <p className="mt-1 text-body-sm text-text-secondary">{item.reason}</p>
-        )}
-      </div>
+      {heading}
       <div className="flex min-w-0 flex-col gap-4">
         <div className="flex flex-col gap-1">
           <p className="text-label text-text-secondary">
@@ -90,21 +137,12 @@ export function ResultItemCard({
           )}
         </div>
         <Button asChild variant="onTint" size="md" className="w-full">
-          <Link
-            href={`/items/${encodeURIComponent(item.code)}${query ? `?${query}` : ''}`}
-          >
+          <Link href={href}>
             {t('viewPrices')}
             <ChevronRight aria-hidden="true" />
           </Link>
         </Button>
       </div>
-      {scope.near && !summary.isPending && (
-        <NearbyPreview
-          code={item.code}
-          near={scope.near}
-          band={comparableBand(summary.data?.avgPrice)}
-        />
-      )}
     </article>
   );
 }

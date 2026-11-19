@@ -49,6 +49,7 @@
     "free": "가격을 확인해도 AI 횟수는 차감되지 않아요.",
     "outsideArea": "지역 선택은 서울·경기만 돼서, {area} 대신 전국 기준으로 보여 드려요.",
     "priceLabel": "{region} 기준",
+    "areaAverage": "{region} 평균 {amount, number}원 · 병원 {count, number}곳",
     "viewPrices": "병원별 가격 보기",
     "priceError": "가격을 불러오지 못했어요.",
     "notice": "건강보험이 적용되는 진료비(진찰료 등)는 포함되지 않은 비급여 가격이에요.",
@@ -56,13 +57,14 @@
     "restart": "다시 찾기",
     "loadError": "찾은 항목을 불러오지 못했어요.",
     "near": {
-      "title": "{place} 근처 {km, number}km",
+      "title": "{place} 근처 병원",
+      "count": "{km, number}km 안 {total, number}곳 중 가까운 {shown, number}곳",
       "empty": "{place} 근처 {km, number}km 안에는 이 항목 가격을 공개한 병원이 없어요.",
       "error": "주변 병원을 불러오지 못했어요.",
-      "count": "{total, number}곳 중 가까운 {shown, number}곳",
       "distance": "직선 {distance}",
-      "from": "{amount, number}원부터",
-      "map": "지도에서 주변 병원 보기"
+      "price": "{item} {amount, number}원부터",
+      "call": "전화",
+      "map": "지도에서 더 넓게 보기"
     }
   },
   "noMatch": {
