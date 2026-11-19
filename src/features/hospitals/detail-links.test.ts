@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   buildNaverMapUrl,
+  buildNaverRouteScheme,
   decodeYkiho,
   parseBackParam,
   parseItemParam,
@@ -103,6 +104,23 @@ describe('parseVariantParam', () => {
     expect(parseVariantParam(query.variant, query.price)).toEqual({
       name: '도수치료 [1일당]-N',
       price: 1000,
+    });
+  });
+});
+
+describe('buildNaverRouteScheme', () => {
+  it('도착지 좌표·이름과 앱 이름만 담고 출발지는 비운다', () => {
+    const url = buildNaverRouteScheme(
+      { lat: 37.59869, lng: 126.91484, name: '리드힐병원 & 의원' },
+      'https://mediprice.example',
+    );
+    expect(url.startsWith('nmap://route/public?')).toBe(true);
+    const params = new URLSearchParams(url.split('?')[1]);
+    expect(Object.fromEntries(params)).toEqual({
+      dlat: '37.59869',
+      dlng: '126.91484',
+      dname: '리드힐병원 & 의원',
+      appname: 'https://mediprice.example',
     });
   });
 });

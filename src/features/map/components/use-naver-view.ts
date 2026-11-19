@@ -35,6 +35,7 @@ export function useNaverView({
   userPosition,
   onMoveEnd,
   isReducedMotion,
+  showArea = true,
 }: {
   handle: NaverHandle | null;
   container: HTMLDivElement | null;
@@ -44,6 +45,8 @@ export function useNaverView({
   userPosition: LatLng | null;
   onMoveEnd: (center: LatLng) => void;
   isReducedMotion: boolean;
+  /** 검색 반경 원을 그릴지. 병원 한 곳의 위치처럼 반경이 뜻이 없으면 끈다. */
+  showArea?: boolean;
 }) {
   const fittedSearch = useRef(search);
   const selectedPosition = useRef<LatLng | null>(null);
@@ -99,7 +102,7 @@ export function useNaverView({
 
   const circle = useRef<NaverCircle | null>(null);
   useEffect(() => {
-    if (!handle) return;
+    if (!handle || !showArea) return;
     const { api, map } = handle;
     const primary = tokenColor('--color-primary');
     const area = fittedSearch.current;
@@ -120,7 +123,7 @@ export function useNaverView({
       created.setMap(null);
       circle.current = null;
     };
-  }, [handle]);
+  }, [handle, showArea]);
 
   useEffect(() => {
     if (!handle) return;

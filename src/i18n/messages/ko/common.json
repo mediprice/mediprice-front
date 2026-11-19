@@ -81,5 +81,9 @@
     "same": "평균 수준",
     "incomparable": "구성이 달라 비교 어려움",
     "incomparableDescription": "이 가격은 평균의 1/3보다 낮거나 3배보다 높아, 시간·횟수 같은 세부 구성이 다른 항목일 수 있어요."
+  },
+  "directions": {
+    "label": "길찾기",
+    "description": "{name}까지 네이버 지도에서 길찾기 (앱 또는 새 창)"
   }
 }

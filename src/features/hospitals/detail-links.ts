@@ -17,6 +17,23 @@ export function decodeYkiho(value: string) {
   }
 }
 
+/**
+ * 네이버 지도 앱의 대중교통 길찾기(URL Scheme, nmap://route/public). 출발지를 비우면 앱이 현재 위치에서 시작해,
+ * 사용자의 위치를 우리 서버에 보내지 않고 길을 안내할 수 있다. appname은 웹이면 이 사이트 주소다.
+ */
+export function buildNaverRouteScheme(
+  destination: { lat: number; lng: number; name: string },
+  appname: string,
+) {
+  const params = new URLSearchParams({
+    dlat: String(destination.lat),
+    dlng: String(destination.lng),
+    dname: destination.name,
+    appname,
+  });
+  return `nmap://route/public?${params.toString()}`;
+}
+
 export function buildNaverMapUrl(query: string) {
   return `https://map.naver.com/p/search/${encodeURIComponent(query)}`;
 }
@@ -43,7 +60,7 @@ export function toTelHref(phone: string | null | undefined) {
   return digits.replace(/\D/g, '').length >= 7 ? `tel:${digits}` : null;
 }
 
-const BACK_KEYS = new Set(['region', 'sggu', 'institution', 'sort']);
+const BACK_KEYS = new Set(['region', 'sggu', 'institution', 'sort', 'prices']);
 const BACK_VALUE = /^[A-Za-z0-9_-]{1,40}$/;
 
 /** 항목 가격 화면(S-06)이 넘긴 검색 조건. 허용한 키와 안전한 값만 있을 때만 쿼리 문자열로 돌려준다. */
