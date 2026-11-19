@@ -4,18 +4,21 @@
 
 ## 1. 브랜치와 합치는 순서
 
-| 저장소   | 브랜치                         | 기준                       | 내용                                                                                                                | push  |
-| -------- | ------------------------------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------- | ----- |
-| frontend | `feature/ui-conventions`       | dev                        | 1차본(컨벤션, 화면 전체, BFF)                                                                                       | 됨    |
-| frontend | `feature/redesign-big-numbers` | `feature/ui-conventions`   | 큰 숫자 리디자인, 가격 정직성, 법률 문서·동의, SSR, 출시 기반                                                       | 안 됨 |
-| backend  | `fix/frontend-integration`     | dev                        | 프론트 연동(리다이렉트, CORS, AI 프록시, 다중 시도)                                                                 | 됨    |
-| backend  | `feature/launch-hardening`     | `fix/frontend-integration` | Flyway(기본 꺼짐), health, AI 한도 DB 저장·전체 상한, IP 속도 제한, prod 필수값 검사, 세션 쿠키, AI 로그·state 검증 | 안 됨 |
-| backend  | `feature/privacy-consent`      | `fix/frontend-integration` | 동의 기록(V4), 의료 정보 별도 동의, 관리자 접속 기록, 내 데이터 내려받기                                            | 안 됨 |
-| backend  | `feature/public-stats`         | `fix/frontend-integration` | 홈 통계(`/api/stats`), 사이트맵 병원 목록, 인기 항목 순위(최근 30일, 5명 미만 제외)                                 | 안 됨 |
-| ai       | `fix/launch-hardening`         | main                       | LLM 시간 제한·재시도, 심평원 캐시·요청 간격, non-root, 422 입력 미노출                                              | 안 됨 |
+| 저장소   | 브랜치                         | 기준                       | 내용                                                                                                                     | push  |
+| -------- | ------------------------------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----- |
+| frontend | `feature/ui-conventions`       | dev                        | 1차본(컨벤션, 화면 전체, BFF)                                                                                            | 됨    |
+| frontend | `feature/redesign-big-numbers` | `feature/ui-conventions`   | 큰 숫자 리디자인, 가격 정직성, 법률 문서·동의, SSR, 출시 기반                                                            | 안 됨 |
+| backend  | `fix/frontend-integration`     | dev                        | 프론트 연동(리다이렉트, CORS, AI 프록시, 다중 시도)                                                                      | 됨    |
+| backend  | `feature/launch-hardening`     | `fix/frontend-integration` | Flyway(기본 꺼짐), health, AI 한도 DB 저장·전체 상한, IP 속도 제한, prod 필수값 검사, 세션 쿠키, AI 로그·state 검증      | 안 됨 |
+| backend  | `feature/privacy-consent`      | `fix/frontend-integration` | 동의 기록(V4), 의료 정보 별도 동의, 관리자 접속 기록, 내 데이터 내려받기                                                 | 안 됨 |
+| backend  | `feature/public-stats`         | `fix/frontend-integration` | 홈 통계(`/api/stats`), 사이트맵 병원 목록, 인기 항목 순위(최근 30일, 5명 미만 제외)                                      | 안 됨 |
+| backend  | `feature/review-claims`        | `feature/privacy-consent`  | 후기 권리침해 신고(비회원 가능)와 임시조치 30일(V5), 작성자 재게시 요청, 관리자 처리·알림 기록, 기한 지난 신고 표시      | 안 됨 |
+| backend  | `feature/retention-jobs`       | `feature/review-claims`    | 보관 기간이 지난 최근 기록·처리된 신고·권리침해 신고·관리자 접속 기록 일일 삭제(기간을 정하지 않으면 꺼짐, dry-run 기본) | 안 됨 |
+| ai       | `fix/launch-hardening`         | main                       | LLM 시간 제한·재시도, 심평원 캐시·요청 간격, non-root, 422 입력 미노출                                                   | 안 됨 |
 
-- backend는 `feature/launch-hardening`(V3)을 먼저, `feature/privacy-consent`(V4)를 다음에 합친다.
-- backend 작업 폴더는 git worktree로 나뉘어 있다: `../mediprice-backend-hardening`, `../mediprice-backend-privacy`, `../mediprice-ai-hardening`.
+- backend는 `feature/launch-hardening`(V3)을 먼저, `feature/privacy-consent`(V4)를 다음에, `feature/review-claims`(V5)와 그 위의 `feature/retention-jobs`를 마지막에 합친다.
+- backend 작업 폴더는 git worktree로 나뉘어 있다: `../mediprice-backend-hardening`, `../mediprice-backend-privacy`, `../mediprice-backend-claims`(`feature/retention-jobs`), `../mediprice-ai-hardening`.
+- frontend의 권리침해 신고 화면(`/hospitals/[ykiho]/review/[reviewId]/claim`, 내 후기의 임시조치·재게시 요청, `/admin/claims`)은 이 API가 없으면(404) 입구를 숨기거나 "아직 서버에 없음"으로 보여 준다.
 - ai의 열린 PR 두 개(`feature/ai-tuning`, `feature/runyour-llm`)는 합치지 않았다. 합칠 때 확인할 것:
   - `metered.py`의 `UsageLog`가 운영에서 끝없이 쌓인다.
   - `openai_compat.py`는 시간 제한이 60초다.
@@ -26,6 +29,7 @@
 - 마이그레이션 파일만 추가했고 어느 DB에도 적용하지 않았다.
   - `V3__create_ai_quota_usage.sql`
   - `V4__privacy_consent.sql`
+  - `V5__review_claims.sql`(`review.status`에 `TEMPORARILY_HIDDEN`·`DELETED` 추가, `review_claim` 테이블)
 - Flyway는 `FLYWAY_ENABLED=false`가 기본이다. 켜는 절차는 backend `docs/operations.md`에 있다(백업 → V1·V2 확인 → dev → prod).
 
 ## 3. 새 환경변수
@@ -38,6 +42,8 @@
   - prod에서 비면 서버가 뜨지 않는다: `BFF_SHARED_SECRET`(프론트와 같은 값), `AI_SERVICE_TOKEN`, `JWT_SECRET`, `GOOGLE_CLIENT_SECRET`, `OAUTH2_REDIRECT_URI`, `CORS_ALLOWED_ORIGINS`.
   - 선택: `FLYWAY_ENABLED`, `AI_QUOTA_STORE`(memory|jdbc), `AI_GLOBAL_DAILY_CAP`, `APP_RATELIMIT_*`, `CONSENT_*_VERSION`.
   - `CONSENT_*_VERSION`은 프론트 `src/config/legal.ts`의 `LEGAL_DOCUMENT_VERSIONS`와 같아야 한다. 다르면 동의 저장이 모두 409가 된다.
+  - `CLAIMS_PRIVACY_NOTICE_VERSION`: 권리침해 신고 화면의 개인정보 수집·이용 안내문 버전. 프론트 `src/config/legal.ts`의 `CLAIM_PRIVACY_NOTICE_VERSION`(지금 `2026-11-19`)과 같아야 한다. 비어 있으면 접수가 503이고, 값이 다르면 프론트가 양식을 막는다("지금은 온라인 접수를 받을 수 없어요"). 안내문(`claims.notice`)을 고치면 양쪽을 함께 올린다.
+  - 선택: `CLAIMS_RATE_LIMIT_*`, `CLAIMS_EXPIRY_*`, `RETENTION_*`(backend `docs/operations.md` 6·7장).
 - **ai**: `LLM_TIMEOUT_SECONDS`, `LLM_ATTEMPT_TIMEOUT_SECONDS`, `TURN_TIMEOUT_SECONDS`. 운영에서는 `ENABLE_DOCS`·`ENABLE_DEMO`를 끈다.
 
 ## 4. 운영자가 정해야 할 것
@@ -47,7 +53,8 @@
    - 운영 DB 지역: dev는 Neon us-east-2.
    - LLM 제공자: RunYour 게이트웨이 또는 Gemini 직접. 유료 등급 여부와 학습 이용 여부. 무료 Gemini는 입력이 학습·사람 검토에 쓰일 수 있다.
    - 호스팅 업체와 지역.
-3. **보유기간**: 접속기록, 백업, 조회 기록, 신고 기록. 탈퇴 시 후기는 삭제와 익명으로 남김 중 하나를 고른다. 지금은 익명으로 남기고, 안내 문구도 그렇게 고쳐 두었다.
+3. **보유기간**: 접속기록, 백업, 조회 기록, 신고 기록, 권리침해 신고(신청인 이름·이메일 포함). 탈퇴 시 후기는 삭제와 익명으로 남김 중 하나를 고른다. 지금은 익명으로 남기고, 안내 문구도 그렇게 고쳐 두었다.
+   - 정한 값은 프론트 `legal-facts.json`(`retention.rightsClaimDays` 등)과 backend `RETENTION_*_DAYS`에 같이 넣는다. 값이 없으면 backend 자동 삭제 작업은 그 데이터를 지우지 않는다(꺼진 상태).
 4. **최소 나이**: 지금은 만 14세 확인을 받는다.
 5. **동의를 거부했을 때**: 지금은 로그아웃만 한다. Google 로그인 때 만들어진 계정이 남으므로, 첫 동의를 거부하면 계정을 지울지 정한다.
 6. **위치**: 서버에는 약 1km로 흐린 좌표를 로그인 정보 없이 보내도록 바꿨다. 이 구조로 위치기반서비스사업 신고 대상에서 빠지는지 법률 검토가 필요하다.
@@ -61,6 +68,7 @@
 ## 5. 아직 하지 않은 것
 
 - 세 저장소 모두 오류 추적과 모니터링(도구 결정 후).
-- 후기 권리침해 신고(비회원·병원 포함)와 임시조치(30일) 처리 흐름, 처리 결과 통지.
-- 조회 기록·신고 기록 보유기간 배치 삭제, 관리자 접속 기록 2년 보관 정리.
+- 권리침해 신고의 처리 결과 통지는 수동이다. 메일 발송 업체가 없어 운영자가 직접 알리고 `/admin/claims`에서 알린 사실만 기록한다. 임시조치 직후에도 알릴지, 무엇을 알릴지는 법률 검토로 정한다.
+- 보유기간 배치 삭제(`feature/retention-jobs`)는 만들었지만 기간은 운영자가 정할 값이라 비어 있고, 그동안 아무것도 지우지 않는다. 관리자 접속 기록은 365일 미만으로 정할 수 없다.
+- 내 데이터 내려받기(`/api/users/me/export`)에 권리침해 신고(직접 낸 신고, 내 후기에 들어온 임시조치·재게시 요청)가 아직 들어 있지 않다(backend).
 - 쓰지 않는 `ai_conversation`·`receipt` 테이블 정리 또는 보유기간 정의.

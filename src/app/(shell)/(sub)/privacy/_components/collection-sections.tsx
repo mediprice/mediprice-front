@@ -13,6 +13,8 @@ const ITEM_ROWS = [
   'history',
   'reviews',
   'reports',
+  'claims',
+  'objection',
   'medical',
   'ai',
   'aiQuota',
@@ -33,7 +35,7 @@ const FIXED_RETENTION_ROWS = [
 
 function RetentionTable() {
   const t = useTranslations('legal.privacy.retention');
-  const { accessLogMonths, backupDays, reviewOnWithdrawal } =
+  const { accessLogMonths, backupDays, reviewOnWithdrawal, rightsClaimDays } =
     LEGAL_FACTS.retention;
   const rows = [
     ...FIXED_RETENTION_ROWS.map((row) => [t(`${row}Label`), t(`${row}Period`)]),
@@ -43,6 +45,14 @@ function RetentionTable() {
         t('reviewsPeriod', { policy: reviewOnWithdrawal })
       ) : (
         <PendingFact item={t('reviewsPending')} />
+      ),
+    ],
+    [
+      t('claimsLabel'),
+      rightsClaimDays === null ? (
+        <PendingFact item={t('claimsPending')} />
+      ) : (
+        t('claimsPeriod', { days: rightsClaimDays })
       ),
     ],
     [
