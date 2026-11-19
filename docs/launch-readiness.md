@@ -4,21 +4,25 @@
 
 ## 1. 브랜치와 합치는 순서
 
-| 저장소   | 브랜치                         | 기준                       | 내용                                                                                                                     | push  |
-| -------- | ------------------------------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----- |
-| frontend | `feature/ui-conventions`       | dev                        | 1차본(컨벤션, 화면 전체, BFF)                                                                                            | 됨    |
-| frontend | `feature/redesign-big-numbers` | `feature/ui-conventions`   | 큰 숫자 리디자인, 가격 정직성, 법률 문서·동의, SSR, 출시 기반                                                            | 안 됨 |
-| backend  | `fix/frontend-integration`     | dev                        | 프론트 연동(리다이렉트, CORS, AI 프록시, 다중 시도)                                                                      | 됨    |
-| backend  | `feature/launch-hardening`     | `fix/frontend-integration` | Flyway(기본 꺼짐), health, AI 한도 DB 저장·전체 상한, IP 속도 제한, prod 필수값 검사, 세션 쿠키, AI 로그·state 검증      | 안 됨 |
-| backend  | `feature/privacy-consent`      | `fix/frontend-integration` | 동의 기록(V4), 의료 정보 별도 동의, 관리자 접속 기록, 내 데이터 내려받기                                                 | 안 됨 |
-| backend  | `feature/public-stats`         | `fix/frontend-integration` | 홈 통계(`/api/stats`), 사이트맵 병원 목록, 인기 항목 순위(최근 30일, 5명 미만 제외)                                      | 안 됨 |
-| backend  | `feature/review-claims`        | `feature/privacy-consent`  | 후기 권리침해 신고(비회원 가능)와 임시조치 30일(V5), 작성자 재게시 요청, 관리자 처리·알림 기록, 기한 지난 신고 표시      | 안 됨 |
-| backend  | `feature/retention-jobs`       | `feature/review-claims`    | 보관 기간이 지난 최근 기록·처리된 신고·권리침해 신고·관리자 접속 기록 일일 삭제(기간을 정하지 않으면 꺼짐, dry-run 기본) | 안 됨 |
-| backend  | `feature/price-band-ai-area`   | `fix/frontend-integration` | 가격 목록·요약의 가격 범위(`minPrice`·`maxPrice`), AI 상담 응답의 지역(`area`) 전달                                      | 안 됨 |
-| ai       | `fix/launch-hardening`         | main                       | LLM 시간 제한·재시도, 심평원 캐시·요청 간격, non-root, 422 입력 미노출                                                   | 안 됨 |
+모든 브랜치는 push했고 PR을 열었다. dev·main에는 아직 아무것도 합치지 않았다.
 
-- backend는 `feature/launch-hardening`(V3)을 먼저, `feature/privacy-consent`(V4)를 다음에, `feature/review-claims`(V5)와 그 위의 `feature/retention-jobs`를 마지막에 합친다.
-- backend 작업 폴더는 git worktree로 나뉘어 있다: `../mediprice-backend-hardening`, `../mediprice-backend-privacy`, `../mediprice-backend-claims`(`feature/retention-jobs`), `../mediprice-ai-hardening`.
+| 저장소   | 브랜치                         | 기준                       | 내용                                                                                                                     | PR  |
+| -------- | ------------------------------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --- |
+| frontend | `feature/ui-conventions`       | main                       | 1차본(컨벤션, 화면 전체, BFF)                                                                                            | #2  |
+| frontend | `feature/redesign-big-numbers` | `feature/ui-conventions`   | 큰 숫자 리디자인, 가격 정직성, 법률 문서·동의, SSR, 출시 기반                                                            | #3  |
+| backend  | `fix/frontend-integration`     | dev                        | 프론트 연동(리다이렉트, CORS, AI 프록시, 다중 시도)                                                                      | #14 |
+| backend  | `feature/launch-hardening`     | `fix/frontend-integration` | Flyway(기본 꺼짐), health, AI 한도 DB 저장·전체 상한, IP 속도 제한, prod 필수값 검사, 세션 쿠키, AI 로그·state 검증      | #15 |
+| backend  | `feature/privacy-consent`      | `fix/frontend-integration` | 동의 기록(V4), 의료 정보 별도 동의, 관리자 접속 기록, 내 데이터 내려받기                                                 | #16 |
+| backend  | `feature/public-stats`         | `fix/frontend-integration` | 홈 통계(`/api/stats`), 사이트맵 병원 목록, 인기 항목 순위(최근 30일, 5명 미만 제외)                                      | #17 |
+| backend  | `feature/review-claims`        | `feature/privacy-consent`  | 후기 권리침해 신고(비회원 가능)와 임시조치 30일(V5), 작성자 재게시 요청, 관리자 처리·알림 기록, 기한 지난 신고 표시      | #18 |
+| backend  | `feature/retention-jobs`       | `feature/review-claims`    | 보관 기간이 지난 최근 기록·처리된 신고·권리침해 신고·관리자 접속 기록 일일 삭제(기간을 정하지 않으면 꺼짐, dry-run 기본) | #19 |
+| backend  | `feature/price-band-ai-area`   | `fix/frontend-integration` | 가격 목록·요약의 가격 범위(`minPrice`·`maxPrice`), AI 상담 응답의 지역(`area`) 전달                                      | #20 |
+| ai       | `fix/launch-hardening`         | dev                        | LLM 시간 제한·재시도, 심평원 캐시·요청 간격, non-root, 422 입력 미노출                                                   | #3  |
+| ai       | `feature/ai-area`              | `fix/launch-hardening`     | 사용자가 말한 장소를 좌표·시군구로 찾아 `area`로 전달(아래 설명)                                                         | #4  |
+
+- backend는 #14 → #15(V3) → #16(V4) → #18(V5) → #19 순서로 합친다. #17과 #20은 #14 뒤 아무 때나 합친다.
+- backend의 겹친 PR(#15~#20)은 기준이 dev·main이 아니라 CI가 돌지 않는다. 로컬에서 테스트를 돌려 확인했다. 아래 PR을 합쳐 기준이 dev로 바뀌면 CI가 돈다.
+- ai는 #3 → #4, frontend는 #2 → #3 순서로 합친다.
 - frontend의 권리침해 신고 화면(`/hospitals/[ykiho]/review/[reviewId]/claim`, 내 후기의 임시조치·재게시 요청, `/admin/claims`)은 이 API가 없으면(404) 입구를 숨기거나 "아직 서버에 없음"으로 보여 준다.
 - ai `feature/ai-area`(`fix/launch-hardening` 기준)는 사용자가 말한 장소를 네이버 지역 검색(NAVER API HUB)으로 좌표·주소를 찾고 주소로 DB의 시도·시군구를 맞춰 `area`(좌표 포함)로 돌려준다. 네이버를 쓸 수 없을 때만 AI 추정으로 구까지 맞춘다. 프론트는 좌표가 있으면 PostGIS 반경 검색으로 주변 병원을 가까운 순으로 보여 준다. 또 병원을 골라 달라거나 평점 순위를 물으면 하지 않는다고 고지한다. backend `feature/price-band-ai-area`와 함께 합친다.
 - ai의 열린 PR 두 개(`feature/ai-tuning`, `feature/runyour-llm`)는 합치지 않았다. 합칠 때 확인할 것:
@@ -37,9 +41,13 @@
 ## 3. 새 환경변수
 
 - **frontend**
-  - `NEXT_PUBLIC_SITE_URL`: 운영 빌드에 필수. 로컬 `pnpm build`에도 필요하다.
+  - `NEXT_PUBLIC_SITE_URL`: 운영 빌드에 필수. 로컬 `pnpm build`에도 필요하다. Vercel 미리보기에서 비어 있으면 `VERCEL_BRANCH_URL`을 쓴다.
   - `BFF_SHARED_SECRET`: Vercel production에서 필수.
   - `NEXT_PUBLIC_NAVER_MAP_CLIENT_ID`
+  - Vercel에 넣어 둔 값(2026-11-19)
+    - Production: `NEXT_PUBLIC_API_URL=https://prod.mediprice.app`, `NEXT_PUBLIC_SITE_URL=https://mediprice.app`, `NEXT_PUBLIC_NAVER_MAP_CLIENT_ID`
+    - Preview: `NEXT_PUBLIC_API_URL=https://dev.mediprice.app`, `NEXT_PUBLIC_NAVER_MAP_CLIENT_ID`
+    - 아직 없음: Production `BFF_SHARED_SECRET`(비밀값이라 운영자가 넣는다. 없으면 운영 빌드가 실패한다).
 - **backend**
   - prod에서 비면 서버가 뜨지 않는다: `BFF_SHARED_SECRET`(프론트와 같은 값), `AI_SERVICE_TOKEN`, `JWT_SECRET`, `GOOGLE_CLIENT_SECRET`, `OAUTH2_REDIRECT_URI`, `CORS_ALLOWED_ORIGINS`.
   - 선택: `FLYWAY_ENABLED`, `AI_QUOTA_STORE`(memory|jdbc), `AI_GLOBAL_DAILY_CAP`, `APP_RATELIMIT_*`, `CONSENT_*_VERSION`.
@@ -75,3 +83,9 @@
 - 보유기간 배치 삭제(`feature/retention-jobs`)는 만들었지만 기간은 운영자가 정할 값이라 비어 있고, 그동안 아무것도 지우지 않는다. 관리자 접속 기록은 365일 미만으로 정할 수 없다.
 - 내 데이터 내려받기(`/api/users/me/export`)에 권리침해 신고(직접 낸 신고, 내 후기에 들어온 임시조치·재게시 요청)가 아직 들어 있지 않다(backend).
 - 쓰지 않는 `ai_conversation`·`receipt` 테이블 정리 또는 보유기간 정의.
+
+## 6. 배포 확인 사항 (2026-11-19)
+
+- `https://prod.mediprice.app`이 502를 돌려준다. 운영 backend가 떠 있는지 확인한다.
+- Vercel 미리보기 주소는 배포마다 달라 로그인이 되지 않는다. 미리보기 로그인이 필요하면 고정 주소 하나를 정해 dev backend의 `CORS_ALLOWED_ORIGINS`와 `OAUTH2_ALLOWED_REDIRECT_ORIGINS`에 넣는다(와일드카드 안 됨).
+- NCP Maps 콘솔의 Web 서비스 URL에 `https://mediprice.app`(필요하면 미리보기 주소)을 넣는다.
