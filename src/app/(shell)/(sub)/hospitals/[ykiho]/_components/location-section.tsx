@@ -4,14 +4,13 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { SectionHeader } from '@/components/ui/section-header';
 import { DirectionsButton } from '@/features/hospitals/components/directions-button';
-import { HospitalLocationMap } from '@/features/hospitals/components/hospital-location-map';
 import { buildNaverMapUrl } from '@/features/hospitals/detail-links';
 import { formatLocation } from '@/features/regions/format-location';
 import type { components } from '@/lib/api/schema';
 
 type Hospital = components['schemas']['HospitalDetailResponse'];
 
-/** 좌표가 있으면 네이버 지도에 병원 위치를 보여 주고, 주소와 함께 길찾기(앱 딥링크)·네이버 지도 열기를 둔다. */
+/** 주소와 길찾기(네이버 지도 앱 딥링크)·네이버 지도 열기. 위치 지도는 화면의 지도 영역이 보여 준다. */
 export function LocationSection({ hospital }: { hospital: Hospital }) {
   const t = useTranslations('hospitals.detail.location');
   const query = hospital.address?.trim() || hospital.name;
@@ -28,13 +27,6 @@ export function LocationSection({ hospital }: { hospital: Hospital }) {
       className="flex scroll-mt-14 flex-col gap-4"
     >
       <SectionHeader id="location-title" title={t('title')} />
-      {position && (
-        <HospitalLocationMap
-          id={hospital.ykiho}
-          name={hospital.name}
-          position={position}
-        />
-      )}
       <div className="flex flex-col gap-5 rounded-2xl bg-surface p-5 md:flex-row md:items-center md:justify-between md:p-6">
         <div className="flex min-w-0 items-start gap-3.5">
           <span

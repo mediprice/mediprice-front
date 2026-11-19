@@ -10,12 +10,14 @@ import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useRecordView } from '@/features/history/use-record-view';
+import { HospitalAreaMap } from '@/features/hospitals/components/hospital-area-map';
 import type { VariantSelection } from '@/features/hospitals/detail-links';
 import {
   pickVariantRow,
   priceRowName,
 } from '@/features/hospitals/price-groups';
 import { hospitalQueries } from '@/features/hospitals/queries';
+import { comparableBand } from '@/features/npay/average-verdict';
 import { npayQueries } from '@/features/npay/queries';
 import {
   DEFAULT_REGION,
@@ -173,63 +175,106 @@ export function HospitalDetail({
         ? (`/items/${item}` as const)
         : null;
 
-  return (
-    <PageContainer className="min-h-dvh pt-6 pb-section lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-x-10 lg:pt-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
-      <HospitalHeader
-        hospital={hospital}
-        className="lg:col-start-1 lg:row-start-1"
-        itemCrumb={
-          itemHref && prices.displayName
-            ? { href: itemHref, name: prices.displayName }
-            : null
-        }
-      />
-      <HospitalContact
-        hospital={hospital}
-        className="mt-5 lg:sticky lg:top-[calc(var(--spacing-top-nav)+1.5rem)] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:self-start"
-      />
-      <div className="mt-8 flex min-w-0 flex-col gap-section lg:col-start-1 lg:row-start-2 lg:mt-10">
-        {item && (
-          <div className="flex flex-col gap-4">
-            <SelectedItemCard
-              item={item}
-              prices={prices}
-              trend={trend}
-              summary={summary}
-              region={region}
-              activeRow={activeRow}
-              expectedRows={expectedRows}
-              onVariantChange={(next) => {
-                setVariant(next);
-                syncItemParams(item, next);
-              }}
-              onClear={() => handleSelectItem(null)}
+  const itemCrumb =
+    itemHref && prices.displayName
+      ? { href: itemHref, name: prices.displayName }
+      : null;
+  /** 선택 항목 카드와 구역들. 지도가 있든 없든 같은 내용이다. */
+  const sections = (
+    <>
+      {item && (
+        <div className="flex flex-col gap-4">
+          <SelectedItemCard
+            item={item}
+            prices={prices}
+            trend={trend}
+            summary={summary}
+            region={region}
+            activeRow={activeRow}
+            expectedRows={expectedRows}
+            onVariantChange={(next) => {
+              setVariant(next);
+              syncItemParams(item, next);
+            }}
+            onClear={() => handleSelectItem(null)}
+          />
+          {trend.summary.kind === 'trend' && (
+            <PriceTrend
+              summary={trend.summary}
+              name={activeVariant ?? prices.displayName ?? item}
             />
-            {trend.summary.kind === 'trend' && (
-              <PriceTrend
-                summary={trend.summary}
-                name={activeVariant ?? prices.displayName ?? item}
-              />
-            )}
+          )}
+        </div>
+      )}
+      {hasSettled && (
+        <div className="flex flex-col gap-6 lg:gap-8">
+          <SectionNav />
+          <div className="flex flex-col gap-section">
+            <PriceList
+              ykiho={ykiho}
+              selectedItem={item}
+              selectedRows={prices.rows}
+              onSelect={handleSelectItem}
+            />
+            <OperatingSection hospital={hospital} />
+            <LocationSection hospital={hospital} />
+            <ReviewSection ykiho={ykiho} />
           </div>
-        )}
-        {hasSettled && (
-          <div className="flex flex-col gap-6 lg:gap-8">
-            <SectionNav />
-            <div className="flex flex-col gap-section">
-              <PriceList
-                ykiho={ykiho}
-                selectedItem={item}
-                selectedRows={prices.rows}
-                onSelect={handleSelectItem}
-              />
-              <OperatingSection hospital={hospital} />
-              <LocationSection hospital={hospital} />
-              <ReviewSection ykiho={ykiho} />
-            </div>
-          </div>
-        )}
+        </div>
+      )}
+    </>
+  );
+
+  const position =
+    hospital.latitude != null && hospital.longitude != null
+      ? { lat: hospital.latitude, lng: hospital.longitude }
+      : null;
+
+  /** 위치를 모르면 지도 없이 예전처럼 본문과 연락처 열을 둔다. */
+  if (!position) {
+    return (
+      <PageContainer className="min-h-dvh pt-6 pb-section lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-x-10 lg:pt-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <HospitalHeader
+          hospital={hospital}
+          className="lg:col-start-1 lg:row-start-1"
+          itemCrumb={itemCrumb}
+        />
+        <HospitalContact
+          hospital={hospital}
+          className="mt-5 lg:sticky lg:top-[calc(var(--spacing-top-nav)+1.5rem)] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:self-start"
+        />
+        <div className="mt-8 flex min-w-0 flex-col gap-section lg:col-start-1 lg:row-start-2 lg:mt-10">
+          {sections}
+        </div>
+      </PageContainer>
+    );
+  }
+
+  /**
+   * 지도와 함께 보는 상세. 데스크톱은 왼쪽 패널에 병원 정보, 오른쪽은 화면 끝까지 지도이고 지도는 스크롤해도 머문다.
+   * 모바일은 위에 지도, 아래에 같은 정보가 이어진다. 패널은 창 스크롤을 그대로 써서 구역 탭(SectionNav)이 그대로 동작한다.
+   */
+  return (
+    <div className="min-h-dvh lg:grid lg:grid-cols-[minmax(0,32rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,36rem)_minmax(0,1fr)]">
+      <div className="h-[36svh] min-h-60 border-b border-hairline lg:sticky lg:top-top-nav lg:order-2 lg:h-[calc(100dvh-var(--spacing-top-nav))] lg:border-b-0 lg:border-l">
+        <HospitalAreaMap
+          ykiho={ykiho}
+          name={hospital.name}
+          position={position}
+          itemCode={item}
+          band={comparableBand(summary.data?.avgPrice)}
+          directionsQuery={hospital.address?.trim() || hospital.name}
+        />
       </div>
-    </PageContainer>
+      <div className="min-w-0 pt-6 px-page pb-section lg:order-1 lg:pt-8">
+        <HospitalHeader
+          hospital={hospital}
+
+          itemCrumb={itemCrumb}
+        />
+        <HospitalContact hospital={hospital} className="mt-5" />
+        <div className="mt-8 flex min-w-0 flex-col gap-section">{sections}</div>
+      </div>
+    </div>
   );
 }
