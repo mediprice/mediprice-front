@@ -1,3 +1,4 @@
+import admin from './ko/admin.json';
 import ai from './ko/ai.json';
 import auth from './ko/auth.json';
 import common from './ko/common.json';
@@ -37,4 +38,5 @@ export const messages = {
   map,
   liveFee,
   legal,
+  admin,
 };
