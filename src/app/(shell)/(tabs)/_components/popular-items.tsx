@@ -29,19 +29,31 @@ const HOME_REGIONS = [
 ] as const satisfies readonly ServiceRegion[];
 type HomeRegion = (typeof HOME_REGIONS)[number];
 
+type Row = { code: string; name: string };
+
+/** 실제 순위가 이만큼 모여야 순위로 보여 준다. 모자라면 고른 목록(POPULAR_ITEMS)을 순위 없이 보여 준다. */
+const ROW_COUNT = 6;
+
 /**
- * 순위는 POPULAR_ITEMS 순서다(실제 인기 순위 API가 생기면 바꾼다). 고른 지역의 요약만 요청하고,
+ * ranked는 최근 30일 로그인 이용자가 많이 본 항목(서버가 읽어 넘긴다). 6개가 안 되면 고른 목록을 쓰고 순위 숫자를 붙이지 않는다. 고른 지역의 요약만 요청하고,
  * 이미 연 지역은 React Query 캐시를 쓴다. 지역을 바꾸면 새 값이 올 때까지 이전 값을 흐리게 두고, 평균은 이전 값에서 새 값으로 굴러간다.
  * 범위는 값 점이 없는 막대 대신 "37만~495만원"처럼 짧은 글자로 쓴다(docs 14장).
  */
-export function PopularItems() {
+export function PopularItems({ ranked = [] }: { ranked?: readonly Row[] }) {
   const t = useTranslations('home.popular');
   const tRegion = useTranslations('common.region');
   const tActions = useTranslations('common.actions');
   const tPrice = useTranslations('common.price');
   const [region, setRegion] = useState<HomeRegion>('metro');
+  const isRanked = ranked.length >= ROW_COUNT;
+  const rows: Row[] = isRanked
+    ? ranked.slice(0, ROW_COUNT)
+    : POPULAR_ITEMS.map((item) => ({
+        code: item.code,
+        name: t(`items.${item.id}.name`),
+      }));
   const results = useQueries({
-    queries: POPULAR_ITEMS.map((item) => ({
+    queries: rows.map((item) => ({
       ...npayQueries.summaryIn(item.code, sidoCodesOf(region)),
       placeholderData: keepPreviousData,
     })),
@@ -55,7 +67,7 @@ export function PopularItems() {
           <SectionHeader
             id="home-popular"
             title={t('title')}
-            description={t('description')}
+            description={isRanked ? t('rankedDescription') : t('description')}
           />
           <span id="home-popular-region" className="sr-only">
             {t('regionLabel')}
@@ -74,7 +86,7 @@ export function PopularItems() {
         </div>
 
         <ol className="mt-6 grid grid-cols-1 border-t border-hairline lg:mt-8 lg:grid-flow-col lg:grid-cols-2 lg:grid-rows-3 lg:gap-x-12 lg:border-t-0 [&>li]:min-w-0">
-          {POPULAR_ITEMS.map((item, index) => {
+          {rows.map((item, index) => {
             const result = results[index];
             if (!result) return null;
             const summary = result.data;
@@ -85,7 +97,7 @@ export function PopularItems() {
               min != null && max != null && max > min ? { min, max } : null;
             return (
               <li
-                key={item.id}
+                key={item.code}
                 aria-busy={result.isPlaceholderData || undefined}
                 className={cn(
                   'border-b border-hairline transition-opacity duration-200 ease-standard lg:[&:nth-child(3n+1)]:border-t',
@@ -99,16 +111,18 @@ export function PopularItems() {
                   }}
                   className="group flex min-h-24 items-center gap-3 rounded-xl py-4 transition-colors duration-200 ease-standard hover:bg-surface active:bg-surface-strong md:gap-4 md:px-2"
                 >
-                  <span className="w-8 shrink-0 text-center text-price-md text-text-tertiary group-hover:text-primary-text">
-                    <span aria-hidden="true">{index + 1}</span>
-                    <span className="sr-only">
-                      {t('rank', { rank: index + 1 })}
+                  {isRanked && (
+                    <span className="w-8 shrink-0 text-center text-price-md text-text-tertiary group-hover:text-primary-text">
+                      <span aria-hidden="true">{index + 1}</span>
+                      <span className="sr-only">
+                        {t('rank', { rank: index + 1 })}
+                      </span>
                     </span>
-                  </span>
+                  )}
                   <span className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-3 gap-y-2">
                     <span className="flex min-w-20 flex-1 flex-col gap-0.5">
-                      <span className="text-subheading">
-                        {t(`items.${item.id}.name`)}
+                      <span className="text-subheading break-keep">
+                        {item.name}
                       </span>
                       <span className="text-body-sm text-text-tertiary tabular-nums">
                         {result.isPending ? (

@@ -11,6 +11,7 @@
 | backend  | `fix/frontend-integration`     | dev                        | 프론트 연동(리다이렉트, CORS, AI 프록시, 다중 시도)                                                                 | 됨    |
 | backend  | `feature/launch-hardening`     | `fix/frontend-integration` | Flyway(기본 꺼짐), health, AI 한도 DB 저장·전체 상한, IP 속도 제한, prod 필수값 검사, 세션 쿠키, AI 로그·state 검증 | 안 됨 |
 | backend  | `feature/privacy-consent`      | `fix/frontend-integration` | 동의 기록(V4), 의료 정보 별도 동의, 관리자 접속 기록, 내 데이터 내려받기                                            | 안 됨 |
+| backend  | `feature/public-stats`         | `fix/frontend-integration` | 홈 통계(`/api/stats`), 사이트맵 병원 목록, 인기 항목 순위(최근 30일, 5명 미만 제외)                                 | 안 됨 |
 | ai       | `fix/launch-hardening`         | main                       | LLM 시간 제한·재시도, 심평원 캐시·요청 간격, non-root, 422 입력 미노출                                              | 안 됨 |
 
 - backend는 `feature/launch-hardening`(V3)을 먼저, `feature/privacy-consent`(V4)를 다음에 합친다.
@@ -63,4 +64,3 @@
 - 후기 권리침해 신고(비회원·병원 포함)와 임시조치(30일) 처리 흐름, 처리 결과 통지.
 - 조회 기록·신고 기록 보유기간 배치 삭제, 관리자 접속 기록 2년 보관 정리.
 - 쓰지 않는 `ai_conversation`·`receipt` 테이블 정리 또는 보유기간 정의.
-- 병원 목록 API(사이트맵에 병원 페이지 넣기), 전체 통계·인기 순위 API(홈).
