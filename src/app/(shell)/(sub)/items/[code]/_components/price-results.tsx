@@ -126,11 +126,16 @@ export function PriceResults({
           </Button>
         </div>
       )}
-      <PriceScopeNotice
-        code={code}
-        filters={filters}
-        excludedCount={excludedCount}
-      />
+      {/** 빠진 가격 수는 범위 요약이 와야 알 수 있어, 그동안 안내 띠 자리를 잡아 목록이 밀리지 않게 한다. */}
+      {band && bandSummary.isPending ? (
+        <Skeleton className="h-16 rounded-lg lg:h-12" />
+      ) : (
+        <PriceScopeNotice
+          code={code}
+          filters={filters}
+          excludedCount={excludedCount}
+        />
+      )}
 
       {query.isPending ? (
         <ul aria-busy="true" className="flex flex-col gap-3">
