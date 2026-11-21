@@ -1,6 +1,9 @@
 import type { LatLng } from '@/features/map/map-geo';
 import type { PriceFilters } from '@/features/npay/price-filters';
-import { DEFAULT_REGION } from '@/features/regions/service-region';
+import {
+  DEFAULT_REGION,
+  type ServiceRegion,
+} from '@/features/regions/service-region';
 
 import type { TurnArea } from './schemas';
 
@@ -10,7 +13,7 @@ const METRO = { '110000': 'seoul', '310000': 'gyeonggi' } as const;
 export type NearPlace = { place: string; center: LatLng };
 
 export type AreaScope =
-  /** 장소를 말하지 않아 기본 지역(서울·경기)이다. */
+  /** 장소를 말하지 않아 기본 지역(서울·경기)이거나, 결과에서 사용자가 고른 지역이다. */
   | { kind: 'default'; filters: PriceFilters; near: null }
   /** 서울·경기 안이라 그 시도(와 시군구)로 좁힌다. */
   | {
@@ -35,12 +38,15 @@ function nearOf(area: TurnArea): NearPlace | null {
   };
 }
 
-/** AI가 알려 준 장소를 항목 가격 화면의 필터로 바꾼다. 시군구는 시도 코드 앞 두 자리가 같을 때만 쓴다. */
-export function areaScope(area: TurnArea | null): AreaScope {
+/** AI가 알려 준 장소를 항목 가격 화면의 필터로 바꾼다. 장소가 없으면 picked(없으면 기본 지역)를 쓴다. 시군구는 시도 코드 앞 두 자리가 같을 때만 쓴다. */
+export function areaScope(
+  area: TurnArea | null,
+  picked: ServiceRegion = DEFAULT_REGION,
+): AreaScope {
   if (!area) {
     return {
       kind: 'default',
-      filters: { region: DEFAULT_REGION, sort: 'price_asc' },
+      filters: { region: picked, sort: 'price_asc' },
       near: null,
     };
   }

@@ -7,14 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
 
 import type { TurnQuestion } from '../schemas';
+import { type DailyUsage, SendCostHint } from './send-cost-hint';
 
-/** 질문이 하나면 고르는 즉시 보내고, 둘이면 각각 고른 뒤 한 번에 보낸다. */
+/** 질문이 하나면 고르는 즉시 보내고, 둘이면 각각 고른 뒤 한 번에 보낸다. 어느 쪽이든 보내면 1회 쓴다고 알린다. */
 export function QuestionOptions({
   questions,
   onAnswer,
+  usage,
 }: {
   questions: TurnQuestion[];
   onAnswer: (text: string) => void;
+  usage: DailyUsage;
 }) {
   const t = useTranslations('ai.questions');
   const baseId = useId();
@@ -80,6 +83,9 @@ export function QuestionOptions({
           {t('sendSelected')}
         </Button>
       )}
+      <p className="text-caption text-text-tertiary">
+        <SendCostHint usage={usage} isInstant={isSingle} />
+      </p>
     </div>
   );
 }

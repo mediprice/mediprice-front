@@ -15,11 +15,12 @@ import {
 } from '@/features/npay/price-filters';
 import { npayQueries } from '@/features/npay/queries';
 import { useCategoryLabel } from '@/features/npay/use-category-label';
-import { sidoCodesOf } from '@/features/regions/service-region';
+import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
 import type { components } from '@/lib/api/schema';
 
 import type { AreaScope } from '../area-filters';
 import { formatItemName } from '../item-name';
+import { isShownReason } from '../result-text';
 import type { TurnItem } from '../schemas';
 import { NearbyMapPanel } from './nearby-map-panel';
 
@@ -71,7 +72,7 @@ export function ResultItemCard({
         </p>
       )}
       <h3 className="text-heading">{formatItemName(detail)}</h3>
-      {item.reason && (
+      {isShownReason(item.reason) && (
         <p className="text-body-sm text-text-secondary">{item.reason}</p>
       )}
     </>
@@ -123,7 +124,9 @@ export function ResultItemCard({
         {heading}
         <div className="mt-2 flex flex-col gap-0.5">
           <p className="text-caption-strong text-text-tertiary">
-            {t('priceLabel', { region: regionLabel })}
+            {scope.kind === 'default' && filters.region === DEFAULT_REGION
+              ? t('priceLabelDefault', { region: regionLabel })
+              : t('priceLabel', { region: regionLabel })}
           </p>
           {summary.isPending ? (
             <span className="flex flex-col gap-1.5">

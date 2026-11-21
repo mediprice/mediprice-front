@@ -1,12 +1,13 @@
 import { ApiError, NetworkError } from '@/lib/api/errors';
 
-/** 화면이 다르게 보여 주는 실패 종류. interrupted는 답을 받기 전에 새로 고쳤을 때다. */
+/** 화면이 다르게 보여 주는 실패 종류. interrupted는 답을 받기 전에 새로 고쳤을 때, cancelled는 기다리다 그만뒀을 때다. */
 export type TurnFailure =
   | 'quota'
   | 'unavailable'
   | 'network'
   | 'invalidInput'
   | 'interrupted'
+  | 'cancelled'
   | 'unknown';
 
 export type VoiceError =

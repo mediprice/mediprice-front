@@ -14,7 +14,7 @@ import { MAX_INPUT_LENGTH, turnInputSchema } from '../schemas';
 const composerSchema = z.object({ input: turnInputSchema });
 const COUNTER_FROM = MAX_INPUT_LENGTH - 100;
 
-/** 대화 입력창. Enter로 보내고 Shift+Enter는 줄바꿈이다(한글 조합 중 Enter는 무시). */
+/** 대화 입력창. Enter로 보내고 Shift+Enter는 줄바꿈이다(한글 조합 중 Enter는 무시). 글자가 커서 한 줄에 다 들어가지 않으면 버튼을 다음 줄로 내린다. */
 export function Composer({
   textareaRef,
   isSending,
@@ -59,12 +59,12 @@ export function Composer({
   return (
     <form
       onSubmit={(event) => void submit(event)}
-      className="flex items-end gap-2 border-t border-border bg-bg py-2.5 px-page lg:mx-8 lg:mb-7 lg:rounded-lg lg:border-t-0 lg:p-2.5 lg:px-2.5"
+      className="flex flex-wrap items-end gap-2 border-t border-border bg-bg py-2.5 px-page lg:mx-8 lg:mb-7 lg:rounded-lg lg:border-t-0 lg:p-2.5 lg:px-2.5"
     >
       <label htmlFor={inputId} className="sr-only">
         {t('label')}
       </label>
-      <div className="flex min-h-11 min-w-0 flex-1 flex-col justify-center rounded-3xl bg-surface-strong px-4 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus-ring lg:rounded-md lg:bg-transparent lg:px-2">
+      <div className="flex min-h-11 min-w-0 flex-[1_1_12rem] flex-col justify-center rounded-3xl bg-surface-strong px-4 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus-ring lg:rounded-md lg:bg-transparent lg:px-2">
         <textarea
           id={inputId}
           {...field}
@@ -97,30 +97,32 @@ export function Composer({
           </p>
         )}
       </div>
-      {onMic && !isDisabled && (
+      <div className="ml-auto flex shrink-0 gap-2">
+        {onMic && !isDisabled && (
+          <Button
+            variant="tint"
+            size="icon"
+            aria-label={t('mic')}
+            onClick={onMic}
+            className="rounded-full lg:rounded-lg"
+          >
+            <Mic aria-hidden="true" />
+          </Button>
+        )}
         <Button
-          variant="tint"
+          type="submit"
           size="icon"
-          aria-label={t('mic')}
-          onClick={onMic}
-          className="rounded-full lg:rounded-lg"
+          aria-label={t('send')}
+          isLoading={isSending}
+          disabled={!canSubmit}
+          className="rounded-full lg:w-auto lg:rounded-lg lg:px-5"
         >
-          <Mic aria-hidden="true" />
+          <SendHorizontal aria-hidden="true" className="lg:hidden" />
+          <span aria-hidden="true" className="hidden lg:inline">
+            {t('send')}
+          </span>
         </Button>
-      )}
-      <Button
-        type="submit"
-        size="icon"
-        aria-label={t('send')}
-        isLoading={isSending}
-        disabled={!canSubmit}
-        className="rounded-full lg:w-auto lg:rounded-lg lg:px-5"
-      >
-        <SendHorizontal aria-hidden="true" className="lg:hidden" />
-        <span aria-hidden="true" className="hidden lg:inline">
-          {t('send')}
-        </span>
-      </Button>
+      </div>
     </form>
   );
 }
