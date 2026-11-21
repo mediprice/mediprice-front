@@ -67,8 +67,12 @@
     "change": "조건 바꾸기",
     "reset": "조건 모두 초기화",
     "noPriceTitle": "아직 공개된 가격이 없어요",
-    "noPriceDescription": "이 항목의 가격을 공개한 병원이 없어요. 다른 항목을 찾아보세요.",
-    "search": "다른 항목 찾기"
+    "noPriceDescription": "전국에서도 이 항목의 가격을 공개한 병원이 없어요.",
+    "search": "다른 항목 찾기",
+    "noPriceInRegion": "{region}에는 이 항목 가격이 없어요",
+    "widenDescription": "다른 지역에는 가격을 공개한 병원이 있을 수 있어요.",
+    "nationwide": "전국에서 보기",
+    "sameCategory": "같은 분류의 다른 항목 보기"
   },
   "card": {
     "meta": "{kind} · {region}",
