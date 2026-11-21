@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 export type ToastAction = { label: string; onClick: () => void };
 
-export type Toast = {
+type Toast = {
   id: number;
   text: string;
   action?: ToastAction;

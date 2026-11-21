@@ -364,6 +364,16 @@
   }
 }
 
+/* 화면 이동 중 진행 막대(NavigationProgress). 줄인 움직임 설정이면 전역 규칙이 멈춘다. */
+@keyframes nav-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
 @layer base {
   :root {
     color-scheme: light;

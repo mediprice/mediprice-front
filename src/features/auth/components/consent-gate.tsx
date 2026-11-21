@@ -1,5 +1,6 @@
 'use client';
 
+import { LoaderCircle } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
@@ -29,9 +30,15 @@ export function ConsentGate() {
   return (
     <div
       role="status"
-      className="fixed inset-0 z-(--z-overlay) flex items-center justify-center bg-bg"
+      className="fixed inset-0 z-(--z-overlay) flex flex-col items-center justify-center gap-3 bg-bg px-page text-center"
     >
-      <span className="sr-only">{t('checking')}</span>
+      <LoaderCircle
+        aria-hidden="true"
+        data-allow-motion
+        className="size-8 animate-spin text-primary"
+        strokeWidth={1.75}
+      />
+      <p className="text-body text-text-secondary">{t('checking')}</p>
     </div>
   );
 }
