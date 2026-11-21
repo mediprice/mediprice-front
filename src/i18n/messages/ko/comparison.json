@@ -59,7 +59,8 @@
     "variantBasis": "{name} 기준",
     "excludedUnit": "시간·횟수 같은 구성이 달라 평균과 견주기 어려운 가격만 있어 비교에서 뺐어요",
     "mixedItems": "담을 때 고른 항목이 서로 달라요. 지금은 {item} 기준으로 비교해요.",
-    "mixedItemsSwitch": "{item} 기준으로 보기"
+    "mixedItemsSwitch": "{item} 기준으로 보기",
+    "dropped": "더 이상 공개되지 않는 병원 {count, plural, other {#곳}}을 빼고 비교해요."
   },
   "table": {
     "caption": "{item} 가격과 병원 정보 비교",
@@ -97,5 +98,14 @@
   "notFound": {
     "description": "주소에 있는 병원 중 찾을 수 없는 곳이 있어요. 병원을 다시 골라 주세요.",
     "back": "병원 다시 고르기"
+  },
+  "share": {
+    "label": "링크 공유",
+    "copied": "링크 복사됨",
+    "copiedAnnounce": "비교 링크를 복사했어요"
+  },
+  "basketSync": {
+    "notice": "이 비교는 내 비교함({count, plural, other {#곳}})과 달라요.",
+    "replace": "이 비교로 비교함 바꾸기"
   }
 }

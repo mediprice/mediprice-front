@@ -35,6 +35,8 @@ type CompareState = {
   clear: () => void;
   /** 공유받은 비교 주소로 들어왔을 때, 비교함이 비어 있으면 그 병원들로 채운다. */
   adopt: (hospitals: readonly CompareHospital[]) => void;
+  /** 공유받은 비교로 비교함을 바꾼다(사용자가 고른 경우에만). */
+  replaceWith: (hospitals: readonly CompareHospital[]) => void;
 };
 
 export const COMPARE_STORAGE_KEY = 'mediprice:compare';
@@ -93,6 +95,8 @@ export const useCompareStore = create<CompareState>()(
           if (get().hospitals.length > 0) return;
           set({ hospitals: hospitals.slice(0, MAX_COMPARE) });
         },
+        replaceWith: (hospitals) =>
+          set({ hospitals: hospitals.slice(0, MAX_COMPARE) }),
       };
     },
     {
