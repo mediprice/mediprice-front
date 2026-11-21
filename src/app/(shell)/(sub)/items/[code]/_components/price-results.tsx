@@ -114,6 +114,18 @@ export function PriceResults({
         </div>
       </div>
 
+      {summary.isError && !query.isError && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-surface-strong px-4 py-2 text-body-sm text-text-secondary">
+          <p>{t('summaryFailed')}</p>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => void summary.refetch()}
+          >
+            {tActions('retry')}
+          </Button>
+        </div>
+      )}
       <PriceScopeNotice
         code={code}
         filters={filters}
@@ -148,7 +160,10 @@ export function PriceResults({
             <Button
               variant="tint"
               size="md"
-              onClick={() => void query.refetch()}
+              onClick={() => {
+                if (summary.isError) void summary.refetch();
+                void query.refetch();
+              }}
             >
               {tActions('retry')}
             </Button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { LockKeyhole } from 'lucide-react';
+import { CircleAlert, LockKeyhole } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
@@ -42,8 +42,9 @@ export function LoginRequired({
   if (status === 'error') {
     return (
       <EmptyState
-        icon={<LockKeyhole />}
+        icon={<CircleAlert />}
         title={t('required.errorTitle')}
+        description={t('required.errorDescription')}
         action={
           <Button variant="tint" size="md" onClick={refetch}>
             {tCommon('actions.retry')}

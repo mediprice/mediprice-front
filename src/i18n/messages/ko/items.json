@@ -61,7 +61,8 @@
     "progress": "전체 {total, number}곳 중 {shown, number}곳",
     "loadMoreError": "다음 목록을 불러오지 못했어요.",
     "narrowHint": "병원이 많아 끝까지 넘겨 보기 어려워요. 지역과 시·군·구로 좁혀 보세요.",
-    "narrowAction": "시·군·구로 좁히기"
+    "narrowAction": "시·군·구로 좁히기",
+    "summaryFailed": "평균을 불러오지 못해 모든 가격을 보여 드려요."
   },
   "empty": {
     "title": "조건에 맞는 병원이 없어요",

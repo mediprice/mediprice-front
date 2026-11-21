@@ -2,7 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
 import { RollingNumber } from '@/components/ui/rolling-number';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PriceSpread } from '@/features/npay/components/price-spread';
@@ -29,10 +28,9 @@ export function PriceSummary({
   const t = useTranslations('items.summary');
   const tPrice = useTranslations('common.price');
   const tErrors = useTranslations('errors');
-  const tActions = useTranslations('common.actions');
   const { scope } = useFilterLabels(filters);
   const { summary, band, bandSummary } = useComparableSummary(code, filters);
-  const { data, isPending, isError, error, refetch } = summary;
+  const { data, isPending, isError, error } = summary;
   /** 평균은 전체 가격 기준(범위를 정하는 기준)이고, 범위·병원 수는 목록과 같은 "견줄 수 있는 가격" 기준이다. */
   const spread = band ? bandSummary.data : data;
   const isSpreadPending = isPending || (band !== null && bandSummary.isPending);
@@ -51,14 +49,10 @@ export function PriceSummary({
         {isPending ? (
           <Skeleton className="h-9 w-52 max-w-full" />
         ) : isError ? (
-          <div className="flex flex-wrap items-center gap-2" role="alert">
-            <p className="text-body-sm text-text-secondary">
-              {tErrors(errorMessageKey(error))}
-            </p>
-            <Button variant="ghost" size="sm" onClick={() => void refetch()}>
-              {tActions('retry')}
-            </Button>
-          </div>
+          /** 다시 시도는 아래 목록 쪽 하나로 모은다(같은 원인으로 버튼이 두 개 생기지 않게). */
+          <p className="text-body-sm text-text-secondary">
+            {tErrors(errorMessageKey(error))}
+          </p>
         ) : data.avgPrice == null ? (
           <p className="text-price-xl text-text-tertiary">{tPrice('none')}</p>
         ) : (
