@@ -33,7 +33,14 @@
     "restored": "{name}을(를) 다시 관심 병원에 저장했어요.",
     "restoreFailed": "관심 병원에 다시 저장하지 못했어요.",
     "signedOutHeading": "관심 병원을 한곳에 모아 둘 수 있어요",
-    "signedOutDescription": "병원 상세에서 하트를 누른 병원이 여기에 모여요."
+    "signedOutDescription": "병원 상세에서 하트를 누른 병원이 여기에 모여요.",
+    "call": "전화",
+    "callLabel": "{name} 전화 걸기 {phone}",
+    "compare": {
+      "count": "비교함 {count, number}/{max, number}",
+      "needMore": "한 곳 더 담으면 비교할 수 있어요.",
+      "go": "비교하기"
+    }
   },
   "history": {
     "title": "최근 기록",
@@ -75,7 +82,6 @@
   },
   "medicalProfile": {
     "title": "의료 프로필",
-    "heading": "내 건강 정보를 적어 두는 곳",
     "description": "진료 이력·복용 약·알레르기를 적어 두고 필요할 때 다시 확인해요. 언제든 지울 수 있어요.",
     "basicTitle": "기본 정보",
     "birthYear": "출생 연도",

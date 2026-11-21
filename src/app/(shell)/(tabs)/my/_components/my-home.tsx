@@ -1,6 +1,7 @@
 'use client';
 
-import { UserRound } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { LogOut, UserRound } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { PageContainer } from '@/components/layout/page-container';
@@ -11,13 +12,20 @@ import { GoogleLoginButton } from '@/features/auth/components/google-login-butto
 import { MyMenuList } from '@/features/auth/components/my-menu-list';
 import { MyPageHeader } from '@/features/auth/components/my-page-header';
 import { UserAvatar } from '@/features/auth/components/user-avatar';
+import { signOut } from '@/features/auth/session';
 import { displayName, useSession } from '@/features/auth/use-session';
+import { showToast } from '@/features/feedback/toast-store';
 
 export function MyHome() {
   const t = useTranslations('mypage.home');
   const tNav = useTranslations('nav');
   const tCommon = useTranslations('common');
   const { status, user, refetch } = useSession();
+  /** 로그아웃해도 이 화면에 머물러 로그인 안내로 바뀐다. */
+  const logout = useMutation({
+    mutationFn: () => signOut(),
+    onSuccess: () => showToast(t('loggedOut')),
+  });
 
   if (status === 'pending') {
     return (
@@ -61,7 +69,7 @@ export function MyHome() {
               icon={<UserRound />}
               title={t('signedOutTitle')}
               description={t('signedOutDescription')}
-              action={<GoogleLoginButton variant="tint" size="md" />}
+              action={<GoogleLoginButton size="md" />}
               className="rounded-xl bg-surface"
             />
           )}
@@ -85,6 +93,18 @@ export function MyHome() {
       {/** 내 정보 홈은 메뉴 카드가 곧 탐색이라 옆 메뉴를 두지 않는다(하위 화면만 옆 메뉴를 쓴다). */}
       <PageContainer className="pb-section md:max-w-2xl lg:max-w-page">
         <MyMenuList />
+        <div className="mt-4 border-t border-hairline pt-6 lg:mt-8 lg:border-t-0 lg:pt-0">
+          <Button
+            variant="neutral"
+            size="md"
+            isLoading={logout.isPending}
+            onClick={() => logout.mutate()}
+            className="w-full md:w-fit"
+          >
+            <LogOut aria-hidden="true" />
+            {t('logout')}
+          </Button>
+        </div>
       </PageContainer>
     </>
   );

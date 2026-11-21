@@ -59,7 +59,7 @@ export function LoginRequired({
         icon={<LockKeyhole />}
         title={t('loginDialog.title')}
         description={t(`loginDialog.reason.${reason}`)}
-        action={<GoogleLoginButton variant="tint" size="md" />}
+        action={<GoogleLoginButton size="md" />}
       />
     );
   }

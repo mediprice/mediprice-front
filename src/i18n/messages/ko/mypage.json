@@ -4,7 +4,9 @@
     "greeting": "{name}님",
     "signedOutTitle": "로그인하고 내 기록을 모아 보세요",
     "signedOutDescription": "관심 병원, 최근 기록, 내 후기를 한곳에서 볼 수 있어요.",
-    "errorTitle": "내 정보를 불러오지 못했어요"
+    "errorTitle": "내 정보를 불러오지 못했어요",
+    "logout": "로그아웃",
+    "loggedOut": "로그아웃했어요"
   },
   "menu": {
     "label": "내 정보 메뉴",
