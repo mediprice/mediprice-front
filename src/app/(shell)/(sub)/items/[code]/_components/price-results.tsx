@@ -1,6 +1,6 @@
 'use client';
 
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { CircleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -8,13 +8,11 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { variantQuery } from '@/features/hospitals/detail-links';
-import { comparableBand } from '@/features/npay/average-verdict';
 import { HospitalPriceGroupCard } from '@/features/npay/components/hospital-price-group-card';
 import { groupPricesByHospital } from '@/features/npay/group-prices';
 import {
   buildPriceFiltersQuery,
   type PriceFilters,
-  toPriceConditions,
 } from '@/features/npay/price-filters';
 import type { HospitalPrice } from '@/features/npay/price-stream';
 import { npayQueries } from '@/features/npay/queries';
@@ -25,7 +23,7 @@ import { PriceScopeNotice } from './price-scope-notice';
 import { SortMenu } from './sort-menu';
 import { RESULTS_HEADING_ID } from './use-apply-filters';
 import { useItemReady } from './use-item-ready';
-import { usePriceSummary } from './use-price-summary';
+import { useComparableSummary } from './use-price-summary';
 import { ZeroResults } from './zero-results';
 
 /** 병원 수·적용된 조건·정렬과 병원별 가격 카드. "더 보기"로 읽은 행은 기존 병원 카드에 합쳐진다. */
@@ -40,18 +38,14 @@ export function PriceResults({
   const tErrors = useTranslations('errors');
   const tActions = useTranslations('common.actions');
   const isReady = useItemReady(code);
-  const summary = usePriceSummary(code, filters);
   /** 기본은 평균의 1/3~3배 가격만 받는다. 범위가 평균에서 나오므로 요약을 받은 뒤 목록을 읽고, 요약이 실패하면 범위 없이 읽는다. */
-  const band =
-    filters.prices === 'all' ? null : comparableBand(summary.data?.avgPrice);
-  const conditions = toPriceConditions(filters, band);
+  const { summary, band, conditions, bandSummary } = useComparableSummary(
+    code,
+    filters,
+  );
   const query = useInfiniteQuery({
     ...npayQueries.priceList(code, { conditions, sort: filters.sort }),
     enabled: isReady && (filters.prices === 'all' || !summary.isPending),
-  });
-  const bandSummary = useQuery({
-    ...npayQueries.summaryOf(code, conditions),
-    enabled: isReady && band !== null,
   });
   const groups = groupPricesByHospital(
     query.data?.pages.flatMap((page) => page.rows) ?? [],

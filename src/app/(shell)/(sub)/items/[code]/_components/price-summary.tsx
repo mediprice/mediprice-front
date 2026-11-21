@@ -11,7 +11,7 @@ import { errorMessageKey } from '@/lib/api/error-message';
 import { cn } from '@/lib/utils';
 
 import { useFilterLabels } from './use-filter-labels';
-import { usePriceSummary } from './use-price-summary';
+import { useComparableSummary } from './use-price-summary';
 
 /**
  * 현재 조건의 평균을 크게, 세부 항목별 최저~최고(글자)와 병원·가격 수를 작게 보여 준다(극단값을 머리로 쓰지 않는다, docs 14장).
@@ -31,10 +31,11 @@ export function PriceSummary({
   const tErrors = useTranslations('errors');
   const tActions = useTranslations('common.actions');
   const { scope } = useFilterLabels(filters);
-  const { data, isPending, isError, error, refetch } = usePriceSummary(
-    code,
-    filters,
-  );
+  const { summary, band, bandSummary } = useComparableSummary(code, filters);
+  const { data, isPending, isError, error, refetch } = summary;
+  /** 평균은 전체 가격 기준(범위를 정하는 기준)이고, 범위·병원 수는 목록과 같은 "견줄 수 있는 가격" 기준이다. */
+  const spread = band ? bandSummary.data : data;
+  const isSpreadPending = isPending || (band !== null && bandSummary.isPending);
 
   return (
     <div
@@ -71,16 +72,16 @@ export function PriceSummary({
           </p>
         )}
       </div>
-      {isPending ? (
+      {isSpreadPending ? (
         <Skeleton className="h-11 w-56 max-w-full" />
       ) : (
-        data && (
+        spread && (
           <div className="flex min-w-0 flex-col gap-0.5 text-body-sm tabular-nums md:items-end md:text-right">
-            <PriceSpread min={data.minPrice} max={data.maxPrice} />
+            <PriceSpread min={spread.minPrice} max={spread.maxPrice} />
             <p className="text-text-tertiary">
-              {t('counts', {
-                hospitals: data.hospitalCount,
-                prices: data.priceCount,
+              {t(band ? 'comparableCounts' : 'counts', {
+                hospitals: spread.hospitalCount,
+                prices: spread.priceCount,
               })}
             </p>
           </div>

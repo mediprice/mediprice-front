@@ -23,7 +23,8 @@
     "regionWithSggu": "{region} {sggu}",
     "scopeWithInstitution": "{scope} · {institution}",
     "scope": "{scope} 기준",
-    "counts": "병원 {hospitals, number}곳 · 가격 {prices, number}건"
+    "counts": "병원 {hospitals, number}곳 · 가격 {prices, number}건",
+    "comparableCounts": "평균과 견줄 수 있는 병원 {hospitals, number}곳 · 가격 {prices, number}건"
   },
   "filters": {
     "title": "필터",
