@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import {
   ChartLine,
   ChevronDown,
@@ -28,7 +29,12 @@ import {
   visibleVariantRows,
 } from '@/features/hospitals/price-groups';
 import { LiveFeeCheck } from '@/features/live-fee/components/live-fee-check';
-import { judgeAgainstAverage } from '@/features/npay/average-verdict';
+import {
+  comparableBand,
+  judgeAgainstAverage,
+} from '@/features/npay/average-verdict';
+import { toPriceConditions } from '@/features/npay/price-filters';
+import { npayQueries } from '@/features/npay/queries';
 import type { ServiceRegion } from '@/features/regions/service-region';
 import { cn } from '@/lib/utils';
 
@@ -151,6 +157,7 @@ export function SelectedItemCard({
           </div>
 
           <RegionComparison
+            item={item}
             price={activeRow.price}
             summary={summary}
             region={region}
@@ -272,10 +279,12 @@ const DIRECTION_STYLE = {
  * 평균의 1/3~3배 밖이면 % 대신 단위·구성이 달라 비교하기 어렵다고 쓴다(목록 행의 꼬리표와 같은 규칙).
  */
 function RegionComparison({
+  item,
   price,
   summary,
   region: regionId,
 }: {
+  item: string;
   price: number;
   summary: RegionSummaryState;
   region: ServiceRegion;
@@ -283,6 +292,15 @@ function RegionComparison({
   const t = useTranslations('hospitals.detail.selected');
   const region = useTranslations('common.region')(regionId);
   const failure = useStickyError(summary.error, summary.refetch);
+  /** 막대의 최저~최고와 병원 수는 항목 목록과 같은 "평균과 견줄 수 있는 가격" 범위로 그린다(1일당 1,000원 같은 극단값 제외). */
+  const band = comparableBand(summary.data?.avgPrice);
+  const comparable = useQuery({
+    ...npayQueries.summaryOf(
+      item,
+      toPriceConditions({ region: regionId, sort: 'price_asc' }, band),
+    ),
+    enabled: band !== null,
+  });
 
   if (failure.error) {
     return (
@@ -294,7 +312,7 @@ function RegionComparison({
       />
     );
   }
-  if (summary.isPending) {
+  if (summary.isPending || (band !== null && comparable.isPending)) {
     return <RegionComparisonSkeleton />;
   }
   const data = summary.data;
@@ -306,6 +324,9 @@ function RegionComparison({
       </p>
     );
   }
+  /** 비교할 수 없는 가격(범위 밖)이면 점이 범위 안에 없으므로 전체 범위를 그대로 보여 준다. */
+  const scope =
+    verdict.kind === 'comparable' && comparable.data ? comparable.data : data;
   const { icon: Icon, tone } =
     verdict.kind === 'comparable'
       ? DIRECTION_STYLE[verdict.comparison.direction]
@@ -336,15 +357,18 @@ function RegionComparison({
         </p>
       )}
       <RangeBar
-        min={data.minPrice}
-        max={data.maxPrice}
+        min={scope.minPrice}
+        max={scope.maxPrice}
         average={data.avgPrice}
         value={price}
         isComparable={verdict.kind !== 'incomparable'}
         className="w-full"
       />
       <p className="text-caption text-text-tertiary">
-        {t('basis', { region, count: data.hospitalCount })}
+        {t(scope === data ? 'basis' : 'comparableBasis', {
+          region,
+          count: scope.hospitalCount,
+        })}
       </p>
     </div>
   );

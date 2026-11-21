@@ -33,7 +33,8 @@
       "incomparable": "이 세부 항목은 단위·구성이 달라 {region} 평균과 비교하기 어려워요",
       "incomparableNote": "평균({average, number}원)의 1/3보다 낮거나 3배보다 높은 가격은 시간·횟수 같은 구성이 다른 항목일 수 있어 % 차이를 쓰지 않아요.",
       "showAll": "세부 항목 {count, plural, other {#개}} 모두 보기",
-      "showLess": "세부 항목 접기"
+      "showLess": "세부 항목 접기",
+      "comparableBasis": "{region} 병원 {count, plural, other {#곳}}의 평균과 견줄 수 있는 세부 항목별 공개 가격 기준"
     },
     "trend": {
       "label": "가격 추이",

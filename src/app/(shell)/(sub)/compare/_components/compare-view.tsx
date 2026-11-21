@@ -29,6 +29,9 @@ import { useCompareStore } from '@/features/comparison/compare-store';
 import { comparisonQueries } from '@/features/comparison/queries';
 import { priceRowName } from '@/features/hospitals/price-groups';
 import { hospitalQueries } from '@/features/hospitals/queries';
+import { comparableBand } from '@/features/npay/average-verdict';
+import { npayQueries } from '@/features/npay/queries';
+import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
 import { errorMessageKey } from '@/lib/api/error-message';
 import { ApiError } from '@/lib/api/errors';
 import { cn } from '@/lib/utils';
@@ -136,6 +139,15 @@ export function CompareView({
   const isVariantsPending = variantQueries.some(
     (query) => query.fetchStatus === 'fetching' && !query.data,
   );
+  /** 병원 상세·항목 목록과 같은 기준: 서울·경기 평균의 1/3~3배 밖 가격(시간·횟수가 다른 세부 항목)은 결론에 쓰지 않는다. */
+  const regional = useQuery({
+    ...npayQueries.summaryIn(
+      itemRow?.npayCode ?? '',
+      sidoCodesOf(DEFAULT_REGION),
+    ),
+    enabled: itemRow != null,
+  });
+  const band = comparableBand(regional.data?.avgPrice);
   const basis = itemRow
     ? comparisonBasis(
         itemRow,
@@ -146,11 +158,12 @@ export function CompareView({
             price: row.price,
           })),
         ),
+        band,
       )
     : null;
   /** 세부 항목을 받을 때까지(최대 DATE_TIMEOUT_MS) 결론을 미뤄, 제목이 "가장 낮은 공개 가격"에서 "가장 저렴"으로 바뀌지 않게 한다. */
   const summary =
-    basis && !error && !isPending && !isVariantsPending
+    basis && !error && !isPending && !isVariantsPending && !regional.isLoading
       ? summarizeComparison(basis, hospitals)
       : null;
 

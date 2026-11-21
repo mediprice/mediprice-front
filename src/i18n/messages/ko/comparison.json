@@ -46,7 +46,7 @@
     "hospitalsNote": "막대는 비교한 병원들의 가격 범위예요. 번호는 비교표의 병원 순서와 같아요.",
     "summaryTie": "{count, number}곳 중 {tied, number}곳의 가장 낮은 공개 가격이 같아요",
     "summarySame": "{count, number}곳 모두 가장 낮은 공개 가격이 같아요",
-    "regionNote": "막대는 {region} 병원 {count, number}곳의 세부 항목별 가격 범위예요. 번호는 비교표의 병원 순서와 같아요.",
+    "regionNote": "막대는 {region} 병원 {count, number}곳의, 평균과 견줄 수 있는 세부 항목별 가격 범위예요. 번호는 비교표의 병원 순서와 같아요.",
     "legendLabel": "병원별 가장 낮은 공개 가격",
     "lowestTag": "최저",
     "summaryLowest": "{count, number}곳 중 가장 낮은 공개 가격은 {name}{particle, select, consonant {이에요} vowel {예요} other {이에요}}",
@@ -56,7 +56,8 @@
     "basisLowest": "{name}의 “{variant}” <nb>{price, number}원</nb> 기준이에요. 세부 항목 구성이 병원마다 달라 같은 조건의 비교는 아니에요.",
     "basisLowestUnnamed": "병원마다 가장 낮은 공개 가격끼리 견줬어요. 세부 항목 구성이 병원마다 달라 같은 조건의 비교는 아니에요.",
     "legendLabelSame": "병원별 같은 세부 항목 가격",
-    "variantBasis": "{name} 기준"
+    "variantBasis": "{name} 기준",
+    "excludedUnit": "시간·횟수 같은 구성이 달라 평균과 견주기 어려운 가격만 있어 비교에서 뺐어요"
   },
   "table": {
     "caption": "{item} 가격과 병원 정보 비교",
