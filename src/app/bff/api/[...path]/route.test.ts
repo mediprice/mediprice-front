@@ -46,6 +46,26 @@ describe('GET /bff/api/**', () => {
     expect(seen?.has('authorization')).toBe(false);
   });
 
+  it('익명 요청 헤더가 있으면 Access 쿠키가 있어도 Authorization 없이 전달한다', async () => {
+    let seen: Headers | undefined;
+    server.use(
+      http.get(`${API}/api/hospitals/nearby`, ({ request }) => {
+        seen = request.headers;
+        return HttpResponse.json({ content: [] });
+      }),
+    );
+    const request = bffRequest('/bff/api/hospitals/nearby?lat=37.57', {
+      cookies: withAccess,
+    });
+    request.headers.set('x-mediprice-anonymous', '1');
+
+    const response = await GET(request, ctx('hospitals', 'nearby'));
+
+    expect(response.status).toBe(200);
+    expect(seen?.has('authorization')).toBe(false);
+    expect(seen?.has('x-mediprice-anonymous')).toBe(false);
+  });
+
   it('쿼리 문자열을 그대로 전달한다', async () => {
     let seenUrl = '';
     server.use(
@@ -93,6 +113,34 @@ describe('GET /bff/api/**', () => {
     const response = await GET(bffRequest('/bff/api/x'), ctx('x'));
 
     expect(response.headers.getSetCookie()).toEqual([]);
+  });
+
+  it('로그인하지 않은 공개 조회는 CDN 캐시를 허용한다', async () => {
+    server.use(
+      http.get(`${API}/api/regions/sido`, () => HttpResponse.json([])),
+    );
+
+    const response = await GET(
+      bffRequest('/bff/api/regions/sido'),
+      ctx('regions', 'sido'),
+    );
+
+    expect(response.headers.get('cache-control')).toBe(
+      'public, s-maxage=300, stale-while-revalidate=3600',
+    );
+  });
+
+  it('로그인한 요청은 공개 조회라도 no-store다', async () => {
+    server.use(
+      http.get(`${API}/api/regions/sido`, () => HttpResponse.json([])),
+    );
+
+    const response = await GET(
+      bffRequest('/bff/api/regions/sido', { cookies: withAccess }),
+      ctx('regions', 'sido'),
+    );
+
+    expect(response.headers.get('cache-control')).toBe('no-store');
   });
 
   it('백엔드에 닿지 못하면 502다', async () => {

@@ -52,7 +52,19 @@
     "notice": "건강보험이 적용되는 진료비(진찰료 등)는 포함되지 않은 비급여 가격이에요.",
     "askMore": "추가 질문하기",
     "restart": "다시 찾기",
-    "loadError": "찾은 항목을 불러오지 못했어요."
+    "loadError": "찾은 항목을 불러오지 못했어요.",
+    "outsideArea": "지역 선택은 서울·경기만 돼서, {area} 대신 전국 기준으로 보여 드려요.",
+    "areaAverage": "{region} 평균 {amount, number}원 · 병원 {count, number}곳",
+    "near": {
+      "title": "{place} 근처 병원",
+      "count": "{km, number}km 안 {total, number}곳 중 가까운 {shown, number}곳",
+      "empty": "{place} 근처 {km, number}km 안에는 이 항목 가격을 공개한 병원이 없어요.",
+      "error": "주변 병원을 불러오지 못했어요.",
+      "distance": "직선 {distance}",
+      "price": "{item} {amount, number}원부터",
+      "call": "전화",
+      "map": "지도에서 더 넓게 보기"
+    }
   },
   "noMatch": {
     "category": "카테고리로 찾기",
@@ -171,5 +183,23 @@
     "search": "항목 이름으로 검색",
     "placeholderAnonymous": "로그인하면 이어서 물어볼 수 있어요",
     "placeholderMember": "내일 다시 쓸 수 있어요"
+  },
+  "notice": {
+    "title": "AI 찾기 전에 확인해 주세요",
+    "voiceTitle": "음성 입력 전에 확인해 주세요",
+    "description": "처음 한 번만 보여 드려요.",
+    "sent": "입력한 내용은 답변을 만들기 위해 외부 AI 서비스로 보내져요.",
+    "providersLabel": "보내는 곳",
+    "provider": "{company} ({countries})",
+    "notStored": "서버에 대화를 저장하지 않아요. 대화는 이 브라우저 탭에만 남고, 탭을 닫으면 지워져요.",
+    "noPersonal": "이름, 연락처, 주민등록번호처럼 나를 알아볼 수 있는 정보는 적지 마세요.",
+    "training": "{use, select, yes {AI 서비스 제공사가 입력 내용을 모델 학습에 쓸 수 있어요.} other {AI 서비스 제공사는 입력 내용을 모델 학습에 쓰지 않아요.}}",
+    "trainingPending": "AI 서비스 제공사의 학습 이용 여부는 확인하고 있어요. 정해지면 개인정보 처리방침에 알려 드려요.",
+    "voiceSpeech": "말한 내용은 브라우저의 음성 인식으로 글자로 바꿔요. 이때 음성이 브라우저 제공사(예: Google) 서버에서 처리될 수 있어요.",
+    "voiceRecorder": "이 브라우저는 음성 인식을 지원하지 않아, 녹음한 음성을 우리 서버를 거쳐 외부 AI 서비스로 보내 글자로 바꿔요. 음성은 저장하지 않아요.",
+    "policyLink": "개인정보 처리방침에서 자세히 보기",
+    "newTab": "(새 탭에서 열림)",
+    "confirm": "확인했어요",
+    "confirmVoice": "확인하고 말하기"
   }
 }

@@ -151,7 +151,9 @@
   /* 섹션 사이 세로 간격. lg 이상은 아래 @media에서 바꾼다. */
   --spacing-section: 2.5rem;
 
+  /* 움직임: 상태 전환은 ease-standard. 처음 나타나는 것(스크롤 등장·범위 막대·숫자 롤업)은 ease-enter. */
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (width >= 64rem) {
@@ -288,6 +290,17 @@
   padding-right: env(safe-area-inset-right, 0px);
 }
 
+/* 가격 글자는 자릿수가 맞도록 항상 tabular-nums. 같은 이름의 테마 유틸리티에 속성을 더한다. */
+@utility text-price-md {
+  font-variant-numeric: tabular-nums;
+}
+@utility text-price-lg {
+  font-variant-numeric: tabular-nums;
+}
+@utility text-price-xl {
+  font-variant-numeric: tabular-nums;
+}
+
 /* 파란 면처럼 기본 포커스 링이 보이지 않는 영역에 붙인다. */
 @utility focus-inverse {
   & :focus-visible,
@@ -333,6 +346,21 @@
     )
     [data-bottom-tab-bar] {
     display: none;
+  }
+
+  /* 탭바가 숨는 동안에는 그 높이만큼의 하단 스크롤 여백도 없앤다(입력 포커스 때 화면이 밀려 올라가지 않게). */
+  :root:has(
+    :is(
+      textarea,
+      input:not(
+        [type='checkbox'],
+        [type='radio'],
+        [type='button'],
+        [type='submit']
+      )
+    ):focus
+  ) {
+    scroll-padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
   }
 }
 

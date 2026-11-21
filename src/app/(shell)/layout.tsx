@@ -4,6 +4,7 @@ import { SkipLink } from '@/components/layout/skip-link';
 import { TopNav } from '@/components/layout/top-nav';
 import { AccountAction } from '@/features/auth/components/account-action';
 import { AuthDialogs } from '@/features/auth/components/auth-dialogs';
+import { ConsentGate } from '@/features/auth/components/consent-gate';
 
 import { useNavItems } from './_components/use-nav-items';
 
@@ -16,6 +17,7 @@ export default function ShellLayout({ children }: { children: ReactNode }) {
       <TopNav items={navItems} actions={<AccountAction />} />
       {children}
       <AuthDialogs />
+      <ConsentGate />
     </>
   );
 }

@@ -30,4 +30,8 @@ describe('cn', () => {
   it('페이지 너비 토큰을 최대 너비로 인식한다', () => {
     expect(cn('max-w-xl', 'max-w-page')).toBe('max-w-page');
   });
+
+  it('움직임 곡선 토큰은 뒤의 것만 남긴다', () => {
+    expect(cn('ease-standard', 'ease-enter')).toBe('ease-enter');
+  });
 });
