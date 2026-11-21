@@ -19,6 +19,7 @@ import { LoadMore } from './load-more';
 import { ResultHeader } from './result-header';
 import { ResultsError } from './results-error';
 import { ResultsLayout } from './results-layout';
+import { useFillPriced } from './use-fill-priced';
 
 /** S-02 A 항목 결과. 결과 없음·조회 실패에서는 오른쪽 열 대신 안내 패널의 버튼으로 이어 준다. */
 export function ItemSearchView({
@@ -37,7 +38,15 @@ export function ItemSearchView({
     searchQueries.items({ keyword, sidoCodes: sidoCodesOf(region) }),
   );
   const total = query.data ? totalCount(query.data.pages) : undefined;
-  const items = query.data?.pages.flatMap((page) => page.content) ?? [];
+  const pages = query.data?.pages.map((page) => page.content) ?? [];
+  const items = pages.flat();
+  const { isFilling } = useFillPriced({
+    pages,
+    hasNextPage: query.hasNextPage,
+    isFetchingNextPage: query.isFetchingNextPage,
+    isError: query.isError,
+    fetchNextPage: query.fetchNextPage,
+  });
 
   const header = (
     <ResultHeader
@@ -100,7 +109,7 @@ export function ItemSearchView({
     <>
       {header}
       <ResultsLayout aside={aside}>
-        <ItemGroupList items={items} region={region} />
+        <ItemGroupList pages={pages} isFilling={isFilling} region={region} />
         <LoadMore
           hasNextPage={query.hasNextPage}
           isFetchingNextPage={query.isFetchingNextPage}

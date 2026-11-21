@@ -4,6 +4,7 @@ import {
   formatItemName,
   groupHeadingParts,
   groupItems,
+  groupItemsByPages,
   partitionByPrice,
 } from './item-groups';
 
@@ -126,5 +127,42 @@ describe('partitionByPrice', () => {
 
     expect(priced.map((i) => i.code)).toEqual(['B', 'C']);
     expect(unpriced.map((i) => i.code)).toEqual(['A']);
+  });
+});
+
+describe('groupItemsByPages', () => {
+  const item = (code: string, sdivCode: string) => ({
+    code,
+    name: code,
+    mdivCode: 'M',
+    mdivName: '분야',
+    sdivCode,
+    sdivName: sdivCode,
+  });
+
+  it('새 페이지의 행은 이미 보여 준 묶음 사이로 끼어들지 않고 뒤에 붙는다', () => {
+    const groups = groupItemsByPages([
+      [item('a1', 'A'), item('b1', 'B')],
+      [item('a2', 'A'), item('c1', 'C')],
+    ]);
+    expect(groups.map((group) => group.items.map((i) => i.code))).toEqual([
+      ['a1'],
+      ['b1'],
+      ['a2'],
+      ['c1'],
+    ]);
+    expect(new Set(groups.map((group) => group.key)).size).toBe(4);
+  });
+
+  it('새 페이지의 첫 묶음이 바로 앞 묶음과 같으면 이어 붙인다', () => {
+    const groups = groupItemsByPages([
+      [item('a1', 'A'), item('b1', 'B')],
+      [item('b2', 'B'), item('c1', 'C')],
+    ]);
+    expect(groups.map((group) => group.items.map((i) => i.code))).toEqual([
+      ['a1'],
+      ['b1', 'b2'],
+      ['c1'],
+    ]);
   });
 });

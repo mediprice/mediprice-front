@@ -1,6 +1,9 @@
+'use client';
+
 import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 import { useCategoryLabel } from '@/features/npay/use-category-label';
 import {
@@ -16,20 +19,21 @@ import { KeepPhrase } from './keep-phrase';
 export function UnpricedItems({
   items,
   region,
-  isOpen,
+  defaultOpen,
 }: {
   items: readonly ItemResult[];
   region: ServiceRegion;
-  /** 가격 있는 항목이 하나도 없으면 펼쳐서 빈 화면처럼 보이지 않게 한다. */
-  isOpen: boolean;
+  /** 처음에 가격 있는 항목이 하나도 없으면 펼쳐서 빈 화면처럼 보이지 않게 한다. 그 뒤로는 사용자가 연 대로 둔다. */
+  defaultOpen: boolean;
 }) {
+  const [initialOpen] = useState(defaultOpen);
   const t = useTranslations('search.item');
   const tRegion = useTranslations('common.region');
   const label = useCategoryLabel();
 
   return (
     <details
-      open={isOpen}
+      open={initialOpen}
       className="group rounded-xl bg-bg lg:border lg:border-border"
     >
       <summary className="flex min-h-13 cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 text-label text-text-secondary lg:px-6 [&::-webkit-details-marker]:hidden">
