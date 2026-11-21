@@ -39,6 +39,7 @@ export function useNaverMap(
     if (!clientId || !container) return;
     let isActive = true;
     let created: NaverMap | null = null;
+    let logoObserver: MutationObserver | null = null;
     const unsubscribe = onNaverAuthFailure(() => setHasFailed(true));
     loadNaverMaps(clientId).then(
       (api) => {
@@ -60,6 +61,7 @@ export function useNaverMap(
           mapDataControlOptions: { position: api.Position.BOTTOM_LEFT },
         });
         created.fitBounds(toNaverBounds(api, initial));
+        logoObserver = keepNaverLinksOutOfTabOrder(container);
         setHandle({ api, map: created });
       },
       () => {
@@ -69,6 +71,7 @@ export function useNaverMap(
     return () => {
       isActive = false;
       unsubscribe();
+      logoObserver?.disconnect();
       created?.destroy();
       setHandle(null);
     };
@@ -77,4 +80,22 @@ export function useNaverMap(
   const status: MapStatus =
     !clientId || hasFailed ? 'unavailable' : handle ? 'ready' : 'loading';
   return { handle: status === 'ready' ? handle : null, status };
+}
+
+/**
+ * 네이버 로고·지도 데이터 링크(외부 사이트)는 보이게 두되 Tab 순서에서는 뺀다. 키보드 사용자가 본문 대신
+ * 10px짜리 이름 없는 링크부터 지나지 않게 한다. SDK가 나중에 그리므로 바뀔 때마다 다시 적용한다.
+ */
+function keepNaverLinksOutOfTabOrder(container: HTMLElement) {
+  const apply = () => {
+    for (const link of container.querySelectorAll<HTMLAnchorElement>(
+      'a[href*="naver"]',
+    )) {
+      if (link.tabIndex !== -1) link.tabIndex = -1;
+    }
+  };
+  apply();
+  const observer = new MutationObserver(apply);
+  observer.observe(container, { childList: true, subtree: true });
+  return observer;
 }

@@ -25,6 +25,7 @@ import {
 } from '@/features/regions/service-region';
 import { errorMessageKey } from '@/lib/api/error-message';
 import { ApiError } from '@/lib/api/errors';
+import { cn } from '@/lib/utils';
 
 import { DetailSkeleton } from './detail-skeleton';
 import { HospitalHeader } from './hospital-header';
@@ -240,11 +241,23 @@ export function HospitalDetail({
 
   /**
    * 지도와 함께 보는 상세. 데스크톱은 왼쪽 패널에 병원 정보, 오른쪽은 화면 끝까지 지도이고 지도는 스크롤해도 머문다.
-   * 모바일은 위에 지도, 아래에 같은 정보가 이어진다. 패널은 창 스크롤을 그대로 써서 구역 탭(SectionNav)이 그대로 동작한다.
+   * 모바일은 위에 지도(항목을 골랐으면 가격이 첫 화면에 들도록 낮게), 아래에 같은 정보가 이어진다. 키보드는 본문을 먼저 지나도록 DOM은 본문이 앞이다.
+   * 패널은 창 스크롤을 그대로 써서 구역 탭(SectionNav)이 그대로 동작한다.
    */
   return (
-    <div className="min-h-dvh lg:grid lg:grid-cols-[minmax(0,32rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,36rem)_minmax(0,1fr)]">
-      <div className="h-[36svh] min-h-60 border-b border-hairline lg:sticky lg:top-top-nav lg:order-2 lg:h-[calc(100dvh-var(--spacing-top-nav))] lg:border-b-0 lg:border-l">
+    <div className="flex min-h-dvh flex-col lg:grid lg:grid-cols-[minmax(0,32rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,36rem)_minmax(0,1fr)]">
+      <div className="min-w-0">
+        <HospitalHeader hospital={hospital} itemCrumb={itemCrumb} />
+        <div className="flex min-w-0 flex-col gap-8 pt-6 px-page pb-section lg:gap-10 lg:pt-8">
+          {sections}
+        </div>
+      </div>
+      <div
+        className={cn(
+          'border-b border-hairline max-lg:order-first lg:sticky lg:top-top-nav lg:h-[calc(100dvh-var(--spacing-top-nav))] lg:border-b-0 lg:border-l',
+          item ? 'h-[28svh] min-h-48' : 'h-[36svh] min-h-60',
+        )}
+      >
         <HospitalAreaMap
           ykiho={ykiho}
           name={hospital.name}
@@ -253,12 +266,6 @@ export function HospitalDetail({
           band={comparableBand(summary.data?.avgPrice)}
           directionsQuery={hospital.address?.trim() || hospital.name}
         />
-      </div>
-      <div className="min-w-0 lg:order-1">
-        <HospitalHeader hospital={hospital} itemCrumb={itemCrumb} />
-        <div className="flex min-w-0 flex-col gap-8 pt-6 px-page pb-section lg:gap-10 lg:pt-8">
-          {sections}
-        </div>
       </div>
     </div>
   );
