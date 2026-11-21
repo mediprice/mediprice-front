@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import { showToast } from '@/features/feedback/toast-store';
 import {
   countHistoryByFilter,
   filterHistory,
@@ -22,8 +23,6 @@ import { errorMessageKey } from '@/lib/api/error-message';
 import { HistoryEntry } from './history-entry';
 import { HistoryListSkeleton } from './history-list-skeleton';
 
-type Notice = { id: number; text: string };
-
 export function HistoryList() {
   const t = useTranslations('library.history');
   const tCommon = useTranslations('common.actions');
@@ -32,7 +31,6 @@ export function HistoryList() {
   const histories = useQuery(historyQueries.list());
   const [filter, setFilter] = useState<HistoryFilter>('all');
   const [isConfirming, setIsConfirming] = useState(false);
-  const [notice, setNotice] = useState<Notice | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const removeOptions = historyMutations.remove();
   /** 연달아 지우면 mutate별 콜백은 마지막 것만 불리므로 옵션 단계에서 실패를 받는다. 되돌리기는 그대로 둔다. */
@@ -77,14 +75,10 @@ export function HistoryList() {
     (value) => value === 'all' || counts[value] > 0,
   );
 
-  function announce(text: string) {
-    setNotice((previous) => ({ id: (previous?.id ?? 0) + 1, text }));
-  }
-
   function handleRemove(id: number) {
     setFailure(null);
     remove.mutate(id);
-    announce(t('removed'));
+    showToast(t('removed'));
     headingRef.current?.focus();
   }
 
@@ -93,7 +87,7 @@ export function HistoryList() {
       onSuccess: () => {
         setIsConfirming(false);
         setFailure(null);
-        announce(t('cleared'));
+        showToast(t('cleared'));
       },
     });
   }
@@ -189,9 +183,6 @@ export function HistoryList() {
           headingRef.current?.focus();
         }}
       />
-      <div aria-live="polite" aria-atomic="true" className="sr-only">
-        {notice && <p key={notice.id}>{notice.text}</p>}
-      </div>
     </section>
   );
 }

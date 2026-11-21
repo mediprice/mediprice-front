@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import { showToast } from '@/features/feedback/toast-store';
 
 import { needsRequiredConsent } from '../required-consent';
 import { signOut } from '../session';
@@ -40,6 +41,7 @@ export function ConsentStep({ returnTo }: { returnTo: string }) {
     isLeaving.current = true;
     setIsSigningOut(true);
     router.replace('/');
+    showToast(tRequired('declinedToast'));
     await signOut();
   }
 

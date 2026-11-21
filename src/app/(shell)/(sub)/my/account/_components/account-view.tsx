@@ -15,6 +15,7 @@ import { LoginRequired } from '@/features/auth/components/login-required';
 import { MyPageHeader } from '@/features/auth/components/my-page-header';
 import { MySideNav } from '@/features/auth/components/my-side-nav';
 import { signOut } from '@/features/auth/session';
+import { showToast } from '@/features/feedback/toast-store';
 
 import { AccountInfoCard } from './account-info-card';
 import { MyDataSection } from './my-data-section';
@@ -27,6 +28,7 @@ export function AccountView() {
   const logout = useMutation({
     mutationFn: () => {
       router.replace('/');
+      showToast(t('loggedOut'));
       return signOut();
     },
   });

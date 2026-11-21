@@ -10,6 +10,7 @@ import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { CenteredDialogContent } from '@/features/auth/components/centered-dialog-content';
 import { withdrawAccount } from '@/features/auth/queries';
 import { signOut } from '@/features/auth/session';
+import { showToast } from '@/features/feedback/toast-store';
 import { errorMessageKey } from '@/lib/api/error-message';
 
 /** 후기는 지우지 않고 작성자 정보만 떼어 남긴다(백엔드 탈퇴 동작). */
@@ -31,6 +32,7 @@ export function WithdrawDialog({
     mutationFn: async () => {
       await withdrawAccount();
       router.replace('/');
+      showToast(t('done'));
       await signOut();
     },
   });
