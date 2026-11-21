@@ -15,8 +15,8 @@ import { formatItemName } from '@/features/search/item-groups';
 import type { ItemResult } from '@/features/search/queries';
 import { cn } from '@/lib/utils';
 
-/** 가격 영역 높이(평균 28px + 범위 19px + 간격). 상태가 바뀌어도 행 높이가 같게 둔다. */
-const PRICE_SLOT = 'min-h-12.25';
+/** 가격 영역 높이(평균 28px + 최저~최고 19px + 병원 수 19px + 간격). 상태가 바뀌어도 행 높이가 같게 둔다. */
+const PRICE_SLOT = 'min-h-17.5';
 
 /** 가격이 있는 항목 한 줄. 요약은 목록 조회 때 캐시에 채워져 있어 바로 보인다. */
 export function ItemRow({
@@ -64,12 +64,13 @@ export function ItemRow({
   );
 }
 
-/** PriceOverview와 같은 줄 높이(28px·19px)를 차지한다. */
+/** PriceOverview와 같은 줄 높이(28px·19px·19px)를 차지한다. */
 export function PriceSkeleton() {
   return (
-    <div className="space-y-0.5">
+    <div className={cn('space-y-0.5', PRICE_SLOT)}>
       <Skeleton className="h-7 w-32" />
-      <Skeleton className="h-4.75 w-48 max-w-full" />
+      <Skeleton className="h-4.75 w-60 max-w-full" />
+      <Skeleton className="h-4.75 w-20" />
     </div>
   );
 }

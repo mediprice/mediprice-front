@@ -14,6 +14,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { PriceRange } from '@/components/ui/price-range';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { VariantSelection } from '@/features/hospitals/detail-links';
 import {
   groupPriceRows,
   lastSegment,
@@ -42,7 +43,11 @@ export function PriceList({
   selectedItem: string | null;
   /** 선택한 항목의 행. 아직 불러오지 않은 페이지에 있어도 그 분류의 맨 위에 보인다. */
   selectedRows: readonly PriceRow[] | undefined;
-  onSelect: (code: string, variant: string, variantCount: number) => void;
+  onSelect: (
+    code: string,
+    variant: VariantSelection,
+    variantCount: number,
+  ) => void;
 }) {
   const t = useTranslations('hospitals.detail.prices');
   const tActions = useTranslations('common.actions');
@@ -244,7 +249,7 @@ function PriceRowButton({
 }: {
   row: PriceRow;
   isSelected: boolean;
-  onSelect: (code: string, variant: string) => void;
+  onSelect: (code: string, variant: VariantSelection) => void;
 }) {
   const t = useTranslations('hospitals.detail.prices');
   const format = useFormatter();
@@ -255,7 +260,7 @@ function PriceRowButton({
     <button
       type="button"
       aria-current={isSelected || undefined}
-      onClick={() => onSelect(row.npayCode, name)}
+      onClick={() => onSelect(row.npayCode, { name, price: row.price })}
       className={cn(
         'my-1 flex w-full flex-col gap-0.5 rounded-lg px-3 py-3 text-left transition-colors hover:bg-surface-strong',
       )}

@@ -4,7 +4,12 @@ import { Check, ChevronDown } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { DropdownMenu } from 'radix-ui';
 
-import { type PriceFilters, SORT_LABEL_KEY, SORTS } from './price-filters';
+import {
+  type PriceFilters,
+  SORT_LABEL_KEY,
+  SORTS,
+} from '@/features/npay/price-filters';
+
 import { useApplyFilters } from './use-apply-filters';
 
 /** 데스크톱 정렬 드롭다운. */

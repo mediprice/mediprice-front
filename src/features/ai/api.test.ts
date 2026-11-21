@@ -21,6 +21,7 @@ const reply = {
   ],
   items: [],
   emergencyBanner: false,
+  area: null,
   remainingTurns: 5,
 };
 

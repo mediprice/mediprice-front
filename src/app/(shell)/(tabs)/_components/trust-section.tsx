@@ -1,12 +1,14 @@
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 
 import { PageContainer } from '@/components/layout/page-container';
 import { SectionHeader } from '@/components/ui/section-header';
+import type { SiteStats } from '@/server/api/home-data';
 
-/** Figma "07 신뢰 안내". 수치(항목·병원 수)는 백엔드에 통계 API가 생기면 추가한다. */
-export function TrustSection() {
+/** Figma "07 신뢰 안내"와 지금 볼 수 있는 병원·항목·가격 수, 데이터 기준일. stats가 없으면(통계 API 장애·배포 전) 숫자 없이 그린다. */
+export function TrustSection({ stats }: { stats: SiteStats | null }) {
   const t = useTranslations('home.trust');
+  const format = useFormatter();
   return (
     <section aria-labelledby="home-trust" className="bg-surface">
       <PageContainer className="space-y-4 py-section lg:space-y-6">
@@ -57,6 +59,41 @@ export function TrustSection() {
             </span>
           </li>
         </ul>
+        {stats && stats.hospitalCount > 0 && (
+          <div className="@container space-y-3 rounded-xl bg-bg p-4 shadow-card lg:p-6">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+              <h3 className="text-subheading">{t('stats.label')}</h3>
+              {stats.dataDate && (
+                <p className="text-caption text-text-tertiary tabular-nums">
+                  {t('stats.dataDate', {
+                    date: format.dateTime(new Date(stats.dataDate), 'date'),
+                  })}
+                </p>
+              )}
+            </div>
+            <dl className="grid grid-cols-1 gap-2 @min-[24rem]:grid-cols-3">
+              {(
+                [
+                  ['hospitals', stats.hospitalCount],
+                  ['items', stats.npayItemCount],
+                  ['prices', stats.priceCount],
+                ] as const
+              ).map(([key, count]) => (
+                <div
+                  key={key}
+                  className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 rounded-lg bg-surface px-4 py-3 @min-[24rem]:flex-col-reverse @min-[24rem]:flex-nowrap @min-[24rem]:items-start @min-[24rem]:justify-end"
+                >
+                  <dt className="text-body-sm text-text-secondary">
+                    {t(`stats.${key}`)}
+                  </dt>
+                  <dd className="text-price-md break-keep tabular-nums">
+                    {t(`stats.${key}Value`, { count })}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
       </PageContainer>
     </section>
   );

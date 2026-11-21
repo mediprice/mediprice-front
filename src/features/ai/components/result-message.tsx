@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { npayQueries } from '@/features/npay/queries';
 import { ApiError } from '@/lib/api/errors';
 
+import { areaScope } from '../area-filters';
 import type { AssistantMessage } from '../conversation';
 import { AssistantBubble } from './assistant-bubble';
 import { NoMatchLinks } from './no-match-links';
@@ -68,6 +69,7 @@ export function ResultMessage({
       <ResultList
         entries={entries}
         pendingCount={pendingCount}
+        scope={areaScope(message.area)}
         actions={isActive ? { onAskMore, onRestart } : undefined}
       />
     </div>

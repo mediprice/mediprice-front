@@ -7,6 +7,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { type CSSProperties, type ReactNode, type Ref, useId } from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { CompareNumber } from '@/features/comparison/components/compare-number';
 import type {
   ComparisonHospital,
   ComparisonItem,
@@ -27,6 +28,7 @@ export function CompareTable<T extends string>({
   addHref,
   item,
   itemRow,
+  itemLowest,
   itemName,
   dates,
   commonItems,
@@ -41,6 +43,8 @@ export function CompareTable<T extends string>({
   addHref: Route<T>;
   item: string | null;
   itemRow: ComparisonItem | null;
+  /** 선택 항목 줄의 "최저" 병원. 머리 결론과 같은 기준(같은 세부 항목 또는 가장 낮은 공개 가격)이다. */
+  itemLowest?: ReadonlySet<string>;
   itemName: string | null;
   /** 병원 순서대로의 적용일. undefined는 불러오는 중이다. */
   dates: readonly (string | null | undefined)[];
@@ -95,13 +99,18 @@ export function CompareTable<T extends string>({
           <tbody>
             <tr className="border-b border-hairline">
               <td className={LABEL_CELL}>{t('hospital')}</td>
-              {hospitals.map((hospital) => (
+              {hospitals.map((hospital, index) => (
                 <th
                   key={hospital.ykiho}
                   scope="col"
                   className="p-3 align-top lg:px-6 lg:py-5"
                 >
-                  <div className="flex items-start gap-1">
+                  <div className="flex items-start gap-2">
+                    <CompareNumber
+                      value={index + 1}
+                      size="sm"
+                      className="lg:h-7 lg:min-w-7"
+                    />
                     <span className="min-w-0 flex-1 pt-0.5 text-label-bold text-text-primary lg:text-heading">
                       {hospital.name}
                     </span>
@@ -162,6 +171,7 @@ export function CompareTable<T extends string>({
                 <PriceRow
                   hospitals={hospitals}
                   row={itemRow}
+                  lowest={itemLowest}
                   label={t('price')}
                   sublabel={itemName}
                   isEmphasized

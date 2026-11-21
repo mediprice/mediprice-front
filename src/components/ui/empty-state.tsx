@@ -8,10 +8,13 @@ export function EmptyState({
   title,
   description,
   action,
+  titleAs: Title = 'p',
   className,
 }: {
   icon?: ReactNode;
   title: string;
+  /** 화면 전체가 빈 상태(404·오류 페이지)면 'h1'로 넘겨 제목 구조를 지킨다. */
+  titleAs?: 'p' | 'h1' | 'h2';
   description?: string;
   action?: ReactNode;
   className?: string;
@@ -31,7 +34,7 @@ export function EmptyState({
           {icon}
         </span>
       )}
-      <p className="text-subheading">{title}</p>
+      <Title className="text-subheading">{title}</Title>
       {description && (
         <p className="max-w-sm text-body-sm text-text-secondary">
           {description}

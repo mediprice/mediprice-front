@@ -9,8 +9,12 @@ import {
   ResponsiveDialogContent,
   ResponsiveDialogTrigger,
 } from '@/components/ui/responsive-dialog';
+import {
+  type PriceFilters,
+  SORT_LABEL_KEY,
+  SORTS,
+} from '@/features/npay/price-filters';
 
-import { type PriceFilters, SORT_LABEL_KEY, SORTS } from './price-filters';
 import { useApplyFilters } from './use-apply-filters';
 
 /** 모바일 정렬 시트. 고르면 바로 적용하고 닫는다. */

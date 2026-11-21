@@ -26,34 +26,43 @@ export function ChatHeader({
         ? t('usage.remainingToday', { count: dailyRemaining })
         : t('usage.chip', { count: dailyLimit });
   return (
-    <div className="flex min-h-15 items-center gap-2 py-2 px-page lg:px-8 lg:pt-7 lg:pb-0">
-      <h1 id={titleId} className="min-w-0 flex-1 text-subheading lg:text-title">
-        {t('header.title')}
-      </h1>
-      {usage && (
-        <p
-          aria-label={
-            dailyRemaining !== null || dailyLimit === null
-              ? usage
-              : t('usage.chipLabel', { count: dailyLimit })
-          }
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary-tint py-1.5 pr-3 pl-2 text-caption-strong text-primary-text lg:hidden"
+    <div className="@container py-2 px-page lg:px-8 lg:pt-7 lg:pb-0">
+      <div className="flex min-h-11 flex-wrap items-center gap-x-2 gap-y-1">
+        <h1
+          id={titleId}
+          className="min-w-0 grow basis-32 text-subheading lg:text-title"
         >
-          <Sparkles aria-hidden="true" className="size-4" strokeWidth={1.75} />
-          {usage}
-        </p>
-      )}
-      {onRestart && (
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={t('header.restart')}
-          onClick={onRestart}
-          className="-mr-2 shrink-0 lg:mr-0"
-        >
-          <RotateCcw aria-hidden="true" />
-        </Button>
-      )}
+          {t('header.title')}
+        </h1>
+        {usage && (
+          <p
+            aria-label={
+              dailyRemaining !== null || dailyLimit === null
+                ? usage
+                : t('usage.chipLabel', { count: dailyLimit })
+            }
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary-tint py-1.5 pr-3 pl-2 text-caption-strong text-primary-text lg:hidden @max-xs:order-last"
+          >
+            <Sparkles
+              aria-hidden="true"
+              className="size-4"
+              strokeWidth={1.75}
+            />
+            {usage}
+          </p>
+        )}
+        {onRestart && (
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={t('header.restart')}
+            onClick={onRestart}
+            className="-mr-2 shrink-0 lg:mr-0"
+          >
+            <RotateCcw aria-hidden="true" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

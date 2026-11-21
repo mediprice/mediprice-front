@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-import type { NpayPriceCondition } from '@/features/npay/queries';
 import {
   DEFAULT_REGION,
   parseServiceRegion,
@@ -8,6 +7,9 @@ import {
   type ServiceRegion,
   sidoCodesOf,
 } from '@/features/regions/service-region';
+
+import type { PriceBand } from './average-verdict';
+import type { NpayPriceCondition } from './queries';
 
 export const SORTS = ['price_asc', 'price_desc'] as const;
 export type PriceSort = (typeof SORTS)[number];
@@ -22,6 +24,8 @@ export type PriceFilters = {
   sggu?: string;
   institution?: string;
   sort: PriceSort;
+  /** 'all'이면 평균과 견주기 어려운 가격(시간·횟수 구성이 다른 세부 항목)까지 모두 보여 준다. 기본은 견줄 수 있는 가격만이다. */
+  prices?: 'all';
 };
 
 const first = (value: unknown) => (Array.isArray(value) ? value[0] : value);
@@ -44,6 +48,7 @@ const searchSchema = z.object({
       .catch(undefined),
   ),
   sort: z.preprocess(first, z.enum(SORTS).catch('price_asc')),
+  prices: z.preprocess(first, z.literal('all').optional().catch(undefined)),
 });
 
 /** 시군구는 서울·경기 하나를 골랐을 때만 쓴다. 시군구 코드 앞 두 자리가 시도 코드와 같다. */
@@ -71,6 +76,7 @@ export function parsePriceFilters(
     sort: parsed.sort,
     ...(sggu && { sggu }),
     ...(parsed.institution && { institution: parsed.institution }),
+    ...(parsed.prices && { prices: parsed.prices }),
   };
 }
 
@@ -82,15 +88,20 @@ export function buildPriceFiltersQuery(filters: PriceFilters) {
   }
   if (filters.institution) search.set('institution', filters.institution);
   if (filters.sort !== 'price_asc') search.set('sort', filters.sort);
+  if (filters.prices) search.set('prices', filters.prices);
   return search.toString();
 }
 
-/** 백엔드는 시도 하나만 받으므로 서울·경기는 조건 두 개가 된다. 빈 배열은 전국이다. */
-export function toPriceConditions(filters: PriceFilters): NpayPriceCondition[] {
+/** 백엔드는 시도 하나만 받으므로 서울·경기는 조건 두 개가 된다. 빈 배열은 전국이다. band를 주면 그 가격 범위의 행만 받는다. */
+export function toPriceConditions(
+  filters: PriceFilters,
+  band?: PriceBand | null,
+): NpayPriceCondition[] {
   const extra = {
     ...(filters.sggu &&
       belongsTo(filters.sggu, filters.region) && { sgguCode: filters.sggu }),
     ...(filters.institution && { institutionCode: filters.institution }),
+    ...band,
   };
   const sidoCodes = sidoCodesOf(filters.region);
   if (sidoCodes.length === 0) {
@@ -108,7 +119,7 @@ export function countActiveFilters(filters: PriceFilters) {
   ].filter(Boolean).length;
 }
 
-/** 정렬은 남기고 조건만 비운다. */
+/** 정렬은 남기고 조건만 비운다. 모든 가격 보기도 기본(견줄 수 있는 가격만)으로 돌린다. */
 export function clearConditions(filters: PriceFilters): PriceFilters {
   return { region: DEFAULT_REGION, sort: filters.sort };
 }

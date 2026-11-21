@@ -3,15 +3,20 @@
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { RollingNumber } from '@/components/ui/rolling-number';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PriceSpread } from '@/features/npay/components/price-spread';
+import type { PriceFilters } from '@/features/npay/price-filters';
 import { errorMessageKey } from '@/lib/api/error-message';
 import { cn } from '@/lib/utils';
 
-import type { PriceFilters } from './price-filters';
 import { useFilterLabels } from './use-filter-labels';
 import { usePriceSummary } from './use-price-summary';
 
-/** 현재 조건의 평균을 크게, 최저·최고와 병원·가격 수를 작게 보여 준다(극단값을 머리로 쓰지 않는다). 모바일은 머리 띠, 데스크톱은 회색 목록 띠 위의 흰 카드다. */
+/**
+ * 현재 조건의 평균을 크게, 세부 항목별 최저~최고(글자)와 병원·가격 수를 작게 보여 준다(극단값을 머리로 쓰지 않는다, docs 14장).
+ * 모바일은 머리 띠, 데스크톱은 회색 목록 띠 위의 흰 카드다.
+ */
 export function PriceSummary({
   code,
   filters,
@@ -53,16 +58,16 @@ export function PriceSummary({
               {tActions('retry')}
             </Button>
           </div>
+        ) : data.avgPrice == null ? (
+          <p className="text-price-xl text-text-tertiary">{tPrice('none')}</p>
         ) : (
-          <p
-            className={cn(
-              'text-price-xl tabular-nums',
-              data.avgPrice == null && 'text-text-tertiary',
-            )}
-          >
-            {data.avgPrice == null
-              ? tPrice('none')
-              : tPrice('average', { amount: data.avgPrice })}
+          <p className="max-w-full text-price-xl">
+            {/** 아주 큰 글자의 좁은 화면에서만 숫자가 줄을 넘겨 가로 스크롤이 생기지 않게 한다. */}
+            <RollingNumber
+              value={data.avgPrice}
+              format={(value) => tPrice('average', { amount: value })}
+              className="max-w-full wrap-anywhere"
+            />
           </p>
         )}
       </div>
@@ -70,12 +75,8 @@ export function PriceSummary({
         <Skeleton className="h-11 w-56 max-w-full" />
       ) : (
         data && (
-          <div className="flex flex-col gap-0.5 text-body-sm tabular-nums md:items-end md:text-right">
-            {data.minPrice != null && data.maxPrice != null && (
-              <p className="text-text-secondary">
-                {tPrice('minMax', { min: data.minPrice, max: data.maxPrice })}
-              </p>
-            )}
+          <div className="flex min-w-0 flex-col gap-0.5 text-body-sm tabular-nums md:items-end md:text-right">
+            <PriceSpread min={data.minPrice} max={data.maxPrice} />
             <p className="text-text-tertiary">
               {t('counts', {
                 hospitals: data.hospitalCount,

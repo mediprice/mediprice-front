@@ -2,10 +2,13 @@ import { Map as MapIcon, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
+import {
+  countActiveFilters,
+  type PriceFilters,
+} from '@/features/npay/price-filters';
 import { regionQuery } from '@/features/regions/service-region';
 
 import { FilterSheet } from './filter-sheet';
-import { countActiveFilters, type PriceFilters } from './price-filters';
 import { SortSheet } from './sort-sheet';
 
 /** 모바일에서 스크롤해도 상단 바 아래에 붙어 있는 필터·지도·정렬 한 줄. 낮은 화면(큰 글자·가로)에서는 본문을 가리지 않게 붙이지 않는다. */

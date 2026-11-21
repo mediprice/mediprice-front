@@ -57,6 +57,12 @@ describe('toNearbyCondition', () => {
     );
     expect(a).toEqual(b);
   });
+
+  it('좌표를 소수 둘째 자리(약 1km)로 흐려 보낸다', () => {
+    expect(
+      toNearbyCondition({ lat: 37.566535, lng: 126.977969, radius: 1000 }),
+    ).toEqual({ lat: 37.57, lng: 126.98, radius: 1000 });
+  });
 });
 
 describe('mapQueries.nearby', () => {
@@ -85,13 +91,29 @@ describe('mapQueries.nearby', () => {
       minPrice: 45000,
     });
     expect(Object.fromEntries(url?.searchParams ?? [])).toEqual({
-      lat: '37.5665',
-      lng: '126.978',
+      lat: '37.57',
+      lng: '126.98',
       radius: '3000',
       npayCode: 'MX1220000',
       page: '0',
       size: '50',
     });
+  });
+
+  it('로그인 쿠키를 쓰지 말라는 익명 요청 헤더를 붙인다', async () => {
+    let headers: Headers | undefined;
+    server.use(
+      http.get(NEARBY, ({ request }) => {
+        headers = request.headers;
+        return HttpResponse.json(page([], 0, 0));
+      }),
+    );
+
+    await new QueryClient().fetchInfiniteQuery(
+      mapQueries.nearby({ lat: 37.5665, lng: 126.978, radius: 1000 }),
+    );
+
+    expect(headers?.get('x-mediprice-anonymous')).toBe('1');
   });
 
   it('항목이 없으면 npayCode를 보내지 않는다', async () => {

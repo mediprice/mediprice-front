@@ -15,8 +15,52 @@ describe('turnResponseSchema', () => {
       questions: [],
       items: [],
       emergencyBanner: false,
+      area: null,
       remainingTurns: null,
     });
+  });
+
+  it('장소는 시도·시군구 코드와 이름, 찾았으면 장소 이름과 좌표로 받는다', () => {
+    const area = {
+      sidoCode: '110000',
+      sgguCode: '110015',
+      label: '서울 은평구',
+      place: '응암역',
+      lat: 37.59869,
+      lng: 126.91484,
+    };
+    expect(turnResponseSchema.parse({ ...base, area }).area).toEqual(area);
+    expect(
+      turnResponseSchema.parse({
+        ...base,
+        area: { sidoCode: '310000', label: '경기' },
+      }).area,
+    ).toEqual({
+      sidoCode: '310000',
+      sgguCode: null,
+      label: '경기',
+      place: null,
+      lat: null,
+      lng: null,
+    });
+  });
+
+  it('한국 밖이거나 숫자가 아닌 좌표는 좌표만 버린다', () => {
+    expect(
+      turnResponseSchema.parse({
+        ...base,
+        area: { sidoCode: '110000', label: '서울', lat: 51.5, lng: 'x' },
+      }).area,
+    ).toMatchObject({ label: '서울', lat: null, lng: null });
+  });
+
+  it('장소 형식이 다르면 대화는 그대로 두고 장소만 버린다', () => {
+    const parsed = turnResponseSchema.parse({
+      ...base,
+      area: { sidoCode: '서울', label: '서울' },
+    });
+    expect(parsed.area).toBeNull();
+    expect(parsed.reply).toBe(base.reply);
   });
 
   it('후보는 3개까지만 받는다', () => {

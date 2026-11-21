@@ -1,5 +1,6 @@
 import type { TurnFailure } from './ai-errors';
 import type {
+  TurnArea,
   TurnItem,
   TurnKind,
   TurnQuestion,
@@ -18,6 +19,8 @@ export type AssistantMessage = {
   text: string;
   questions: TurnQuestion[];
   items: TurnItem[];
+  /** 사용자가 말한 장소. 결과 카드가 이 지역의 가격을 보여 준다. */
+  area: TurnArea | null;
 };
 type ChatMessage = UserMessage | AssistantMessage;
 
@@ -197,6 +200,7 @@ export function conversationReducer(
             text: response.reply,
             questions: response.questions,
             items: response.kind === 'result' ? response.items : [],
+            area: response.area,
           },
         ],
         serverState: response.state,

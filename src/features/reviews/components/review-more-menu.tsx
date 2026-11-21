@@ -1,7 +1,8 @@
 'use client';
 
-import { useQueryClient } from '@tanstack/react-query';
-import { Ellipsis, Flag, PenLine, Trash2 } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Ellipsis, Flag, PenLine, Scale, Trash2 } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { type ReactNode, useRef, useState } from 'react';
@@ -12,15 +13,16 @@ import {
   ResponsiveDialogContent,
 } from '@/components/ui/responsive-dialog';
 import { useLoginGuard } from '@/features/auth/use-session';
+import { claimNoticeState, claimQueries } from '@/features/claims/queries';
 
 import { type Review, reviewKeys } from '../queries';
-import { reviewWriteHref } from '../write-href';
+import { reviewClaimHref, reviewWriteHref } from '../write-href';
 import { DeleteReviewDialog } from './delete-review-dialog';
 import { ReportDialog } from './report-dialog';
 
-type Action = 'edit' | 'delete' | 'report';
+type Action = 'edit' | 'delete' | 'report' | 'claim';
 
-/** 후기의 수정·삭제(내 후기)와 신고(남의 후기). 모바일은 ⋯ 시트, 데스크톱은 카드 안의 작은 버튼이다. */
+/** 후기의 수정·삭제(내 후기)와 신고·권리침해 신고(남의 후기). 모바일은 ⋯ 시트, 데스크톱은 카드 안의 작은 버튼이다. 권리침해 신고는 로그인 없이 쓰는 별도 화면이고, 서버에 기능이 없으면 숨긴다. */
 export function ReviewMoreMenu({
   review,
   subject,
@@ -35,6 +37,7 @@ export function ReviewMoreMenu({
   onDeleted?: () => void;
 }) {
   const t = useTranslations('reviews.menu');
+  const tClaim = useTranslations('claims.entry');
   const tActions = useTranslations('common.actions');
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -45,7 +48,19 @@ export function ReviewMoreMenu({
   const moreRef = useRef<HTMLButtonElement>(null);
   const inlineRef = useRef<HTMLDivElement>(null);
   const isDeletedRef = useRef(false);
-  const actions: Action[] = review.mine ? ['edit', 'delete'] : ['report'];
+  const notice = useQuery({
+    ...claimQueries.notice(),
+    enabled: !review.mine,
+  });
+  const canClaim =
+    notice.data !== undefined &&
+    claimNoticeState(notice.data) !== 'unsupported';
+  const actions: Action[] = review.mine
+    ? ['edit', 'delete']
+    : canClaim
+      ? ['report', 'claim']
+      : ['report'];
+  const claimHref = reviewClaimHref(review.ykiho, review.id);
   const openReport = guard('review', () => setIsReporting(true));
 
   function run(action: Action) {
@@ -55,7 +70,7 @@ export function ReviewMoreMenu({
       router.push(reviewWriteHref(review.ykiho, { edit: review.id, from }));
     } else if (action === 'delete') {
       setIsDeleting(true);
-    } else {
+    } else if (action === 'report') {
       openReport();
     }
   }
@@ -91,6 +106,12 @@ export function ReviewMoreMenu({
       label: t('reportFor', { name: subject }),
       icon: <Flag aria-hidden="true" />,
     },
+    claim: {
+      short: tClaim('short'),
+      long: tClaim('long'),
+      label: tClaim('labelFor', { name: subject }),
+      icon: <Scale aria-hidden="true" />,
+    },
   };
 
   return (
@@ -107,41 +128,68 @@ export function ReviewMoreMenu({
         <Ellipsis aria-hidden="true" />
       </Button>
       <div ref={inlineRef} className="-my-2 hidden items-center gap-1 lg:flex">
-        {actions.map((action) => (
-          <Button
-            key={action}
-            variant={action === 'edit' ? 'tint' : 'ghost'}
-            size="sm"
-            aria-label={labels[action].label}
-            onClick={() => run(action)}
-            className={
-              action === 'edit'
-                ? undefined
-                : action === 'delete'
-                  ? 'text-danger hover:bg-danger-tint active:bg-danger-tint'
-                  : 'text-text-secondary hover:bg-surface-strong active:bg-surface-strong'
-            }
-          >
-            {labels[action].icon}
-            {labels[action].short}
-          </Button>
-        ))}
+        {actions.map((action) =>
+          action === 'claim' ? (
+            <Button
+              key={action}
+              asChild
+              variant="ghost"
+              size="sm"
+              className="text-text-secondary hover:bg-surface-strong active:bg-surface-strong"
+            >
+              <Link href={claimHref} aria-label={labels.claim.label}>
+                {labels.claim.icon}
+                {labels.claim.short}
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              key={action}
+              variant={action === 'edit' ? 'tint' : 'ghost'}
+              size="sm"
+              aria-label={labels[action].label}
+              onClick={() => run(action)}
+              className={
+                action === 'edit'
+                  ? undefined
+                  : action === 'delete'
+                    ? 'text-danger hover:bg-danger-tint active:bg-danger-tint'
+                    : 'text-text-secondary hover:bg-surface-strong active:bg-surface-strong'
+              }
+            >
+              {labels[action].icon}
+              {labels[action].short}
+            </Button>
+          ),
+        )}
       </div>
 
       <ResponsiveDialog open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <ResponsiveDialogContent title={t('title')}>
           <div className="flex flex-col gap-2">
-            {actions.map((action) => (
-              <Button
-                key={action}
-                variant={action === 'delete' ? 'dangerText' : 'neutral'}
-                size="lg"
-                onClick={() => run(action)}
-                className="w-full"
-              >
-                {labels[action].long}
-              </Button>
-            ))}
+            {actions.map((action) =>
+              action === 'claim' ? (
+                <Button
+                  key={action}
+                  asChild
+                  variant="neutral"
+                  size="lg"
+                  className="w-full"
+                >
+                  <Link href={claimHref}>{labels.claim.long}</Link>
+                </Button>
+              ) : (
+                <Button
+                  key={action}
+                  variant={action === 'delete' ? 'dangerText' : 'neutral'}
+                  size="lg"
+                  onClick={() => run(action)}
+                  className="w-full"
+                >
+                  {labels[action].long}
+                </Button>
+              ),
+            )}
             <Button
               variant="ghost"
               size="lg"

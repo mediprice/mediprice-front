@@ -17,6 +17,7 @@ export const LABEL_CELL =
 export function PriceRow({
   hospitals,
   row,
+  lowest: lowestOverride,
   label,
   sublabel,
   isEmphasized = false,
@@ -24,6 +25,8 @@ export function PriceRow({
 }: {
   hospitals: readonly ComparisonHospital[];
   row: ComparisonItem;
+  /** "최저"를 달 병원. 없으면 병원별 가장 낮은 가격으로 고른다. */
+  lowest?: ReadonlySet<string>;
   label: string;
   sublabel?: string | null;
   isEmphasized?: boolean;
@@ -31,11 +34,13 @@ export function PriceRow({
   trailing?: ReactNode;
 }) {
   const t = useTranslations('comparison.table');
-  const lowest = findLowest(
-    row.prices.filter((price) =>
-      hospitals.some((hospital) => hospital.ykiho === price.ykiho),
-    ),
-  );
+  const lowest =
+    lowestOverride ??
+    findLowest(
+      row.prices.filter((price) =>
+        hospitals.some((hospital) => hospital.ykiho === price.ykiho),
+      ),
+    );
 
   return (
     <tr

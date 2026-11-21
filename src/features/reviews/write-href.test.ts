@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseEditParam, parseFromParam, reviewWriteHref } from './write-href';
+import {
+  parseFromParam,
+  parseReviewId,
+  reviewClaimHref,
+  reviewWriteHref,
+} from './write-href';
 
 describe('reviewWriteHref', () => {
   it('새 후기는 쿼리 없이, 수정은 후기 번호와 돌아갈 화면을 붙인다', () => {
@@ -20,16 +25,16 @@ describe('reviewWriteHref', () => {
   });
 });
 
-describe('parseEditParam', () => {
+describe('parseReviewId', () => {
   it('양의 정수 문자열만 후기 번호로 본다', () => {
-    expect(parseEditParam('12')).toBe(12);
-    expect(parseEditParam('0')).toBeNull();
-    expect(parseEditParam('-3')).toBeNull();
-    expect(parseEditParam('1.5')).toBeNull();
-    expect(parseEditParam('abc')).toBeNull();
-    expect(parseEditParam(['1', '2'])).toBeNull();
-    expect(parseEditParam(undefined)).toBeNull();
-    expect(parseEditParam('99999999999999999')).toBeNull();
+    expect(parseReviewId('12')).toBe(12);
+    expect(parseReviewId('0')).toBeNull();
+    expect(parseReviewId('-3')).toBeNull();
+    expect(parseReviewId('1.5')).toBeNull();
+    expect(parseReviewId('abc')).toBeNull();
+    expect(parseReviewId(['1', '2'])).toBeNull();
+    expect(parseReviewId(undefined)).toBeNull();
+    expect(parseReviewId('99999999999999999')).toBeNull();
   });
 });
 
@@ -38,5 +43,13 @@ describe('parseFromParam', () => {
     expect(parseFromParam('my')).toBe('my');
     expect(parseFromParam('evil')).toBe('hospital');
     expect(parseFromParam(undefined)).toBe('hospital');
+  });
+});
+
+describe('reviewClaimHref', () => {
+  it('병원 아래 후기 번호의 권리침해 신고 화면을 가리킨다', () => {
+    expect(reviewClaimHref('a/b+c=', 11)).toBe(
+      '/hospitals/a%2Fb%2Bc%3D/review/11/claim',
+    );
   });
 });
