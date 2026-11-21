@@ -24,17 +24,23 @@
   },
   "categories": {
     "title": "진료 분야별로 찾아보세요",
-    "all": "전체 항목",
+    "all": "전체 분류",
     "physio": "물리치료·재활",
     "dental": "치과",
     "eye": "안과·시력교정",
     "vaccine": "예방접종",
-    "imaging": "MRI·초음파"
+    "imaging": "MRI·초음파",
+    "nearbyTitle": "내 주변 병원",
+    "nearbyDescription": "지도에서 가까운 병원을 찾아요"
+  },
+  "recent": {
+    "title": "최근 본 항목",
+    "clear": "지우기"
   },
   "popular": {
     "title": "자주 찾는 진료 항목",
     "description": "항목을 고르면 병원별 공개 가격을 비교할 수 있어요",
-    "viewAll": "전체 보기",
+    "viewAll": "전체 분류 보기",
     "rank": "{rank, number}위",
     "priceLabel": "{region} 공개 가격",
     "error": "가격을 불러오지 못했어요",

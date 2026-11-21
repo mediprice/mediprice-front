@@ -1,10 +1,11 @@
 /** globals.css 토큰 값. ImageResponse(satori)는 CSS 변수를 읽지 못해 hex로 옮겨 둔다. 토큰을 바꾸면 함께 바꾼다. */
 export const BRAND_COLORS = {
-  primary: '#1a5fd8',
+  primary: '#016cbf',
+  primaryTint: '#e6f2ff',
   onPrimary: '#ffffff',
   bg: '#ffffff',
-  textPrimary: '#16202b',
-  textSecondary: '#4a5563',
+  textPrimary: '#0f2d5b',
+  textSecondary: '#4a5b6c',
 } as const;
 
 /** lucide Tag 아이콘의 path. ImageResponse 안에서는 lucide 컴포넌트 대신 SVG를 직접 그린다(점은 satori가 r=0.5 원의 획을 링으로 그려 채운 원으로 바꿨다). */

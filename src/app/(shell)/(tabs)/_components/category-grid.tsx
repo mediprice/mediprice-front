@@ -3,6 +3,7 @@ import {
   ChevronRight,
   Eye,
   LayoutGrid,
+  MapPin,
   ScanLine,
   Smile,
   Syringe,
@@ -58,6 +59,28 @@ export function CategoryGrid() {
             </li>
           ))}
         </ul>
+        <Link
+          href="/map"
+          className="flex items-center gap-3.5 rounded-xl pressable bg-bg px-3.5 py-4 shadow-card lg:px-5"
+        >
+          <span
+            aria-hidden="true"
+            className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary-tint text-primary [&_svg]:size-6 [&_svg]:[stroke-width:1.75]"
+          >
+            <MapPin />
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span className="text-label-bold">{t('nearbyTitle')}</span>
+            <span className="text-body-sm text-text-secondary">
+              {t('nearbyDescription')}
+            </span>
+          </span>
+          <ChevronRight
+            aria-hidden="true"
+            className="size-5 shrink-0 text-text-tertiary"
+            strokeWidth={1.75}
+          />
+        </Link>
       </PageContainer>
     </section>
   );

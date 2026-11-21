@@ -8,6 +8,7 @@ import type { ReactNode } from 'react';
 
 import { env } from '@/env';
 
+import { BRAND_COLORS } from './_components/brand-tile';
 import { Providers } from './providers';
 
 /** og:title·og:description은 비워 두어 공유 미리보기가 화면마다의 title·description을 쓰게 한다. og:image는 opengraph-image.tsx가 채운다. */
@@ -24,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#ffffff',
+  themeColor: BRAND_COLORS.bg,
   colorScheme: 'light',
   viewportFit: 'cover',
   interactiveWidget: 'resizes-content',

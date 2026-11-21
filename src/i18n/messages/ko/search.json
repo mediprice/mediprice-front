@@ -2,12 +2,12 @@
   "metadata": {
     "title": "검색",
     "titleWithQuery": "''{query}'' 검색 결과",
-    "category": "카테고리"
+    "category": "분류"
   },
   "topBar": {
     "search": "검색",
     "results": "검색 결과",
-    "category": "카테고리"
+    "category": "분류"
   },
   "form": {
     "label": "진료비 검색",
@@ -55,14 +55,14 @@
   },
   "prompt": {
     "title": "무엇을 찾고 계세요?",
-    "itemDescription": "진료 항목 이름을 입력하거나 카테고리에서 찾아보세요.",
+    "itemDescription": "진료 항목 이름을 입력하거나 분류에서 찾아보세요.",
     "hospitalDescription": "찾는 병원 이름을 입력해 주세요."
   },
   "suggestions": {
     "title": "원하는 항목이 없나요?",
     "hospitalTitle": "원하는 병원이 없나요?",
     "category": {
-      "title": "카테고리에서 찾기",
+      "title": "분류에서 찾기",
       "description": "공식 분류를 하나씩 좁혀 보세요"
     },
     "allCategories": {

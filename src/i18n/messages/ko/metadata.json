@@ -1,10 +1,23 @@
 {
   "title": "MediPrice",
   "titleTemplate": "%s | MediPrice",
+  "homeTitle": "MediPrice · 병원마다 다른 비급여 진료비 비교",
   "description": "병원마다 다른 비급여 진료비를 한눈에 비교하세요.",
   "ogImage": {
     "alt": "MediPrice — 병원마다 다른 비급여 진료비를 한눈에 비교",
     "headline": "병원마다 다른 비급여 진료비, 한눈에 비교해요",
-    "caption": "건강보험심사평가원 공개 자료 기반"
+    "caption": "건강보험심사평가원 공개 자료 기반",
+    "footerWithDate": "건강보험심사평가원 공개 자료 · {date} 기준",
+    "won": "{amount, number}원",
+    "item": {
+      "alt": "MediPrice 진료 항목의 공개 가격 평균 요약",
+      "eyebrow": "비급여 진료비 공개 가격",
+      "average": "{region} 평균 · 병원 {count, plural, other {#곳}}"
+    },
+    "hospital": {
+      "alt": "MediPrice 병원의 비급여 진료비 공개 항목 요약",
+      "items": "공개한 비급여 항목",
+      "itemCount": "{count, plural, other {#개}}"
+    }
   }
 }

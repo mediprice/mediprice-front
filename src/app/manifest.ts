@@ -13,7 +13,8 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     start_url: '/',
     scope: '/',
     display: 'standalone',
-    theme_color: BRAND_COLORS.primary,
+    /** 상단 바가 흰색이라 viewport themeColor와 같은 값을 쓴다. */
+    theme_color: BRAND_COLORS.bg,
     background_color: BRAND_COLORS.bg,
     icons: [
       { src: '/icon/192', sizes: '192x192', type: 'image/png' },

@@ -1,12 +1,10 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
-
 import { ImageResponse } from 'next/og';
 import { createTranslator } from 'next-intl';
 
 import metadata from '@/i18n/messages/ko/metadata.json';
 
 import { BRAND_COLORS, BrandTile } from './_components/brand-tile';
+import { loadPretendard } from './_components/og-image';
 
 const t = createTranslator({
   locale: 'ko',
@@ -17,27 +15,6 @@ const t = createTranslator({
 export const alt = t('ogImage.alt');
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
-
-const FONT_DIR = join(
-  process.cwd(),
-  'node_modules/pretendard/dist/public/static',
-);
-
-/** 빌드 때 한 번 그린다. 글꼴을 못 읽으면 기본 글꼴로 그려 빌드가 멈추지 않게 한다. */
-async function loadPretendard() {
-  try {
-    const [bold, medium] = await Promise.all([
-      readFile(join(FONT_DIR, 'Pretendard-Bold.otf')),
-      readFile(join(FONT_DIR, 'Pretendard-Medium.otf')),
-    ]);
-    return [
-      { name: 'Pretendard', data: bold, weight: 700 as const },
-      { name: 'Pretendard', data: medium, weight: 500 as const },
-    ];
-  } catch {
-    return undefined;
-  }
-}
 
 export default async function OpengraphImage() {
   const fonts = await loadPretendard();
