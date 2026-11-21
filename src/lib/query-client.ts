@@ -6,11 +6,16 @@ import {
 
 import { ApiError } from './api/errors';
 
-/** 4xx는 다시 보내도 결과가 같고 401은 refresh가 따로 처리하므로 재시도하지 않는다. */
+/**
+ * 4xx는 다시 보내도 결과가 같고 401은 refresh가 따로 처리하므로 재시도하지 않는다.
+ * 5xx·네트워크 오류는 잠깐 뒤 한 번만 다시 보낸다. 여러 번 기다리면 오류 화면까지 7~10초 동안 뼈대만 보인다.
+ */
 export function shouldRetryQuery(failureCount: number, error: unknown) {
   if (error instanceof ApiError && error.status < 500) return false;
-  return failureCount < 3;
+  return failureCount < 1;
 }
+
+const RETRY_DELAY_MS = 800;
 
 function makeQueryClient() {
   return new QueryClient({
@@ -18,6 +23,7 @@ function makeQueryClient() {
       queries: {
         staleTime: 60 * 1000,
         retry: shouldRetryQuery,
+        retryDelay: RETRY_DELAY_MS,
       },
       dehydrate: {
         // Include pending queries so server-started prefetches can stream to the client.
