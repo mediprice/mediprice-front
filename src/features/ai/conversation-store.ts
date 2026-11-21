@@ -25,7 +25,7 @@ import {
 export const CONVERSATION_STORAGE_KEY = 'mediprice:ai-conversation';
 
 /** 답을 이만큼 기다려도 오지 않으면 끊고 다시 보낼 수 있게 한다. 서버 처리 시간(보통 20초 남짓)보다 넉넉히 둔다. */
-export const TURN_TIMEOUT_MS = 60_000;
+const TURN_TIMEOUT_MS = 60_000;
 
 type ConversationStore = Conversation & {
   /** 지금 기다리는 요청을 보낸 시각(ms). 저장하지 않고, 기다림 안내가 다시 그려져도 같은 기준으로 센다. */

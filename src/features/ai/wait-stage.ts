@@ -1,7 +1,7 @@
 /** 답을 기다린 시간에 따라 안내를 바꾼다. slow는 걸리는 시간을 알리고, long은 계속 기다릴지 묻는다. */
 export type WaitStage = 'quiet' | 'slow' | 'long';
 
-export const WAIT_STAGE_FROM = { slow: 8_000, long: 30_000 } as const;
+const WAIT_STAGE_FROM = { slow: 8_000, long: 30_000 } as const;
 
 export function waitStage(elapsedMs: number): WaitStage {
   if (elapsedMs >= WAIT_STAGE_FROM.long) return 'long';
