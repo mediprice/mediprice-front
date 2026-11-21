@@ -118,17 +118,37 @@ export const useCompareStore = create<CompareState>()(
   ),
 );
 
-/** 모두 같은 항목에서 담았으면 그 항목 코드, 아니면 null. */
-export function sharedItemCode(hospitals: readonly CompareHospital[]) {
-  const [first, ...rest] = hospitals;
-  const code = first?.itemCode ?? null;
-  return code && rest.every((h) => h.itemCode === code) ? code : null;
+/** 담을 때 고른 항목들(중복 없이 담은 순서). 항목 없이 담은 병원은 빠진다. */
+export function basketItemCodes(hospitals: readonly CompareHospital[]) {
+  return [
+    ...new Set(hospitals.flatMap((h) => (h.itemCode ? [h.itemCode] : []))),
+  ];
+}
+
+/**
+ * 비교 기준으로 쓸 항목. 관심·지도처럼 항목 없이 담은 병원은 무시해 그 한 곳 때문에 가격 비교가 사라지지 않게 한다.
+ * 담은 항목이 서로 다르면 가장 많이 담긴 항목, 같은 수면 나중에 담은 항목이다. 하나도 없으면 null.
+ */
+export function basketItemCode(hospitals: readonly CompareHospital[]) {
+  const counts = new Map<string, number>();
+  let best: string | null = null;
+  let bestCount = 0;
+  for (const { itemCode } of hospitals) {
+    if (!itemCode) continue;
+    const count = (counts.get(itemCode) ?? 0) + 1;
+    counts.set(itemCode, count);
+    if (count >= bestCount) {
+      best = itemCode;
+      bestCount = count;
+    }
+  }
+  return best;
 }
 
 export function buildBasketHref(hospitals: readonly CompareHospital[]) {
   return buildCompareHref(
     hospitals.map((h) => h.ykiho),
-    sharedItemCode(hospitals),
+    basketItemCode(hospitals),
   );
 }
 

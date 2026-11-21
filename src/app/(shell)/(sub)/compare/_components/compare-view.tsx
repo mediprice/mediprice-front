@@ -40,6 +40,7 @@ import { CompareEmpty } from './compare-empty';
 import { CompareHeader } from './compare-header';
 import { CompareSkeleton } from './compare-skeleton';
 import { CompareTable } from './compare-table';
+import { MixedItemsNotice } from './mixed-items-notice';
 
 /** 함께 공개한 항목은 많으면 100개라 처음에는 이만큼만 펼친다. */
 const INITIAL_COMMON_ITEMS = 8;
@@ -348,8 +349,9 @@ export function CompareView({
         basis={basis}
         hospitals={hospitals}
       />
-      <PageContainer className="pt-2 pb-section lg:pt-4">
-        {renderBody()}
+      <PageContainer className="flex flex-col gap-4 pt-2 pb-section lg:pt-4">
+        <MixedItemsNotice ykihos={ykihos} item={activeItem} />
+        <div>{renderBody()}</div>
       </PageContainer>
     </>
   );

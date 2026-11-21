@@ -57,7 +57,9 @@
     "basisLowestUnnamed": "병원마다 가장 낮은 공개 가격끼리 견줬어요. 세부 항목 구성이 병원마다 달라 같은 조건의 비교는 아니에요.",
     "legendLabelSame": "병원별 같은 세부 항목 가격",
     "variantBasis": "{name} 기준",
-    "excludedUnit": "시간·횟수 같은 구성이 달라 평균과 견주기 어려운 가격만 있어 비교에서 뺐어요"
+    "excludedUnit": "시간·횟수 같은 구성이 달라 평균과 견주기 어려운 가격만 있어 비교에서 뺐어요",
+    "mixedItems": "담을 때 고른 항목이 서로 달라요. 지금은 {item} 기준으로 비교해요.",
+    "mixedItemsSwitch": "{item} 기준으로 보기"
   },
   "table": {
     "caption": "{item} 가격과 병원 정보 비교",
