@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { PageContainer } from '@/components/layout/page-container';
 import { SubTopBar } from '@/components/layout/sub-top-bar';
 import { parsePriceFilters } from '@/features/npay/price-filters';
+import { fetchSiteStats } from '@/server/api/home-data';
 
 import { FilterColumn } from './_components/filter-column';
 import {
@@ -45,9 +46,10 @@ export default async function ItemPricePage({
 }: PageProps<'/items/[code]'>) {
   const { code } = await params;
   const filters = parsePriceFilters(await searchParams);
-  const [state, t] = await Promise.all([
+  const [state, t, stats] = await Promise.all([
     prefetchItemPage(code, filters),
     getTranslations('items'),
+    fetchSiteStats(),
   ]);
 
   return (
@@ -57,7 +59,11 @@ export default async function ItemPricePage({
         <ItemGate code={code}>
           <div className="rounded-b-4xl bg-primary-tint lg:rounded-none">
             <PageContainer className="flex flex-col gap-5 py-6 lg:py-10">
-              <ItemHeader code={code} region={filters.region} />
+              <ItemHeader
+                code={code}
+                region={filters.region}
+                dataDate={stats?.dataDate ?? null}
+              />
               <PriceSummary
                 code={code}
                 filters={filters}

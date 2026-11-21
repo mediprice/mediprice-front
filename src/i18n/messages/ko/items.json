@@ -12,7 +12,9 @@
   "header": {
     "source": "건강보험심사평가원 공개 가격 기준",
     "loading": "항목 정보를 불러오는 중",
-    "fallbackTitle": "항목별 가격"
+    "fallbackTitle": "항목별 가격",
+    "sourceWithDate": "건강보험심사평가원 공개 가격 · <nowrap>{date, date, long} 기준</nowrap>",
+    "actualCostNote": "병원이 신고한 기준 가격이라 실제 진료비와 다를 수 있어요."
   },
   "notFound": {
     "description": "주소가 바뀌었거나 더 이상 공개되지 않는 항목일 수 있어요.",

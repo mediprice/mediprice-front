@@ -26,9 +26,12 @@ import { formatItemTitle } from './item-title';
 export function ItemHeader({
   code,
   region,
+  dataDate = null,
 }: {
   code: string;
   region: ServiceRegion;
+  /** 공개 데이터 기준일(YYYY-MM-DD). 모르면 출처만 쓴다. */
+  dataDate?: string | null;
 }) {
   const t = useTranslations('items');
   const categoryLabel = useCategoryLabel();
@@ -46,7 +49,7 @@ export function ItemHeader({
           <span className="sr-only">{t('header.loading')}</span>
           <Skeleton className="h-9 w-48 lg:h-10" />
         </h1>
-        <SourceLine />
+        <SourceLine dataDate={dataDate} />
       </div>
     );
   }
@@ -63,7 +66,7 @@ export function ItemHeader({
             {tActions('retry')}
           </Button>
         </div>
-        <SourceLine />
+        <SourceLine dataDate={dataDate} />
       </div>
     );
   }
@@ -91,17 +94,34 @@ export function ItemHeader({
         </Tag>
       )}
       <h1 className="text-display">{title}</h1>
-      <SourceLine />
+      <SourceLine dataDate={dataDate} />
     </div>
   );
 }
 
-function SourceLine() {
+/** 출처와 자료 기준일, 공개 가격이 실제 진료비와 다를 수 있다는 한 줄. 가격 화면마다 같은 자리에 둔다. */
+function SourceLine({ dataDate }: { dataDate: string | null }) {
   const t = useTranslations('items.header');
   return (
-    <p className="flex items-center gap-1.5 text-body-sm text-text-tertiary">
-      <Info aria-hidden="true" className="size-4 shrink-0" strokeWidth={1.75} />
-      {t('source')}
-    </p>
+    <div className="flex flex-col gap-0.5 text-body-sm text-text-tertiary">
+      <p className="flex items-start gap-1.5">
+        <Info
+          aria-hidden="true"
+          className="mt-0.5 size-4 shrink-0"
+          strokeWidth={1.75}
+        />
+        <span>
+          {dataDate
+            ? t.rich('sourceWithDate', {
+                date: new Date(`${dataDate}T00:00:00+09:00`),
+                nowrap: (chunks) => (
+                  <span className="whitespace-nowrap">{chunks}</span>
+                ),
+              })
+            : t('source')}
+        </span>
+      </p>
+      <p className="pl-5.5">{t('actualCostNote')}</p>
+    </div>
   );
 }
