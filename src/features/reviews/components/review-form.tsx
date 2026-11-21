@@ -5,12 +5,23 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CircleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useId, useState } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import {
+  Controller,
+  type DefaultValues,
+  useForm,
+  useWatch,
+} from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import { errorMessageKey } from '@/lib/api/error-message';
 
 import { type Review, reviewMutations } from '../queries';
+import {
+  clearReviewDraft,
+  readReviewDraft,
+  reviewDraftKey,
+  writeReviewDraft,
+} from '../review-draft';
 import {
   buildReviewFormSchema,
   invalidFields,
@@ -46,6 +57,17 @@ export function ReviewForm({
   const queryClient = useQueryClient();
   const isEdit = review != null;
   const [today] = useState(todayInSeoul);
+  const draftKey = reviewDraftKey(ykiho, review?.id);
+  /** 이 탭에서 쓰다 만 글. 세션이 끝나 다시 로그인하고 돌아와도 이어 쓸 수 있다. */
+  const [restoredDraft, setRestoredDraft] = useState(() =>
+    readReviewDraft(draftKey),
+  );
+  const [initialValues] = useState<DefaultValues<ReviewFormInput>>(() => ({
+    rating: review?.rating,
+    content: review?.content ?? '',
+    visitedOn: review?.visitedOn ?? '',
+    paidAmount: review?.paidAmount != null ? String(review.paidAmount) : '',
+  }));
   const [schema] = useState(() =>
     buildReviewFormSchema({
       today,
@@ -61,18 +83,30 @@ export function ReviewForm({
     handleSubmit,
     setError,
     setFocus,
+    reset,
     formState: { errors, isDirty },
   } = useForm<ReviewFormInput, unknown, ReviewFormValues>({
     resolver: zodResolver(schema),
     /** 별점 Controller가 본문보다 늦게 등록돼 기본 포커스가 화면 순서와 어긋나므로 직접 고른다. */
     shouldFocusError: false,
-    defaultValues: {
-      rating: review?.rating,
-      content: review?.content ?? '',
-      visitedOn: review?.visitedOn ?? '',
-      paidAmount: review?.paidAmount != null ? String(review.paidAmount) : '',
-    },
+    defaultValues: restoredDraft ?? initialValues,
   });
+
+  const draftValues = useWatch({ control });
+  useEffect(() => {
+    writeReviewDraft(draftKey, {
+      rating: draftValues.rating,
+      content: draftValues.content ?? '',
+      visitedOn: draftValues.visitedOn ?? '',
+      paidAmount: draftValues.paidAmount ?? '',
+    });
+  }, [draftKey, draftValues]);
+
+  function discardDraft() {
+    clearReviewDraft(draftKey);
+    reset(initialValues);
+    setRestoredDraft(null);
+  }
   const content = useWatch({ control, name: 'content' });
   const save = useMutation({
     ...(review
@@ -98,7 +132,13 @@ export function ReviewForm({
     <form
       noValidate
       onSubmit={handleSubmit(
-        (form) => save.mutate(form, { onSuccess: (saved) => onSuccess(saved) }),
+        (form) =>
+          save.mutate(form, {
+            onSuccess: (saved) => {
+              clearReviewDraft(draftKey);
+              onSuccess(saved);
+            },
+          }),
         (invalid) => {
           const first = REVIEW_FORM_FIELDS.find((field) => invalid[field]);
           if (first) setFocus(first);
@@ -106,6 +146,19 @@ export function ReviewForm({
       )}
       className="flex flex-col gap-6"
     >
+      {restoredDraft && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-primary-tint px-4 py-2 text-body-sm text-primary-text">
+          <p>{t('draftRestored')}</p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={discardDraft}
+          >
+            {t('draftDiscard')}
+          </Button>
+        </div>
+      )}
       <fieldset className="flex min-w-0 flex-col gap-2">
         <legend id={`${id}-rating`} className="mb-2 text-label-bold">
           {t('rating')}
