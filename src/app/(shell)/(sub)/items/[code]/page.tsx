@@ -24,13 +24,15 @@ export async function generateMetadata({
   params,
 }: PageProps<'/items/[code]'>): Promise<Metadata> {
   const { code } = await params;
-  const [item, summary, t, tRegion] = await Promise.all([
+  const [item, summary, t, tRegion, tMeta] = await Promise.all([
     loadItem(code),
     loadDefaultSummary(code),
     getTranslations('items.metadata'),
     getTranslations('common.region'),
+    getTranslations('metadata'),
   ]);
   return buildItemMetadata({
+    siteName: tMeta('title'),
     code,
     item,
     summary,
