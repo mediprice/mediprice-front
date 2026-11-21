@@ -82,7 +82,11 @@ export function useMapSearch(initial: MapParams) {
 
   function replaceUrl(center: LatLng | null, nextRadius: RadiusOption) {
     const query = buildMapQuery({ ...initial, center, radius: nextRadius });
-    window.history.replaceState(null, '', query ? `/map?${query}` : '/map');
+    window.history.replaceState(
+      window.history.state,
+      '',
+      query ? `/map?${query}` : '/map',
+    );
   }
 
   return {

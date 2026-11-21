@@ -26,6 +26,7 @@ export function LocationNoticeBanner({
   notice,
   item,
   region,
+  back,
   isRetrying,
   onRetry,
   onDismiss,
@@ -33,6 +34,8 @@ export function LocationNoticeBanner({
   notice: LocationNotice;
   item: string | null;
   region: ServiceRegion;
+  /** 항목 가격 화면의 필터 쿼리. 목록으로 돌아갈 때 쓴다. */
+  back: string | null;
   isRetrying: boolean;
   onRetry: () => void;
   onDismiss: () => void;
@@ -68,7 +71,9 @@ export function LocationNoticeBanner({
             )}
             {item && (
               <Button asChild variant="ghost" size="sm">
-                <Link href={itemListHref(item, region)}>{t('backToList')}</Link>
+                <Link href={itemListHref(item, region, back)}>
+                  {t('backToList')}
+                </Link>
               </Button>
             )}
           </div>

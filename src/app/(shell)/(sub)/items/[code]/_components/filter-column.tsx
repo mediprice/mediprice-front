@@ -5,12 +5,12 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { mapHrefForItem } from '@/features/map/map-params';
 import {
   clearConditions,
   countActiveFilters,
   type PriceFilters,
 } from '@/features/npay/price-filters';
-import { regionQuery } from '@/features/regions/service-region';
 
 import { FilterPanel } from './filter-panel';
 import { useApplyFilters } from './use-apply-filters';
@@ -26,10 +26,7 @@ export function FilterColumn({
   const t = useTranslations('items.filters');
   const applyFilters = useApplyFilters(code);
   const tMap = useTranslations('map.entry');
-  const mapQuery = new URLSearchParams({
-    item: code,
-    ...regionQuery(filters.region),
-  }).toString();
+  const mapHref = mapHrefForItem(code, filters);
 
   return (
     <aside
@@ -53,7 +50,7 @@ export function FilterColumn({
       </div>
       <FilterPanel value={filters} onChange={applyFilters} />
       <Button asChild variant="outline" size="md" className="mt-5 w-full">
-        <Link href={`/map?${mapQuery}`}>
+        <Link href={mapHref}>
           <MapIcon aria-hidden="true" />
           {tMap('openMap')}
         </Link>

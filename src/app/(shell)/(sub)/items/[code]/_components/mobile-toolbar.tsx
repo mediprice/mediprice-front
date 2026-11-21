@@ -2,11 +2,11 @@ import { Map as MapIcon, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
+import { mapHrefForItem } from '@/features/map/map-params';
 import {
   countActiveFilters,
   type PriceFilters,
 } from '@/features/npay/price-filters';
-import { regionQuery } from '@/features/regions/service-region';
 
 import { FilterSheet } from './filter-sheet';
 import { SortSheet } from './sort-sheet';
@@ -22,10 +22,7 @@ export function MobileToolbar({
   const t = useTranslations('items.filters');
   const tMap = useTranslations('map.entry');
   const count = countActiveFilters(filters);
-  const mapQuery = new URLSearchParams({
-    item: code,
-    ...regionQuery(filters.region),
-  }).toString();
+  const mapHref = mapHrefForItem(code, filters);
 
   return (
     <div className="sticky top-[calc(var(--spacing-top-bar)+env(safe-area-inset-top,0px))] z-(--z-header) border-b border-hairline bg-bg lg:hidden [@media(max-height:40rem)]:static">
@@ -54,7 +51,7 @@ export function MobileToolbar({
           }
         />
         <Link
-          href={`/map?${mapQuery}`}
+          href={mapHref}
           aria-label={tMap('openMap')}
           className="touch-target inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border border-border-strong bg-bg px-3 text-label text-text-primary active:bg-surface"
         >

@@ -2,7 +2,7 @@
 
 import { LocateFixed, RotateCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -18,14 +18,56 @@ import { SelectedHospitalPanel } from './selected-hospital-panel';
 import { useMapSearch } from './use-map-search';
 import { useNearbyResults } from './use-nearby-results';
 
+const VIEW_KEY = 'mpMapView';
+
+type SavedView = { view: MobileView; selectedId: string | null };
+
+function readSavedView(): SavedView | null {
+  const saved = (window.history.state as Record<string, unknown> | null)?.[
+    VIEW_KEY
+  ];
+  if (!saved || typeof saved !== 'object') return null;
+  const { view, selectedId } = saved as Partial<SavedView>;
+  if (view !== 'list' && view !== 'map') return null;
+  return {
+    view,
+    selectedId: typeof selectedId === 'string' ? selectedId : null,
+  };
+}
+
+function savedViewKey() {
+  const saved = readSavedView();
+  return saved ? JSON.stringify(saved) : '';
+}
+
+const noSubscribe = () => () => {};
+
+function saveView(value: SavedView) {
+  window.history.replaceState(
+    { ...window.history.state, [VIEW_KEY]: value },
+    '',
+    window.location.href,
+  );
+}
+
 /** S-07 지도 탐색. 목록이 주 수단이고 지도는 위치를 보여 주는 보조 수단이다. 선택은 지도와 목록이 함께 쓴다. */
 export function MapView({ initialParams }: { initialParams: MapParams }) {
   const t = useTranslations('map');
   const item = initialParams.item;
   const state = useMapSearch(initialParams);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  /** 병원을 열었다 뒤로 돌아오면 보던 방식과 고른 병원을 이 기록 칸에서 되살린다(주소는 지도 검색이 쓰므로 건드리지 않음). */
+  const savedKey = useSyncExternalStore(noSubscribe, savedViewKey, () => '');
+  const saved = savedKey ? (JSON.parse(savedKey) as SavedView) : null;
+  const [chosenId, setSelectedId] = useState<string | null | undefined>();
   /** 모바일은 지도와 목록을 함께 두면 화면을 넘기다 지도가 끌려가서 하나씩 보여 준다. 항목을 골라 왔으면 가격 목록부터. */
-  const [view, setView] = useState<MobileView>(item ? 'list' : 'map');
+  const [chosenView, setView] = useState<MobileView>();
+  const selectedId =
+    chosenId === undefined ? (saved?.selectedId ?? null) : chosenId;
+  const view = chosenView ?? saved?.view ?? (item ? 'list' : 'map');
+  useEffect(() => {
+    if (chosenId !== undefined || chosenView !== undefined)
+      saveView({ view, selectedId });
+  }, [chosenId, chosenView, view, selectedId]);
 
   const { query, hospitals, markers } = useNearbyResults(state.search, item);
 
@@ -45,7 +87,7 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
   /** 데스크톱은 지도가 옆에 있어 켜고 끄는 토글이고, 모바일은 고른 뒤 지도 보기로 넘어간다. */
   function handleShowOnMap(id: string) {
     if (isSideBySide()) {
-      setSelectedId((current) => (current === id ? null : id));
+      setSelectedId(selectedId === id ? null : id);
       return;
     }
     setSelectedId(id);
@@ -75,6 +117,7 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
       <MapToolbar
         item={item}
         region={initialParams.region}
+        back={initialParams.back ?? null}
         radius={state.radius}
         onRadiusChange={state.changeRadius}
         view={view}
@@ -85,6 +128,7 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
           notice={state.notice}
           item={item}
           region={initialParams.region}
+          back={initialParams.back ?? null}
           isRetrying={state.isLocating}
           onRetry={state.retryLocation}
           onDismiss={state.dismissNotice}

@@ -20,6 +20,7 @@ export type MobileView = 'list' | 'map';
 export function MapToolbar({
   item,
   region,
+  back,
   radius,
   onRadiusChange,
   view,
@@ -27,6 +28,8 @@ export function MapToolbar({
 }: {
   item: string | null;
   region: ServiceRegion;
+  /** 항목 가격 화면의 필터 쿼리. 목록으로 돌아갈 때 쓴다. */
+  back: string | null;
   radius: RadiusOption;
   onRadiusChange: (radius: RadiusOption) => void;
   /** 모바일에서만 쓰는 지도/목록 전환. 데스크톱은 둘 다 보인다. */
@@ -41,7 +44,7 @@ export function MapToolbar({
         <div className="flex min-w-0 items-center gap-3">
           {item && (
             <Link
-              href={itemListHref(item, region)}
+              href={itemListHref(item, region, back)}
               className="hidden min-h-11 shrink-0 items-center gap-1 rounded-lg bg-surface pr-3.5 pl-2.5 text-label-bold text-text-primary hover:bg-surface-strong lg:inline-flex"
             >
               <ChevronLeft
