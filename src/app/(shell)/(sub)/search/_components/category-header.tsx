@@ -13,6 +13,7 @@ import type { HomeCategoryId } from '@/features/npay/catalog';
 import { useCategoryLabel } from '@/features/npay/use-category-label';
 import {
   regionQuery,
+  SERVICE_REGIONS,
   type ServiceRegion,
 } from '@/features/regions/service-region';
 import type { CategoryView } from '@/features/search/category-tree';
@@ -43,6 +44,7 @@ export function CategoryHeader({
   region: ServiceRegion;
 }) {
   const t = useTranslations('search');
+  const tRegion = useTranslations('common.region');
   const label = useCategoryLabel();
   const query = (extra: Record<string, string>) => ({
     ...extra,
@@ -137,6 +139,22 @@ export function CategoryHeader({
         {t('category.description')}
       </p>
 
+      {/** 모바일은 분류 화면에 검색 띠가 없어, 지역을 여기서 바꾼다(데스크톱은 위 검색 띠의 지역 선택을 쓴다). */}
+      <div className="lg:hidden">
+        <ChipLinks
+          label={t('form.region')}
+          chips={SERVICE_REGIONS.map((value) => ({
+            key: value,
+            label: tRegion(value),
+            href: categoryHref({
+              category: homeId ?? 'all',
+              ...(code ? { code } : {}),
+              ...regionQuery(value),
+            }),
+            isSelected: value === region,
+          }))}
+        />
+      </div>
       {!view ? (
         <ChipLinksSkeleton label={t('category.subCategories')} />
       ) : (
