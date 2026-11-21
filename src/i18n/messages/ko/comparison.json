@@ -2,12 +2,18 @@
   "toggle": {
     "add": "비교함 담기",
     "added": "비교함 담음",
+    "addNamed": "{name} 비교함 담기",
+    "addedNamed": "{name} 비교함 담음",
     "full": "비교함은 최대 {max, number}곳이에요. 다른 병원을 빼면 담을 수 있어요."
   },
   "tray": {
     "label": "비교함",
     "count": "비교함 {count, number}/{max, number}",
     "remove": "{name} 비교함에서 빼기",
+    "removeShort": "빼기",
+    "manage": "병원 빼기",
+    "sheetTitle": "비교함에 담은 병원",
+    "sheetCount": "{max, number}곳 중 {count, number}곳을 담았어요.",
     "clear": "비우기",
     "compare": "비교하기",
     "needMore": "{count, plural, other {#곳}} 더 담아 주세요",

@@ -13,6 +13,7 @@ import { useCompareStore } from '../compare-store';
 /**
  * 병원을 비교함에 담거나 뺀다. 3곳이 차면 담지 않은 병원의 버튼은 비활성으로 보이되(aria-disabled) 포커스와 누름은 남겨,
  * 눌렀을 때 CompareTray가 이유를 보여 주고 읽어 준다. 어느 병원과 바꿀지는 사용자가 비교함에서 고른다.
+ * 목록에 같은 버튼이 여럿이라 접근성 이름에 병원 이름을 넣는다(보이는 문구를 그대로 포함).
  */
 export function CompareToggle({
   ykiho,
@@ -51,6 +52,7 @@ export function CompareToggle({
       <Button
         variant={isAdded ? 'outline' : 'tint'}
         size="sm"
+        aria-label={t(isAdded ? 'addedNamed' : 'addNamed', { name })}
         aria-pressed={isAdded}
         aria-disabled={isBlocked || undefined}
         aria-describedby={isBlocked ? hintId : undefined}

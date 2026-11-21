@@ -78,7 +78,7 @@ export function CategoryHeader({
   const parents = isTitleKnown ? crumbs.slice(0, -1) : crumbs;
 
   return (
-    <PageContainer className="space-y-1 pt-3 pb-4 lg:pt-4 lg:pb-6">
+    <PageContainer className="space-y-1 pt-3 pb-4 md:max-w-2xl lg:max-w-page lg:pt-4 lg:pb-6">
       <Breadcrumb>
         <BreadcrumbLink href="/">{t('breadcrumb.home')}</BreadcrumbLink>
         {parents.map((crumb) => (

@@ -63,7 +63,7 @@ export function CategoryRoot({
 
   return (
     <>
-      <PageContainer className="space-y-2 pt-5 pb-4 lg:pt-4 lg:pb-6">
+      <PageContainer className="space-y-2 pt-5 pb-4 md:max-w-2xl lg:max-w-page lg:pt-4 lg:pb-6">
         <Breadcrumb>
           <BreadcrumbLink href="/">{tCrumb('home')}</BreadcrumbLink>
           <BreadcrumbCurrent>{t('root')}</BreadcrumbCurrent>
@@ -75,7 +75,7 @@ export function CategoryRoot({
       </PageContainer>
 
       <div className="flex-1 bg-surface lg:bg-bg">
-        <PageContainer className="space-y-8 pt-5 pb-section lg:pt-2">
+        <PageContainer className="space-y-8 pt-5 pb-section md:max-w-2xl lg:max-w-page lg:pt-2">
           <section
             aria-labelledby="search-home-categories"
             className="space-y-3"

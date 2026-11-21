@@ -402,7 +402,7 @@ export function CompareView({
         basis={basis}
         hospitals={hospitals}
       />
-      <PageContainer className="flex flex-col gap-4 pt-2 pb-section lg:pt-4">
+      <PageContainer className="flex flex-col gap-4 pt-2 pb-section md:max-w-2xl lg:max-w-page lg:pt-4">
         <MixedItemsNotice ykihos={ykihos} item={activeItem} />
         <div>{renderBody()}</div>
       </PageContainer>

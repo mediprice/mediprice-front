@@ -90,7 +90,7 @@ export function CompareHeader({
 
   return (
     <div className="bg-primary-tint">
-      <PageContainer className="flex flex-col gap-2.5 pt-6 pb-5 lg:pt-6 lg:pb-8">
+      <PageContainer className="flex flex-col gap-2.5 pt-6 pb-5 md:max-w-2xl lg:max-w-page lg:pt-6 lg:pb-8">
         <Breadcrumb>
           <BreadcrumbLink href="/">{t('breadcrumbHome')}</BreadcrumbLink>
           {item && itemName && (

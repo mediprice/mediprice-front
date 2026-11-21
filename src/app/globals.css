@@ -147,7 +147,8 @@
   --container-page: 79rem;
   --spacing-top-nav: 4.5rem;
   --spacing-top-bar: 3.5rem;
-  --spacing-tab-bar: 4rem;
+  /* 글자를 키워도 아이콘은 24px라, 글자 몫(2.5rem)만 커지게 한다. 100%에서 64px. */
+  --spacing-tab-bar: calc(2.5rem + 24px);
   /* 섹션 사이 세로 간격. lg 이상은 아래 @media에서 바꾼다. */
   --spacing-section: 2.5rem;
 

@@ -58,7 +58,7 @@ export default async function ItemPricePage({
       <HydrationBoundary state={state}>
         <ItemGate code={code}>
           <div className="rounded-b-4xl bg-primary-tint lg:rounded-none">
-            <PageContainer className="flex flex-col gap-5 py-6 lg:py-10">
+            <PageContainer className="flex flex-col gap-5 py-6 md:max-w-2xl lg:max-w-page lg:py-10">
               <ItemHeader
                 code={code}
                 region={filters.region}
@@ -73,7 +73,7 @@ export default async function ItemPricePage({
           </div>
           <MobileToolbar code={code} filters={filters} />
           <div className="flex-1 bg-surface">
-            <PageContainer className="flex flex-col gap-4 pt-4 pb-section lg:flex-row lg:items-start lg:gap-8 lg:pt-8">
+            <PageContainer className="flex flex-col gap-4 pt-4 pb-section md:max-w-2xl lg:max-w-page lg:flex-row lg:items-start lg:gap-8 lg:pt-8">
               <FilterColumn code={code} filters={filters} />
               <div className="flex min-w-0 flex-1 flex-col gap-4 lg:gap-6">
                 <PriceSummary
