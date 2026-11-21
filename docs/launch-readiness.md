@@ -6,20 +6,20 @@
 
 모든 브랜치는 push했고 PR을 열었다. dev·main에는 아직 아무것도 합치지 않았다.
 
-| 저장소   | 브랜치                         | 기준                       | 내용                                                                                                                                                | PR    |
-| -------- | ------------------------------ | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| frontend | `feature/ui-conventions`       | main                       | 1차본(컨벤션, 화면 전체, BFF)                                                                                                                       | #2    |
-| frontend | `feature/design-upgrade`       | `feature/ui-conventions`   | 기존 디자인 고도화: 리브랜딩 기간의 기능(가격 정직성, 가격 위치 표시, 네이버 지도, 법률 문서·동의, 권리침해 신고, SSR, 출시 기반)을 기존 디자인으로 | 새 PR |
-| frontend | `feature/redesign-big-numbers` | `feature/ui-conventions`   | 리브랜딩(큰 숫자) 안. 합치지 않고 비교용으로 남겨 둠                                                                                                | #3    |
-| backend  | `fix/frontend-integration`     | dev                        | 프론트 연동(리다이렉트, CORS, AI 프록시, 다중 시도)                                                                                                 | #14   |
-| backend  | `feature/launch-hardening`     | `fix/frontend-integration` | Flyway(기본 꺼짐), health, AI 한도 DB 저장·전체 상한, IP 속도 제한, prod 필수값 검사, 세션 쿠키, AI 로그·state 검증                                 | #15   |
-| backend  | `feature/privacy-consent`      | `fix/frontend-integration` | 동의 기록(V4), 의료 정보 별도 동의, 관리자 접속 기록, 내 데이터 내려받기                                                                            | #16   |
-| backend  | `feature/public-stats`         | `fix/frontend-integration` | 홈 통계(`/api/stats`), 사이트맵 병원 목록, 인기 항목 순위(최근 30일, 5명 미만 제외)                                                                 | #17   |
-| backend  | `feature/review-claims`        | `feature/privacy-consent`  | 후기 권리침해 신고(비회원 가능)와 임시조치 30일(V5), 작성자 재게시 요청, 관리자 처리·알림 기록, 기한 지난 신고 표시                                 | #18   |
-| backend  | `feature/retention-jobs`       | `feature/review-claims`    | 보관 기간이 지난 최근 기록·처리된 신고·권리침해 신고·관리자 접속 기록 일일 삭제(기간을 정하지 않으면 꺼짐, dry-run 기본)                            | #19   |
-| backend  | `feature/price-band-ai-area`   | `fix/frontend-integration` | 가격 목록·요약의 가격 범위(`minPrice`·`maxPrice`), AI 상담 응답의 지역(`area`) 전달                                                                 | #20   |
-| ai       | `fix/launch-hardening`         | dev                        | LLM 시간 제한·재시도, 심평원 캐시·요청 간격, non-root, 422 입력 미노출                                                                              | #3    |
-| ai       | `feature/ai-area`              | `fix/launch-hardening`     | 사용자가 말한 장소를 좌표·시군구로 찾아 `area`로 전달(아래 설명)                                                                                    | #4    |
+| 저장소   | 브랜치                         | 기준                       | 내용                                                                                                                                                | PR  |
+| -------- | ------------------------------ | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
+| frontend | `feature/ui-conventions`       | main                       | 1차본(컨벤션, 화면 전체, BFF)                                                                                                                       | #2  |
+| frontend | `feature/design-upgrade`       | `feature/ui-conventions`   | 기존 디자인 고도화: 리브랜딩 기간의 기능(가격 정직성, 가격 위치 표시, 네이버 지도, 법률 문서·동의, 권리침해 신고, SSR, 출시 기반)을 기존 디자인으로 | #4  |
+| frontend | `feature/redesign-big-numbers` | `feature/ui-conventions`   | 리브랜딩(큰 숫자) 안. 합치지 않고 비교용으로 남겨 둠                                                                                                | #3  |
+| backend  | `fix/frontend-integration`     | dev                        | 프론트 연동(리다이렉트, CORS, AI 프록시, 다중 시도)                                                                                                 | #14 |
+| backend  | `feature/launch-hardening`     | `fix/frontend-integration` | Flyway(기본 꺼짐), health, AI 한도 DB 저장·전체 상한, IP 속도 제한, prod 필수값 검사, 세션 쿠키, AI 로그·state 검증                                 | #15 |
+| backend  | `feature/privacy-consent`      | `fix/frontend-integration` | 동의 기록(V4), 의료 정보 별도 동의, 관리자 접속 기록, 내 데이터 내려받기                                                                            | #16 |
+| backend  | `feature/public-stats`         | `fix/frontend-integration` | 홈 통계(`/api/stats`), 사이트맵 병원 목록, 인기 항목 순위(최근 30일, 5명 미만 제외)                                                                 | #17 |
+| backend  | `feature/review-claims`        | `feature/privacy-consent`  | 후기 권리침해 신고(비회원 가능)와 임시조치 30일(V5), 작성자 재게시 요청, 관리자 처리·알림 기록, 기한 지난 신고 표시                                 | #18 |
+| backend  | `feature/retention-jobs`       | `feature/review-claims`    | 보관 기간이 지난 최근 기록·처리된 신고·권리침해 신고·관리자 접속 기록 일일 삭제(기간을 정하지 않으면 꺼짐, dry-run 기본)                            | #19 |
+| backend  | `feature/price-band-ai-area`   | `fix/frontend-integration` | 가격 목록·요약의 가격 범위(`minPrice`·`maxPrice`), AI 상담 응답의 지역(`area`) 전달                                                                 | #20 |
+| ai       | `fix/launch-hardening`         | dev                        | LLM 시간 제한·재시도, 심평원 캐시·요청 간격, non-root, 422 입력 미노출                                                                              | #3  |
+| ai       | `feature/ai-area`              | `fix/launch-hardening`     | 사용자가 말한 장소를 좌표·시군구로 찾아 `area`로 전달(아래 설명)                                                                                    | #4  |
 
 - backend는 #14 → #15(V3) → #16(V4) → #18(V5) → #19 순서로 합친다. #17과 #20은 #14 뒤 아무 때나 합친다.
 - backend의 겹친 PR(#15~#20)은 기준이 dev·main이 아니라 CI가 돌지 않는다. 로컬에서 테스트를 돌려 확인했다. 아래 PR을 합쳐 기준이 dev로 바뀌면 CI가 돈다.
