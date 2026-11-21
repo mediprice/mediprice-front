@@ -112,5 +112,12 @@
     "home": "홈",
     "results": "검색 결과",
     "search": "검색"
+  },
+  "zeroHints": {
+    "hospitals": "병원 이름으로 {count, number}곳 찾았어요",
+    "category": "{name} 분야 보기"
+  },
+  "relaxed": {
+    "notice": "''{query}''에 맞는 항목이 없어 ''{relaxed}''(으)로 찾은 결과예요."
   }
 }

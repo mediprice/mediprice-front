@@ -12,6 +12,7 @@ import {
   sidoCodesOf,
 } from '@/features/regions/service-region';
 import { searchQueries, totalCount } from '@/features/search/queries';
+import { relaxedKeyword } from '@/features/search/relaxed-keyword';
 
 import { ItemGroupList } from './item-group-list';
 import { ListSkeleton } from './list-skeleton';
@@ -20,6 +21,7 @@ import { ResultHeader } from './result-header';
 import { ResultsError } from './results-error';
 import { ResultsLayout } from './results-layout';
 import { useFillPriced } from './use-fill-priced';
+import { ZeroResultHints } from './zero-result-hints';
 
 /** S-02 A 항목 결과. 결과 없음·조회 실패에서는 오른쪽 열 대신 안내 패널의 버튼으로 이어 준다. */
 export function ItemSearchView({
@@ -34,9 +36,23 @@ export function ItemSearchView({
   emptyActions: ReactNode;
 }) {
   const t = useTranslations('search');
-  const query = useInfiniteQuery(
-    searchQueries.items({ keyword, sidoCodes: sidoCodesOf(region) }),
-  );
+  const sidoCodes = sidoCodesOf(region);
+  const primary = useInfiniteQuery(searchQueries.items({ keyword, sidoCodes }));
+  /** 0건이면 띄어쓰기·꼬리말을 다듬은 검색어로 한 번 더 찾는다("도수 치료", "임플란트 가격"). */
+  const relaxed = relaxedKeyword(keyword);
+  const isPrimaryEmpty =
+    primary.data?.pages.every((page) => page.content.length === 0) ?? false;
+  const fallback = useInfiniteQuery({
+    ...searchQueries.items({ keyword: relaxed ?? '', sidoCodes }),
+    enabled: isPrimaryEmpty && relaxed !== null,
+  });
+  const usesFallback =
+    isPrimaryEmpty &&
+    relaxed !== null &&
+    (fallback.data?.pages.some((page) => page.content.length > 0) ?? false);
+  const isFallbackPending =
+    isPrimaryEmpty && relaxed !== null && fallback.isPending;
+  const query = usesFallback ? fallback : primary;
   const total = query.data ? totalCount(query.data.pages) : undefined;
   const pages = query.data?.pages.map((page) => page.content) ?? [];
   const items = pages.flat();
@@ -66,7 +82,7 @@ export function ItemSearchView({
     />
   );
 
-  if (query.isPending) {
+  if (query.isPending || isFallbackPending) {
     return (
       <>
         {header}
@@ -99,7 +115,12 @@ export function ItemSearchView({
             icon={<Search />}
             title={t('empty.itemTitle', { query: keyword })}
             description={t('empty.description')}
-            action={emptyActions}
+            action={
+              <div className="flex flex-col items-center gap-3">
+                <ZeroResultHints keyword={keyword} region={region} />
+                {emptyActions}
+              </div>
+            }
           />
         </PageContainer>
       </>
@@ -109,6 +130,11 @@ export function ItemSearchView({
     <>
       {header}
       <ResultsLayout aside={aside}>
+        {usesFallback && relaxed && (
+          <p className="rounded-lg bg-primary-tint px-4 py-3 text-body-sm text-primary-text">
+            {t('relaxed.notice', { query: keyword, relaxed })}
+          </p>
+        )}
         <ItemGroupList pages={pages} isFilling={isFilling} region={region} />
         <LoadMore
           hasNextPage={query.hasNextPage}
