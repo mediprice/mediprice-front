@@ -10,6 +10,7 @@ import { LazyHospitalMap } from '@/features/map/components/lazy-hospital-map';
 import type { MapParams } from '@/features/map/map-params';
 import { cn } from '@/lib/utils';
 
+import { itemListHref } from './item-list-href';
 import { isSideBySide, scrollListTo } from './list-scroll';
 import { LocationNoticeBanner } from './location-notice-banner';
 import { MapToolbar, type MobileView } from './map-toolbar';
@@ -59,11 +60,11 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
   const savedKey = useSyncExternalStore(noSubscribe, savedViewKey, () => '');
   const saved = savedKey ? (JSON.parse(savedKey) as SavedView) : null;
   const [chosenId, setSelectedId] = useState<string | null | undefined>();
-  /** 모바일은 지도와 목록을 함께 두면 화면을 넘기다 지도가 끌려가서 하나씩 보여 준다. 항목을 골라 왔으면 가격 목록부터. */
+  /** 모바일은 지도와 목록을 함께 두면 화면을 넘기다 지도가 끌려가서 하나씩 보여 준다. 목록이 주 수단이라 목록부터. */
   const [chosenView, setView] = useState<MobileView>();
   const selectedId =
     chosenId === undefined ? (saved?.selectedId ?? null) : chosenId;
-  const view = chosenView ?? saved?.view ?? (item ? 'list' : 'map');
+  const view = chosenView ?? saved?.view ?? 'list';
   useEffect(() => {
     if (chosenId !== undefined || chosenView !== undefined)
       saveView({ view, selectedId });
@@ -130,7 +131,11 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
           region={initialParams.region}
           back={initialParams.back ?? null}
           isRetrying={state.isLocating}
-          onRetry={state.retryLocation}
+          onRetry={
+            state.notice === 'deferred'
+              ? state.requestLocation
+              : state.retryLocation
+          }
           onDismiss={state.dismissNotice}
         />
       )}
@@ -200,6 +205,11 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
           selectedId={activeId}
           onShowOnMap={handleShowOnMap}
           onRadiusChange={state.changeRadius}
+          listHref={
+            item
+              ? itemListHref(item, initialParams.region, initialParams.back)
+              : null
+          }
           className={cn(view === 'map' && 'hidden md:block')}
         />
         {view === 'map' && selected && (

@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import {
+  ArrowDown,
   ChartLine,
   ChevronDown,
   ChevronRight,
@@ -16,6 +17,7 @@ import { useParams } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useId, useState } from 'react';
 
+import { Button } from '@/components/ui/button';
 import { PriceRange } from '@/components/ui/price-range';
 import { RangeBar } from '@/components/ui/range-bar';
 import { RollingNumber } from '@/components/ui/rolling-number';
@@ -36,6 +38,7 @@ import {
 import { toPriceConditions } from '@/features/npay/price-filters';
 import { npayQueries } from '@/features/npay/queries';
 import type { ServiceRegion } from '@/features/regions/service-region';
+import { ApiError } from '@/lib/api/errors';
 import { cn } from '@/lib/utils';
 
 import { SectionError } from './section-error';
@@ -66,6 +69,7 @@ export function SelectedItemCard({
   expectedRows,
   onVariantChange,
   onClear,
+  onBackToList,
 }: {
   item: string;
   prices: ItemPrices;
@@ -79,6 +83,8 @@ export function SelectedItemCard({
   expectedRows: number;
   onVariantChange: (variant: VariantSelection) => void;
   onClear: () => void;
+  /** 아래 목록에서 골랐을 때만 있다. 고른 행으로 돌아간다. */
+  onBackToList?: () => void;
 }) {
   const t = useTranslations('hospitals.detail.selected');
   const tPrice = useTranslations('common.price');
@@ -96,6 +102,11 @@ export function SelectedItemCard({
       : rows;
   const isLoading =
     prices.isPending || !rows || (trend.isPending && !trend.error);
+  /** 주소에 남은 옛 항목 코드처럼 더 이상 없는 항목이면 다시 시도해도 소용없다. */
+  const isMissing =
+    failure.error instanceof ApiError &&
+    (failure.error.code === 'NPAY_ITEM_NOT_FOUND' ||
+      failure.error.status === 404);
 
   return (
     <section
@@ -112,6 +123,8 @@ export function SelectedItemCard({
         >
           {displayName ? (
             t('label', { name: displayName })
+          ) : isMissing ? (
+            t('missingLabel')
           ) : (
             <Skeleton className="h-5 w-40" />
           )}
@@ -126,7 +139,25 @@ export function SelectedItemCard({
         </button>
       </div>
 
-      {failure.error ? (
+      {onBackToList && (
+        <button
+          type="button"
+          onClick={onBackToList}
+          className="-mt-3 inline-flex min-h-11 w-fit items-center gap-1 text-label-bold text-primary-text hover:underline"
+        >
+          <ArrowDown aria-hidden="true" className="size-4" strokeWidth={2} />
+          {t('backToList')}
+        </button>
+      )}
+
+      {isMissing ? (
+        <div className="flex flex-col items-start gap-3">
+          <p className="text-body-sm text-text-secondary">{t('missing')}</p>
+          <Button variant="outline" size="md" onClick={onClear}>
+            {t('clear')}
+          </Button>
+        </div>
+      ) : failure.error ? (
         <SectionError
           error={failure.error}
           onRetry={() => void failure.retry()}
@@ -254,7 +285,7 @@ export function SelectedItemCard({
         </>
       )}
 
-      {!isLoading && (
+      {!isLoading && !isMissing && (
         <Link
           href={`/items/${item}`}
           className="inline-flex min-h-11 w-fit items-center gap-1 text-label-bold text-primary-text hover:underline"

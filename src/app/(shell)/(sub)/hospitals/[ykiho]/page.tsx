@@ -25,11 +25,17 @@ export async function generateMetadata({
   params,
 }: PageProps<'/hospitals/[ykiho]'>): Promise<Metadata> {
   const ykiho = decodeYkiho((await params).ykiho);
-  const [hospital, t] = await Promise.all([
+  const [hospital, t, tMeta] = await Promise.all([
     loadHospital(ykiho),
     getTranslations('hospitals.detail'),
+    getTranslations('metadata'),
   ]);
-  return buildHospitalMetadata({ ykiho, hospital, t });
+  return buildHospitalMetadata({
+    ykiho,
+    hospital,
+    t,
+    siteName: tMeta('title'),
+  });
 }
 
 /** 병원 상세(항목에서 왔으면 선택 카드까지)를 서버에서 익명으로 읽어 HTML에 담고, 브라우저는 같은 키로 이어받는다. */

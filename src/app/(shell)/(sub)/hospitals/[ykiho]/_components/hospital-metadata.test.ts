@@ -30,6 +30,7 @@ describe('buildHospitalMetadata', () => {
       ykiho: 'a+b==',
       hospital: HOSPITAL,
       t,
+      siteName: 'MediPrice',
     });
 
     expect(metadata.title).toBe(
@@ -45,6 +46,7 @@ describe('buildHospitalMetadata', () => {
       ykiho: 'a+b==',
       hospital: { ...HOSPITAL, sidoName: null, sgguName: null },
       t,
+      siteName: 'MediPrice',
     });
 
     expect(metadata.title).toBe('metadata.title {"name":"프라임병원"}');
@@ -55,13 +57,40 @@ describe('buildHospitalMetadata', () => {
 
   it('canonical은 항목 파라미터 없는 병원 주소이고 ykiho를 인코딩한다', () => {
     expect(
-      buildHospitalMetadata({ ykiho: 'a+b==', hospital: HOSPITAL, t })
-        .alternates,
+      buildHospitalMetadata({
+        ykiho: 'a+b==',
+        hospital: HOSPITAL,
+        t,
+        siteName: 'MediPrice',
+      }).alternates,
     ).toEqual({ canonical: '/hospitals/a%2Bb%3D%3D' });
   });
 
+  it('og:url을 canonical과 같게 두고 루트의 공통 값을 함께 넣는다', () => {
+    expect(
+      buildHospitalMetadata({
+        ykiho: 'H1',
+        hospital: HOSPITAL,
+        t,
+        siteName: 'MediPrice',
+      }).openGraph,
+    ).toEqual({
+      type: 'website',
+      siteName: 'MediPrice',
+      locale: 'ko_KR',
+      url: '/hospitals/H1',
+    });
+  });
+
   it('병원을 읽지 못했으면 공통 제목이다', () => {
-    expect(buildHospitalMetadata({ ykiho: 'H1', hospital: null, t })).toEqual({
+    expect(
+      buildHospitalMetadata({
+        ykiho: 'H1',
+        hospital: null,
+        t,
+        siteName: 'MediPrice',
+      }),
+    ).toMatchObject({
       title: 'metaTitle',
       alternates: { canonical: '/hospitals/H1' },
     });

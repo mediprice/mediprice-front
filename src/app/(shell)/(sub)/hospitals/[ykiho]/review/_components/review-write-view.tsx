@@ -1,6 +1,8 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { ChevronLeft } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -12,15 +14,18 @@ import {
 } from '@/components/layout/breadcrumb';
 import { PageContainer } from '@/components/layout/page-container';
 import { SubTopBar } from '@/components/layout/sub-top-bar';
+import { Button } from '@/components/ui/button';
 import { LoginRequired } from '@/features/auth/components/login-required';
 import { MyPageHeader } from '@/features/auth/components/my-page-header';
 import { MySideNav } from '@/features/auth/components/my-side-nav';
+import { useSession } from '@/features/auth/use-session';
 import { hospitalQueries } from '@/features/hospitals/queries';
 import { setReviewNotice } from '@/features/reviews/review-notice';
 import type { ReviewWriteFrom } from '@/features/reviews/write-href';
 
 import { LeaveConfirmDialog } from './leave-confirm-dialog';
 import { ReviewWriteBody } from './review-write-body';
+import { TargetHospitalCard } from './target-hospital-card';
 import { useLeaveGuard } from './use-leave-guard';
 
 export function ReviewWriteView({
@@ -37,6 +42,7 @@ export function ReviewWriteView({
   const tNav = useTranslations('nav');
   const router = useRouter();
   const hospital = useQuery(hospitalQueries.detail(ykiho));
+  const { status } = useSession();
   const isMyContext = from === 'my';
   const [isDirty, setIsDirty] = useState(false);
   const leave = useLeaveGuard(isDirty);
@@ -45,7 +51,7 @@ export function ReviewWriteView({
   const title = editId ? t('titleEdit') : t('title');
 
   return (
-    <div onClickCapture={leave.handleClickCapture}>
+    <div>
       <SubTopBar title={title} backHref={backHref} />
       <MyPageHeader className="max-lg:hidden">
         {isMyContext ? (
@@ -78,23 +84,39 @@ export function ReviewWriteView({
         }
       >
         {isMyContext && <MySideNav />}
-        <LoginRequired reason="review">
-          <ReviewWriteBody
-            ykiho={ykiho}
-            editId={editId}
-            backHref={backHref}
-            onDirtyChange={setIsDirty}
-            onCancel={() => leave.requestLeave(backHref)}
-            onSaved={() => {
-              setIsDirty(false);
-              setReviewNotice(
-                isMyContext ? 'my' : ykiho,
-                editId ? 'updated' : 'created',
-              );
-              router.replace(backHref);
-            }}
-          />
-        </LoginRequired>
+        {status === 'anonymous' ? (
+          /** 로그인 전에도 어느 병원의 후기인지와 돌아갈 길을 보여 준다. */
+          <div className="flex flex-col gap-6">
+            <TargetHospitalCard ykiho={ykiho} />
+            <div className="rounded-xl bg-surface">
+              <LoginRequired reason="review">{null}</LoginRequired>
+            </div>
+            <Button asChild variant="ghost" size="md" className="w-fit">
+              <Link href={backHref}>
+                <ChevronLeft aria-hidden="true" />
+                {isMyContext ? t('backToMyReviews') : t('backToHospital')}
+              </Link>
+            </Button>
+          </div>
+        ) : (
+          <LoginRequired reason="review">
+            <ReviewWriteBody
+              ykiho={ykiho}
+              editId={editId}
+              backHref={backHref}
+              onDirtyChange={setIsDirty}
+              onCancel={() => leave.requestLeave(backHref)}
+              onSaved={() => {
+                setIsDirty(false);
+                setReviewNotice(
+                  isMyContext ? 'my' : ykiho,
+                  editId ? 'updated' : 'created',
+                );
+                router.replace(backHref);
+              }}
+            />
+          </LoginRequired>
+        )}
       </PageContainer>
       <LeaveConfirmDialog
         open={leave.pendingHref != null}

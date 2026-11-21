@@ -31,7 +31,7 @@ import { DetailSkeleton } from './detail-skeleton';
 import { HospitalHeader } from './hospital-header';
 import { LocationSection } from './location-section';
 import { OperatingSection } from './operating-section';
-import { PriceList } from './price-list';
+import { PriceList, priceRowKey } from './price-list';
 import { PriceTrend } from './price-trend';
 import { ReviewSection } from './review-section';
 import { SectionNav } from './section-nav';
@@ -80,6 +80,8 @@ export function HospitalDetail({
   const [item, setItem] = useState(initialItem);
   const [variant, setVariant] = useState(initialVariant);
   const [expectedRows, setExpectedRows] = useState(DEFAULT_EXPECTED_ROWS);
+  /** 목록에서 골랐으면 그 행. 선택 카드의 "목록으로 돌아가기"가 이 행으로 돌아온다. */
+  const [listRow, setListRow] = useState<string | null>(null);
   const detail = useQuery(hospitalQueries.detail(ykiho));
   useRecordView(hospitalQueries.detail(ykiho));
   /** 선택 항목의 상세도 서버가 채우므로, 로그인했으면 항목도 최근 본 기록에 남긴다(서버 렌더 전과 같은 동작). */
@@ -105,6 +107,14 @@ export function HospitalDetail({
   /** 처음 들어올 때만 선택 카드가 다 채워진 뒤 아래 구역을 그려, 카드가 자라며 화면 안의 내용을 밀지 않게 한다. */
   const [hasSettled, setHasSettled] = useState(initialItem == null);
   if (!hasSettled && detail.data && !isCardLoading) setHasSettled(true);
+  /** 들어올 때 고른 항목만 목록 맨 위에 올려 두고, 그 순서를 끝까지 지켜 목록에서 고를 때 행이 움직이지 않게 한다. */
+  const [pinned, setPinned] = useState<{
+    npayCode: string;
+    rows: NonNullable<typeof prices.rows>;
+  } | null>(null);
+  if (!pinned && initialItem && item === initialItem && prices.rows) {
+    setPinned({ npayCode: initialItem, rows: prices.rows });
+  }
 
   const failure = useStickyError(detail.error, () => detail.refetch());
   const isNotFound =
@@ -121,12 +131,29 @@ export function HospitalDetail({
     setExpectedRows(variantCount);
     syncItemParams(code, nextVariant);
     if (code) {
+      setListRow(nextVariant ? priceRowKey(code, nextVariant) : null);
       requestAnimationFrame(() => {
         const card = document.getElementById('selected-item');
         card?.scrollIntoView({ block: 'start' });
         card?.focus({ preventScroll: true });
       });
+    } else {
+      setListRow(null);
     }
+  }
+
+  /** 고른 행으로 돌아가 포커스를 둔다. 행이 사라졌으면(다른 조건으로 검색) 목록 머리로 간다. */
+  function returnToList(row: string | null) {
+    requestAnimationFrame(() => {
+      const target =
+        (row &&
+          document.querySelector<HTMLElement>(
+            `[data-price-row="${CSS.escape(row)}"]`,
+          )) ||
+        document.getElementById('prices');
+      target?.scrollIntoView({ block: 'center' });
+      target?.focus({ preventScroll: true });
+    });
   }
 
   if (failure.error) {
@@ -195,7 +222,11 @@ export function HospitalDetail({
               setVariant(next);
               syncItemParams(item, next);
             }}
-            onClear={() => handleSelectItem(null)}
+            onClear={() => {
+              handleSelectItem(null);
+              if (listRow) returnToList(listRow);
+            }}
+            onBackToList={listRow ? () => returnToList(listRow) : undefined}
           />
           {trend.summary.kind === 'trend' && (
             <PriceTrend
@@ -211,7 +242,7 @@ export function HospitalDetail({
           <PriceList
             ykiho={ykiho}
             selectedItem={item}
-            selectedRows={prices.rows}
+            pinned={pinned}
             onSelect={handleSelectItem}
           />
           <OperatingSection hospital={hospital} />
@@ -232,7 +263,7 @@ export function HospitalDetail({
     return (
       <div className="min-h-dvh">
         <HospitalHeader hospital={hospital} itemCrumb={itemCrumb} />
-        <PageContainer className="flex flex-col gap-8 pt-6 pb-section lg:gap-10 lg:pt-8 [&>*]:lg:max-w-3xl">
+        <PageContainer className="flex flex-col gap-8 pt-6 pb-section md:max-w-2xl lg:max-w-page lg:gap-10 lg:pt-8 [&>*]:lg:max-w-3xl">
           {sections}
         </PageContainer>
       </div>

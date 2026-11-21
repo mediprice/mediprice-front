@@ -5,7 +5,14 @@ import {
   useInfiniteQuery,
   useQuery,
 } from '@tanstack/react-query';
-import { Check, ChevronDown, Info, Search, SearchX } from 'lucide-react';
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Info,
+  Search,
+  SearchX,
+} from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
@@ -33,16 +40,21 @@ type PriceRow = components['schemas']['HospitalItemPriceResponse'];
 
 const SEARCH_DELAY_MS = 300;
 
+/** 목록 행을 다시 찾을 때 쓰는 값. 선택 카드의 "목록으로 돌아가기"가 고른 행으로 돌아온다. */
+export function priceRowKey(code: string, variant: VariantSelection) {
+  return `${code}|${variant.name}|${variant.price ?? ''}`;
+}
+
 export function PriceList({
   ykiho,
   selectedItem,
-  selectedRows,
+  pinned,
   onSelect,
 }: {
   ykiho: string;
   selectedItem: string | null;
-  /** 선택한 항목의 행. 아직 불러오지 않은 페이지에 있어도 그 분류의 맨 위에 보인다. */
-  selectedRows: readonly PriceRow[] | undefined;
+  /** 들어올 때 고른 항목의 행. 아직 불러오지 않은 페이지에 있어도 그 분류의 맨 위에 보인다. 목록에서 고를 때는 순서를 바꾸지 않는다. */
+  pinned: { npayCode: string; rows: readonly PriceRow[] } | null;
   onSelect: (
     code: string,
     variant: VariantSelection,
@@ -80,12 +92,7 @@ export function PriceList({
   const failure = useStickyError(list.error, () => list.refetch());
   const rows = list.data?.pages.flatMap((page) => page.content) ?? [];
   const total = list.data?.pages[0]?.totalElements ?? 0;
-  const groups = groupPriceRows(
-    rows,
-    selectedItem && !isFiltered
-      ? { npayCode: selectedItem, rows: selectedRows ?? [] }
-      : null,
-  );
+  const groups = groupPriceRows(rows, isFiltered ? null : pinned);
 
   return (
     <section
@@ -255,51 +262,58 @@ function PriceRowButton({
   const format = useFormatter();
   const name = priceRowName(row);
   const standardName = lastSegment(row.itemName);
+  const variant = { name, price: row.price };
 
   return (
     <button
       type="button"
       aria-current={isSelected || undefined}
-      onClick={() => onSelect(row.npayCode, { name, price: row.price })}
-      className={cn(
-        'my-1 flex w-full flex-col gap-0.5 rounded-lg px-3 py-3 text-left transition-colors hover:bg-surface-strong',
-      )}
+      data-price-row={priceRowKey(row.npayCode, variant)}
+      onClick={() => onSelect(row.npayCode, variant)}
+      className="my-1 flex w-full items-center gap-2 rounded-lg py-3 pr-1 pl-3 text-left transition-colors hover:bg-surface-strong active:bg-surface-strong"
     >
-      <span
-        className={cn(
-          'flex items-center gap-1.5 text-label text-text-primary',
-          isSelected && 'text-label-bold text-primary-text',
-        )}
-      >
-        {isSelected && (
-          <Check
-            aria-hidden="true"
-            className="size-4 shrink-0"
-            strokeWidth={2}
-          />
-        )}
-        <span className="min-w-0">
-          <VariantName name={name} />
-        </span>
-      </span>
-      <span className="flex items-end justify-between gap-3">
-        <span className="min-w-0 text-caption text-text-tertiary">
-          {standardName !== name && (
-            <span title={row.itemName} className="block">
-              {standardName}
-            </span>
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span
+          className={cn(
+            'flex items-center gap-1.5 text-label text-text-primary',
+            isSelected && 'text-label-bold text-primary-text',
           )}
-          {row.startDate &&
-            t('appliedOn', {
-              date: format.dateTime(new Date(row.startDate), 'dateShort'),
-            })}
+        >
+          {isSelected && (
+            <Check
+              aria-hidden="true"
+              className="size-4 shrink-0"
+              strokeWidth={2}
+            />
+          )}
+          <span className="min-w-0">
+            <VariantName name={name} />
+          </span>
         </span>
-        <PriceRange
-          min={row.price}
-          max={row.price}
-          className="shrink-0 text-label-bold text-text-primary"
-        />
+        <span className="flex items-end justify-between gap-3">
+          <span className="min-w-0 text-caption text-text-tertiary">
+            {standardName !== name && (
+              <span title={row.itemName} className="block">
+                {standardName}
+              </span>
+            )}
+            {row.startDate &&
+              t('appliedOn', {
+                date: format.dateTime(new Date(row.startDate), 'dateShort'),
+              })}
+          </span>
+          <PriceRange
+            min={row.price}
+            max={row.price}
+            className="shrink-0 text-label-bold text-text-primary"
+          />
+        </span>
       </span>
+      <ChevronRight
+        aria-hidden="true"
+        className="size-5 shrink-0 text-text-tertiary"
+        strokeWidth={1.75}
+      />
     </button>
   );
 }

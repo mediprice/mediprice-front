@@ -6,6 +6,7 @@ import {
   useQuery,
 } from '@tanstack/react-query';
 import { CircleAlert, MapPinned } from 'lucide-react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,8 @@ import { npayQueries } from '@/features/npay/queries';
 import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
 import { errorMessageKey } from '@/lib/api/error-message';
 import { cn } from '@/lib/utils';
+
+import type { itemListHref } from './item-list-href';
 
 type NearbyPage = { content: NearbyHospital[]; totalElements: number };
 
@@ -38,6 +41,7 @@ export function NearbyList({
   selectedId,
   onShowOnMap,
   onRadiusChange,
+  listHref,
   className,
 }: {
   query: UseInfiniteQueryResult<InfiniteData<NearbyPage>>;
@@ -49,6 +53,8 @@ export function NearbyList({
   selectedId: string | null;
   onShowOnMap: (id: string) => void;
   onRadiusChange: (radius: RadiusOption) => void;
+  /** 항목으로 들어왔으면 그 항목의 지역 가격 목록. 주변에 없을 때 다른 지역 병원을 보러 간다. */
+  listHref: ReturnType<typeof itemListHref> | null;
   className?: string;
 }) {
   const t = useTranslations('map.list');
@@ -133,17 +139,41 @@ export function NearbyList({
           <EmptyState
             icon={<MapPinned />}
             title={item ? t('emptyItemTitle') : t('emptyTitle')}
-            description={t('emptyDescription')}
+            description={
+              wider
+                ? t('emptyDescription')
+                : t(
+                    listHref
+                      ? 'emptyMaxItemDescription'
+                      : 'emptyMaxDescription',
+                    {
+                      km: radius / 1000,
+                    },
+                  )
+            }
             className="rounded-xl bg-bg"
             action={
-              wider && (
-                <Button
-                  variant="tint"
-                  size="md"
-                  onClick={() => onRadiusChange(wider)}
-                >
-                  {t('widen', { km: wider / 1000 })}
-                </Button>
+              (wider || listHref) && (
+                <>
+                  {wider && (
+                    <Button
+                      variant="tint"
+                      size="md"
+                      onClick={() => onRadiusChange(wider)}
+                    >
+                      {t('widen', { km: wider / 1000 })}
+                    </Button>
+                  )}
+                  {listHref && (
+                    <Button
+                      asChild
+                      variant={wider ? 'ghost' : 'tint'}
+                      size="md"
+                    >
+                      <Link href={listHref}>{t('openPriceList')}</Link>
+                    </Button>
+                  )}
+                </>
               )
             }
           />
