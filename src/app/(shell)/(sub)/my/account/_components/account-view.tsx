@@ -17,6 +17,7 @@ import { MySideNav } from '@/features/auth/components/my-side-nav';
 import { signOut } from '@/features/auth/session';
 
 import { AccountInfoCard } from './account-info-card';
+import { MyDataSection } from './my-data-section';
 import { WithdrawSection } from './withdraw-section';
 
 export function AccountView() {
@@ -58,6 +59,7 @@ export function AccountView() {
                   </Button>
                 }
               />
+              <MyDataSection />
               <WithdrawSection />
             </div>
           )}

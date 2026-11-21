@@ -13,6 +13,7 @@ import { MAX_COMPARE } from '../compare-params';
 import { buildBasketHref, useCompareStore } from '../compare-store';
 import { ClearCompareDialog } from './clear-compare-dialog';
 import { CompareAnnouncer } from './compare-announcer';
+import { CompareNumber } from './compare-number';
 import { useCoveredHeight } from './use-covered-height';
 
 const FULL_NOTICE_MS = 5000;
@@ -37,6 +38,7 @@ export function CompareTray() {
   const coveredHeight = useCoveredHeight(barRef, isVisible);
   const isFull = notice?.kind === 'full' && notice.id !== dismissedNotice;
   const canCompare = hospitals.length >= 2;
+  const names = hospitals.map((hospital) => hospital.name).join(' · ');
 
   useEffect(() => {
     void useCompareStore.persist.rehydrate();
@@ -82,30 +84,40 @@ export function CompareTray() {
                   {t('full', { max: MAX_COMPARE })}
                 </p>
               )}
-              <div className="flex items-center gap-2 py-3 lg:pointer-events-auto lg:gap-4 lg:rounded-xl lg:border lg:border-primary lg:bg-bg lg:py-3 lg:pr-3 lg:pl-6 lg:shadow-float">
-                <div className="flex min-w-0 flex-1 flex-col lg:flex-row lg:items-center lg:gap-4">
+              {/**
+               * 정보가 남는 폭을 거의 다 가져가서, 큰 글자로 줄이 나뉠 때만 비교하기가 한 줄을 다 쓴다.
+               * 컨테이너 쿼리 단위가 rem이라 글자를 키웠을 때만 좁은 배치가 된다: 모바일은 이름을 한 줄로, 데스크톱은 칩 대신 이름 한 줄로.
+               */}
+              <div className="@container/tray flex flex-wrap items-center gap-2 py-3 lg:pointer-events-auto lg:gap-x-4 lg:rounded-xl lg:border lg:border-primary lg:bg-bg lg:py-3 lg:pr-3 lg:pl-6 lg:shadow-float">
+                <div className="flex min-w-0 flex-[999_1_12rem] flex-col lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-4 lg:gap-y-2">
                   <p
                     ref={countRef}
                     tabIndex={-1}
-                    className="shrink-0 text-label-bold text-text-primary tabular-nums outline-none"
+                    className="shrink-0 text-label-bold whitespace-nowrap text-text-primary tabular-nums outline-none"
                   >
                     {t('count', {
                       count: hospitals.length,
                       max: MAX_COMPARE,
                     })}
                   </p>
-                  <p className="truncate text-body-sm text-text-secondary lg:hidden">
+                  <p
+                    title={canCompare ? names : undefined}
+                    className="line-clamp-2 text-body-sm break-keep text-text-secondary lg:line-clamp-1 @max-[16rem]/tray:line-clamp-1 lg:@min-[48rem]/tray:hidden"
+                  >
                     {canCompare
-                      ? hospitals.map((hospital) => hospital.name).join(' · ')
+                      ? names
                       : t('needMore', { count: 2 - hospitals.length })}
                   </p>
-                  <ul className="hidden min-w-0 flex-wrap items-center gap-2 lg:flex">
-                    {hospitals.map((hospital) => (
+                  <ul className="hidden min-w-0 flex-wrap items-center gap-2 lg:@min-[48rem]/tray:flex">
+                    {hospitals.map((hospital, index) => (
                       <li
                         key={hospital.ykiho}
-                        className="inline-flex h-9 max-w-60 items-center gap-0.5 rounded-full border border-border bg-bg pr-1 pl-3.5 text-body-sm text-text-primary"
+                        className="inline-flex h-9 max-w-60 items-center gap-1 rounded-full border border-border bg-bg pr-1 pl-1.5 text-body-sm text-text-primary"
                       >
-                        <span className="truncate">{hospital.name}</span>
+                        <CompareNumber value={index + 1} size="sm" />
+                        <span title={hospital.name} className="truncate">
+                          {hospital.name}
+                        </span>
                         <button
                           type="button"
                           aria-label={t('remove', { name: hospital.name })}
@@ -132,7 +144,7 @@ export function CompareTray() {
                     </p>
                   ) : (
                     !canCompare && (
-                      <p className="hidden text-body-sm text-text-secondary lg:block">
+                      <p className="hidden text-body-sm text-text-secondary lg:@min-[48rem]/tray:block">
                         {t('needMore', { count: 2 - hospitals.length })}
                       </p>
                     )
@@ -144,13 +156,13 @@ export function CompareTray() {
                   </Button>
                 </ClearCompareDialog>
                 {canCompare ? (
-                  <Button asChild size="md" elevated>
+                  <Button asChild size="md" elevated className="grow">
                     <Link href={buildBasketHref(hospitals)}>
                       {t('compare')}
                     </Link>
                   </Button>
                 ) : (
-                  <Button size="md" disabled>
+                  <Button size="md" disabled className="grow">
                     {t('compare')}
                   </Button>
                 )}

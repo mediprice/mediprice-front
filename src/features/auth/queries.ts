@@ -7,6 +7,9 @@ import { BFF_BASE } from '@/lib/api/paths';
 import type { components } from '@/lib/api/schema';
 import { unwrap } from '@/lib/api/unwrap';
 
+import { consentApi } from './consent-api';
+import { myDataApi } from './my-data-export';
+
 export type CurrentUser = components['schemas']['UserResponse'];
 
 const sessionSchema = z.object({ authenticated: z.boolean() });
@@ -74,3 +77,21 @@ export function updateMyName(name: string) {
 export function withdrawAccount() {
   return unwrap(apiClient.DELETE('/api/users/me'));
 }
+
+/** 개인정보 열람 요구에 맞춰 서비스가 저장한 내 정보를 모두 받는다. */
+export function exportMyData() {
+  return myDataApi.fetchExport();
+}
+
+export const consentKeys = {
+  all: ['consents'] as const,
+  status: () => [...consentKeys.all, 'status'] as const,
+};
+
+export const consentQueries = {
+  status: () =>
+    queryOptions({
+      queryKey: consentKeys.status(),
+      queryFn: () => consentApi.fetchStatus(),
+    }),
+};

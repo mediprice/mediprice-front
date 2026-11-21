@@ -3,8 +3,12 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 import type { PriceSummary } from '../price-summary';
+import { PriceSpread } from './price-spread';
 
-/** 극단값에 끌려가는 최저~최고 대신 평균을 크게, 범위와 병원 수를 작게 보여 준다. */
+/**
+ * 극단값에 끌려가는 최저~최고 대신 평균을 크게, 세부 항목별 최저~최고(글자)와 병원 수를 작게 보여 준다(docs 14장).
+ * 값 점이 없는 범위 막대는 정보가 없어 쓰지 않는다.
+ */
 export function PriceOverview({
   summary,
   className,
@@ -13,7 +17,8 @@ export function PriceOverview({
   className?: string;
 }) {
   const t = useTranslations('common.price');
-  if (summary.avgPrice == null) {
+  const average = summary.avgPrice;
+  if (average == null) {
     return (
       <p className={cn('text-body-sm text-text-tertiary', className)}>
         {t('none')}
@@ -24,18 +29,17 @@ export function PriceOverview({
     <div className={cn('space-y-0.5', className)}>
       <p className="text-price-md tabular-nums">
         {t.rich('averageParts', {
-          amount: summary.avgPrice,
+          amount: average,
           nb: (chunks) => <span className="whitespace-nowrap">{chunks}</span>,
         })}
       </p>
-      <p className="flex flex-wrap gap-x-1.5 text-caption text-text-tertiary tabular-nums [&>span]:whitespace-nowrap">
-        {summary.minPrice != null && (
-          <span>{t('minimum', { amount: summary.minPrice })}</span>
-        )}
-        {summary.maxPrice != null && (
-          <span>{t('maximum', { amount: summary.maxPrice })}</span>
-        )}
-        <span>{t('hospitals', { count: summary.hospitalCount })}</span>
+      <PriceSpread
+        min={summary.minPrice}
+        max={summary.maxPrice}
+        className="text-caption text-text-tertiary"
+      />
+      <p className="text-caption text-text-tertiary tabular-nums">
+        {t('hospitals', { count: summary.hospitalCount })}
       </p>
     </div>
   );

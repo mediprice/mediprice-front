@@ -26,7 +26,7 @@ export function LeaveConfirmDialog({
       <CenteredDialogContent title={t('title')}>
         <div className="flex flex-col gap-4">
           <p className="text-body-sm text-text-secondary">{t('description')}</p>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex flex-wrap gap-2 *:flex-[1_1_8rem]">
             <Button variant="tint" size="md" onClick={onLeave}>
               {t('leave')}
             </Button>

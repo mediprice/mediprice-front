@@ -12,12 +12,8 @@ import { withdrawAccount } from '@/features/auth/queries';
 import { signOut } from '@/features/auth/session';
 import { errorMessageKey } from '@/lib/api/error-message';
 
-const DELETED_ITEMS = [
-  'medicalProfile',
-  'favorites',
-  'history',
-  'reviews',
-] as const;
+/** 후기는 지우지 않고 작성자 정보만 떼어 남긴다(백엔드 탈퇴 동작). */
+const DELETED_ITEMS = ['medicalProfile', 'favorites', 'history'] as const;
 
 export function WithdrawDialog({
   open,
@@ -64,6 +60,9 @@ export function WithdrawDialog({
                 <li key={item}>{t(`items.${item}`)}</li>
               ))}
             </ul>
+            <p className="mt-3 text-body-sm text-text-secondary">
+              {t('reviewsKept')}
+            </p>
           </div>
           <p className="text-body-sm text-text-secondary">{t('note')}</p>
           {withdraw.isError && (

@@ -35,6 +35,7 @@
     "title": "자주 찾는 진료 항목",
     "description": "항목을 고르면 병원별 공개 가격을 비교할 수 있어요",
     "viewAll": "전체 보기",
+    "rank": "{rank, number}위",
     "priceLabel": "{region} 공개 가격",
     "error": "가격을 불러오지 못했어요",
     "items": {
@@ -62,7 +63,8 @@
         "name": "대상포진 예방접종",
         "description": "싱그릭스 백신 1회 접종 기준"
       }
-    }
+    },
+    "rankedDescription": "최근 30일 동안 이용자가 많이 본 순서예요. 항목을 고르면 병원별 공개 가격을 비교할 수 있어요"
   },
   "howItWorks": {
     "title": "정확한 이름을 몰라도, 내 상황부터 시작하세요",
@@ -73,7 +75,7 @@
       },
       "compare": {
         "title": "병원별 가격 확인",
-        "description": "고른 항목을 공개한 병원들의 가격을 낮은 순으로 봐요"
+        "description": "지역 평균을 먼저 보고, 세부 항목별 최저·최고 가격을 함께 봐요"
       },
       "decide": {
         "title": "위치와 조건 비교",
@@ -90,6 +92,16 @@
     "source": {
       "title": "출처와 적용일 표시",
       "description": "가격마다 출처와 적용 시작일을 함께 표시해요"
+    },
+    "stats": {
+      "label": "지금 볼 수 있는 가격",
+      "hospitals": "병·의원",
+      "hospitalsValue": "{count, number}곳",
+      "items": "비급여 항목",
+      "itemsValue": "{count, number}개",
+      "prices": "공개 가격",
+      "pricesValue": "{count, number}건",
+      "dataDate": "{date} 기준"
     }
   },
   "faq": {

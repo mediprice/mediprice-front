@@ -84,6 +84,7 @@ Next의 특수 파일(`page.tsx`, `layout.tsx`, `route.ts`)과 폴더 이름도 
 ```text
 src/
   env.ts                  검증된 환경변수
+  config/                 법적 고지 사실(legal-facts.json)과 약관 문서 버전 설정
   i18n/                   next-intl 설정과 화면 문구. 코드에는 키만 둔다(12장)
     request.ts            locale·시간대·포맷 설정
     messages/ko/*.json    화면 문구 (네임스페이스마다 파일 하나, messages/ko.ts가 합친다)
@@ -106,6 +107,7 @@ src/
   lib/                    도메인을 모르는 공용 코드
     api/                  HTTP 클라이언트, 에러, 에러 코드 → 문구 키, 쿼리 직렬화, 재발급, 세션 만료 이벤트, schema.d.ts
   server/bff/             서버 전용 코드: 쿠키, 업스트림 호출, 재발급, 응답 헬퍼
+  server/api/             서버 컴포넌트의 익명 공개 조회(publicApi, 요청마다 QueryClient, 404 판정)
   test/                   테스트 공용 설정 (msw 서버, 요청 헬퍼)
 ```
 
@@ -120,7 +122,7 @@ app ──▶ features ──▶ components, lib
 ```
 
 - `lib`, `components`는 `features`, `app`, `server`를 import하지 않는다. 도메인을 알면 `features`에 둔다.
-- 클라이언트 코드(`features`, `components`, `lib`, `app`의 화면)는 `server`를 import하지 않는다. 예외는 `app/bff/**` 라우트와 테스트다.
+- 클라이언트 코드(`features`, `components`, `lib`, `app`의 화면)는 `server`를 import하지 않는다. 예외는 `app/bff/**` 라우트, 서버 컴포넌트(`page.tsx`·`sitemap.ts`와 `import 'server-only'`를 둔 그 라우트의 조각)가 쓰는 `server/api/**`, 테스트다.
 - `server/**`의 파일은 첫 줄에 `import 'server-only';`를 둔다.
 - 다른 feature의 코드는 `queries.ts`와 `components/`, 그리고 여러 화면이 함께 쓰도록 만든 공용 모듈(`regions/service-region.ts`, `regions/format-location.ts`, `npay/price-summary.ts`, `npay/catalog.ts`, `npay/use-category-label.ts`)만 import한다. 그 밖의 내부 파일을 직접 가져오지 않는다.
 - 폴더를 넘나드는 import는 `@/` 절대 경로를 쓰고 `../..`는 쓰지 않는다.
@@ -358,11 +360,14 @@ export const hospitalQueries = {
 };
 ```
 
-화면에서는 `useQuery(hospitalQueries.detail(id))`로 쓴다. `apiClient`는 브라우저 전용이라 서버 컴포넌트에서 이 옵션으로 prefetch할 수 없다. 서버에서 prefetch가 필요해지면 서버용 호출 경로를 따로 만든다.
+화면에서는 `useQuery(hospitalQueries.detail(id))`로 쓴다. `apiClient`는 브라우저 전용이라, 검색에 노출할 화면(항목·병원 상세)은 같은 옵션에 마지막 인자로 `publicApi`(`server/api/public-client.ts`, 쿠키 없는 익명 호출, Next 데이터 캐시 5분)를 넘겨 서버에서 채우고 `HydrationBoundary`로 넘긴다. 키가 같아 브라우저는 다시 읽지 않는다.
+
+- 없는 코드는 서버에서 `loadOrNotFound`로 `notFound()`를 불러 HTTP 404로 끝낸다. 그 밖의 실패는 그 쿼리만 빼고 그려 브라우저가 다시 읽게 한다.
+- 백엔드가 로그인 사용자의 상세 조회에 최근 본 기록을 남기므로, 서버가 채운 상세는 `useRecordView`(`features/history`)로 로그인했을 때만 BFF로 한 번 더 읽는다.
 
 ### 7.2.1 생성 타입에 아직 없는 엔드포인트
 
-백엔드 브랜치에만 있고 배포·`pnpm api:generate`가 되지 않은 엔드포인트는 `features/<도메인>/api.ts`에서 `createApiFetch`로 `/bff/api/...`를 부르고, 응답을 zod로 검증한다(예: `features/ai/api.ts`, `features/live-fee/api.ts`). 실패는 같은 `ApiError`/`NetworkError`로 던져 `errorMessageKey`가 그대로 동작하게 한다. 파일에 "배포 후 생성 클라이언트로 바꾼다"는 한 줄 TSDoc을 남기고, 배포되면 `apiClient` + `unwrap`으로 옮긴다.
+백엔드 브랜치에만 있고 배포·`pnpm api:generate`가 되지 않은 엔드포인트는 `features/<도메인>/api.ts`에서 `createApiFetch`로 `/bff/api/...`를 부르고, 응답을 zod로 검증한다(예: `features/ai/api.ts`, `features/live-fee/api.ts`). JSON을 주고받는 단순한 호출은 `createUntypedRequest`(`lib/api/untyped-request.ts`)를 쓴다(예: `features/auth/consent-api.ts`, `features/medical-profile/api.ts`). 배포된 백엔드에 아직 없는 경로는 404 `RESOURCE_NOT_FOUND`로 오므로, 화면은 이를 "아직 지원하지 않음"으로 다루고 막지 않는다(예: `/users/me`의 `requiredConsentsMissing`이 없으면 동의 화면을 띄우지 않는다). 실패는 같은 `ApiError`/`NetworkError`로 던져 `errorMessageKey`가 그대로 동작하게 한다. 파일에 "배포 후 생성 클라이언트로 바꾼다"는 한 줄 TSDoc을 남기고, 배포되면 `apiClient` + `unwrap`으로 옮긴다.
 
 ### 7.3 변경과 캐시
 
@@ -403,25 +408,40 @@ export const hospitalQueries = {
 | 그림자   | `shadow-card` `shadow-cta-glow` `shadow-float` `shadow-sheet` `shadow-bar`. 쓰임은 카드·떠 있는 것(다이얼로그)·시트·하단 바·대표 CTA로만 나눈다                                                                     |
 | 레이아웃 | `max-w-page` `px-page`(16·24·32px + 노치) `py-section`(40 → lg 64px) `h-top-nav` `h-top-bar` `h-tab-bar` `pb-tab-bar` `pb-safe` `pt-safe` `px-safe` `touch-target`                                                  |
 | 겹침     | `z-(--z-header)` `z-(--z-tab-bar)` `z-(--z-bottom-cta)` `z-(--z-overlay)` `z-(--z-toast)` `z-(--z-skip-link)`. 숫자 `z-40`을 직접 쓰지 않는다                                                                       |
-| 움직임   | `ease-standard`, 150–200ms. `prefers-reduced-motion`이면 전역에서 멈춘다(상태를 알리는 스피너만 `data-allow-motion`)                                                                                                |
+| 움직임   | 상태 전환은 `ease-standard` 150–200ms, 처음 나타나는 것(스크롤 등장·범위 막대·숫자 롤업)은 `ease-enter`. `prefers-reduced-motion`이면 전역에서 멈춘다(상태를 알리는 스피너만 `data-allow-motion`)                   |
 
 - 타이포는 모바일 우선이다. `hero` `display` `title` `price-lg` `price-xl`은 모바일 값(28·28·24·22·26px)이고 `lg`부터 데스크톱 값(34·32·26·24·30px)으로 자동으로 바뀐다. 읽는 거리가 먼 데스크톱에서는 `caption`(13→14px), `body-sm`·`label`(15→16px)도 한 단계 커진다. 배경 그라데이션과 왼쪽 선 강조는 쓰지 않는다(단색 띠, 옅은 바탕으로 구분). 화면에서 `lg:text-*`를 따로 붙이지 않는다.
+- 제목 크기는 단계를 따른다. 페이지 H1은 `text-display`(홈 히어로만 `text-hero`), 페이지 섹션 H2는 `text-section`(`SectionHeader`), 섹션 안 하위 묶음과 카드·알림·옆 칸 제목은 `text-heading` 이하를 쓴다. 어떤 제목도 그 화면의 H1보다 크게 보이지 않게 한다. 예외: 지도처럼 화면 대부분을 도구가 차지하는 화면의 도구 막대 H1과, 절이 많은 법률 문서의 절 H2는 `text-heading`을 쓴다.
 - 타이포 토큰 하나에 크기·행간·자간·굵기가 함께 들어 있다. `font-bold` 같은 굵기 클래스를 따로 붙이지 않는다(활성 상태처럼 굵기만 바꿀 때는 예외).
 - 본문은 16px(`text-body`)이 기본이다. 13px(`text-caption`)은 출처·날짜 같은 메타 정보에만 쓰고, 가격 조건("1회 기준")처럼 판단에 필요한 정보에는 쓰지 않는다.
 - 대비: 글자는 배경과 4.5:1 이상(큰 글자 3:1). `text-tertiary`까지는 흰색·surface·surface-strong 위에서 통과한다. 입력창처럼 테두리만으로 구분되는 컨트롤은 `border-border`(1.3:1)가 아니라 `border-border-strong`(3.3:1)을 쓴다.
 - Tailwind 기본 팔레트(`blue-600`, `slate-50`), `white`·`black`, 기본 글자 크기(`text-sm`~`text-9xl`), shadcn 별칭(`bg-background`, `text-muted-foreground`)은 쓰지 않는다(lint). 기본 팔레트는 CSS도 만들어지지 않는다.
 - 간격은 Tailwind 기본 4px 단위를 그대로 쓴다(`gap-3` = 12px, `w-70` = 280px).
 - arbitrary value(`[...]`)는 토큰으로 표현할 수 없을 때만 쓴다(safe-area 계산, grid template).
-- 가격처럼 자릿수를 맞춰야 하는 숫자에는 `tabular-nums`를 쓴다.
+- 가격처럼 자릿수를 맞춰야 하는 숫자에는 `tabular-nums`를 쓴다. `text-price-*`에는 이미 들어 있다.
+- 글자 크기에 따라 배치가 바뀌어야 하는 곳(필터 열 옆의 목록 행, 고정 바)은 화면 폭 `lg:`·`xl:` 대신 rem 단위 컨테이너 쿼리(`@container` + `@min-[50rem]:`)를 쓴다. rem 기준이라 글자를 200%로 키우면 좁은 배치로 바뀐다.
 - 토큰을 추가하거나 이름을 바꾸면 `src/lib/utils.ts`의 `extendTailwindMerge` 목록도 고친다. 등록하지 않으면 `cn('text-title', 'text-text-primary')`에서 앞 클래스가 지워진다.
 - 토큰 이름이 shadcn 별칭과 겹치지 않게 한다(예: 입력창 타이포가 `text-input`이면 `--color-input`과 겹쳐 색까지 바뀐다).
 - 다크 모드는 없다.
 
-### 8.3 폰트
+### 8.3 움직임과 공용 조각
+
+| 조각                                                                   | 쓰임                                                                                                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RangeBar`(`components/ui/range-bar.tsx`)                              | `min` `max` `average?` `value`(이 병원 점, 필수) `valueLabel?` `size`(`md` 라벨 붙은 막대, `sm` 목록 행의 작은 막대) `showAverageTick?`(sm 평균 눈금 라벨). 평균이 가운데인 구간별 눈금(최저→평균 0–50%, 평균→최고 50–100%), 끝 라벨은 실제 최저·최고. 범위가 없거나 최저=최고면 그리지 않는다. 막대는 `aria-hidden`, 뜻은 sr-only 문장. 값 점이 있는 곳(항목 행, 병원 선택 항목)에서만 쓴다(14장) |
+| `RollingNumber`(`components/ui/rolling-number.tsx`)                    | `value` `format?`(가격은 `(n) => t('won', { amount: n })`). 처음 보일 때와 값이 바뀔 때 0부터 굴린다. 접근성 이름은 최종값                                                                                                                                                                                                                                                                         |
+| `Reveal`(`components/ui/reveal.tsx`)                                   | 스크롤 등장(12px 아래에서 떠오름). `asChild` `delayMs`. 서버 렌더·이미 보이는 것·reduced-motion은 그대로 보인다                                                                                                                                                                                                                                                                                    |
+| `PriceOverview`·`PriceSpread`·`AverageTag`(`features/npay/components`) | `PriceOverview`는 목록·카드의 평균 + "최저 N원 ~ 최고 N원 (세부 항목별 가격)" + 병원 수. `PriceSpread`는 그 범위 한 줄(15–16px, 머리·카드에서도 쓴다). 홈 목록처럼 좁은 곳은 `common.price.compactRange`("37만~495만원"). `AverageTag`는 "평균보다 N% 저렴" 꼬리표로, 평균의 1/3~3배 밖이면 "구성이 달라 비교 어려움"을 쓴다                                                                       |
+
+- 움직임은 `lib/motion`의 `useFirstView`(처음 보일 때 한 번)와 `prefersReducedMotion`으로 만든다. 서버 렌더와 JS가 없을 때는 항상 최종 모습이다.
+- 움직이는 숫자·막대는 장식이다. 같은 뜻을 글자로 함께 둔다.
+- 자동으로 바뀌는 것은 멈춤 수단이 있어야 한다(MUST). 멈출 수 없는 자동 슬라이드는 쓰지 않는다.
+
+### 8.4 폰트
 
 Pretendard 하나만 쓴다. `app/layout.tsx`에서 `pretendard` 패키지의 dynamic subset CSS를 import한다. 화면에 필요한 글자 조각만 받으므로 `next/font/local`로 2MB 전체 파일을 받지 않는다.
 
-### 8.4 shadcn 추가
+### 8.5 shadcn 추가
 
 ```bash
 pnpm ui:add dialog sheet   # components/primitives에 생성, cn import를 @/lib/utils로 바꿈
@@ -553,7 +573,16 @@ const t = await getTranslations('metadata');
 - 모바일에서 입력창에 포커스가 있으면 하단 탭바가 숨는다(`globals.css`의 `[data-bottom-tab-bar]` 규칙). 입력창을 화면 아래에 붙이는 화면(AI 대화 등)은 탭바가 있을 때와 없을 때의 높이를 모두 계산한다.
 - 입력창 글자는 `text-field`(16px)를 쓴다. 16px보다 작으면 iOS Safari가 포커스할 때 화면을 확대한다.
 - `viewport`는 `app/layout.tsx`에 있다(`viewportFit: 'cover'`로 safe-area 사용). 확대를 막는 설정(`maximumScale`, `userScalable`)은 넣지 않는다.
-- 음성 입력·현재 위치·카메라는 `next.config.ts`의 `Permissions-Policy`에서 같은 출처(`self`)에만 허용돼 있다. 다른 출처의 iframe에서는 쓰지 않는다.
+- 음성 입력·현재 위치는 `next.config.ts`의 `Permissions-Policy`에서 같은 출처(`self`)에만 허용돼 있고, 카메라는 쓰지 않아 막혀 있다(`camera=()`). 다른 출처의 iframe에서는 쓰지 않는다.
+
+### 13.5 현재 위치: 개인위치정보를 받지 않게 설계 (MUST)
+
+「위치정보의 보호 및 이용 등에 관한 법률」은 특정 개인의 위치를 알 수 있는 정보(개인위치정보)를 다루는 사업자에게 신고·동의·기록 보관 의무를 지운다. 주변 병원 찾기에는 1m 정밀도의 좌표가 필요 없으므로, 서버가 개인위치정보를 받지 않게 만든다.
+
+- 서버(`/api/hospitals/nearby`)로 보내는 좌표는 `coarsenLatLng`(`features/map/map-geo.ts`)로 소수 둘째 자리(약 1km 격자)로 흐린다. 현재 위치든 지도 중심이든 같다. 정확한 좌표는 브라우저 상태로만 두고 URL·저장소에 남기지 않는다.
+- 이 조회는 로그인 정보 없이 보낸다. 요청에 `ANONYMOUS_REQUEST_HEADER`(`lib/api/paths.ts`)를 붙이면 BFF가 쿠키가 있어도 Authorization을 붙이지 않는다(`isAnonymousRequest`). 흐린 위치도 계정과 묶이지 않는다.
+- 정확한 좌표는 지도의 내 위치 점과 거리 계산에만 쓴다. 병원 좌표가 응답에 있으므로 거리와 가까운 순서는 `withExactDistances`로 브라우저에서 다시 잰다. 검색 범위는 흐린 중심 기준이라 "반경 약 N km"로 쓴다.
+- 권한을 묻기 전 안내(`map.location.promptDescription`)와 개인정보 처리방침 14항에 같은 내용을 쓴다. 이 설계를 바꾸면(정확한 좌표를 서버로 보내는 기능 등) 위치정보법 검토부터 한다.
 
 ## 14. 가격·지역 데이터 표시
 
@@ -561,6 +590,13 @@ const t = await getTranslations('metadata');
 
 - **지역 (MUST)**: 지역은 `features/regions/service-region.ts` 하나로 다룬다. 기본은 서울·경기(`metro`)이고 선택지는 서울·경기 / 서울 / 경기 / 전국(`all`)이다. URL 파라미터 이름은 `region`이고 기본값은 링크에서 뺀다. 백엔드가 시도 하나만 받으므로 서울·경기는 `sidoCodesOf`로 나눠 조회해 합친다.
 - **가격 요약 (MUST)**: 최저~최고 범위를 대표값으로 내세우지 않는다. 범위는 "1일당 1,000원" 같은 예외 값에 끌려가 오해를 만든다. 평균을 크게, 범위와 병원 수를 작게 쓴다(`PriceOverview`). 여러 시도의 요약은 `npayQueries.summaryIn`이 합친다(평균은 가격 수로 가중).
+- **값 점이 없는 범위 막대 금지 (MUST)**: `RangeBar`는 이 병원 값(`value`) 점이 있을 때만 쓴다. 막대는 평균을 가운데에 두는 눈금이라, 점이 없으면 평균 눈금이 늘 가운데에 있어 아무것도 알려 주지 않고 분포가 대칭인 것처럼 보인다. 점이 없는 곳(홈, 오늘의 가격, 항목 머리, 검색·분류 행, AI 결과)은 `PriceSpread` 글자나 `compactRange`로 쓴다.
+- **세부 항목이 다른 가격 (MUST)**: 한 항목(예: 도수치료) 안의 세부 항목은 병원마다 시간·횟수·구성이 다르다. 도수치료 서울·경기 2,744건에서 15분 세션 중앙값은 30,000원(평균 118,384원의 0.25배), 30분 80,000원, 60분 150,000원, 100분 400,000원(3.4배)이었다. "[1일당]"은 심평원 청구 단위 표기라 345건(12.6%)에 붙지만 중앙값이 95,000원으로 전체(100,000원)와 같아 단위를 가르는 표시가 아니다. 그래서 다음을 지킨다.
+  - 가격 옆에는 그 가격의 세부 항목 이름을 쓴다("도수치료F 기준"). 행의 꼬리표·막대·큰 가격·병원 화면 링크(`variant`·`price` 파라미터)는 모두 같은 세부 항목을 말한다. 병원 화면은 그 세부 항목을 먼저 고르고 같은 지역 평균과 견줘, 행의 꼬리표와 같은 숫자를 말한다.
+  - 평균 대비 %는 가격이 평균의 1/3~3배 안일 때만 쓴다(`features/npay/average-verdict.ts`의 `judgeAgainstAverage`). 밖이면 "구성이 달라 비교 어려움"으로 쓴다. 이 범위는 도수치료 가격의 8.9%, 체외충격파 4.5%, 임플란트 1.1%, 라식·라섹·대상포진 예방접종 0%를 거른다.
+  - 범위의 최저·최고는 세부 항목 하나의 값이라 "(세부 항목별 가격)"을 함께 쓴다.
+  - 병원 비교(`features/comparison/compare-basis.ts`)는 모든 병원이 같은 이름으로 공개한 세부 항목이 있으면 그것끼리 견줘 "가장 저렴해요"라고 쓴다. 없으면 병원별 가장 낮은 공개 가격끼리 견주되 "가장 낮은 공개 가격은 OO병원이에요"라고 쓰고, 어느 세부 항목의 값인지 밝히고 금액 차이를 쓰지 않는다.
+- **"최저" 낱말**: 범위의 끝은 "최저 N원 / 최고 N원", 한 병원의 세부 항목 중 가장 낮은 값은 "가장 낮은 가격", 비교한 병원 중 가장 낮은 곳의 꼬리표는 "최저"로 쓴다. "최저가"는 뜻이 섞여 쓰지 않는다.
 - **병원 단위 (MUST)**: 가격 API는 병원의 세부 항목마다 한 줄을 준다. 병원을 비교하는 목록은 병원 하나에 카드 하나로 묶고, 세부 항목은 펼쳐서 보여 준다. 개수는 "병원 N곳"으로 쓴다.
 - **분류 이름**: 홈 분류(`features/npay/catalog.ts`)에 속하는 코드는 쉬운 이름("물리치료·재활")을 먼저, 공식 이름("이학요법료")은 보조로 쓴다. 항목 이름의 "대분류/" 앞부분은 떼고 보여 준다.
 - **지역 이름**: 시도·시군구는 `formatLocation`으로 정리한다("부산 부산남구" → "부산 남구", "경기 부천원미구" → "경기 부천시 원미구").

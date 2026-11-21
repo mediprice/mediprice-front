@@ -49,7 +49,7 @@ export function useNaverMarkers(
     const { api, map } = handle;
     const projection = map.getProjection();
     const candidates = markers
-      .filter((marker) => marker.kind !== 'plain')
+      .filter((marker) => marker.kind !== 'plain' && marker.kind !== 'place')
       .map((marker) => {
         const point = projection.fromCoordToOffset(
           new api.LatLng(marker.position.lat, marker.position.lng),
@@ -80,7 +80,7 @@ export function useNaverMarkers(
             : collapsed.has(marker.id)
               ? 'dot'
               : 'label';
-      const key = `${marker.kind}|${marker.label}|${display}`;
+      const key = `${marker.kind}|${marker.label}|${marker.badge ?? ''}|${display}`;
       const existing = current.get(marker.id);
       if (existing?.key === key) continue;
       const icon = {

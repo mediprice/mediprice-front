@@ -10,9 +10,14 @@ cp .env.example .env     # NEXT_PUBLIC_API_URL을 백엔드 주소로 수정
 pnpm dev
 ```
 
-| 환경변수              | 설명                                                                              |
-| --------------------- | --------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_API_URL` | 백엔드 주소(예: `http://localhost:8080`). BFF 중계, 로그인 시작, 타입 생성에 쓴다 |
+| 환경변수                          | 필수                                       | 설명                                                                                               |
+| --------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL`             | 항상                                       | 백엔드 주소(예: `http://localhost:8080`). BFF 중계, 로그인 시작, 타입 생성에 쓴다                  |
+| `NEXT_PUBLIC_SITE_URL`            | 운영 빌드(`NODE_ENV=production`, 미리보기) | 이 사이트의 공개 주소(origin). canonical·Open Graph·sitemap·robots에 쓴다. 개발 기본값은 localhost |
+| `BFF_SHARED_SECRET`               | 운영 배포(`VERCEL_ENV=production`)         | 백엔드와 같은 공유 비밀값(16자 이상). BFF가 사용자 IP를 백엔드에 전달한다(AI 비회원 한도)          |
+| `NEXT_PUBLIC_NAVER_MAP_CLIENT_ID` | 선택                                       | 네이버 지도 Client ID. 없으면 지도 탐색(`/map`)이 목록만 보여 준다                                 |
+
+환경변수는 `src/env.ts`가 zod로 검증한다. 실제 비밀값은 `.env`(git 제외)와 Vercel 환경변수에만 둔다.
 
 | 명령                 | 설명                                                          |
 | -------------------- | ------------------------------------------------------------- |
@@ -93,5 +98,5 @@ const { data: hospitals } = useQuery(
 ## 알아둘 점
 
 - `apiClient`와 이를 쓰는 쿼리 옵션은 상대 주소(`/bff`)를 쓰는 **브라우저 전용**이다. 서버 컴포넌트에서 prefetch하려면 쿠키를 읽어 백엔드로 직접 보내는 서버용 호출 경로를 따로 만들어야 한다(아직 없음).
-- `NEXT_PUBLIC_API_URL`은 빌드에도 필요하다. 배포(Vercel)에 설정해야 한다.
+- `NEXT_PUBLIC_API_URL`·`NEXT_PUBLIC_SITE_URL`은 빌드에도 필요하다. 배포(Vercel)의 Production과 Preview에 설정해야 한다. 로컬에서 `pnpm build`를 하려면 `.env`에 `NEXT_PUBLIC_SITE_URL`을 넣는다.
 - 로그인이 끝나면 백엔드가 돌려보낼 기본 주소(`OAUTH2_REDIRECT_URI`)는 이 앱의 `/oauth/callback`이어야 한다. 다른 주소(로컬, 프리뷰)에서 로그인하려면 그 origin을 백엔드 `OAUTH2_ALLOWED_REDIRECT_ORIGINS`와 `CORS_ALLOWED_ORIGINS`에 넣는다.

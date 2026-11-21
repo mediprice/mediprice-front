@@ -28,6 +28,7 @@ const twMerge = extendTailwindMerge({
       shadow: ['card', 'cta-glow', 'float', 'sheet', 'bar'],
       spacing: ['top-nav', 'top-bar', 'tab-bar', 'section', 'page'],
       container: ['page'],
+      ease: ['standard', 'enter'],
     },
   },
 });

@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-import type { MedicalProfile, MedicalProfileRequest } from './queries';
+import { LEGAL_DOCUMENT_VERSIONS } from '@/config/legal';
+
+import type { MedicalProfile, MedicalProfileRequest } from './api';
+
+/** 이 화면이 보여 주는 건강 정보 수집·이용 동의 문서의 버전. 저장할 때 함께 보낸다. */
+export const MEDICAL_CONSENT_VERSION = LEGAL_DOCUMENT_VERSIONS.MEDICAL_PROFILE;
 
 /** 백엔드 MedicalProfileRequest의 글자 수 상한. */
 export const TEXT_MAX_LENGTH = 1000;
@@ -51,6 +56,7 @@ export type MedicalProfileForm = z.infer<
 
 const SCHEMA_ERROR_KEYS = [
   'consentRequired',
+  'consentOutdated',
   'birthYearFormat',
   'birthYearRange',
   'tooLong',
@@ -70,12 +76,22 @@ function toGender(value: string | null): Gender {
   return value === 'MALE' || value === 'FEMALE' ? value : '';
 }
 
-/** 저장한 프로필이 있으면 이미 동의한 것이라 동의 칸을 채워 둔다. */
+/**
+ * 지금 문서 버전에 동의해 저장한 프로필인지. 동의 기록 없이 저장된 예전 프로필(null)이나 이전 버전이면 다시 묻는다.
+ * 동의 값을 모르는 예전 백엔드(undefined)는 저장한 프로필이 있으면 동의한 것으로 본다(저장 화면에서 동의를 받았다).
+ */
+export function hasCurrentConsent(profile: MedicalProfile | null) {
+  if (!profile) return false;
+  if (profile.consentVersion === undefined) return true;
+  return profile.consentVersion === MEDICAL_CONSENT_VERSION;
+}
+
+/** 지금 버전에 동의해 저장한 프로필이면 동의 칸을 채워 둔다. */
 export function toMedicalProfileForm(
   profile: MedicalProfile | null,
 ): MedicalProfileForm {
   return {
-    consent: profile !== null,
+    consent: hasCurrentConsent(profile),
     birthYear: profile?.birthYear?.toString() ?? '',
     gender: toGender(profile?.gender ?? null),
     chronicConditions: profile?.chronicConditions ?? '',
@@ -85,11 +101,13 @@ export function toMedicalProfileForm(
   };
 }
 
-/** PUT은 통째로 바꾸므로 빈 칸은 보내지 않아 서버에서 비워지게 한다. */
+/** PUT은 통째로 바꾸므로 빈 칸은 보내지 않아 서버에서 비워지게 한다. 동의한 문서 버전은 항상 보낸다. */
 export function toMedicalProfileRequest(
   form: MedicalProfileForm,
 ): MedicalProfileRequest {
-  const request: MedicalProfileRequest = {};
+  const request: MedicalProfileRequest = {
+    consentVersion: MEDICAL_CONSENT_VERSION,
+  };
   const birthYear = form.birthYear.trim();
   if (birthYear) request.birthYear = Number(birthYear);
   if (form.gender) request.gender = form.gender;

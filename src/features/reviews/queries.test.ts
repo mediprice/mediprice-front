@@ -5,7 +5,8 @@ import { describe, expect, it, vi } from 'vitest';
 import type * as ClientModule from '@/lib/api/client';
 import { server } from '@/test/server';
 
-import { reviewKeys, reviewQueries } from './queries';
+import { findCachedHospitalReview } from './cached-review';
+import { type Review, reviewKeys, reviewQueries } from './queries';
 
 vi.mock('@/lib/api/client', async (importOriginal) => {
   const actual = await importOriginal<typeof ClientModule>();
@@ -135,5 +136,38 @@ describe('reviewQueries.mine', () => {
       }),
     ).rejects.toMatchObject({ status: 500 });
     expect(calls).toBe(2);
+  });
+});
+
+describe('findCachedHospitalReview', () => {
+  const review = (id: number): Review => ({
+    id,
+    ykiho: 'H1',
+    hospitalName: null,
+    authorName: '문*지',
+    mine: false,
+    rating: 4,
+    content: '후기',
+    npayCode: null,
+    paidAmount: null,
+    visitedOn: null,
+    status: 'ACTIVE',
+    createdAt: '2026-11-01T01:00:00Z',
+    updatedAt: '2026-11-01T01:00:00Z',
+  });
+  const pages = (...ids: number[]) => ({
+    pages: [{ ...emptyPage(0, 1), content: ids.map(review) }],
+    pageParams: [0],
+  });
+
+  it('같은 병원의 어느 정렬 목록에 있든 찾고, 없으면 undefined다', () => {
+    const client = new QueryClient();
+    client.setQueryData(reviewKeys.hospital('H1', 'latest'), pages(1, 2));
+    client.setQueryData(reviewKeys.hospital('H1', 'rating'), pages(3));
+    client.setQueryData(reviewKeys.hospital('H2', 'latest'), pages(4));
+
+    expect(findCachedHospitalReview(client, 'H1', 3)?.id).toBe(3);
+    expect(findCachedHospitalReview(client, 'H1', 4)).toBeUndefined();
+    expect(findCachedHospitalReview(client, 'H9', 1)).toBeUndefined();
   });
 });

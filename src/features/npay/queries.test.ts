@@ -3,6 +3,7 @@ import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 
 import type * as ClientModule from '@/lib/api/client';
+import { createApiClient } from '@/lib/api/client';
 import { ApiError } from '@/lib/api/errors';
 import { server } from '@/test/server';
 
@@ -59,6 +60,40 @@ describe('npayQueries.detail', () => {
       status: 404,
       code: 'NPAY_ITEM_NOT_FOUND',
     });
+  });
+});
+
+describe('서버 prefetch 클라이언트', () => {
+  it('다른 클라이언트를 넘겨도 키는 같고 그 클라이언트로 읽는다(서버가 채운 캐시를 브라우저가 이어받는다)', async () => {
+    const publicClient = createApiClient({ baseUrl: 'http://api.test' });
+    let path = '';
+    server.use(
+      http.get(
+        'http://api.test/api/npay-items/MX1220000/price-summary',
+        ({ request }) => {
+          path = new URL(request.url).search;
+          return HttpResponse.json({
+            npayCode: 'MX1220000',
+            minPrice: 1000,
+            maxPrice: 3000,
+            avgPrice: 2000,
+            priceCount: 2,
+            hospitalCount: 1,
+          });
+        },
+      ),
+    );
+
+    const options = npayQueries.summaryIn(
+      'MX1220000',
+      ['110000'],
+      publicClient,
+    );
+    expect(options.queryKey).toEqual(
+      npayQueries.summaryIn('MX1220000', ['110000']).queryKey,
+    );
+    await new QueryClient().fetchQuery(options);
+    expect(path).toBe('?sidoCode=110000');
   });
 });
 

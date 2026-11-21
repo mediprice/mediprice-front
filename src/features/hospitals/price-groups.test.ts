@@ -3,8 +3,11 @@ import { describe, expect, it } from 'vitest';
 import {
   groupPriceRows,
   lastSegment,
+  pickVariantRow,
   priceRowName,
+  sortVariantRows,
   splitTrailingUnit,
+  visibleVariantRows,
 } from './price-groups';
 
 const row = (
@@ -91,5 +94,61 @@ describe('splitTrailingUnit', () => {
       'A 아주아주긴마지막조각입니다',
       '',
     ]);
+  });
+});
+
+describe('sortVariantRows', () => {
+  it('낮은 가격부터 두고 같은 값은 받은 순서를 지킨다', () => {
+    const rows = [
+      row('X', null, 'B', 3000),
+      row('X', null, 'A', 1000),
+      row('X', null, 'C', 3000),
+    ];
+    expect(sortVariantRows(rows).map((r) => r.hospitalItemName)).toEqual([
+      'A',
+      'B',
+      'C',
+    ]);
+  });
+});
+
+describe('pickVariantRow', () => {
+  const rows = [
+    row('X', null, '도수치료R', 50_000),
+    row('X', null, '도수치료', 300_000),
+    row('X', null, '도수치료', 360_000),
+    row('X', null, '도수치료F', 500_000),
+  ];
+
+  it('이름과 가격이 모두 맞는 행을 먼저 고른다', () => {
+    expect(pickVariantRow(rows, { name: '도수치료', price: 360_000 })).toBe(
+      rows[2],
+    );
+    expect(pickVariantRow(rows, { name: ' 도수치료F ', price: 500_000 })).toBe(
+      rows[3],
+    );
+  });
+
+  it('가격이 바뀌었거나 없으면 이름만 맞는 첫 행, 이름도 없으면 맨 앞 행이다', () => {
+    expect(pickVariantRow(rows, { name: '도수치료', price: 1 })).toBe(rows[1]);
+    expect(pickVariantRow(rows, { name: '도수치료', price: null })).toBe(
+      rows[1],
+    );
+    expect(pickVariantRow(rows, { name: '없음', price: 1 })).toBe(rows[0]);
+    expect(pickVariantRow(rows, null)).toBe(rows[0]);
+    expect(pickVariantRow([], null)).toBeUndefined();
+  });
+});
+
+describe('visibleVariantRows', () => {
+  const rows = ['a', 'b', 'c', 'd', 'e'];
+
+  it('앞에서 limit개를 보여 준다', () => {
+    expect(visibleVariantRows(rows, 'b', 3)).toEqual(['a', 'b', 'c']);
+    expect(visibleVariantRows(rows, undefined, 3)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('고른 행이 뒤에 있으면 마지막 자리를 그 행에 준다', () => {
+    expect(visibleVariantRows(rows, 'e', 3)).toEqual(['a', 'b', 'e']);
   });
 });

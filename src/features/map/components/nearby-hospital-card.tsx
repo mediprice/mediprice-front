@@ -9,15 +9,21 @@ import type { ComponentProps } from 'react';
 import { Button } from '@/components/ui/button';
 import { FavoriteButton } from '@/features/favorites/components/favorite-button';
 import { HospitalIdentity } from '@/features/hospitals/components/hospital-identity';
+import { AverageTag } from '@/features/npay/components/average-tag';
 import { cn } from '@/lib/utils';
 
 import type { NearbyHospital } from '../queries';
+import { useDistanceLabel } from '../use-distance-label';
 
-/** 주변 병원 한 곳. 카드 전체가 병원 상세 링크이고(이름 링크를 카드 크기로 넓힘) 하트·지도에서 보기만 그 위에 놓인다. 지도에서 고른 병원은 테두리와 "지도에서 선택됨" 문구로 함께 표시한다(색만으로 구분하지 않음). */
+/**
+ * 주변 병원 한 곳. 카드 전체가 병원 상세 링크이고(이름 링크를 카드 크기로 넓힘) 하트·지도에서 보기만 그 위에 놓인다.
+ * 가격(이 병원 세부 항목 중 가장 낮은 값) 아래에 항목 행과 같은 규칙의 평균 대비 꼬리표를 붙인다. 지도에서 고른 병원은 테두리와 "지도에서 선택됨" 문구로 함께 표시한다(색만으로 구분하지 않음).
+ */
 export function NearbyHospitalCard<T extends string>({
   hospital,
   href,
   hasItem,
+  average,
   isSelected,
   onShowOnMap,
   isCompact = false,
@@ -28,6 +34,8 @@ export function NearbyHospitalCard<T extends string>({
   href: Route<T>;
   /** 항목을 골라 가격을 보여 주는 중인지. 아니면 가격 줄을 빼고 병원 정보만 보여 준다. */
   hasItem: boolean;
+  /** 꼬리표의 기준 평균(서울·경기). 없으면 꼬리표를 뺀다. */
+  average?: number | null;
   isSelected: boolean;
   /** 없으면 "지도에서 보기"를 그리지 않는다(이미 지도 옆에 보일 때). */
   onShowOnMap?: () => void;
@@ -64,7 +72,7 @@ export function NearbyHospitalCard<T extends string>({
           name={
             <Link
               href={href}
-              className="rounded-sm after:absolute after:inset-0 after:rounded-xl"
+              className="inline-block max-w-full rounded-sm wrap-break-word after:absolute after:inset-0 after:rounded-xl"
             >
               {hospital.name}
             </Link>
@@ -90,12 +98,15 @@ export function NearbyHospitalCard<T extends string>({
         (hospital.minPrice === null ? (
           <p className="text-subheading text-text-tertiary">{tPrice('none')}</p>
         ) : (
-          <p className="text-price-lg tabular-nums">
-            {t('minPrice', { amount: hospital.minPrice })}
-          </p>
+          <div className="flex flex-col items-start gap-1">
+            <p className="text-price-lg wrap-anywhere tabular-nums">
+              {t('minPrice', { amount: hospital.minPrice })}
+            </p>
+            <AverageTag price={hospital.minPrice} average={average} />
+          </div>
         ))}
 
-      <div className="flex min-h-9 flex-wrap items-center justify-between gap-2">
+      <div className="flex min-h-11 flex-wrap items-center justify-between gap-2">
         {!onShowOnMap ? null : hasPosition ? (
           <Button
             variant="tint"
@@ -126,11 +137,4 @@ export function NearbyHospitalCard<T extends string>({
       </div>
     </article>
   );
-}
-
-function useDistanceLabel(meters: number) {
-  const t = useTranslations('map.card');
-  return meters < 1000
-    ? t('meters', { value: meters })
-    : t('kilometers', { value: meters / 1000 });
 }

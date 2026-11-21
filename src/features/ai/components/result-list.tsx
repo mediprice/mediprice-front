@@ -5,6 +5,7 @@ import { useId } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
+import type { AreaScope } from '../area-filters';
 import type { TurnItem } from '../schemas';
 import { type ItemDetail, ResultItemCard } from './result-item-card';
 
@@ -12,10 +13,12 @@ import { type ItemDetail, ResultItemCard } from './result-item-card';
 export function ResultList({
   entries,
   pendingCount,
+  scope,
   actions,
 }: {
   entries: { item: TurnItem; detail: ItemDetail }[];
   pendingCount: number;
+  scope: AreaScope;
   actions?: { onAskMore: () => void; onRestart: () => void };
 }) {
   const t = useTranslations('ai.result');
@@ -35,11 +38,16 @@ export function ResultList({
           )}
         </h2>
         <p className="text-caption text-text-tertiary">{t('free')}</p>
+        {scope.kind === 'outside' && (
+          <p className="text-caption text-text-tertiary">
+            {t('outsideArea', { area: scope.label })}
+          </p>
+        )}
       </div>
       <ul className="flex flex-col gap-3" aria-busy={pendingCount > 0}>
         {entries.map(({ item, detail }) => (
           <li key={item.code}>
-            <ResultItemCard item={item} detail={detail} />
+            <ResultItemCard item={item} detail={detail} scope={scope} />
           </li>
         ))}
         {Array.from({ length: pendingCount }, (_, index) => (

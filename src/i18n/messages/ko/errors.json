@@ -17,6 +17,17 @@
   "historyNotFound": "기록을 찾을 수 없어요.",
   "reviewAlreadyReported": "이미 신고한 후기예요.",
   "reportAlreadyResolved": "이미 처리된 신고예요.",
+  "claimUnavailable": "지금은 온라인으로 권리침해 신고를 받을 수 없어요.",
+  "claimNoticeOutdated": "개인정보 수집·이용 안내가 바뀌었어요. 새 안내를 확인하고 다시 동의해 주세요.",
+  "claimRateLimited": "짧은 시간에 신고가 너무 많이 들어왔어요. 잠시 후 다시 시도해 주세요.",
+  "claimObjectionForbidden": "내가 쓴 후기에만 재게시를 요청할 수 있어요.",
+  "activeClaimNotFound": "처리 중인 권리침해 신고가 없어요. 이미 처리가 끝났을 수 있어요.",
+  "claimObjectionAlreadySubmitted": "이미 재게시를 요청했어요.",
+  "claimNotFound": "권리침해 신고를 찾을 수 없어요.",
+  "claimAlreadyResolved": "이미 처리된 권리침해 신고예요.",
+  "consentVersionOutdated": "약관이 바뀌었어요. 바뀐 내용을 확인하고 다시 동의해 주세요.",
+  "consentWithdrawalNotAllowed": "필수 동의는 철회할 수 없어요. 서비스를 그만 쓰려면 회원 탈퇴를 해 주세요.",
+  "medicalProfileConsentRequired": "건강 정보 수집·이용 동의가 바뀌었어요. 동의를 다시 확인한 뒤 저장해 주세요.",
   "conflict": "다른 변경과 겹쳤어요. 새로고침한 뒤 다시 시도해 주세요.",
   "tooManyRequests": "요청이 너무 많아요. 잠시 후 다시 시도해 주세요.",
   "server": "일시적인 오류가 생겼어요. 잠시 후 다시 시도해 주세요.",
@@ -26,5 +37,24 @@
   "aiQuotaExceeded": "오늘 AI 찾기를 모두 사용했어요. 내일 다시 이용해 주세요.",
   "aiUnavailable": "AI가 지금 응답하지 못해요. 잠시 후 다시 시도해 주세요.",
   "audioTooLarge": "음성이 너무 길어요. 1분 안으로 다시 말해 주세요.",
-  "unsupportedMedia": "지원하지 않는 형식이에요."
+  "unsupportedMedia": "지원하지 않는 형식이에요.",
+  "page": {
+    "notFound": {
+      "title": "페이지를 찾을 수 없어요",
+      "description": "주소가 바뀌었거나 없어진 페이지예요. 홈이나 검색에서 다시 찾아보세요.",
+      "home": "홈으로",
+      "search": "진료비 검색하기"
+    },
+    "error": {
+      "title": "화면을 불러오지 못했어요",
+      "description": "일시적인 문제가 생겼어요. 잠시 후 다시 시도해 주세요.",
+      "home": "홈으로"
+    },
+    "global": {
+      "title": "문제가 생겼어요",
+      "description": "일시적인 오류로 화면을 보여 드리지 못했어요. 잠시 후 다시 시도해 주세요.",
+      "retry": "다시 시도",
+      "home": "홈으로"
+    }
+  }
 }

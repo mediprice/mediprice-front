@@ -19,7 +19,7 @@ export function ReviewCard({
   const t = useTranslations('hospitals.detail.reviews');
   const format = useFormatter();
   const rating = clampRating(review.rating);
-  const isHidden = review.status === 'HIDDEN';
+  const isHidden = review.status !== 'ACTIVE';
   const author = review.authorName ?? t('anonymous');
   const meta = [
     review.visitedOn &&

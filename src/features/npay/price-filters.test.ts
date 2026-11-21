@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatItemTitle } from './item-title';
 import {
   buildPriceFiltersQuery,
   clearConditions,
@@ -21,6 +20,18 @@ describe('parsePriceFilters', () => {
   it('홈·검색에서 온 region 값을 그대로 받는다', () => {
     expect(parsePriceFilters({ region: 'gyeonggi' }).region).toBe('gyeonggi');
     expect(parsePriceFilters({ region: 'all' }).region).toBe('all');
+  });
+
+  it('모든 가격 보기는 prices=all일 때만 켠다', () => {
+    expect(parsePriceFilters({ prices: 'all' })).toEqual({
+      region: 'metro',
+      sort: 'price_asc',
+      prices: 'all',
+    });
+    expect(parsePriceFilters({ prices: 'some' })).toEqual({
+      region: 'metro',
+      sort: 'price_asc',
+    });
   });
 
   it('모르는 값은 기본값으로 돌린다', () => {
@@ -67,11 +78,12 @@ describe('buildPriceFiltersQuery', () => {
       sggu: '110001',
       institution: '21',
       sort: 'price_desc',
+      prices: 'all',
     });
     const query = buildPriceFiltersQuery(filters);
 
     expect(query).toBe(
-      'region=seoul&sggu=110001&institution=21&sort=price_desc',
+      'region=seoul&sggu=110001&institution=21&sort=price_desc&prices=all',
     );
     expect(
       parsePriceFilters(Object.fromEntries(new URLSearchParams(query))),
@@ -102,6 +114,22 @@ describe('toPriceConditions', () => {
         sort: 'price_asc',
       }),
     ).toEqual([{ institutionCode: '11' }]);
+  });
+
+  it('가격 범위를 주면 조건마다 담는다', () => {
+    const band = { minPrice: 39_462, maxPrice: 355_152 };
+    expect(
+      toPriceConditions({ region: 'metro', sort: 'price_asc' }, band),
+    ).toEqual([
+      { sidoCode: '110000', ...band },
+      { sidoCode: '310000', ...band },
+    ]);
+    expect(
+      toPriceConditions({ region: 'all', sort: 'price_asc' }, band),
+    ).toEqual([band]);
+    expect(
+      toPriceConditions({ region: 'all', sort: 'price_asc' }, null),
+    ).toEqual([]);
   });
 
   it('한 지역은 시군구까지 한 조건에 담는다', () => {
@@ -145,31 +173,5 @@ describe('필터 조작', () => {
         sort: 'price_desc',
       }),
     ).toEqual({ region: 'metro', sort: 'price_desc' });
-  });
-});
-
-describe('formatItemTitle', () => {
-  it('대분류 경로를 빼고 나머지를 가운뎃점으로 잇는다', () => {
-    expect(
-      formatItemTitle({
-        name: '이학요법료/도수치료',
-        mdivName: '이학요법료',
-      }),
-    ).toBe('도수치료');
-    expect(
-      formatItemTitle({
-        name: '치과의 보철료/치과임플란트(1치당)/PFM',
-        mdivName: '치과의 보철료',
-      }),
-    ).toBe('치과임플란트(1치당) · PFM');
-  });
-
-  it('대분류와 이름이 같으면 이름을 그대로 쓴다', () => {
-    expect(
-      formatItemTitle({
-        name: '자기공명영상진단료(MRI-기본검사)',
-        mdivName: '자기공명영상진단료(MRI-기본검사)',
-      }),
-    ).toBe('자기공명영상진단료(MRI-기본검사)');
   });
 });

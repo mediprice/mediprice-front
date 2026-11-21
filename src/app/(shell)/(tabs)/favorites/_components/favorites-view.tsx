@@ -30,7 +30,11 @@ export function FavoritesView() {
           <BreadcrumbCurrent>{t('title')}</BreadcrumbCurrent>
         </Breadcrumb>
         <h1 className="text-title">{t('title')}</h1>
-        <p className="text-body-sm text-text-secondary">{t('description')}</p>
+        <p className="text-body-sm text-text-secondary">
+          {status === 'anonymous'
+            ? t('signedOutDescription')
+            : t('description')}
+        </p>
       </MyPageHeader>
       {/** 흰 카드가 잘 보이도록 목록 영역을 회색 띠에 올린다. 로그인 안내처럼 카드가 없는 상태는 흰 판에 둔다. */}
       <div className="flex-1 bg-surface">

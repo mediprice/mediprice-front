@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatItemName, groupItems, partitionByPrice } from './item-groups';
+import {
+  formatItemName,
+  groupHeadingParts,
+  groupItems,
+  partitionByPrice,
+} from './item-groups';
 
 function item(
   code: string,
@@ -58,6 +63,56 @@ describe('groupItems', () => {
     expect(groups).toHaveLength(1);
     expect(groups[0]?.minor).toBeNull();
     expect(groups[0]?.items.map((i) => i.code)).toEqual(['1070Z', 'X']);
+  });
+});
+
+describe('groupHeadingParts', () => {
+  const groups = groupItems([
+    item('A', '이학요법료/도수치료/척추'),
+    item('A2', '이학요법료/도수치료/사지'),
+    item('B', '이학요법료/증식치료/관절', ['1070Z060', '증식치료']),
+    item('X', '이학요법료/기타', null),
+  ]);
+
+  it('기본은 대분류와 중분류를 모두 둔다', () => {
+    expect(groupHeadingParts(groups)[0]).toEqual({
+      major: { code: '1070Z', name: '이학요법료' },
+      minor: { code: '1070Z050', name: '도수치료' },
+    });
+  });
+
+  it('모든 묶음이 같은 대분류면 대분류를 빼되, 중분류가 없는 묶음은 대분류를 남긴다', () => {
+    const parts = groupHeadingParts(groups, { omitSharedMajor: true });
+    expect(parts.map((part) => part?.major?.code ?? null)).toEqual([
+      null,
+      null,
+      '1070Z',
+    ]);
+    expect(parts[1]?.minor?.name).toBe('증식치료');
+  });
+
+  it('항목 하나뿐인 묶음의 머리가 항목 이름과 같으면 머리를 없앤다', () => {
+    const single = groupItems([
+      item('A', '이학요법료/도수치료'),
+      item('B', '이학요법료/증식치료/관절', ['1070Z060', '증식치료']),
+    ]);
+    const parts = groupHeadingParts(single, { omitSharedMajor: true });
+    expect(parts[0]).toBeNull();
+    expect(parts[1]?.minor?.name).toBe('증식치료');
+    expect(groupHeadingParts(single)[0]).not.toBeNull();
+  });
+
+  it('대분류가 여럿이면 빼지 않는다', () => {
+    const mixed = groupItems([
+      item('A', '이학요법료/도수치료'),
+      {
+        ...item('E', '안과/라식', ['2Z96', '라식']),
+        mdivCode: '2Z',
+        mdivName: '안과',
+      },
+    ]);
+    const parts = groupHeadingParts(mixed, { omitSharedMajor: true });
+    expect(parts.map((part) => part?.major?.code)).toEqual(['1070Z', '2Z']);
   });
 });
 

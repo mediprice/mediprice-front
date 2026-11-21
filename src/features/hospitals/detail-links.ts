@@ -17,6 +17,23 @@ export function decodeYkiho(value: string) {
   }
 }
 
+/**
+ * 네이버 지도 앱의 대중교통 길찾기(URL Scheme, nmap://route/public). 출발지를 비우면 앱이 현재 위치에서 시작해,
+ * 사용자의 위치를 우리 서버에 보내지 않고 길을 안내할 수 있다. appname은 웹이면 이 사이트 주소다.
+ */
+export function buildNaverRouteScheme(
+  destination: { lat: number; lng: number; name: string },
+  appname: string,
+) {
+  const params = new URLSearchParams({
+    dlat: String(destination.lat),
+    dlng: String(destination.lng),
+    dname: destination.name,
+    appname,
+  });
+  return `nmap://route/public?${params.toString()}`;
+}
+
 export function buildNaverMapUrl(query: string) {
   return `https://map.naver.com/p/search/${encodeURIComponent(query)}`;
 }
@@ -43,7 +60,7 @@ export function toTelHref(phone: string | null | undefined) {
   return digits.replace(/\D/g, '').length >= 7 ? `tel:${digits}` : null;
 }
 
-const BACK_KEYS = new Set(['region', 'sggu', 'institution', 'sort']);
+const BACK_KEYS = new Set(['region', 'sggu', 'institution', 'sort', 'prices']);
 const BACK_VALUE = /^[A-Za-z0-9_-]{1,40}$/;
 
 /** 항목 가격 화면(S-06)이 넘긴 검색 조건. 허용한 키와 안전한 값만 있을 때만 쿼리 문자열로 돌려준다. */
@@ -60,4 +77,31 @@ export function parseBackParam(value: unknown): string | null {
     safe.set(key, entry);
   }
   return safe.size > 0 ? safe.toString() : null;
+}
+
+export type VariantSelection = { name: string; price: number | null };
+
+const variantSchema = z.object({
+  variant: z.string().trim().min(1).max(120),
+  price: z
+    .string()
+    .regex(/^\d{1,10}$/)
+    .transform(Number)
+    .optional()
+    .catch(undefined),
+});
+
+/** 목록 행이 보여 준 세부 항목(이름과 가격). 같은 이름이 여러 가격으로 있을 수 있어 가격을 함께 받는다. */
+export function parseVariantParam(
+  variant: unknown,
+  price: unknown,
+): VariantSelection | null {
+  const result = variantSchema.safeParse({ variant, price });
+  if (!result.success) return null;
+  return { name: result.data.variant, price: result.data.price ?? null };
+}
+
+/** 병원 화면이 목록 행과 같은 세부 항목을 먼저 고르도록 붙이는 쿼리. parseVariantParam과 짝이다. */
+export function variantQuery(selection: { name: string; price: number }) {
+  return { variant: selection.name, price: String(selection.price) };
 }

@@ -5,14 +5,14 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
-import { regionQuery } from '@/features/regions/service-region';
-
-import { FilterPanel } from './filter-panel';
 import {
   clearConditions,
   countActiveFilters,
   type PriceFilters,
-} from './price-filters';
+} from '@/features/npay/price-filters';
+import { regionQuery } from '@/features/regions/service-region';
+
+import { FilterPanel } from './filter-panel';
 import { useApplyFilters } from './use-apply-filters';
 
 /** 데스크톱 왼쪽 필터 열. 열이 늘 보이므로 고르는 즉시 적용한다. */

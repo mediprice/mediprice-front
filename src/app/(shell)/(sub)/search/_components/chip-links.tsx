@@ -13,7 +13,7 @@ type ChipLink = {
   isSelected?: boolean;
 };
 
-/** 분류를 고르는 칩 줄. 모바일은 가로로 밀고 lg부터 줄바꿈한다. 고른 칩은 aria-current로 알린다. */
+/** 분류를 고르는 칩 줄. 모바일은 가로로 밀고 오른쪽 끝을 흐리게 해 더 있음을 알린다(끝까지 밀면 여백만 흐려진다). lg부터 줄바꿈한다. */
 export function ChipLinks({
   label,
   chips,
@@ -42,7 +42,7 @@ export function ChipLinks({
       <h2 className="text-label-bold text-text-secondary">{label}</h2>
       <ul
         ref={revealSelected}
-        className="-mx-4 flex [scrollbar-width:none] gap-2 overflow-x-auto px-4 py-1 md:-mx-6 md:px-6 lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0"
+        className="-mx-page flex [scrollbar-width:none] gap-2 overflow-x-auto mask-r-from-[calc(100%-2rem)] py-1 px-page pr-8 lg:mx-0 lg:flex-wrap lg:overflow-visible lg:mask-none lg:px-0"
       >
         {chips.map((chip) => (
           <li key={chip.key} className="shrink-0">

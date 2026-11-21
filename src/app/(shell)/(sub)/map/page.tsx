@@ -9,7 +9,11 @@ import { MapView } from './_components/map-view';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('map.metadata');
-  return { title: t('title'), description: t('description') };
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: { canonical: '/map' },
+  };
 }
 
 export default async function MapPage({ searchParams }: PageProps<'/map'>) {

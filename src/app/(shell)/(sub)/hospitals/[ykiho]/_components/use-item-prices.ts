@@ -2,14 +2,19 @@
 
 import { useQuery } from '@tanstack/react-query';
 
+import { sortVariantRows } from '@/features/hospitals/price-groups';
 import {
   pickSeries,
   summarizePriceTrend,
 } from '@/features/hospitals/price-history';
 import { hospitalQueries } from '@/features/hospitals/queries';
 import { npayQueries } from '@/features/npay/queries';
+import {
+  type ServiceRegion,
+  sidoCodesOf,
+} from '@/features/regions/service-region';
 
-/** 선택한 비급여 항목의 이름과, 이 병원이 그 항목으로 공개한 세부 가격들. */
+/** 선택한 비급여 항목의 이름과, 이 병원이 그 항목으로 공개한 세부 가격들(낮은 가격부터). */
 export function useItemPrices(ykiho: string, item: string | null) {
   const detail = useQuery({
     ...npayQueries.detail(item ?? ''),
@@ -19,6 +24,7 @@ export function useItemPrices(ykiho: string, item: string | null) {
   const prices = useQuery({
     ...hospitalQueries.itemPrices(ykiho, item ?? '', name ?? ''),
     enabled: item != null && name != null,
+    select: sortVariantRows,
   });
 
   return {
@@ -59,3 +65,13 @@ export function usePriceTrend(
 }
 
 export type PriceTrendState = ReturnType<typeof usePriceTrend>;
+
+/** 선택 항목의 지역(기본 서울·경기) 요약. 이 병원 가격이 평균보다 싼지 막대와 문장으로 보여 줄 때 쓴다. */
+export function useRegionSummary(item: string | null, region: ServiceRegion) {
+  return useQuery({
+    ...npayQueries.summaryIn(item ?? '', sidoCodesOf(region)),
+    enabled: item != null,
+  });
+}
+
+export type RegionSummaryState = ReturnType<typeof useRegionSummary>;
