@@ -5,7 +5,8 @@ import facts from './legal-facts.json';
 /** 동의 기록에 남기는 문서 버전. 백엔드가 같은 키를 쓰므로(app.consent.versions) 문서를 고치면 양쪽을 함께 올린다. AGE_14는 "만 N세 이상" 확인 문구의 버전이다. */
 export const LEGAL_DOCUMENT_VERSIONS = {
   TERMS: '2026-11-19',
-  PRIVACY: '2026-11-19',
+  PRIVACY: '2026-11-23',
+  LOCATION: '2026-11-23',
   AGE_14: '2026-11-19',
   REVIEW_POLICY: '2026-11-19',
   MEDICAL_PROFILE: '2026-11-19',

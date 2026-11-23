@@ -1,4 +1,4 @@
-import { infiniteQueryOptions } from '@tanstack/react-query';
+import { infiniteQueryOptions, mutationOptions } from '@tanstack/react-query';
 
 import type { PriceBand } from '@/features/npay/average-verdict';
 import { apiClient } from '@/lib/api/client';
@@ -6,6 +6,7 @@ import { ANONYMOUS_REQUEST_HEADER } from '@/lib/api/paths';
 import type { components } from '@/lib/api/schema';
 import { unwrap } from '@/lib/api/unwrap';
 
+import { locationUsageApi } from './location-usage-api';
 import { clampRadius, clampToKorea, coarsenLatLng } from './map-geo';
 
 export type NearbyHospital = components['schemas']['NearbyHospitalResponse'];
@@ -66,4 +67,10 @@ export const mapQueries = {
         last.page + 1 < last.totalPages ? last.page + 1 : undefined,
     });
   },
+};
+
+export const locationUsageMutations = {
+  /** 현재 위치로 주변 병원을 찾았다는 사실을 기록한다. */
+  record: () =>
+    mutationOptions({ mutationFn: () => locationUsageApi.record() }),
 };

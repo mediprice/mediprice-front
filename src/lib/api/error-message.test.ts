@@ -21,6 +21,7 @@ describe('errorMessageKey', () => {
     ['CONSENT_VERSION_OUTDATED', 409, 'consentVersionOutdated'],
     ['CONSENT_WITHDRAWAL_NOT_ALLOWED', 400, 'consentWithdrawalNotAllowed'],
     ['MEDICAL_PROFILE_CONSENT_REQUIRED', 409, 'medicalProfileConsentRequired'],
+    ['LOCATION_CONSENT_REQUIRED', 403, 'locationConsentRequired'],
     ['CLAIM_UNAVAILABLE', 503, 'claimUnavailable'],
     ['CLAIM_NOTICE_VERSION_OUTDATED', 409, 'claimNoticeOutdated'],
     ['CLAIM_RATE_LIMITED', 429, 'claimRateLimited'],

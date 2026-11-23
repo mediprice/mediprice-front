@@ -6,7 +6,10 @@ import type * as ClientModule from '@/lib/api/client';
 import { ApiError } from '@/lib/api/errors';
 import { server } from '@/test/server';
 
+import { consentApi } from './consent-api';
 import {
+  consentKeys,
+  consentMutations,
   fetchCurrentUser,
   getSession,
   markSignedOut,
@@ -147,5 +150,25 @@ describe('markSignedOut', () => {
 
     expect(queryClient.getQueryData(sessionKeys.current())).toBeNull();
     expect(queryClient.getQueryData(['favorites', 'list'])).toBeUndefined();
+  });
+});
+
+describe('consentMutations', () => {
+  it('withdrawLocation 성공 시 동의 현황을 무효화한다', async () => {
+    const withdraw = vi
+      .spyOn(consentApi, 'withdraw')
+      .mockResolvedValue(undefined);
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(consentKeys.status(), { consents: [] });
+
+    await queryClient
+      .getMutationCache()
+      .build(queryClient, consentMutations.withdrawLocation(queryClient))
+      .execute(undefined);
+
+    expect(withdraw).toHaveBeenCalledWith('LOCATION');
+    expect(queryClient.getQueryState(consentKeys.status())?.isInvalidated).toBe(
+      true,
+    );
   });
 });

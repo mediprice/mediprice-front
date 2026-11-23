@@ -21,7 +21,8 @@ const consentStatusSchema = z.object({
   consents: z.array(consentStateSchema),
 });
 
-type ConsentType = 'TERMS' | 'PRIVACY' | 'AGE_14' | 'MEDICAL_PROFILE';
+export type ConsentType =
+  'TERMS' | 'PRIVACY' | 'AGE_14' | 'MEDICAL_PROFILE' | 'LOCATION';
 export type ConsentStatus = z.infer<typeof consentStatusSchema>;
 export type ConsentDecision = {
   type: ConsentType;
@@ -45,6 +46,9 @@ export function createConsentApi(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ consents }),
       }),
+    /** 선택 동의를 철회한다(필수 동의는 400). */
+    withdraw: (type: ConsentType) =>
+      request.empty(`/api/users/me/consents/${type}`, { method: 'DELETE' }),
   };
 }
 

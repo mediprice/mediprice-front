@@ -5,6 +5,7 @@ import {
 } from '@tanstack/react-query';
 import { z } from 'zod';
 
+import { LEGAL_DOCUMENT_VERSIONS } from '@/config/legal';
 import { apiClient } from '@/lib/api/client';
 import { ApiError } from '@/lib/api/errors';
 import { BFF_BASE } from '@/lib/api/paths';
@@ -112,5 +113,27 @@ export const consentMutations = {
           queryKey: sessionKeys.current(),
         });
       },
+    }),
+  /** 위치 동의를 저장하고 바뀐 동의 현황을 바로 쓴다. */
+  agreeLocation: (queryClient: QueryClient) =>
+    mutationOptions({
+      mutationFn: () =>
+        consentApi.save([
+          {
+            type: 'LOCATION',
+            version: LEGAL_DOCUMENT_VERSIONS.LOCATION,
+            agreed: true,
+          },
+        ]),
+      onSuccess: (saved) => {
+        queryClient.setQueryData(consentKeys.status(), saved);
+      },
+    }),
+  /** 위치 동의를 철회하고 동의 현황을 다시 받는다. */
+  withdrawLocation: (queryClient: QueryClient) =>
+    mutationOptions({
+      mutationFn: () => consentApi.withdraw('LOCATION'),
+      onSuccess: () =>
+        queryClient.invalidateQueries({ queryKey: consentKeys.status() }),
     }),
 };
