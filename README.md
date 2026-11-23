@@ -40,7 +40,7 @@ pnpm dev
 - 로그인 토큰은 **httpOnly 쿠키**에만 있다. 브라우저의 JavaScript는 토큰을 읽을 수 없고, 컴포넌트와 쿼리에서 토큰을 다룰 일이 없다.
 - 브라우저는 같은 출처의 `/bff/**`만 호출한다(백엔드 CORS 설정 불필요).
 - Access가 만료되면(401) API 클라이언트가 `/bff/session/refresh`를 한 번만 호출하고 원래 요청을 다시 보낸다. Refresh까지 거부되면 `subscribeSessionExpired`로 알린다.
-- 재발급은 `POST /bff/session/refresh` 한 곳에서만 한다. 브라우저의 모든 클라이언트와 `getSession`이 refresher 하나(`sharedRefresher`)를 함께 쓰고, `GET /bff/session`은 재발급하지 않고 `refreshable`만 알린다. BFF는 같은 Refresh로 동시에 온 재발급을 인스턴스 안에서 합치고, 회전 직후 3초 동안 이전 Refresh로 늦게 온 요청에는 새 토큰 없이 쿠키를 건드리지 않는 200을 돌려준다(늦게 온 요청이 새 쿠키를 지우지 않게). 로그아웃은 진행 중인 재발급이 끝난 뒤 보낸다.
+- 재발급은 `POST /bff/session/refresh` 한 곳에서만 한다. 브라우저의 모든 클라이언트와 `getSession`이 refresher 하나(`sharedRefresher`)를 함께 쓰고, `GET /bff/session`은 재발급하지 않고 `refreshable`만 알린다. BFF는 같은 Refresh로 동시에 온 재발급을 인스턴스 안에서 합치고, 회전 직후 3초 동안 이전 Refresh로 늦게 온 요청에는 새 토큰 없이 쿠키를 건드리지 않는 200을 돌려준다(늦게 온 요청이 새 쿠키를 지우지 않게). 로그아웃은 진행 중인 재발급이 끝난 뒤 보내고, 그동안 새 재발급은 요청 없이 실패시킨다. 브라우저 재발급 요청은 40초가 지나면 끊는다.
 
 ```
 src/

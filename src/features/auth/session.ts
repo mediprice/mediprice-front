@@ -61,17 +61,18 @@ export async function completeOAuthCallback(
   return { ok: true, returnTo };
 }
 
-/** 서버 요청이 실패해도 쿼리 캐시는 비운다. 진행 중인 재발급이 끝난 뒤 보내야 그 응답이 지운 쿠키를 다시 심지 않는다. */
+/** 서버 요청이 실패해도 쿼리 캐시는 비운다. 진행 중인 재발급이 끝난 뒤 보내고 그동안 새 재발급을 막아야, 재발급 응답이 지운 쿠키를 다시 심지 않는다. */
 export async function signOut(
   baseUrl = BFF_BASE,
   queryClient = getQueryClient(),
 ) {
-  await sharedRefresher(baseUrl).settled();
-  try {
-    await fetch(`${baseUrl}/session`, {
-      method: 'DELETE',
-      credentials: 'same-origin',
-    });
-  } catch {}
-  markSignedOut(queryClient);
+  await sharedRefresher(baseUrl).pausedDuring(async () => {
+    try {
+      await fetch(`${baseUrl}/session`, {
+        method: 'DELETE',
+        credentials: 'same-origin',
+      });
+    } catch {}
+    markSignedOut(queryClient);
+  });
 }
