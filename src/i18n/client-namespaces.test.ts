@@ -1,65 +1,29 @@
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 
 import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 
+import {
+  APP,
+  clientFilesOf,
+  routeEntries,
+  sourceInfoOf,
+  SRC,
+  stringLiteralOf,
+} from '@/test/client-graph';
+
 import { CLIENT_NAMESPACES } from './message-scope';
 import { messages } from './messages/ko';
 
-const SRC = path.resolve(__dirname, '..');
-const APP = path.join(SRC, 'app');
-const ENTRY_NAMES = new Set([
-  'page.tsx',
-  'layout.tsx',
-  'error.tsx',
-  'not-found.tsx',
-  'loading.tsx',
-  'template.tsx',
-  'default.tsx',
-  'global-error.tsx',
-]);
 const T_METHODS = new Set(['rich', 'markup', 'raw', 'has']);
 
-type Module = {
-  isClient: boolean;
-  imports: string[];
-  paths: Set<string>;
-  scoped: string[] | null;
-};
+type Messages = { paths: Set<string>; scoped: string[] | null };
 
-const modules = new Map<string, Module>();
-
-function resolveImport(from: string, spec: string): string | null {
-  let base: string;
-  if (spec.startsWith('@/')) base = path.join(SRC, spec.slice(2));
-  else if (spec.startsWith('.')) base = path.resolve(path.dirname(from), spec);
-  else return null;
-  for (const candidate of [
-    base,
-    `${base}.ts`,
-    `${base}.tsx`,
-    path.join(base, 'index.ts'),
-  ]) {
-    if (
-      /\.tsx?$/.test(candidate) &&
-      existsSync(candidate) &&
-      statSync(candidate).isFile()
-    )
-      return candidate;
-  }
-  return null;
-}
-
-function stringArg(node: ts.Node | undefined) {
-  if (!node) return null;
-  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node))
-    return node.text;
-  return null;
-}
+const analyzed = new Map<string, Messages>();
 
 function keyPrefixOf(node: ts.Node | undefined) {
-  const literal = stringArg(node);
+  const literal = stringLiteralOf(node);
   if (literal !== null) return literal;
   if (node && ts.isTemplateExpression(node)) {
     const head = node.head.text;
@@ -102,54 +66,28 @@ function keysReadBy(translator: ts.Identifier, prefix: string) {
   return keys;
 }
 
-/** 클라이언트에서 실행될 때 이 파일이 읽는 메시지 경로와 import, ClientMessages로 더하는 경로를 모은다. */
-function load(file: string): Module {
-  const cached = modules.get(file);
+/** 이 파일이 읽는 메시지 경로와 ClientMessages로 더하는 경로를 모은다. */
+function messagesOf(file: string): Messages {
+  const cached = analyzed.get(file);
   if (cached) return cached;
-  const text = readFileSync(file, 'utf8');
-  const source = ts.createSourceFile(
-    file,
-    text,
-    ts.ScriptTarget.Latest,
-    true,
-    file.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
-  );
-  const info: Module = {
-    isClient: /^\s*['"]use client['"]/.test(text),
-    imports: [],
-    paths: new Set(),
-    scoped: null,
-  };
-  modules.set(file, info);
+  const info: Messages = { paths: new Set(), scoped: null };
+  analyzed.set(file, info);
 
   const visit = (node: ts.Node) => {
     if (
-      (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
-      node.moduleSpecifier &&
-      ts.isStringLiteral(node.moduleSpecifier) &&
-      !(ts.isImportDeclaration(node) && node.importClause?.isTypeOnly)
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'useTranslations'
     ) {
-      const resolved = resolveImport(file, node.moduleSpecifier.text);
-      if (resolved) info.imports.push(resolved);
-    }
-    if (ts.isCallExpression(node)) {
-      const callee = node.expression;
-      if (callee.kind === ts.SyntaxKind.ImportKeyword) {
-        const spec = stringArg(node.arguments[0]);
-        const resolved = spec ? resolveImport(file, spec) : null;
-        if (resolved) info.imports.push(resolved);
-      }
-      if (ts.isIdentifier(callee) && callee.text === 'useTranslations') {
-        const arg = node.arguments[0];
-        const prefix = stringArg(arg);
-        if (arg && prefix === null)
-          throw new Error(`useTranslations(${arg.getText()}) in ${file}`);
-        const target = node.parent;
-        if (ts.isVariableDeclaration(target) && ts.isIdentifier(target.name))
-          for (const key of keysReadBy(target.name, prefix ?? ''))
-            info.paths.add(key);
-        else info.paths.add(prefix ?? '');
-      }
+      const arg = node.arguments[0];
+      const prefix = stringLiteralOf(arg);
+      if (arg && prefix === null)
+        throw new Error(`useTranslations(${arg.getText()}) in ${file}`);
+      const target = node.parent;
+      if (ts.isVariableDeclaration(target) && ts.isIdentifier(target.name))
+        for (const key of keysReadBy(target.name, prefix ?? ''))
+          info.paths.add(key);
+      else info.paths.add(prefix ?? '');
     }
     if (
       ts.isJsxAttribute(node) &&
@@ -164,7 +102,7 @@ function load(file: string): Module {
       if (!expression || !ts.isArrayLiteralExpression(expression))
         throw new Error(`ClientMessages namespaces must be an array: ${file}`);
       info.scoped = expression.elements.map((element) => {
-        const literal = stringArg(element);
+        const literal = stringLiteralOf(element);
         if (literal === null)
           throw new Error(
             `ClientMessages namespaces must be literals: ${file}`,
@@ -174,45 +112,27 @@ function load(file: string): Module {
     }
     ts.forEachChild(node, visit);
   };
-  visit(source);
+  visit(sourceInfoOf(file).source);
   return info;
 }
 
-/** 경계 파일('use client')부터 그 아래 import 전체가 브라우저에서 실행된다. */
+/** 그 화면에서 브라우저가 실행하는 컴포넌트가 읽는 키와, 그 키를 처음 읽은 파일. */
 function clientNamespacesOf(entry: string) {
   const namespaces = new Map<string, string>();
-  const seen = new Set<string>();
-  const walk = (file: string, isClient: boolean) => {
-    const info = load(file);
-    const client = isClient || info.isClient;
-    const id = `${file}:${client}`;
-    if (seen.has(id)) return;
-    seen.add(id);
-    if (client)
-      for (const key of info.paths)
-        if (!namespaces.has(key)) namespaces.set(key, path.relative(SRC, file));
-    for (const dependency of info.imports) walk(dependency, client);
-  };
-  walk(entry, false);
+  for (const file of clientFilesOf(entry))
+    for (const key of messagesOf(file).paths)
+      if (!namespaces.has(key)) namespaces.set(key, path.relative(SRC, file));
   return namespaces;
-}
-
-function routeEntries(dir: string): string[] {
-  return readdirSync(dir).flatMap((name) => {
-    const full = path.join(dir, name);
-    if (statSync(full).isDirectory())
-      return name === 'bff' ? [] : routeEntries(full);
-    return ENTRY_NAMES.has(name) ? [full] : [];
-  });
 }
 
 /** 이 파일과 조상 레이아웃이 ClientMessages로 더한 네임스페이스. 루트 레이아웃은 CLIENT_NAMESPACES를 넘긴다. */
 function scopedNamespacesOf(entry: string) {
-  const scoped = new Set<string>(load(entry).scoped ?? []);
+  const scoped = new Set<string>(messagesOf(entry).scoped ?? []);
   for (let dir = path.dirname(entry); dir.startsWith(APP);) {
     const layout = path.join(dir, 'layout.tsx');
     if (existsSync(layout) && path.basename(entry) !== 'global-error.tsx')
-      for (const namespace of load(layout).scoped ?? []) scoped.add(namespace);
+      for (const namespace of messagesOf(layout).scoped ?? [])
+        scoped.add(namespace);
     if (dir === APP) break;
     dir = path.dirname(dir);
   }
@@ -235,7 +155,7 @@ function hasPath(key: string) {
   return true;
 }
 
-const entries = routeEntries(APP).sort();
+const entries = routeEntries();
 
 describe('브라우저에 넘기는 메시지', () => {
   it('루트는 서버 화면 전용 legal·admin 전체를 넘기지 않는다', () => {
