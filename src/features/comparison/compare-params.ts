@@ -1,5 +1,7 @@
 import { z } from 'zod/mini';
 
+import { firstParam } from '@/lib/search-params';
+
 /** 백엔드는 5곳까지 받지만 화면 폭(360px)에서 읽을 수 있는 열은 3개다. */
 export const MAX_COMPARE = 3;
 
@@ -28,7 +30,7 @@ export function parseItemCode(value: unknown): string | null {
 
 /** URL의 dropped 파라미터: 공유 링크에서 더 이상 공개되지 않아 뺀 병원 수(1~3). 안내 한 줄에만 쓴다. */
 export function parseDropped(value: unknown): number {
-  const count = Number(Array.isArray(value) ? value[0] : value);
+  const count = Number(firstParam(value));
   return Number.isInteger(count) && count >= 1 && count <= MAX_COMPARE
     ? count
     : 0;

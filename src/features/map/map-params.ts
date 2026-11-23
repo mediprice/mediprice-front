@@ -10,6 +10,7 @@ import {
   regionQuery,
   type ServiceRegion,
 } from '@/features/regions/service-region';
+import { firstParam } from '@/lib/search-params';
 
 import {
   defaultRadius,
@@ -30,12 +31,11 @@ export type MapParams = {
   back?: string | null;
 };
 
-const first = (value: unknown) => (Array.isArray(value) ? value[0] : value);
 const itemSchema = z.pipe(
-  z.transform(first),
+  z.transform(firstParam),
   z.string().check(z.regex(/^[A-Za-z0-9]{1,20}$/)),
 );
-const coordinate = z.pipe(z.transform(first), z.coerce.number());
+const coordinate = z.pipe(z.transform(firstParam), z.coerce.number());
 const radiusSchema = z.pipe(
   coordinate,
   z.custom<RadiusOption>((value) =>
@@ -56,7 +56,7 @@ export function parseMapParams(
       ? roundLatLng({ lat: lat.data, lng: lng.data })
       : null;
   const radius = radiusSchema.safeParse(search.radius);
-  const rawBack = first(search.back);
+  const rawBack = firstParam(search.back);
   const back =
     item && typeof rawBack === 'string'
       ? buildPriceFiltersQuery(
