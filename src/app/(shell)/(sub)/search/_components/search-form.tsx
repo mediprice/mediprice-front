@@ -1,3 +1,5 @@
+'use client';
+
 import { ArrowRight, ChevronDown, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -7,7 +9,10 @@ import {
   type ServiceRegion,
 } from '@/features/regions/service-region';
 
-/** JS 없이 동작하는 GET 폼. 모바일은 입력 줄 아래에 대상·지역 두 칸, lg부터 한 줄 검색 바다. */
+/**
+ * JS 없이도 동작하는 GET 폼. 모바일은 입력 줄 아래에 대상·지역 두 칸, lg부터 한 줄 검색 바다.
+ * 검색어가 있으면 대상·지역을 바꾸는 즉시 다시 찾는다(바꾼 것처럼 보이는데 결과가 그대로인 일이 없게).
+ */
 export function SearchForm({
   type,
   keyword,
@@ -22,6 +27,21 @@ export function SearchForm({
   return (
     <form
       action="/search"
+      onChange={(event) => {
+        const field = event.target;
+        if (
+          !(
+            field instanceof HTMLInputElement ||
+            field instanceof HTMLSelectElement
+          ) ||
+          (field.name !== 'type' && field.name !== 'region')
+        )
+          return;
+        const form = event.currentTarget;
+        const query = form.elements.namedItem('q');
+        if (query instanceof HTMLInputElement && query.value.trim())
+          form.requestSubmit();
+      }}
       role="search"
       aria-label={t('label')}
       className="w-full overflow-hidden rounded-xl bg-bg shadow-card md:flex md:items-center md:gap-2 md:overflow-visible md:p-2"

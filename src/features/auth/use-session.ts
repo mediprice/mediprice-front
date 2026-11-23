@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 
 import { type LoginReason, openLoginDialog } from './login-dialog-store';
 import { type CurrentUser, sessionQueries } from './queries';
@@ -14,21 +14,32 @@ export type Session = {
   refetch: () => void;
 };
 
-/** 쿼리 결과를 화면이 분기하기 쉬운 상태 하나로 바꾼다. 서버 렌더와 첫 렌더는 항상 pending이다. */
+const noSubscribe = () => () => {};
+
+/**
+ * 쿼리 결과를 화면이 분기하기 쉬운 상태 하나로 바꾼다. 서버 렌더와 hydration 중에는 항상 pending이다.
+ * 화면 일부의 hydration이 늦어지는 동안 다른 곳에서 세션 확인이 끝나도 서버 HTML과 어긋나지 않게 한다.
+ */
 export function useSession(): Session {
   const { data, isPending, isError, refetch } = useQuery(
     sessionQueries.current(),
   );
-  const status: SessionStatus = isPending
-    ? 'pending'
-    : data
-      ? 'authenticated'
-      : isError
-        ? 'error'
-        : 'anonymous';
+  const isHydrated = useSyncExternalStore(
+    noSubscribe,
+    () => true,
+    () => false,
+  );
+  const status: SessionStatus =
+    !isHydrated || isPending
+      ? 'pending'
+      : data
+        ? 'authenticated'
+        : isError
+          ? 'error'
+          : 'anonymous';
   return {
     status,
-    user: data ?? null,
+    user: isHydrated ? (data ?? null) : null,
     refetch: () => void refetch(),
   };
 }

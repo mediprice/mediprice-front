@@ -1,0 +1,50 @@
+import { z } from 'zod';
+
+const KEY = 'mediprice:pending-favorite';
+/** 로그인 창을 닫고 한참 뒤 다른 길로 로그인했을 때 엉뚱하게 추가되지 않게, 짧은 시간 안에 돌아왔을 때만 이어서 한다. */
+const MAX_AGE_MS = 15 * 60 * 1000;
+
+const pendingSchema = z.object({
+  ykiho: z.string().min(1).max(200),
+  name: z.string().max(200).nullable(),
+  path: z.string().startsWith('/').max(2000),
+  scrollY: z.number().min(0),
+  savedAt: z.number(),
+});
+
+export type PendingFavorite = z.infer<typeof pendingSchema>;
+
+/** 로그인하지 않은 채 관심을 누르면 로그인 뒤 같은 화면에서 이어 하려고 남긴다(이 탭에만). */
+export function savePendingFavorite(
+  value: Omit<PendingFavorite, 'savedAt'>,
+  now = Date.now(),
+) {
+  try {
+    window.sessionStorage.setItem(
+      KEY,
+      JSON.stringify({ ...value, savedAt: now }),
+    );
+  } catch {
+    /** 저장소를 쓸 수 없으면 이어 하지 않는다. */
+  }
+}
+
+/** 지금 화면이 남긴 화면과 같고 오래되지 않았으면 꺼내고 지운다. 아니면 지우기만 한다(한 번만 쓴다). */
+export function takePendingFavorite(
+  currentPath: string,
+  now = Date.now(),
+): PendingFavorite | null {
+  try {
+    const raw = window.sessionStorage.getItem(KEY);
+    if (!raw) return null;
+    window.sessionStorage.removeItem(KEY);
+    const parsed = pendingSchema.safeParse(JSON.parse(raw));
+    if (!parsed.success) return null;
+    const pending = parsed.data;
+    return pending.path === currentPath && now - pending.savedAt <= MAX_AGE_MS
+      ? pending
+      : null;
+  } catch {
+    return null;
+  }
+}

@@ -36,14 +36,14 @@ export function StarRatingInput({
         aria-labelledby={labelledBy}
         aria-describedby={describedBy}
         aria-invalid={isInvalid || undefined}
-        className="-ml-1.5 flex"
+        className="-ml-1.5 flex max-w-[calc(100%+0.375rem)] min-w-0 items-center"
       >
         {RATINGS.map((rating) => {
           const isFilled = value != null && rating <= value;
           return (
             <label
               key={rating}
-              className="group relative flex size-11 cursor-pointer items-center justify-center rounded-md active:bg-surface"
+              className="group relative flex aspect-square w-11 min-w-0 shrink cursor-pointer items-center justify-center rounded-md active:bg-surface"
             >
               <input
                 ref={rating === 1 ? ref : undefined}
@@ -60,7 +60,7 @@ export function StarRatingInput({
                 aria-hidden="true"
                 strokeWidth={1.75}
                 className={cn(
-                  'size-8 transition-colors duration-150 ease-standard peer-focus-visible:rounded-sm peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus-ring',
+                  'size-8/11 transition-colors duration-150 ease-standard peer-focus-visible:rounded-sm peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus-ring',
                   isFilled
                     ? 'fill-current text-text-primary'
                     : 'text-text-tertiary group-hover:text-text-secondary',

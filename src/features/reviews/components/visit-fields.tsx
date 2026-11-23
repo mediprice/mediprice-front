@@ -4,9 +4,9 @@ import { useTranslations } from 'next-intl';
 import { useId } from 'react';
 import type { FieldErrors, UseFormRegister } from 'react-hook-form';
 
+import type { ReviewFormInput } from '@/features/reviews/schemas';
 import { cn } from '@/lib/utils';
 
-import type { ReviewFormInput } from '../schemas';
 import { FieldError } from './field-error';
 
 const INPUT =

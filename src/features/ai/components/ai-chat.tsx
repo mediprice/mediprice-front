@@ -12,9 +12,7 @@ import {
 } from 'react';
 
 import { PageContainer } from '@/components/layout/page-container';
-import { useSession } from '@/features/auth/use-session';
-import { cn } from '@/lib/utils';
-
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   canRetry,
   canSend,
@@ -23,14 +21,20 @@ import {
   isNearEnd,
   isOverDailyLimit,
   SESSION_TURN_LIMIT,
-} from '../conversation';
+  shouldConfirmRestart,
+} from '@/features/ai/conversation';
 import {
   restoreConversation,
   restoredState,
   useConversation,
-} from '../conversation-store';
-import { AI_DAILY_LIMIT } from '../usage-limits';
-import { useVoiceInput } from '../use-voice-input';
+} from '@/features/ai/conversation-store';
+import { AI_DAILY_LIMIT } from '@/features/ai/usage-limits';
+import { useAiNotice } from '@/features/ai/use-ai-notice';
+import { useVoiceInput } from '@/features/ai/use-voice-input';
+import { useSession } from '@/features/auth/use-session';
+import { cn } from '@/lib/utils';
+
+import { AiNoticeDialog } from './ai-notice-dialog';
 import { AiSideRail } from './ai-side-rail';
 import { AssistantMessage } from './assistant-message';
 import { ChatEnded } from './chat-ended';
@@ -40,6 +44,7 @@ import { Composer } from './composer';
 import { DailyLimitNotice } from './daily-limit-notice';
 import { EmergencyBanner } from './emergency-banner';
 import { QuotaDialog } from './quota-dialog';
+import type { DailyUsage } from './send-cost-hint';
 import { TurnFailure } from './turn-failure';
 import { TypingIndicator } from './typing-indicator';
 import { UserBubble } from './user-bubble';
@@ -62,7 +67,7 @@ export function AiChat() {
   const t = useTranslations('ai');
   const conversation = useConversation((state) => state);
   const { messages, status, failure, hasEmergency, requestId } = conversation;
-  const { send, retry, restart } = conversation;
+  const { send, retry, cancel, restart, sentAt } = conversation;
   const isRestored = useSyncExternalStore(
     restoredState.subscribe,
     restoredState.get,
@@ -72,14 +77,26 @@ export function AiChat() {
   const isMember = sessionStatus === 'authenticated';
   const scope: DailyScope = isMember ? 'member' : 'anonymous';
   const voice = useVoiceInput();
+  const notice = useAiNotice();
   const logRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [dismissedQuota, setDismissedQuota] = useState<string | null>(null);
+  const [isConfirmingRestart, setIsConfirmingRestart] = useState(false);
+  const isRestartConfirmed = useRef(false);
 
   const isOverDaily = isOverDailyLimit(conversation, scope);
   const isOpen = canSend(conversation) && !isOverDaily;
   const isLocked = status === 'stopped' || status === 'ended' || isOverDaily;
   const lastMessage = messages.at(-1);
+  const usage: DailyUsage = {
+    limit:
+      sessionStatus === 'pending'
+        ? null
+        : isMember
+          ? AI_DAILY_LIMIT.member
+          : AI_DAILY_LIMIT.anonymous,
+    remaining: dailyRemaining(conversation, scope),
+  };
 
   useEffect(() => {
     void restoreConversation();
@@ -124,18 +141,45 @@ export function AiChat() {
     resetMobileScroll();
   }, [isLocked]);
 
+  /** 안내를 처음 확인하면 입력창을 다시 제출해, 보낸 뒤 입력창을 비우는 흐름을 그대로 탄다. */
   function handleSend(text: string) {
+    const resubmit = () => textareaRef.current?.form?.requestSubmit();
+    if (!notice.ensure(['ai'], resubmit)) return false;
     return send(text, scope);
   }
 
   function handlePick(text: string) {
+    if (!notice.ensure(['ai'], () => handlePick(text))) return;
     if (send(text, scope)) logRef.current?.focus({ preventScroll: true });
+  }
+
+  function handleMic() {
+    if (notice.ensure(['ai', 'voice'], voice.start)) voice.start();
+  }
+
+  function handleVoiceSend(text: string) {
+    if (!notice.ensure(['ai'], () => handleVoiceSend(text))) return;
+    if (send(text, scope)) {
+      voice.cancel();
+      logRef.current?.focus({ preventScroll: true });
+    }
   }
 
   function handleRestart() {
     voice.cancel();
     restart();
     requestAnimationFrame(() => textareaRef.current?.focus());
+  }
+
+  /** 받은 답이 지워지므로 먼저 묻는다. 지울 것이 없으면 바로 새로 시작한다. */
+  function requestRestart() {
+    if (shouldConfirmRestart(conversation)) setIsConfirmingRestart(true);
+    else handleRestart();
+  }
+
+  function handleCancel() {
+    cancel();
+    logRef.current?.focus({ preventScroll: true });
   }
 
   /** 입력을 마치면 탭바가 돌아오고 대화 영역이 다시 화면 높이에 맞으므로, 입력창을 보이려고 내려간 창 스크롤을 되돌린다. */
@@ -156,34 +200,35 @@ export function AiChat() {
 
   return (
     <PageContainer className="max-lg:px-0 lg:py-10">
-      <div className="flex lg:items-start lg:gap-8">
+      <div className="@container/chat flex lg:items-start lg:gap-8">
         <section
           aria-labelledby="ai-chat-title"
           onMouseDown={keepTypingFocus}
           onBlur={handleBlur}
           className={cn(
-            'flex min-w-0 flex-1 flex-col bg-surface md:mx-auto md:max-w-2xl lg:mx-0 lg:max-w-none',
+            'group/chat flex min-w-0 flex-1 flex-col bg-surface md:mx-auto md:max-w-2xl lg:mx-0 lg:max-w-none',
             /** 모바일은 상단 바와 하단 탭바 사이를 채운다. 입력 중에는 탭바가 숨으므로(globals.css) 그 높이까지 쓴다. 키보드가 열리면 dvh가 줄어든다. */
             'h-[calc(100dvh-var(--spacing-top-bar)-var(--spacing-tab-bar)-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))]',
             'max-lg:has-[textarea:focus]:h-[calc(100dvh-var(--spacing-top-bar)-env(safe-area-inset-top,0px))]',
             'lg:h-[calc(100dvh-var(--spacing-top-nav)-5rem)] lg:max-h-240 lg:min-h-150 lg:overflow-hidden lg:rounded-xl',
           )}
         >
-          <ChatHeader
-            titleId="ai-chat-title"
-            dailyLimit={
-              sessionStatus === 'pending'
-                ? null
-                : isMember
-                  ? AI_DAILY_LIMIT.member
-                  : AI_DAILY_LIMIT.anonymous
-            }
-            dailyRemaining={dailyRemaining(conversation, scope)}
-            onRestart={messages.length > 0 ? handleRestart : undefined}
-          />
-          <p className="bg-surface-strong py-2 px-page text-body-sm text-text-secondary lg:mx-8 lg:mt-4 lg:rounded-lg lg:px-4 lg:py-2.5">
-            {t('header.disclaimer')}
-          </p>
+          {/** 글자가 커서 폭이 18rem보다 좁으면 안내 띠의 둘째 문장을 접고, 입력하는 동안은 제목과 띠를 숨겨 대화가 보이게 한다. */}
+          <div className="@max-[18rem]/chat:group-has-[textarea:focus]/chat:hidden">
+            <ChatHeader
+              titleId="ai-chat-title"
+              dailyLimit={usage.limit}
+              dailyRemaining={usage.remaining}
+              onRestart={messages.length > 0 ? requestRestart : undefined}
+            />
+            <p className="bg-surface-strong py-2 px-page text-body-sm text-text-secondary lg:mx-8 lg:mt-4 lg:rounded-lg lg:px-4 lg:py-2.5">
+              {t.rich('header.disclaimer', {
+                more: (chunks) => (
+                  <span className="@max-[18rem]/chat:hidden">{chunks}</span>
+                ),
+              })}
+            </p>
+          </div>
           {hasEmergency && (
             <div className="pt-3 px-page lg:px-8">
               <EmergencyBanner />
@@ -199,8 +244,11 @@ export function AiChat() {
             <div className="flex min-h-full flex-col justify-end gap-4 py-4 px-page lg:px-8 lg:py-5">
               <div data-chat-item>
                 <ChatIntro
-                  onPick={messages.length === 0 ? handlePick : undefined}
+                  onPick={
+                    messages.length === 0 && isOpen ? handlePick : undefined
+                  }
                   isAnonymous={sessionStatus === 'anonymous'}
+                  usage={usage}
                 />
               </div>
               {messages.map((message) => (
@@ -213,14 +261,15 @@ export function AiChat() {
                       isActive={message === lastMessage && isOpen}
                       onAnswer={handlePick}
                       onAskMore={focusComposer}
-                      onRestart={handleRestart}
+                      onRestart={requestRestart}
+                      usage={usage}
                     />
                   )}
                 </div>
               ))}
               {status === 'sending' && (
                 <div data-chat-item>
-                  <TypingIndicator />
+                  <TypingIndicator sentAt={sentAt} onCancel={handleCancel} />
                 </div>
               )}
               {status === 'failed' && failure && !isOverDaily && (
@@ -245,7 +294,7 @@ export function AiChat() {
               ) : (
                 status === 'ended' && (
                   <div data-chat-item>
-                    <ChatEnded onRestart={handleRestart} />
+                    <ChatEnded onRestart={requestRestart} />
                   </div>
                 )
               )}
@@ -262,12 +311,7 @@ export function AiChat() {
               }}
               onRetry={voice.retry}
               onRerecord={voice.start}
-              onSend={(text) => {
-                if (send(text, scope)) {
-                  voice.cancel();
-                  logRef.current?.focus({ preventScroll: true });
-                }
-              }}
+              onSend={handleVoiceSend}
               onTypeInstead={() => {
                 voice.cancel();
                 requestAnimationFrame(focusComposer);
@@ -286,15 +330,42 @@ export function AiChat() {
                   : t('ended.placeholder')
               }
               onSend={handleSend}
-              onMic={voice.engine ? voice.start : undefined}
+              onMic={voice.engine ? handleMic : undefined}
             />
           )}
         </section>
         <AiSideRail
           sessionStatus={sessionStatus}
-          dailyRemaining={dailyRemaining(conversation, scope)}
+          dailyRemaining={usage.remaining}
         />
       </div>
+      <AiNoticeDialog
+        kinds={notice.kinds}
+        engine={voice.engine}
+        onConfirm={notice.confirm}
+        onDismiss={notice.dismiss}
+      />
+      <ConfirmDialog
+        open={isConfirmingRestart}
+        onOpenChange={setIsConfirmingRestart}
+        title={t('header.restartConfirm.title')}
+        description={t('header.restartConfirm.description')}
+        cancelLabel={t('header.restartConfirm.cancel')}
+        confirmLabel={t('header.restartConfirm.confirm')}
+        confirmVariant="primary"
+        onConfirm={() => {
+          voice.cancel();
+          restart();
+          isRestartConfirmed.current = true;
+          setIsConfirmingRestart(false);
+        }}
+        onCloseAutoFocus={(event) => {
+          if (!isRestartConfirmed.current) return;
+          isRestartConfirmed.current = false;
+          event.preventDefault();
+          focusComposer();
+        }}
+      />
       <QuotaDialog
         open={
           isOverDaily && failure === 'quota' && dismissedQuota !== requestId
@@ -303,6 +374,10 @@ export function AiChat() {
           if (!open) setDismissedQuota(requestId);
         }}
         isMember={isMember}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          logRef.current?.focus({ preventScroll: true });
+        }}
       />
     </PageContainer>
   );

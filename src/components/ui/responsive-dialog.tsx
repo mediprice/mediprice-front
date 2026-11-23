@@ -47,8 +47,10 @@ export function ResponsiveDialogContent({
           aria-hidden="true"
           className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-border-strong/50 md:hidden"
         />
-        <div className="flex shrink-0 items-center justify-between gap-2 pt-2 pr-2 pl-4 md:pt-4 md:pr-3 md:pl-6">
-          <Dialog.Title className="text-heading">{title}</Dialog.Title>
+        <div className="flex shrink-0 items-center justify-between gap-2 pt-2 pr-2 pl-4 max-[22rem]:pr-1 max-[22rem]:pl-3 md:pt-4 md:pr-3 md:pl-6">
+          <Dialog.Title className="min-w-0 text-heading break-keep">
+            {title}
+          </Dialog.Title>
           <Dialog.Close
             aria-label={t('close')}
             className="flex size-11 shrink-0 items-center justify-center rounded-lg text-text-secondary hover:bg-surface active:bg-surface-strong"
@@ -61,11 +63,11 @@ export function ResponsiveDialogContent({
             {description}
           </Dialog.Description>
         )}
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-4 md:px-6 md:pb-6 [@media(max-height:40rem)]:flex-none [@media(max-height:40rem)]:overflow-visible">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-4 max-[22rem]:px-3 md:px-6 md:pb-6 [@media(max-height:40rem)]:flex-none [@media(max-height:40rem)]:overflow-visible">
           {children}
         </div>
         {footer && (
-          <div className="flex shrink-0 flex-wrap gap-2 border-t border-hairline bg-bg px-4 py-3 md:rounded-b-xl md:px-6 md:py-4">
+          <div className="flex shrink-0 flex-wrap gap-2 border-t border-hairline bg-bg px-4 py-3 max-[22rem]:px-3 md:rounded-b-xl md:px-6 md:py-4">
             {footer}
           </div>
         )}

@@ -12,6 +12,7 @@ import {
   isNearEnd,
   isOverDailyLimit,
   resumeConversation,
+  shouldConfirmRestart,
 } from './conversation';
 import type { TurnResponse } from './schemas';
 
@@ -25,6 +26,7 @@ function response(overrides: Partial<TurnResponse> = {}): TurnResponse {
     ],
     items: [],
     emergencyBanner: false,
+    area: null,
     remainingTurns: 5,
     ...overrides,
   };
@@ -86,7 +88,27 @@ describe('conversationReducer', () => {
 
   it('다른 요청의 늦은 답은 무시한다(새 대화를 시작한 뒤 도착한 답 등)', () => {
     const state = run(send('하나'), { type: 'restart' }, receive(response()));
-    expect(state).toEqual(INITIAL_CONVERSATION);
+    expect(state).toEqual({ ...INITIAL_CONVERSATION, dailyScope: 'anonymous' });
+  });
+
+  it('새 대화를 시작해도 오늘 남은 횟수는 남긴다', () => {
+    const state = run(
+      send('허리가 아파요'),
+      receive(response({ remainingTurns: 1 })),
+      { type: 'restart' },
+    );
+    expect(state.messages).toEqual([]);
+    expect(dailyRemaining(state, 'anonymous')).toBe(1);
+  });
+
+  it('오늘 한도에 걸린 뒤 새 대화를 시작해도 한도는 그대로다', () => {
+    const state = run(
+      send('허리가 아파요'),
+      { type: 'fail', requestId: 'r1', failure: 'quota' },
+      { type: 'restart' },
+    );
+    expect(isOverDailyLimit(state, 'anonymous')).toBe(true);
+    expect(isOverDailyLimit(state, 'member')).toBe(false);
   });
 
   it('실패하면 입력과 서버 상태를 그대로 두고 재시도할 수 있다', () => {
@@ -259,5 +281,24 @@ describe('resumeConversation', () => {
     expect(resumed.status).toBe('failed');
     expect(resumed.failure).toBe('interrupted');
     expect(canRetry(resumed)).toBe(true);
+  });
+});
+
+describe('shouldConfirmRestart', () => {
+  it('답을 받았거나 기다리는 중이면 확인받는다', () => {
+    expect(shouldConfirmRestart(INITIAL_CONVERSATION)).toBe(false);
+    expect(shouldConfirmRestart(run(send('하나')))).toBe(true);
+    expect(shouldConfirmRestart(run(send('하나'), receive(response())))).toBe(
+      true,
+    );
+  });
+
+  it('답 없이 실패한 입력만 있으면 바로 지운다', () => {
+    const failed = run(send('하나'), {
+      type: 'fail',
+      requestId: 'r1',
+      failure: 'network',
+    });
+    expect(shouldConfirmRestart(failed)).toBe(false);
   });
 });

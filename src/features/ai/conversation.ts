@@ -1,5 +1,6 @@
 import type { TurnFailure } from './ai-errors';
 import type {
+  TurnArea,
   TurnItem,
   TurnKind,
   TurnQuestion,
@@ -18,6 +19,8 @@ export type AssistantMessage = {
   text: string;
   questions: TurnQuestion[];
   items: TurnItem[];
+  /** 사용자가 말한 장소. 결과 카드가 이 지역의 가격을 보여 준다. */
+  area: TurnArea | null;
 };
 type ChatMessage = UserMessage | AssistantMessage;
 
@@ -101,6 +104,14 @@ export function isNearEnd(conversation: Conversation) {
 /** 지금 로그인 상태 기준의 오늘 남은 횟수. 모르거나 다른 상태에서 받은 값이면 null이다. */
 export function dailyRemaining(conversation: Conversation, scope: DailyScope) {
   return conversation.dailyScope === scope ? conversation.remainingTurns : null;
+}
+
+/** 답을 하나라도 받았거나 기다리는 중이면, 새 대화로 지우기 전에 확인받는다. */
+export function shouldConfirmRestart(conversation: Conversation) {
+  return (
+    conversation.status === 'sending' ||
+    conversation.messages.some((message) => message.role === 'assistant')
+  );
 }
 
 /** 오늘 한도를 다 썼는지(429를 받았거나 남은 횟수가 0). 로그인해서 기준이 바뀌면 다시 보낼 수 있다. */
@@ -197,6 +208,7 @@ export function conversationReducer(
             text: response.reply,
             questions: response.questions,
             items: response.kind === 'result' ? response.items : [],
+            area: response.area,
           },
         ],
         serverState: response.state,
@@ -216,8 +228,14 @@ export function conversationReducer(
       }
       return { ...conversation, status: 'failed', failure: action.failure };
     }
+    /** 오늘 남은 횟수는 대화가 아니라 하루 기준이라 새 대화에도 남긴다. */
     case 'restart':
-      return INITIAL_CONVERSATION;
+      return {
+        ...INITIAL_CONVERSATION,
+        remainingTurns:
+          conversation.failure === 'quota' ? 0 : conversation.remainingTurns,
+        dailyScope: conversation.dailyScope,
+      };
   }
 }
 

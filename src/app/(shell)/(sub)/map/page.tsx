@@ -9,7 +9,11 @@ import { MapView } from './_components/map-view';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('map.metadata');
-  return { title: t('title'), description: t('description') };
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: { canonical: '/map' },
+  };
 }
 
 export default async function MapPage({ searchParams }: PageProps<'/map'>) {
@@ -20,7 +24,11 @@ export default async function MapPage({ searchParams }: PageProps<'/map'>) {
     <>
       <SubTopBar
         title={t('title')}
-        backHref={params.item ? itemListHref(params.item, params.region) : '/'}
+        backHref={
+          params.item
+            ? itemListHref(params.item, params.region, params.back ?? null)
+            : '/'
+        }
       />
       <MapView initialParams={params} />
     </>

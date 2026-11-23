@@ -1,9 +1,10 @@
 {
   "metadata": {
-    "title": "항목별 가격",
-    "description": "병원마다 다른 비급여 진료비를 건강보험심사평가원 공개 가격으로 비교해요.",
-    "documentTitle": "{name} 병원별 가격 | MediPrice",
-    "notFoundTitle": "찾을 수 없는 항목 | MediPrice"
+    "title": "{name} 병원별 가격",
+    "descriptionWithAverage": "{name} 비급여 진료비를 병원별로 비교해요. {region} 평균 {average, number}원, 병원 {hospitals, number}곳의 건강보험심사평가원 공개 가격이에요.",
+    "descriptionWithoutAverage": "{name} 비급여 진료비를 건강보험심사평가원 공개 가격으로 병원별로 비교해요.",
+    "fallbackTitle": "항목별 가격",
+    "fallbackDescription": "병원마다 다른 비급여 진료비를 건강보험심사평가원 공개 가격으로 비교해요."
   },
   "topBar": {
     "title": "항목별 가격"
@@ -11,7 +12,9 @@
   "header": {
     "source": "건강보험심사평가원 공개 가격 기준",
     "loading": "항목 정보를 불러오는 중",
-    "fallbackTitle": "항목별 가격"
+    "fallbackTitle": "항목별 가격",
+    "sourceWithDate": "건강보험심사평가원 공개 가격 · <nowrap>{date, date, long} 기준</nowrap>",
+    "actualCostNote": "병원이 신고한 기준 가격이라 실제 진료비와 다를 수 있어요."
   },
   "notFound": {
     "description": "주소가 바뀌었거나 더 이상 공개되지 않는 항목일 수 있어요.",
@@ -22,7 +25,8 @@
     "regionWithSggu": "{region} {sggu}",
     "scopeWithInstitution": "{scope} · {institution}",
     "scope": "{scope} 기준",
-    "counts": "병원 {hospitals, number}곳 · 가격 {prices, number}건"
+    "counts": "병원 {hospitals, number}곳 · 가격 {prices, number}건",
+    "comparableCounts": "평균과 견줄 수 있는 병원 {hospitals, number}곳 · 가격 {prices, number}건"
   },
   "filters": {
     "title": "필터",
@@ -55,7 +59,10 @@
     "title": "병원별 공개 가격",
     "count": "병원 {count, number}곳",
     "progress": "전체 {total, number}곳 중 {shown, number}곳",
-    "loadMoreError": "다음 목록을 불러오지 못했어요."
+    "loadMoreError": "다음 목록을 불러오지 못했어요.",
+    "narrowHint": "병원이 많아 끝까지 넘겨 보기 어려워요. 지역과 시·군·구로 좁혀 보세요.",
+    "narrowAction": "시·군·구로 좁히기",
+    "summaryFailed": "평균을 불러오지 못해 모든 가격을 보여 드려요."
   },
   "empty": {
     "title": "조건에 맞는 병원이 없어요",
@@ -63,19 +70,31 @@
     "change": "조건 바꾸기",
     "reset": "조건 모두 초기화",
     "noPriceTitle": "아직 공개된 가격이 없어요",
-    "noPriceDescription": "이 항목의 가격을 공개한 병원이 없어요. 다른 항목을 찾아보세요.",
-    "search": "다른 항목 찾기"
+    "noPriceDescription": "전국에서도 이 항목의 가격을 공개한 병원이 없어요.",
+    "search": "다른 항목 찾기",
+    "noPriceInRegion": "{region}에는 이 항목 가격이 없어요",
+    "widenDescription": "다른 지역에는 가격을 공개한 병원이 있을 수 있어요.",
+    "nationwide": "전국에서 보기",
+    "sameCategory": "같은 분류의 다른 항목 보기"
   },
   "card": {
     "meta": "{kind} · {region}",
+    "valueLabel": "이 병원",
     "startDate": "{date}부터 적용",
     "startDateUnknown": "적용일 미확인",
     "showVariants": "세부 {count, number}건 보기",
     "hideVariants": "세부 접기",
     "variantsLabel": "{hospital}의 세부 가격",
-    "moreVariants": "외 {count, number}건"
+    "basis": "{name} 기준"
   },
   "breadcrumb": {
     "home": "홈"
+  },
+  "scope": {
+    "comparable": "평균과 견주기 어려운 가격 {count, number}건은 빼고 보여 드려요.",
+    "all": "평균과 견주기 어려운 가격까지 모두 보여 드려요.",
+    "reason": "평균의 1/3보다 낮거나 3배보다 높은 가격은 시간·횟수 같은 구성이 다른 세부 항목일 수 있어요.",
+    "showAll": "모두 보기",
+    "showComparable": "견줄 수 있는 가격만 보기"
   }
 }

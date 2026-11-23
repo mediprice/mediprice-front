@@ -24,6 +24,7 @@ function toReviewBody(form: ReviewForm) {
 }
 
 export type Review = components['schemas']['ReviewResponse'];
+export type ReviewPage = components['schemas']['PageResponseReviewResponse'];
 export type ReviewSort = 'latest' | 'rating';
 
 const REVIEW_PAGE_SIZE = 5;
@@ -33,8 +34,10 @@ const MAX_PAGE_SIZE = 100;
 
 export const reviewKeys = {
   all: ['reviews'] as const,
+  hospitalAll: (ykiho: string) =>
+    [...reviewKeys.all, 'hospital', ykiho] as const,
   hospital: (ykiho: string, sort: ReviewSort) =>
-    [...reviewKeys.all, 'hospital', ykiho, sort] as const,
+    [...reviewKeys.hospitalAll(ykiho), sort] as const,
   mine: () => [...reviewKeys.all, 'mine'] as const,
   myList: () => [...reviewKeys.mine(), 'list'] as const,
   myReview: (reviewId: number) =>

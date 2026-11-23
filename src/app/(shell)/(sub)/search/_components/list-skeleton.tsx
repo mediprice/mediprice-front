@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 
 import { Skeleton } from '@/components/ui/skeleton';
 
-import { PriceSkeleton } from './item-row';
+import { PriceSkeleton } from './price-skeleton';
 
 /** 첫 페이지를 불러오는 동안 목록 자리를 잡는다. 묶음 머리와 행은 실제 ItemRow·HospitalCard와 같은 높이다. */
 export function ListSkeleton({

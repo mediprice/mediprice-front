@@ -2,7 +2,12 @@ import type { Messages } from 'next-intl';
 
 import { ApiError, NetworkError } from './errors';
 
-export type ErrorMessageKey = keyof Messages['errors'];
+type ErrorMessages = Messages['errors'];
+
+/** errors.page.*(에러 화면 문구) 같은 묶음은 빼고 문자열 키만 고른다. */
+export type ErrorMessageKey = {
+  [K in keyof ErrorMessages]: ErrorMessages[K] extends string ? K : never;
+}[keyof ErrorMessages];
 
 /** 백엔드 message는 한국어 고정이고 fieldErrors.reason은 Bean Validation 기본 문구라서 화면 문구는 코드로만 고른다. */
 const MESSAGE_KEY_BY_CODE = {
@@ -25,6 +30,9 @@ const MESSAGE_KEY_BY_CODE = {
   RESOURCE_NOT_FOUND: 'notFound',
   NOT_FOUND: 'notFound',
   MEDICAL_PROFILE_NOT_FOUND: 'notFound',
+  MEDICAL_PROFILE_CONSENT_REQUIRED: 'medicalProfileConsentRequired',
+  CONSENT_VERSION_OUTDATED: 'consentVersionOutdated',
+  CONSENT_WITHDRAWAL_NOT_ALLOWED: 'consentWithdrawalNotAllowed',
   HOSPITAL_NOT_FOUND: 'hospitalNotFound',
   NPAY_ITEM_NOT_FOUND: 'npayItemNotFound',
   SIDO_NOT_FOUND: 'regionNotFound',
@@ -33,12 +41,23 @@ const MESSAGE_KEY_BY_CODE = {
   HISTORY_NOT_FOUND: 'historyNotFound',
   REVIEW_ALREADY_REPORTED: 'reviewAlreadyReported',
   REPORT_ALREADY_RESOLVED: 'reportAlreadyResolved',
+  CLAIM_UNAVAILABLE: 'claimUnavailable',
+  CLAIM_NOTICE_VERSION_OUTDATED: 'claimNoticeOutdated',
+  CLAIM_RATE_LIMITED: 'claimRateLimited',
+  CLAIM_OBJECTION_FORBIDDEN: 'claimObjectionForbidden',
+  ACTIVE_CLAIM_NOT_FOUND: 'activeClaimNotFound',
+  CLAIM_OBJECTION_ALREADY_SUBMITTED: 'claimObjectionAlreadySubmitted',
+  CLAIM_NOT_FOUND: 'claimNotFound',
+  CLAIM_ALREADY_RESOLVED: 'claimAlreadyResolved',
+  RATE_LIMITED: 'tooManyRequests',
   AI_QUOTA_EXCEEDED: 'aiQuotaExceeded',
   AI_UNAVAILABLE: 'aiUnavailable',
   AI_AUDIO_TOO_LARGE: 'audioTooLarge',
   UNSUPPORTED_MEDIA_TYPE: 'unsupportedMedia',
   INTERNAL_ERROR: 'server',
   UPSTREAM_UNAVAILABLE: 'serverUnavailable',
+  UPSTREAM_TIMEOUT: 'serverUnavailable',
+  INVALID_RESPONSE: 'server',
 } as const satisfies Record<string, ErrorMessageKey>;
 
 type KnownErrorCode = keyof typeof MESSAGE_KEY_BY_CODE;

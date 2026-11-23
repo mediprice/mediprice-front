@@ -5,12 +5,21 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CircleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useId, useState } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import {
+  Controller,
+  type DefaultValues,
+  useForm,
+  useWatch,
+} from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
-import { errorMessageKey } from '@/lib/api/error-message';
-
-import { type Review, reviewMutations } from '../queries';
+import { type Review, reviewMutations } from '@/features/reviews/queries';
+import {
+  clearReviewDraft,
+  readReviewDraft,
+  reviewDraftKey,
+  writeReviewDraft,
+} from '@/features/reviews/review-draft';
 import {
   buildReviewFormSchema,
   invalidFields,
@@ -19,7 +28,9 @@ import {
   type ReviewForm as ReviewFormValues,
   type ReviewFormInput,
   todayInSeoul,
-} from '../schemas';
+} from '@/features/reviews/schemas';
+import { errorMessageKey } from '@/lib/api/error-message';
+
 import { FieldError } from './field-error';
 import { StarRatingInput } from './star-rating-input';
 import { VisitFields } from './visit-fields';
@@ -46,6 +57,17 @@ export function ReviewForm({
   const queryClient = useQueryClient();
   const isEdit = review != null;
   const [today] = useState(todayInSeoul);
+  const draftKey = reviewDraftKey(ykiho, review?.id);
+  /** 이 탭에서 쓰다 만 글. 세션이 끝나 다시 로그인하고 돌아와도 이어 쓸 수 있다. */
+  const [restoredDraft, setRestoredDraft] = useState(() =>
+    readReviewDraft(draftKey),
+  );
+  const [initialValues] = useState<DefaultValues<ReviewFormInput>>(() => ({
+    rating: review?.rating,
+    content: review?.content ?? '',
+    visitedOn: review?.visitedOn ?? '',
+    paidAmount: review?.paidAmount != null ? String(review.paidAmount) : '',
+  }));
   const [schema] = useState(() =>
     buildReviewFormSchema({
       today,
@@ -61,29 +83,37 @@ export function ReviewForm({
     handleSubmit,
     setError,
     setFocus,
+    reset,
     formState: { errors, isDirty },
   } = useForm<ReviewFormInput, unknown, ReviewFormValues>({
     resolver: zodResolver(schema),
     /** 별점 Controller가 본문보다 늦게 등록돼 기본 포커스가 화면 순서와 어긋나므로 직접 고른다. */
     shouldFocusError: false,
-    defaultValues: {
-      rating: review?.rating,
-      content: review?.content ?? '',
-      visitedOn: review?.visitedOn ?? '',
-      paidAmount: review?.paidAmount != null ? String(review.paidAmount) : '',
-    },
+    defaultValues: restoredDraft ?? initialValues,
   });
+
+  const draftValues = useWatch({ control });
+  useEffect(() => {
+    writeReviewDraft(draftKey, {
+      rating: draftValues.rating,
+      content: draftValues.content ?? '',
+      visitedOn: draftValues.visitedOn ?? '',
+      paidAmount: draftValues.paidAmount ?? '',
+    });
+  }, [draftKey, draftValues]);
+
+  function discardDraft() {
+    clearReviewDraft(draftKey);
+    reset(initialValues);
+    setRestoredDraft(null);
+  }
   const content = useWatch({ control, name: 'content' });
-  const save = useMutation({
-    ...(review
+  /** 옵션의 onError(낡은 목록 다시 받기)를 덮지 않도록 화면 처리는 mutate에 넘긴다. */
+  const save = useMutation(
+    review
       ? reviewMutations.update(queryClient, review.id)
-      : reviewMutations.create(queryClient, ykiho)),
-    onError: (error) => {
-      const fields = invalidFields(error, REVIEW_FORM_FIELDS);
-      fields.forEach((field) => setError(field, { message: 'invalid' }));
-      if (fields[0]) setFocus(fields[0]);
-    },
-  });
+      : reviewMutations.create(queryClient, ykiho),
+  );
   const hasFieldErrors =
     save.isError && invalidFields(save.error, REVIEW_FORM_FIELDS).length > 0;
 
@@ -98,7 +128,20 @@ export function ReviewForm({
     <form
       noValidate
       onSubmit={handleSubmit(
-        (form) => save.mutate(form, { onSuccess: (saved) => onSuccess(saved) }),
+        (form) =>
+          save.mutate(form, {
+            onSuccess: (saved) => {
+              clearReviewDraft(draftKey);
+              onSuccess(saved);
+            },
+            onError: (error) => {
+              const fields = invalidFields(error, REVIEW_FORM_FIELDS);
+              fields.forEach((field) =>
+                setError(field, { message: 'invalid' }),
+              );
+              if (fields[0]) setFocus(fields[0]);
+            },
+          }),
         (invalid) => {
           const first = REVIEW_FORM_FIELDS.find((field) => invalid[field]);
           if (first) setFocus(first);
@@ -106,7 +149,20 @@ export function ReviewForm({
       )}
       className="flex flex-col gap-6"
     >
-      <fieldset className="flex flex-col gap-2">
+      {restoredDraft && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-primary-tint px-4 py-2 text-body-sm text-primary-text">
+          <p>{t('draftRestored')}</p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={discardDraft}
+          >
+            {t('draftDiscard')}
+          </Button>
+        </div>
+      )}
+      <fieldset className="flex min-w-0 flex-col gap-2">
         <legend id={`${id}-rating`} className="mb-2 text-label-bold">
           {t('rating')}
         </legend>
@@ -145,10 +201,10 @@ export function ReviewForm({
         />
         <div
           id={`${id}-content-hint`}
-          className="flex items-start justify-between gap-4 text-caption text-text-secondary"
+          className="flex flex-wrap items-start justify-between gap-x-4 text-caption text-text-secondary"
         >
           <span>{t('contentRange')}</span>
-          <span aria-hidden="true" className="shrink-0 tabular-nums">
+          <span aria-hidden="true" className="ml-auto tabular-nums">
             {t('contentCount', {
               count: content.length,
               max: REVIEW_CONTENT_MAX,

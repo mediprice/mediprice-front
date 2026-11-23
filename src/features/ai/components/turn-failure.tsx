@@ -3,8 +3,8 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import type { TurnFailure as Failure } from '@/features/ai/ai-errors';
 
-import type { TurnFailure as Failure } from '../ai-errors';
 import { AssistantBubble } from './assistant-bubble';
 
 /** 답을 받지 못했을 때. 다시 보내기는 같은 입력과 같은 대화 상태를 다시 보낸다. 재시도가 없으면 검색을 tint로 앞세운다. */

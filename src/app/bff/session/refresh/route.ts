@@ -8,6 +8,9 @@ import { isSameOrigin } from '@/server/bff/upstream';
 export async function POST(request: NextRequest) {
   if (!isSameOrigin(request)) return forbidden();
 
-  const result = await refreshSession(readTokens(request).refreshToken);
+  const result = await refreshSession(
+    readTokens(request).refreshToken,
+    request.headers,
+  );
   return refreshResponse(result, unauthenticated);
 }

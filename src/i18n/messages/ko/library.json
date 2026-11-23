@@ -19,7 +19,7 @@
     "viewHospital": "병원 보기",
     "remove": "{name} 관심 병원에서 빼기",
     "removed": "{name}을(를) 관심 병원에서 뺐어요.",
-    "removeFailed": "관심 병원에서 빼지 못했어요.",
+    "removeFailed": "관심 병원에서 빼지 못했어요. {reason}",
     "unavailableName": "정보가 사라진 병원",
     "unavailable": "정보 없음",
     "unavailableHint": "병원 정보가 더 이상 공개되지 않아요.",
@@ -31,7 +31,16 @@
     "undo": "되돌리기",
     "undoLabel": "{name} 관심 병원 되돌리기",
     "restored": "{name}을(를) 다시 관심 병원에 저장했어요.",
-    "restoreFailed": "관심 병원에 다시 저장하지 못했어요."
+    "restoreFailed": "관심 병원에 다시 저장하지 못했어요. {reason}",
+    "signedOutHeading": "관심 병원을 한곳에 모아 둘 수 있어요",
+    "signedOutDescription": "병원 상세에서 하트를 누른 병원이 여기에 모여요.",
+    "call": "전화",
+    "callLabel": "{name} 전화 걸기 {phone}",
+    "compare": {
+      "count": "비교함 {count, number}/{max, number}",
+      "needMore": "한 곳 더 담으면 비교할 수 있어요.",
+      "go": "비교하기"
+    }
   },
   "history": {
     "title": "최근 기록",
@@ -58,7 +67,7 @@
     "revisit": "다시 보기",
     "removeLabel": "{title} 기록 삭제",
     "removed": "기록을 삭제했어요.",
-    "removeFailed": "기록을 삭제하지 못했어요.",
+    "removeFailed": "기록을 삭제하지 못했어요. {reason}",
     "clearAll": "기록 전체 삭제",
     "clearDialog": {
       "title": "최근 기록을 모두 삭제할까요?",
@@ -73,10 +82,7 @@
   },
   "medicalProfile": {
     "title": "의료 프로필",
-    "heading": "AI 찾기에 쓸 내 정보",
-    "description": "진료 이력·복용 약·알레르기를 직접 입력하고 언제든 지울 수 있어요.",
-    "consentLabel": "저장 목적을 확인했고, 건강 정보 저장에 동의해요",
-    "consentPurpose": "저장 목적: AI가 내 상황을 더 정확히 이해하도록 돕기 위해서예요. 모든 칸은 선택이에요.",
+    "description": "진료 이력·복용 약·알레르기를 적어 두고 필요할 때 다시 확인해요. 언제든 지울 수 있어요.",
     "basicTitle": "기본 정보",
     "birthYear": "출생 연도",
     "birthYearHint": "네 자리 숫자로 입력해요. 예: 1985",
@@ -96,20 +102,20 @@
       "chronicConditions": "예: 고혈압, 허리 디스크 치료(2024년)",
       "medications": "예: 혈압약 하루 1번",
       "allergies": "예: 페니실린, 땅콩",
-      "note": "AI가 알면 좋을 내용을 적어 주세요."
+      "note": "병원에 갈 때 기억해 둘 내용을 적어 주세요."
     },
     "charCount": "{count, number}/{max, number}자",
     "updatedAt": "마지막 저장 {date}",
     "notSaved": "아직 저장하지 않았어요.",
     "save": "저장",
     "saved": "의료 프로필을 저장했어요.",
-    "remove": "의료 프로필 전체 삭제",
+    "remove": "동의 철회하고 의료 정보 삭제",
     "deleteDialog": {
-      "title": "의료 프로필을 모두 삭제할까요?",
-      "description": "저장한 출생 연도, 성별, 진료 이력, 복용 약, 알레르기, 메모가 모두 삭제되고 되돌릴 수 없어요.",
-      "confirm": "삭제"
+      "title": "동의를 철회하고 의료 정보를 삭제할까요?",
+      "description": "건강 정보 수집·이용 동의를 철회하고, 저장한 출생 연도, 성별, 진료 이력, 복용 약, 알레르기, 메모를 모두 삭제해요. 되돌릴 수 없어요. 다른 기능은 그대로 쓸 수 있어요.",
+      "confirm": "철회하고 삭제"
     },
-    "deleted": "의료 프로필을 삭제했어요.",
+    "deleted": "동의를 철회하고 의료 프로필을 삭제했어요.",
     "leaveDialog": {
       "title": "저장하지 않은 내용이 있어요",
       "description": "나가면 입력한 내용이 사라져요.",
@@ -121,8 +127,28 @@
       "birthYearFormat": "출생 연도는 네 자리 숫자로 입력해 주세요.",
       "birthYearRange": "1900년부터 올해까지의 연도를 입력해 주세요.",
       "tooLong": "1,000자 이내로 입력해 주세요.",
-      "invalid": "입력한 값을 다시 확인해 주세요."
+      "invalid": "입력한 값을 다시 확인해 주세요.",
+      "consentOutdated": "동의 내용이 바뀌었어요. 위 내용을 다시 확인하고 동의해 주세요."
     },
-    "errorTitle": "의료 프로필을 불러오지 못했어요"
+    "errorTitle": "의료 프로필을 불러오지 못했어요",
+    "consent": {
+      "title": "건강 정보 수집·이용 동의",
+      "description": "건강 정보는 민감정보라 다른 동의와 따로 받아요.",
+      "optional": "선택",
+      "purposeLabel": "수집·이용 목적",
+      "purpose": "직접 입력한 건강 정보를 저장해 두고 본인이 다시 확인할 수 있게 해요.",
+      "ai": "{sent, select, yes {AI 찾기를 쓸 때 요약이 외부 AI 서비스로 보내져요.} other {AI 찾기에는 보내지 않아요.}}",
+      "aiPending": "AI 찾기 전송 여부",
+      "itemsLabel": "수집 항목",
+      "items": "출생 연도, 성별, 앓고 있는 질환·진료 이력, 복용 중인 약, 알레르기, 기타 메모(모두 선택해서 입력)",
+      "periodLabel": "보유·이용 기간",
+      "period": "동의를 철회하거나 회원 탈퇴할 때까지예요. 철회하면 바로 삭제해요.",
+      "refuseLabel": "동의를 거부할 권리",
+      "refuse": "동의하지 않아도 돼요. 동의하지 않으면 의료 프로필을 저장할 수 없지만, 다른 기능은 그대로 쓸 수 있어요.",
+      "label": "위 내용을 확인했고, 건강 정보 수집·이용에 동의해요",
+      "agreedAt": "동의한 날짜 {date}",
+      "policyLink": "개인정보 처리방침의 민감정보 항목 보기",
+      "newTab": "(새 탭에서 열림)"
+    }
   }
 }

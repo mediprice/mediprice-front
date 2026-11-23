@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -8,20 +8,25 @@ export function EmptyState({
   title,
   description,
   action,
+  titleAs: Title = 'p',
   className,
-}: {
+  ...props
+}: Omit<ComponentProps<'div'>, 'title'> & {
   icon?: ReactNode;
   title: string;
+  /** 화면 전체가 빈 상태(404·오류 페이지)면 'h1'로 넘겨 제목 구조를 지킨다. */
+  titleAs?: 'p' | 'h1' | 'h2';
   description?: string;
   action?: ReactNode;
-  className?: string;
 }) {
   return (
     <div
+      data-slot="empty-state"
       className={cn(
         'flex flex-col items-center gap-3 px-4 py-12 text-center',
         className,
       )}
+      {...props}
     >
       {icon && (
         <span
@@ -31,7 +36,7 @@ export function EmptyState({
           {icon}
         </span>
       )}
-      <p className="text-subheading">{title}</p>
+      <Title className="text-subheading">{title}</Title>
       {description && (
         <p className="max-w-sm text-body-sm text-text-secondary">
           {description}

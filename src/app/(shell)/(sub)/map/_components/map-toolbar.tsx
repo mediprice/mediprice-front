@@ -16,10 +16,14 @@ import { itemListHref } from './item-list-href';
 
 export type MobileView = 'list' | 'map';
 
-/** 제목(고른 항목)과 반경 칩, 모바일 지도/목록 전환. 데스크톱은 항목 가격 목록으로 돌아가는 버튼도 둔다(모바일은 상단 바가 맡는다). */
+/**
+ * 제목(고른 항목)과 반경 칩, 모바일 지도/목록 전환. 데스크톱은 항목 가격 목록으로 돌아가는 버튼도 둔다(모바일은 상단 바가 맡는다).
+ * 큰 글자로 제목 자리가 10rem보다 좁아지면 전환 버튼이 다음 줄로 내려가 제목이 세로로 깨지지 않는다.
+ */
 export function MapToolbar({
   item,
   region,
+  back,
   radius,
   onRadiusChange,
   view,
@@ -27,6 +31,8 @@ export function MapToolbar({
 }: {
   item: string | null;
   region: ServiceRegion;
+  /** 항목 가격 화면의 필터 쿼리. 목록으로 돌아갈 때 쓴다. */
+  back: string | null;
   radius: RadiusOption;
   onRadiusChange: (radius: RadiusOption) => void;
   /** 모바일에서만 쓰는 지도/목록 전환. 데스크톱은 둘 다 보인다. */
@@ -38,10 +44,10 @@ export function MapToolbar({
   return (
     <div className="border-b border-hairline bg-bg">
       <div className="flex flex-col gap-3 py-3 px-page md:flex-row md:flex-wrap md:items-center md:gap-4 lg:py-4">
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
           {item && (
             <Link
-              href={itemListHref(item, region)}
+              href={itemListHref(item, region, back)}
               className="hidden min-h-11 shrink-0 items-center gap-1 rounded-lg bg-surface pr-3.5 pl-2.5 text-label-bold text-text-primary hover:bg-surface-strong lg:inline-flex"
             >
               <ChevronLeft
@@ -52,7 +58,7 @@ export function MapToolbar({
               {t('header.backToList')}
             </Link>
           )}
-          <h1 className="min-w-0 flex-1 text-heading">
+          <h1 className="min-w-0 flex-[1_1_10rem] text-heading">
             {item ? <ItemTitle code={item} /> : t('header.title')}
           </h1>
           <span id="map-view-label" className="sr-only">

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -10,16 +10,21 @@ export function SectionHeader({
   description,
   action,
   className,
-}: {
+  ...props
+}: Omit<ComponentProps<'div'>, 'id' | 'title'> & {
+  /** 루트가 아니라 제목(h2)에 붙는다. */
   id?: string;
   eyebrow?: string;
   title: string;
   description?: string;
   action?: ReactNode;
-  className?: string;
 }) {
   return (
-    <div className={cn('flex items-end justify-between gap-4', className)}>
+    <div
+      data-slot="section-header"
+      className={cn('flex items-end justify-between gap-4', className)}
+      {...props}
+    >
       <div className="min-w-0 space-y-1">
         {eyebrow && (
           <p className="text-caption-bold text-primary-text">{eyebrow}</p>

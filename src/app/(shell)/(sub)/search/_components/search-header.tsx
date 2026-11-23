@@ -31,7 +31,7 @@ export function SearchHeader({
     <div
       className={cn('rounded-b-4xl bg-primary-tint lg:rounded-none', className)}
     >
-      <PageContainer className="py-3.5 md:py-6 lg:pt-2 lg:pb-9">
+      <PageContainer className="py-3.5 md:max-w-2xl md:py-6 lg:max-w-page lg:pt-2 lg:pb-9">
         {current && (
           <Breadcrumb>
             <BreadcrumbLink href="/">{t('home')}</BreadcrumbLink>

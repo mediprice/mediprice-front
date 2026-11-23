@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 export function PageContainer({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
+      data-slot="page-container"
       className={cn('mx-auto w-full max-w-page px-page', className)}
       {...props}
     />

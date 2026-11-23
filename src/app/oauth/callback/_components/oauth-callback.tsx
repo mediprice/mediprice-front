@@ -91,8 +91,9 @@ function CallbackFailure({
               returnTo={returnTo}
             />
             <Button asChild variant="ghost" size="md">
-              <Link href="/" replace>
-                {t('home')}
+              {/** 로그인하려던 화면을 알면 그 화면으로, 모르면 홈으로 돌아간다. returnTo는 같은 출처 경로로 검증된 값이다. */}
+              <Link href={(returnTo ?? '/') as Route} replace>
+                {returnTo && returnTo !== '/' ? t('back') : t('home')}
               </Link>
             </Button>
           </>

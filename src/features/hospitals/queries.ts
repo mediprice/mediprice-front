@@ -1,6 +1,6 @@
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query';
 
-import { apiClient } from '@/lib/api/client';
+import { type ApiClient, apiClient } from '@/lib/api/client';
 import type { paths } from '@/lib/api/schema';
 import { unwrap } from '@/lib/api/unwrap';
 
@@ -34,13 +34,14 @@ export const hospitalKeys = {
 };
 
 function fetchPrices(
+  client: ApiClient,
   ykiho: string,
   condition: HospitalPriceCondition,
   page: number,
   size: number,
 ) {
   return unwrap(
-    apiClient.GET('/api/hospitals/{ykiho}/prices', {
+    client.GET('/api/hospitals/{ykiho}/prices', {
       params: {
         path: { ykiho },
         query: { condition, pageQuery: { page, size } },
@@ -57,33 +58,43 @@ export const hospitalQueries = {
         unwrap(apiClient.GET('/api/hospitals', { params: { query: params } })),
     }),
 
-  detail: (ykiho: string) =>
+  detail: (ykiho: string, client: ApiClient = apiClient) =>
     queryOptions({
       queryKey: hospitalKeys.detail(ykiho),
       queryFn: () =>
         unwrap(
-          apiClient.GET('/api/hospitals/{ykiho}', {
+          client.GET('/api/hospitals/{ykiho}', {
             params: { path: { ykiho } },
           }),
         ),
     }),
 
-  priceList: (ykiho: string, condition: HospitalPriceCondition) =>
+  priceList: (
+    ykiho: string,
+    condition: HospitalPriceCondition,
+    client: ApiClient = apiClient,
+  ) =>
     infiniteQueryOptions({
       queryKey: hospitalKeys.priceList(ykiho, condition),
       queryFn: ({ pageParam }) =>
-        fetchPrices(ykiho, condition, pageParam, PRICE_PAGE_SIZE),
+        fetchPrices(client, ykiho, condition, pageParam, PRICE_PAGE_SIZE),
       initialPageParam: 0,
       getNextPageParam: (last) =>
         last.page + 1 < last.totalPages ? last.page + 1 : undefined,
     }),
 
   /** 가격 API에 코드 필터가 없어 항목 이름으로 좁힌 뒤 코드가 같은 세부 항목만 남긴다. */
-  itemPrices: (ykiho: string, npayCode: string, itemName: string) =>
+  itemPrices: (
+    ykiho: string,
+    npayCode: string,
+    itemName: string,
+    client: ApiClient = apiClient,
+  ) =>
     queryOptions({
       queryKey: hospitalKeys.itemPrices(ykiho, npayCode, itemName),
       queryFn: async () => {
         const page = await fetchPrices(
+          client,
           ykiho,
           { keyword: itemName },
           0,
@@ -93,12 +104,16 @@ export const hospitalQueries = {
       },
     }),
 
-  priceHistory: (ykiho: string, condition: PriceHistoryCondition) =>
+  priceHistory: (
+    ykiho: string,
+    condition: PriceHistoryCondition,
+    client: ApiClient = apiClient,
+  ) =>
     queryOptions({
       queryKey: hospitalKeys.priceHistory(ykiho, condition),
       queryFn: () =>
         unwrap(
-          apiClient.GET('/api/hospitals/{ykiho}/prices/history', {
+          client.GET('/api/hospitals/{ykiho}/prices/history', {
             params: { path: { ykiho }, query: { condition } },
           }),
         ),

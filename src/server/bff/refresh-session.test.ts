@@ -24,7 +24,7 @@ describe('refreshSession', () => {
       }),
     );
 
-    expect(await refreshSession('old-refresh')).toEqual({
+    expect(await refreshSession('old-refresh', new Headers())).toEqual({
       status: 'ok',
       tokens: {
         accessToken: 'new-access',
@@ -35,8 +35,50 @@ describe('refreshSession', () => {
     expect(received).toEqual({ refreshToken: 'old-refresh' });
   });
 
+  it('브라우저의 User-Agent를 넘기고 Cookie는 넘기지 않는다', async () => {
+    let headers: Headers | undefined;
+    server.use(
+      http.post(`${API}/api/auth/refresh`, ({ request }) => {
+        headers = request.headers;
+        return HttpResponse.json(newTokens);
+      }),
+    );
+
+    await refreshSession(
+      'r',
+      new Headers({ 'user-agent': 'test-browser', cookie: 'mp_refresh=r' }),
+    );
+
+    expect(headers?.get('user-agent')).toBe('test-browser');
+    expect(headers?.get('content-type')).toBe('application/json');
+    expect(headers?.get('cookie')).toBeNull();
+  });
+
+  it('리다이렉트를 따라가 Refresh를 다른 주소로 다시 보내지 않는다', async () => {
+    let redirected = false;
+    server.use(
+      http.post(
+        `${API}/api/auth/refresh`,
+        () =>
+          new HttpResponse(null, {
+            status: 307,
+            headers: { location: `${API}/elsewhere` },
+          }),
+      ),
+      http.post(`${API}/elsewhere`, () => {
+        redirected = true;
+        return HttpResponse.json(newTokens);
+      }),
+    );
+
+    expect(await refreshSession('r', new Headers())).toEqual({
+      status: 'unavailable',
+    });
+    expect(redirected).toBe(false);
+  });
+
   it('Refresh 쿠키가 없으면 백엔드를 부르지 않고 unauthenticated다', async () => {
-    expect(await refreshSession(undefined)).toEqual({
+    expect(await refreshSession(undefined, new Headers())).toEqual({
       status: 'unauthenticated',
     });
   });
@@ -53,7 +95,9 @@ describe('refreshSession', () => {
         ),
       );
 
-      expect(await refreshSession('r')).toEqual({ status: 'unauthenticated' });
+      expect(await refreshSession('r', new Headers())).toEqual({
+        status: 'unauthenticated',
+      });
     },
   );
 
@@ -64,12 +108,16 @@ describe('refreshSession', () => {
         () => new HttpResponse(null, { status: 503 }),
       ),
     );
-    expect(await refreshSession('r')).toEqual({ status: 'unavailable' });
+    expect(await refreshSession('r', new Headers())).toEqual({
+      status: 'unavailable',
+    });
 
     server.use(
       http.post(`${API}/api/auth/refresh`, () => HttpResponse.error()),
     );
-    expect(await refreshSession('r')).toEqual({ status: 'unavailable' });
+    expect(await refreshSession('r', new Headers())).toEqual({
+      status: 'unavailable',
+    });
   });
 
   it('응답이 약속된 형식이 아니면 unavailable이다', async () => {
@@ -79,7 +127,9 @@ describe('refreshSession', () => {
       ),
     );
 
-    expect(await refreshSession('r')).toEqual({ status: 'unavailable' });
+    expect(await refreshSession('r', new Headers())).toEqual({
+      status: 'unavailable',
+    });
   });
 });
 

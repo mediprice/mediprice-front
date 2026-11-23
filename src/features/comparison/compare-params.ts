@@ -26,20 +26,34 @@ export function parseItemCode(value: unknown): string | null {
   return isNpayCode(value) ? value : null;
 }
 
+/** URL의 dropped 파라미터: 공유 링크에서 더 이상 공개되지 않아 뺀 병원 수(1~3). 안내 한 줄에만 쓴다. */
+export function parseDropped(value: unknown): number {
+  const count = Number(Array.isArray(value) ? value[0] : value);
+  return Number.isInteger(count) && count >= 1 && count <= MAX_COMPARE
+    ? count
+    : 0;
+}
+
 export function parseCompareParams(
   params: Record<string, string | string[] | undefined>,
 ) {
-  return { ykihos: parseYkihos(params.h), item: parseItemCode(params.item) };
+  return {
+    ykihos: parseYkihos(params.h),
+    item: parseItemCode(params.item),
+    dropped: parseDropped(params.dropped),
+  };
 }
 
 /** 비교 화면 주소가 비교 대상의 기준이라 그대로 공유할 수 있다(`/compare?h=A&h=B&item=CODE`). */
 export function buildCompareHref(
   ykihos: readonly string[],
   item: string | null,
+  dropped = 0,
 ) {
   const query = new URLSearchParams();
   for (const ykiho of ykihos) query.append('h', ykiho);
   if (item) query.set('item', item);
+  if (dropped > 0) query.set('dropped', String(dropped));
   const search = query.toString();
   return search ? (`/compare?${search}` as const) : ('/compare' as const);
 }

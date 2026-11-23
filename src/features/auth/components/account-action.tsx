@@ -5,10 +5,10 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { openLoginDialog } from '@/features/auth/login-dialog-store';
+import { displayName, useSession } from '@/features/auth/use-session';
 import { cn } from '@/lib/utils';
 
-import { openLoginDialog } from '../login-dialog-store';
-import { displayName, useSession } from '../use-session';
 import { UserAvatar } from './user-avatar';
 
 /** 헤더 오른쪽의 로그인 버튼 또는 내 정보 링크. 확인 중에는 같은 높이의 자리를 잡아 헤더가 흔들리지 않게 한다. compact는 모바일 상단 바용이다. */

@@ -1,11 +1,10 @@
 import createClient from 'openapi-fetch';
 
-import { emitSessionExpired } from '@/lib/api/session-events';
-
 import { BFF_BASE } from './paths';
 import { serializeQuery } from './query';
 import { createRefresher } from './refresh';
 import type { paths } from './schema';
+import { emitSessionExpired } from './session-events';
 
 type Options = {
   baseUrl: string;
@@ -47,6 +46,9 @@ export function createApiClient(options: Options) {
     querySerializer: serializeQuery,
   });
 }
+
+/** 쿼리 옵션이 받는 생성 클라이언트. 서버 prefetch는 같은 옵션에 익명 공개 클라이언트를 넘긴다. */
+export type ApiClient = ReturnType<typeof createApiClient>;
 
 /** 브라우저 전용이다(상대 경로 `/bff`를 쓴다). */
 export const apiClient = createApiClient({

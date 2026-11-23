@@ -5,10 +5,9 @@ import type { ReactNode } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AI_DAILY_LIMIT } from '@/features/ai/usage-limits';
 import { openLoginDialog } from '@/features/auth/login-dialog-store';
 import type { SessionStatus } from '@/features/auth/use-session';
-
-import { AI_DAILY_LIMIT } from '../usage-limits';
 
 /** 데스크톱 오른쪽 열. 하루 한도와 AI 없이 찾는 길을 둔다. */
 export function AiSideRail({

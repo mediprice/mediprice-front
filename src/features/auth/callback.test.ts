@@ -54,6 +54,26 @@ describe('runOAuthCallback', () => {
     expect(queryClient.getQueryData(sessionKeys.current())).toEqual(user);
   });
 
+  it('필수 동의가 빠진 회원은 동의 화면을 거쳐 돌아갈 경로로 간다', async () => {
+    currentUser.mockResolvedValueOnce({
+      ...user,
+      requiredConsentsMissing: true,
+    });
+    const { outcome } = run({ ok: true, returnTo: null });
+
+    expect(await outcome).toEqual({
+      status: 'success',
+      returnTo: '/consent?returnTo=%2Fitems%2FA',
+    });
+  });
+
+  it('동의 여부가 없는 예전 백엔드 응답이면 바로 돌아간다', async () => {
+    currentUser.mockResolvedValueOnce(user);
+    const { outcome } = run({ ok: true, returnTo: '/my' });
+
+    expect(await outcome).toEqual({ status: 'success', returnTo: '/my' });
+  });
+
   it('fragment의 돌아올 경로를 sessionStorage 값보다 먼저 쓴다', async () => {
     currentUser.mockResolvedValueOnce(user);
     const takeReturnPath = vi.fn(() => '/items/A');

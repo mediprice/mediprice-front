@@ -1,0 +1,73 @@
+{
+  "operator": {
+    "name": null,
+    "representative": null,
+    "businessRegistrationNumber": null,
+    "address": null,
+    "email": null,
+    "phone": null
+  },
+  "privacyOfficer": {
+    "name": null,
+    "position": null,
+    "email": null,
+    "phone": null
+  },
+  "effectiveDates": {
+    "TERMS": null,
+    "PRIVACY": null,
+    "REVIEW_POLICY": null
+  },
+  "minimumAge": null,
+  "retention": {
+    "accessLogMonths": null,
+    "backupDays": null,
+    "reviewOnWithdrawal": null,
+    "rightsClaimDays": null
+  },
+  "ai": {
+    "providerTrainingUse": null,
+    "medicalProfileSentToProvider": false
+  },
+  "security": {
+    "internalPlanAdopted": null
+  },
+  "processors": [
+    {
+      "task": "database",
+      "company": null,
+      "contact": null,
+      "countries": null,
+      "retention": null
+    },
+    {
+      "task": "webHosting",
+      "company": null,
+      "contact": null,
+      "countries": null,
+      "retention": null
+    },
+    {
+      "task": "apiHosting",
+      "company": null,
+      "contact": null,
+      "countries": null,
+      "retention": null
+    },
+    {
+      "task": "llmGateway",
+      "company": null,
+      "contact": null,
+      "countries": null,
+      "retention": null
+    },
+    {
+      "task": "llmModel",
+      "company": null,
+      "contact": null,
+      "countries": null,
+      "retention": null
+    }
+  ],
+  "thirdParties": []
+}

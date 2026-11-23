@@ -13,15 +13,21 @@ export function QuotaDialog({
   open,
   onOpenChange,
   isMember,
+  onCloseAutoFocus,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isMember: boolean;
+  /** 열게 한 입력창이 막혀 있어 닫힐 때 포커스를 돌려줄 곳을 화면이 정한다. */
+  onCloseAutoFocus?: (event: Event) => void;
 }) {
   const t = useTranslations('ai.quota');
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <CenteredDialogContent title={t('title')}>
+      <CenteredDialogContent
+        title={t('title')}
+        onCloseAutoFocus={onCloseAutoFocus}
+      >
         <div className="flex flex-col gap-5">
           <p className="text-body text-text-secondary">
             {isMember ? t('member') : t('anonymous')}

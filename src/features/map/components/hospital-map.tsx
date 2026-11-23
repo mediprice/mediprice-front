@@ -5,9 +5,9 @@ import { useTranslations } from 'next-intl';
 import { type ReactNode, useState } from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import type { LatLng } from '@/features/map/map-geo';
+import { useReducedMotion } from '@/features/map/use-reduced-motion';
 
-import type { LatLng } from '../map-geo';
-import { useReducedMotion } from '../use-reduced-motion';
 import type { MapMarker } from './marker-icon';
 import { type MapSearchArea, useNaverMap } from './use-naver-map';
 import { useNaverMarkers } from './use-naver-markers';
@@ -26,6 +26,8 @@ export type HospitalMapProps = {
   controls?: ReactNode;
   /** 지도를 못 불러왔을 때 안내 아래에 둘 행동(모바일 "목록 보기" 등). */
   fallbackAction?: ReactNode;
+  /** 검색 반경 원. 기본은 그린다. */
+  showArea?: boolean;
 };
 
 /**
@@ -41,6 +43,7 @@ export function HospitalMap({
   userPosition = null,
   controls,
   fallbackAction,
+  showArea = true,
 }: HospitalMapProps) {
   const t = useTranslations('map.mapControls');
   const isReducedMotion = useReducedMotion();
@@ -56,6 +59,7 @@ export function HospitalMap({
     userPosition,
     onMoveEnd,
     isReducedMotion,
+    showArea,
   });
 
   if (status === 'unavailable') {

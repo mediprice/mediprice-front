@@ -54,9 +54,9 @@ function layerBoundaries() {
       ['src/app/**/*.{ts,tsx}'],
       [
         {
-          group: ['@/server/*'],
+          group: ['@/server/*', '!@/server/api'],
           message:
-            '화면 코드는 server를 import할 수 없습니다. app/bff 라우트만 사용할 수 있습니다.',
+            '화면 코드는 server를 import할 수 없습니다. app/bff 라우트와 서버 컴포넌트의 공개 조회(server/api)만 사용할 수 있습니다.',
         },
         noPrimitives,
       ],
@@ -151,6 +151,15 @@ export default defineConfig([
   ...nextVitals,
   ...nextTypescript,
   ...pluginQuery.configs['flat/recommended'],
+  {
+    rules: {
+      /** 같은 쿼리를 브라우저(BFF)와 서버(공개 백엔드)가 다른 클라이언트로 읽어 한 키로 하이드레이션한다. */
+      '@tanstack/query/exhaustive-deps': [
+        'error',
+        { allowlist: { types: ['ApiClient'] } },
+      ],
+    },
+  },
   {
     files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
     plugins: {

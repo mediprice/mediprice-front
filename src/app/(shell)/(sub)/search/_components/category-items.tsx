@@ -17,6 +17,7 @@ import { ListSkeleton } from './list-skeleton';
 import { LoadMore } from './load-more';
 import { ResultsError } from './results-error';
 import { ResultsLayout } from './results-layout';
+import { useFillPriced } from './use-fill-priced';
 
 /**
  * 고른 분류의 항목. codes가 없으면(분류 목록을 불러오는 중) 같은 자리에 뼈대만 그린다.
@@ -40,7 +41,15 @@ export function CategoryItems({
     enabled: codes !== undefined,
   });
   const total = query.data ? totalCount(query.data.pages) : undefined;
-  const items = query.data?.pages.flatMap((page) => page.content) ?? [];
+  const pages = query.data?.pages.map((page) => page.content) ?? [];
+  const items = pages.flat();
+  const { isFilling } = useFillPriced({
+    pages,
+    hasNextPage: query.hasNextPage,
+    isFetchingNextPage: query.isFetchingNextPage,
+    isError: query.isError,
+    fetchNextPage: query.fetchNextPage,
+  });
 
   return (
     <ResultsLayout aside={query.isPending ? undefined : aside}>
@@ -78,7 +87,13 @@ export function CategoryItems({
           />
         ) : (
           <>
-            <ItemGroupList items={items} region={region} headingAs="h3" />
+            <ItemGroupList
+              pages={pages}
+              isFilling={isFilling}
+              region={region}
+              headingAs="h3"
+              omitSharedMajor
+            />
             <LoadMore
               hasNextPage={query.hasNextPage}
               isFetchingNextPage={query.isFetchingNextPage}

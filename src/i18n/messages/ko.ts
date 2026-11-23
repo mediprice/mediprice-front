@@ -1,11 +1,14 @@
+import admin from './ko/admin.json';
 import ai from './ko/ai.json';
 import auth from './ko/auth.json';
+import claims from './ko/claims.json';
 import common from './ko/common.json';
 import comparison from './ko/comparison.json';
 import errors from './ko/errors.json';
 import home from './ko/home.json';
 import hospitals from './ko/hospitals.json';
 import items from './ko/items.json';
+import legal from './ko/legal.json';
 import library from './ko/library.json';
 import liveFee from './ko/liveFee.json';
 import map from './ko/map.json';
@@ -31,8 +34,11 @@ export const messages = {
   mypage,
   comparison,
   reviews,
+  claims,
   library,
   ai,
   map,
   liveFee,
+  legal,
+  admin,
 };

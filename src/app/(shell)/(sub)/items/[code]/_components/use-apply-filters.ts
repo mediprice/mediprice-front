@@ -2,7 +2,10 @@
 
 import { useRouter } from 'next/navigation';
 
-import { buildPriceFiltersQuery, type PriceFilters } from './price-filters';
+import {
+  buildPriceFiltersQuery,
+  type PriceFilters,
+} from '@/features/npay/price-filters';
 
 export const RESULTS_HEADING_ID = 'item-prices-title';
 

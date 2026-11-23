@@ -4,9 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import { institutionQueries } from '@/features/institutions/queries';
+import { type PriceFilters, sgguSidoOf } from '@/features/npay/price-filters';
 import { regionQueries } from '@/features/regions/queries';
-
-import { type PriceFilters, sgguSidoOf } from './price-filters';
 
 /** 필터 값(코드)을 화면 이름으로 바꾼다. 목록을 불러오기 전에는 이름이 undefined다. */
 export function useFilterLabels(filters: PriceFilters) {

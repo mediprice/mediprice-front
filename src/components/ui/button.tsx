@@ -68,7 +68,12 @@ export function Button({
 
   if (asChild) {
     return (
-      <Slot.Root data-slot="button" className={classes} {...props}>
+      <Slot.Root
+        data-slot="button"
+        className={classes}
+        onClick={onClick}
+        {...props}
+      >
         {children}
       </Slot.Root>
     );

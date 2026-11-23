@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   callBackend,
   forwardHeaders,
+  isAnonymousRequest,
   isSameOrigin,
   resolveBackendUrl,
 } from './upstream';
@@ -136,10 +137,36 @@ describe('forwardHeaders', () => {
     expect(headers.has('x-mediprice-client-ip')).toBe(false);
   });
 
+  it('브라우저의 User-Agent를 그대로 전달한다(동의 기록 근거)', () => {
+    const withAgent = new Headers({ 'user-agent': 'Mozilla/5.0 Test' });
+
+    expect(forwardHeaders(withAgent).get('user-agent')).toBe(
+      'Mozilla/5.0 Test',
+    );
+  });
+
+  it('익명 요청 표시 헤더는 백엔드로 넘기지 않는다', () => {
+    const anonymous = new Headers({ 'x-mediprice-anonymous': '1' });
+
+    expect(forwardHeaders(anonymous).has('x-mediprice-anonymous')).toBe(false);
+  });
+
   it('Access가 없으면 브라우저가 보낸 Authorization도 지운다', () => {
     expect(forwardHeaders(incoming, undefined).has('authorization')).toBe(
       false,
     );
+  });
+});
+
+describe('isAnonymousRequest', () => {
+  it('익명 요청 헤더가 1일 때만 익명으로 본다', () => {
+    expect(
+      isAnonymousRequest(new Headers({ 'x-mediprice-anonymous': '1' })),
+    ).toBe(true);
+    expect(
+      isAnonymousRequest(new Headers({ 'x-mediprice-anonymous': 'yes' })),
+    ).toBe(false);
+    expect(isAnonymousRequest(new Headers())).toBe(false);
   });
 });
 
@@ -167,5 +194,57 @@ describe('callBackend', () => {
     expect(await response.json()).toMatchObject({
       code: 'UPSTREAM_UNAVAILABLE',
     });
+  });
+
+  it('제한 시간 신호를 붙여 호출한다', async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 204 }));
+
+    await callBackend(new URL('http://api.test/api/x'), { method: 'GET' });
+
+    expect(fetchMock.mock.calls[0]?.[1]?.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('호출하는 쪽이 정해도 리다이렉트를 따라가지 않는다', async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 204 }));
+    const init: RequestInit = { method: 'POST', redirect: 'follow' };
+
+    await callBackend(new URL('http://api.test/api/x'), init);
+
+    expect(fetchMock.mock.calls[0]?.[1]?.redirect).toBe('manual');
+  });
+
+  it('호출하는 쪽의 취소 신호를 함께 전달한다', async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 204 }));
+    const controller = new AbortController();
+
+    await callBackend(new URL('http://api.test/api/x'), {
+      signal: controller.signal,
+    });
+    const signal = fetchMock.mock.calls[0]?.[1]?.signal;
+    controller.abort();
+
+    expect(signal).not.toBe(controller.signal);
+    expect(signal?.aborted).toBe(true);
+  });
+
+  it('제한 시간을 넘기면 504 UPSTREAM_TIMEOUT을 돌려준다', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(
+      new DOMException(
+        'The operation was aborted due to timeout',
+        'TimeoutError',
+      ),
+    );
+
+    const response = await callBackend(new URL('http://api.test/api/x'), {});
+
+    expect(response.status).toBe(504);
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    expect(await response.json()).toMatchObject({ code: 'UPSTREAM_TIMEOUT' });
   });
 });

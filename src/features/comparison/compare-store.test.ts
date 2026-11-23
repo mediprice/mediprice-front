@@ -18,7 +18,8 @@ const storage = vi.hoisted(() => {
 const {
   buildBasketHref,
   COMPARE_STORAGE_KEY,
-  sharedItemCode,
+  basketItemCode,
+  basketItemCodes,
   useCompareStore,
 } = await import('./compare-store');
 
@@ -133,20 +134,38 @@ describe('useCompareStore', () => {
   });
 });
 
-describe('sharedItemCode / buildBasketHref', () => {
+describe('basketItemCode / buildBasketHref', () => {
   it('모두 같은 항목이면 그 항목을 붙인다', () => {
     const hospitals = [hospital('1'), hospital('2')];
-    expect(sharedItemCode(hospitals)).toBe('MX1220000');
+    expect(basketItemCode(hospitals)).toBe('MX1220000');
     expect(buildBasketHref(hospitals)).toBe(
       '/compare?h=YKIHO1&h=YKIHO2&item=MX1220000',
     );
   });
 
-  it('항목이 다르거나 없으면 항목 없이 비교한다', () => {
-    expect(sharedItemCode([hospital('1'), hospital('2', 'AB1')])).toBeNull();
+  it('항목 없이 담은 병원이 섞여도 담긴 항목으로 비교한다', () => {
+    expect(basketItemCode([hospital('1'), hospital('2', null)])).toBe(
+      'MX1220000',
+    );
+    expect(buildBasketHref([hospital('1', null), hospital('2')])).toBe(
+      '/compare?h=YKIHO1&h=YKIHO2&item=MX1220000',
+    );
+  });
+
+  it('항목이 다르면 많이 담긴 항목, 같은 수면 나중에 담은 항목이다', () => {
     expect(
-      sharedItemCode([hospital('1', null), hospital('2', null)]),
+      basketItemCode([hospital('1', 'AB1'), hospital('2'), hospital('3')]),
+    ).toBe('MX1220000');
+    expect(basketItemCode([hospital('1'), hospital('2', 'AB1')])).toBe('AB1');
+    expect(
+      basketItemCodes([hospital('1'), hospital('2', 'AB1'), hospital('3')]),
+    ).toEqual(['MX1220000', 'AB1']);
+  });
+
+  it('항목이 하나도 없으면 항목 없이 비교한다', () => {
+    expect(
+      basketItemCode([hospital('1', null), hospital('2', null)]),
     ).toBeNull();
-    expect(sharedItemCode([])).toBeNull();
+    expect(basketItemCode([])).toBeNull();
   });
 });

@@ -1,6 +1,7 @@
 'use client';
 
-import { UserRound } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { CircleAlert, LogOut, UserRound } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { PageContainer } from '@/components/layout/page-container';
@@ -11,29 +12,34 @@ import { GoogleLoginButton } from '@/features/auth/components/google-login-butto
 import { MyMenuList } from '@/features/auth/components/my-menu-list';
 import { MyPageHeader } from '@/features/auth/components/my-page-header';
 import { UserAvatar } from '@/features/auth/components/user-avatar';
+import { signOut } from '@/features/auth/session';
 import { displayName, useSession } from '@/features/auth/use-session';
+import { showToast } from '@/features/feedback/toast-store';
 
 export function MyHome() {
   const t = useTranslations('mypage.home');
   const tNav = useTranslations('nav');
+  const tAuth = useTranslations('auth');
   const tCommon = useTranslations('common');
   const { status, user, refetch } = useSession();
+  /** 로그아웃해도 이 화면에 머물러 로그인 안내로 바뀐다. */
+  const logout = useMutation({
+    mutationFn: () => signOut(),
+    onSuccess: () => showToast(t('loggedOut')),
+  });
 
   if (status === 'pending') {
     return (
       <>
+        {/** 로그인 여부를 아직 모르므로 두 모양 모두에 맞는 제목 한 줄과 카드 하나로 자리를 잡는다(대부분은 로그인 안내 카드가 된다). */}
         <MyPageHeader>
-          <div role="status" className="flex items-center gap-4">
-            <Skeleton className="size-14 rounded-full lg:size-16" />
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-7 w-32" />
-              <Skeleton className="h-5 w-48" />
-            </div>
+          <div role="status">
+            <Skeleton className="h-8 w-28 lg:h-8.5" />
             <span className="sr-only">{tCommon('status.loading')}</span>
           </div>
         </MyPageHeader>
         <PageContainer className="pb-section md:max-w-2xl lg:max-w-page">
-          <Skeleton className="h-80 w-full rounded-xl" />
+          <Skeleton className="h-64 w-full rounded-xl" />
         </PageContainer>
       </>
     );
@@ -48,8 +54,9 @@ export function MyHome() {
         <PageContainer className="pb-section md:max-w-2xl lg:max-w-page">
           {status === 'error' ? (
             <EmptyState
-              icon={<UserRound />}
+              icon={<CircleAlert />}
               title={t('errorTitle')}
+              description={tAuth('required.errorDescription')}
               action={
                 <Button variant="tint" size="md" onClick={refetch}>
                   {tCommon('actions.retry')}
@@ -61,7 +68,7 @@ export function MyHome() {
               icon={<UserRound />}
               title={t('signedOutTitle')}
               description={t('signedOutDescription')}
-              action={<GoogleLoginButton variant="tint" size="md" />}
+              action={<GoogleLoginButton size="md" />}
               className="rounded-xl bg-surface"
             />
           )}
@@ -85,6 +92,18 @@ export function MyHome() {
       {/** 내 정보 홈은 메뉴 카드가 곧 탐색이라 옆 메뉴를 두지 않는다(하위 화면만 옆 메뉴를 쓴다). */}
       <PageContainer className="pb-section md:max-w-2xl lg:max-w-page">
         <MyMenuList />
+        <div className="mt-4 border-t border-hairline pt-6 lg:mt-8 lg:border-t-0 lg:pt-0">
+          <Button
+            variant="neutral"
+            size="md"
+            isLoading={logout.isPending}
+            onClick={() => logout.mutate()}
+            className="w-full md:w-fit"
+          >
+            <LogOut aria-hidden="true" />
+            {t('logout')}
+          </Button>
+        </div>
       </PageContainer>
     </>
   );

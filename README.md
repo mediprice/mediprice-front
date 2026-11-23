@@ -10,16 +10,23 @@ cp .env.example .env     # NEXT_PUBLIC_API_URL을 백엔드 주소로 수정
 pnpm dev
 ```
 
-| 환경변수              | 설명                                                                              |
-| --------------------- | --------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_API_URL` | 백엔드 주소(예: `http://localhost:8080`). BFF 중계, 로그인 시작, 타입 생성에 쓴다 |
+| 환경변수                          | 필수                                                     | 설명                                                                                                                                                                    |
+| --------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL`             | 항상                                                     | 백엔드 주소(예: `http://localhost:8080`). BFF 중계, 로그인 시작, 타입 생성에 쓴다                                                                                       |
+| `NEXT_PUBLIC_SITE_URL`            | 운영 빌드(`NODE_ENV=production`, 로컬 `pnpm build` 포함) | 이 사이트의 공개 주소(origin). canonical·Open Graph·sitemap·robots에 쓴다. Vercel 미리보기는 비워 두면 브랜치 주소(`VERCEL_BRANCH_URL`), 개발은 `http://localhost:3000` |
+| `BFF_SHARED_SECRET`               | 운영 배포(`VERCEL_ENV=production`)                       | 백엔드와 같은 공유 비밀값(16자 이상). BFF가 사용자 IP를 백엔드에 전달한다(AI 비회원 한도)                                                                               |
+| `NEXT_PUBLIC_NAVER_MAP_CLIENT_ID` | 선택                                                     | 네이버 지도 Client ID. 없으면 지도 탐색(`/map`)이 목록만 보여 준다                                                                                                      |
 
-| 명령                 | 설명                                                          |
-| -------------------- | ------------------------------------------------------------- |
-| `pnpm check`         | lint, typecheck, format, knip, test를 모두 실행(PR 전에 실행) |
-| `pnpm test`          | 단위 테스트(vitest + msw)                                     |
-| `pnpm api:generate`  | 백엔드 `/api-docs`에서 타입을 다시 생성                       |
-| `pnpm ui:add <이름>` | shadcn 컴포넌트를 `src/components/primitives`에 추가          |
+환경변수는 `src/env.ts`가 zod로 검증한다. 실제 비밀값은 `.env`(git 제외)와 Vercel 환경변수에만 둔다.
+
+| 명령                 | 설명                                                                                                                                            |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm check`         | lint, typecheck, format, knip, test를 모두 실행(PR 전에 실행)                                                                                   |
+| `pnpm test`          | 단위 테스트(vitest + msw)                                                                                                                       |
+| `pnpm format`        | 포맷 자동 수정                                                                                                                                  |
+| `pnpm api:generate`  | 백엔드 `/api-docs`에서 타입을 다시 생성                                                                                                         |
+| `pnpm launch:check`  | 출시 전 법적 고지 설정(`src/config/legal-facts.json`)에 빈 값이 없는지 확인([`docs/legal-launch-checklist.md`](docs/legal-launch-checklist.md)) |
+| `pnpm ui:add <이름>` | shadcn 컴포넌트를 `src/components/primitives`에 추가(지금은 쓰는 생성물이 없다)                                                                 |
 
 ## 백엔드 연동 구조
 
@@ -37,9 +44,11 @@ pnpm dev
 ```
 src/
   app/bff/            BFF 라우트(api 중계, session, session/refresh). 핸들러는 얇게
+  app/oauth/callback/ 로그인 콜백 화면(토큰을 BFF 쿠키로 바꾼다)
   server/bff/         서버 전용: 쿠키, 업스트림 호출, 재발급, 응답 헬퍼
-  lib/api/            타입(schema.d.ts, 생성물), 클라이언트, 에러, 쿼리 직렬화, 세션 만료 이벤트
-  features/<도메인>/  쿼리 옵션(queryOptions)과 쿼리 키. auth는 로그인 창·콜백·세션 훅(`useSession`)
+  server/api/         서버 컴포넌트의 익명 공개 조회(publicApi), 요청마다 QueryClient, 404 판정
+  lib/api/            타입(schema.d.ts, 생성물), 클라이언트, 에러, 에러 코드 → 문구 키, 쿼리 직렬화, 세션 만료 이벤트
+  features/<도메인>/  쿼리 옵션(queryOptions)과 쿼리 키, 생성 타입에 아직 없는 호출(api.ts). auth는 로그인 창·콜백·세션 훅(`useSession`)
 ```
 
 ### 호출하는 법
@@ -75,9 +84,9 @@ const { data: hospitals } = useQuery(
 
 화면을 만들 때 알아둘 것:
 
-- **컴포넌트**: `components/ui`(Figma와 1:1인 디자인 시스템), `components/layout`(TopNav·탭바 같은 틀), `features/<도메인>/components`(도메인 UI). shadcn 생성물은 `components/primitives`에 두고 `ui`에서만 감싼다(6장).
+- **컴포넌트**: `components/ui`(Figma와 1:1인 디자인 시스템), `components/layout`(TopNav·탭바 같은 틀), `features/<도메인>/components`(도메인 UI). `ui`는 `radix-ui`를 직접 감싼다. shadcn 생성물을 들이면 `components/primitives`에 두고 `ui`에서만 감싼다(6장).
 - **색·글자**: Figma 토큰 이름 그대로 쓴다(`bg-primary`, `text-text-secondary`, `text-title`, `shadow-card`). 토큰은 `src/app/globals.css`에 있고 Tailwind 기본 팔레트는 지워져 있다(8장).
-- **문구**: 화면에 보이는 글은 `src/i18n/messages/ko.json`에 두고 `useTranslations`로 쓴다. 날짜는 `useFormatter`로 포맷한다(서울 시간 고정). 에러 문구는 `errorMessageKey(error)`로 고른다(12장).
+- **문구**: 화면에 보이는 글은 `src/i18n/messages/ko/<네임스페이스>.json`에 두고 `useTranslations`로 쓴다. 날짜는 `useFormatter`로 포맷한다(서울 시간 고정). 에러 문구는 `errorMessageKey(error)`로 고른다(12장).
 - **모바일**: 기본 클래스가 모바일(360px), `lg:`부터 데스크톱(1440px)이다(13장).
 
 ## 새 도메인(쿼리) 추가하기
@@ -92,6 +101,6 @@ const { data: hospitals } = useQuery(
 
 ## 알아둘 점
 
-- `apiClient`와 이를 쓰는 쿼리 옵션은 상대 주소(`/bff`)를 쓰는 **브라우저 전용**이다. 서버 컴포넌트에서 prefetch하려면 쿠키를 읽어 백엔드로 직접 보내는 서버용 호출 경로를 따로 만들어야 한다(아직 없음).
-- `NEXT_PUBLIC_API_URL`은 빌드에도 필요하다. 배포(Vercel)에 설정해야 한다.
+- `apiClient`는 상대 주소(`/bff`)를 쓰는 **브라우저 전용**이다. 검색에 노출할 화면(항목·병원 상세)은 같은 쿼리 옵션에 `publicApi`(`src/server/api/public-client.ts`, 쿠키 없는 익명 호출)를 넘겨 서버 컴포넌트에서 채우고 `HydrationBoundary`로 넘긴다. 로그인 사용자의 데이터를 서버에서 미리 읽는 경로는 없다(코딩 컨벤션 7.2).
+- `NEXT_PUBLIC_API_URL`·`NEXT_PUBLIC_SITE_URL`은 빌드에도 필요하다. 배포(Vercel)의 Production에는 둘 다, Preview에는 `NEXT_PUBLIC_API_URL`을 설정한다(Preview의 `NEXT_PUBLIC_SITE_URL`은 비우면 브랜치 주소). 로컬에서 `pnpm build`를 하려면 `.env`에 `NEXT_PUBLIC_SITE_URL`을 넣는다.
 - 로그인이 끝나면 백엔드가 돌려보낼 기본 주소(`OAUTH2_REDIRECT_URI`)는 이 앱의 `/oauth/callback`이어야 한다. 다른 주소(로컬, 프리뷰)에서 로그인하려면 그 origin을 백엔드 `OAUTH2_ALLOWED_REDIRECT_ORIGINS`와 `CORS_ALLOWED_ORIGINS`에 넣는다.

@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 
 import { FavoriteCard } from './favorite-card';
 import { FavoriteListSkeleton } from './favorite-list-skeleton';
+import { FavoritesCompareBand } from './favorites-compare-band';
 import { RemovedFavoriteRow } from './removed-favorite-row';
 
 type Notice = { id: number; text: string };
@@ -43,7 +44,7 @@ export function FavoriteList() {
         current?.favorite.ykiho === variables.ykiho ? null : current,
       );
       const key = variables.isFavorite ? 'restoreFailed' : 'removeFailed';
-      setFailure(`${t(key)} ${tErrors(errorMessageKey(error))}`);
+      setFailure(t(key, { reason: tErrors(errorMessageKey(error)) }));
     },
   });
   const announce = (text: string) =>
@@ -135,6 +136,7 @@ export function FavoriteList() {
           {failure}
         </p>
       )}
+      <FavoritesCompareBand />
       {items.length === 0 && !undoRow ? (
         <EmptyState
           icon={<Heart />}

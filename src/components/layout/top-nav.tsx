@@ -1,3 +1,5 @@
+import { Search } from 'lucide-react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
@@ -32,6 +34,13 @@ export function TopNav({
           ))}
         </nav>
         <div className="flex items-center gap-2 justify-self-end">
+          <Link
+            href="/search"
+            aria-label={t('search')}
+            className="flex size-11 items-center justify-center rounded-lg text-text-primary hover:bg-surface active:bg-surface-strong"
+          >
+            <Search aria-hidden="true" className="size-5" strokeWidth={1.75} />
+          </Link>
           {actions}
         </div>
       </div>

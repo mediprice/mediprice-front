@@ -3,17 +3,24 @@
 import { useQueries } from '@tanstack/react-query';
 import { RotateCcw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { areaScope } from '@/features/ai/area-filters';
+import type { AssistantMessage } from '@/features/ai/conversation';
+import { withoutNotice } from '@/features/ai/result-text';
 import { npayQueries } from '@/features/npay/queries';
+import {
+  DEFAULT_REGION,
+  type ServiceRegion,
+} from '@/features/regions/service-region';
 import { ApiError } from '@/lib/api/errors';
 
-import type { AssistantMessage } from '../conversation';
 import { AssistantBubble } from './assistant-bubble';
 import { NoMatchLinks } from './no-match-links';
 import { ResultList } from './result-list';
 
-/** AI가 고른 코드 중 공개 데이터에 없는 것(404)은 빼고, 하나도 남지 않으면 "찾지 못함"으로 보여 준다. */
+/** AI가 고른 코드 중 공개 데이터에 없는 것(404)은 빼고, 하나도 남지 않으면 "찾지 못함"으로 보여 준다. 장소를 말하지 않았으면 가격을 볼 지역을 여기서 바꾼다(AI 횟수를 쓰지 않는다). */
 export function ResultMessage({
   message,
   isActive,
@@ -26,6 +33,7 @@ export function ResultMessage({
   onRestart: () => void;
 }) {
   const t = useTranslations('ai');
+  const [region, setRegion] = useState<ServiceRegion>(DEFAULT_REGION);
   const details = useQueries({
     queries: message.items.map((item) => npayQueries.detail(item.code)),
   });
@@ -64,10 +72,12 @@ export function ResultMessage({
 
   return (
     <div className="flex flex-col gap-6">
-      <AssistantBubble text={message.text} />
+      <AssistantBubble text={withoutNotice(message.text, t('result.notice'))} />
       <ResultList
         entries={entries}
         pendingCount={pendingCount}
+        scope={areaScope(message.area, region)}
+        onRegionChange={setRegion}
         actions={isActive ? { onAskMore, onRestart } : undefined}
       />
     </div>

@@ -15,6 +15,7 @@ import {
 } from './conversation';
 import {
   TURN_KINDS,
+  turnAreaSchema,
   turnInputSchema,
   turnItemSchema,
   turnQuestionSchema,
@@ -23,10 +24,17 @@ import {
 
 export const CONVERSATION_STORAGE_KEY = 'mediprice:ai-conversation';
 
+/** 답을 이만큼 기다려도 오지 않으면 끊고 다시 보낼 수 있게 한다. 서버 처리 시간(보통 20초 남짓)보다 넉넉히 둔다. */
+const TURN_TIMEOUT_MS = 60_000;
+
 type ConversationStore = Conversation & {
+  /** 지금 기다리는 요청을 보낸 시각(ms). 저장하지 않고, 기다림 안내가 다시 그려져도 같은 기준으로 센다. */
+  sentAt: number | null;
   /** 보낼 수 없는 상태이거나 빈 입력이면 false다. 답은 기다리지 않는다. */
   send: (text: string, scope: DailyScope) => boolean;
   retry: (scope: DailyScope) => void;
+  /** 기다리던 요청을 끊는다. 입력은 남아 다시 보낼 수 있다. */
+  cancel: () => void;
   restart: () => void;
 };
 
@@ -41,6 +49,8 @@ const storedSchema = z.object({
         text: z.string(),
         questions: z.array(turnQuestionSchema),
         items: z.array(turnItemSchema),
+        /** 장소를 받기 전에 저장된 대화에는 없다. */
+        area: turnAreaSchema.nullable().catch(null),
       }),
     ]),
   ),
@@ -55,6 +65,7 @@ const storedSchema = z.object({
       'network',
       'invalidInput',
       'interrupted',
+      'cancelled',
       'unknown',
     ])
     .nullable(),
@@ -92,11 +103,20 @@ function pickConversation(state: ConversationStore): Conversation {
 export function createConversationStore({
   api,
   createId = () => crypto.randomUUID(),
+  timeoutMs = TURN_TIMEOUT_MS,
 }: {
   api: Pick<AiApi, 'sendTurn'>;
   createId?: () => string;
+  timeoutMs?: number;
 }) {
   let controller: AbortController | null = null;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  function abortPending() {
+    clearTimeout(timer);
+    controller?.abort();
+    controller = null;
+  }
 
   return createStore<ConversationStore>()(
     persist(
@@ -104,11 +124,21 @@ export function createConversationStore({
         const dispatch = (action: ConversationAction) =>
           set((state) => conversationReducer(pickConversation(state), action));
 
+        /** 실패로 먼저 바꾼 뒤 끊으므로, 끊긴 요청이 던지는 오류는 reducer가 무시한다. */
+        function stop(failure: 'cancelled' | 'unavailable') {
+          const { status, requestId } = get();
+          if (status !== 'sending' || requestId === null) return;
+          dispatch({ type: 'fail', requestId, failure });
+          abortPending();
+        }
+
         async function request(requestId: string) {
           const { pendingInput, serverState } = get();
           if (pendingInput === null) return;
-          controller?.abort();
+          abortPending();
           controller = new AbortController();
+          set({ sentAt: Date.now() });
+          timer = setTimeout(() => stop('unavailable'), timeoutMs);
           try {
             const response = await api.sendTurn(pendingInput, serverState, {
               signal: controller.signal,
@@ -125,11 +155,14 @@ export function createConversationStore({
               requestId,
               failure: classifyTurnError(error),
             });
+          } finally {
+            if (get().requestId === requestId) clearTimeout(timer);
           }
         }
 
         return {
           ...INITIAL_CONVERSATION,
+          sentAt: null,
           send: (text, scope) => {
             const parsed = turnInputSchema.safeParse(text);
             if (!parsed.success) return false;
@@ -150,9 +183,9 @@ export function createConversationStore({
             dispatch({ type: 'retry', requestId, scope });
             if (get().requestId === requestId) void request(requestId);
           },
+          cancel: () => stop('cancelled'),
           restart: () => {
-            controller?.abort();
-            controller = null;
+            abortPending();
             dispatch({ type: 'restart' });
           },
         };

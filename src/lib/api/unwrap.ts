@@ -14,8 +14,10 @@ export async function unwrap<T>(request: Promise<FetchResult<T>>) {
   } catch (cause) {
     throw cause instanceof ApiError ? cause : new NetworkError(cause);
   }
-  if (result.error !== undefined) {
+  /** openapi-fetch는 본문 없는 실패(Content-Length: 0)에 error를 비워 두므로 상태도 본다. */
+  if (result.error !== undefined || !result.response.ok) {
     throw fromErrorBody(result.response.status, result.error);
   }
+  /** 실패는 위에서 던졌으므로 성공 본문이다. 본문 없는 성공(204)은 생성 타입의 data가 이미 비어 있다. */
   return result.data as T;
 }

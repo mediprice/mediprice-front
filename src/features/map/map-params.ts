@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
 import {
+  buildPriceFiltersQuery,
+  parsePriceFilters,
+  type PriceFilters,
+} from '@/features/npay/price-filters';
+import {
   parseServiceRegion,
   regionQuery,
   type ServiceRegion,
@@ -21,6 +26,8 @@ export type MapParams = {
   /** URL로 받은 지도 중심. 없으면 현재 위치나 지역 중심을 쓴다. */
   center: LatLng | null;
   radius: RadiusOption;
+  /** 항목 가격 화면의 필터 조건(검증해 다시 만든 쿼리). 목록으로 돌아갈 때 그대로 되살린다. */
+  back?: string | null;
 };
 
 const first = (value: unknown) => (Array.isArray(value) ? value[0] : value);
@@ -48,11 +55,19 @@ export function parseMapParams(
       ? roundLatLng({ lat: lat.data, lng: lng.data })
       : null;
   const radius = radiusSchema.safeParse(search.radius);
+  const rawBack = first(search.back);
+  const back =
+    item && typeof rawBack === 'string'
+      ? buildPriceFiltersQuery(
+          parsePriceFilters(Object.fromEntries(new URLSearchParams(rawBack))),
+        ) || null
+      : null;
   return {
     item,
     region: parseServiceRegion(search.region),
     center,
     radius: radius.success ? radius.data : defaultRadius(item !== null),
+    back,
   };
 }
 
@@ -70,5 +85,14 @@ export function buildMapQuery(params: MapParams) {
   if (params.radius !== defaultRadius(params.item !== null)) {
     search.set('radius', String(params.radius));
   }
+  if (params.item && params.back) search.set('back', params.back);
   return search.toString();
+}
+
+/** 항목 가격 화면에서 지도로 가는 링크. 지금 필터를 back으로 넘겨 돌아올 때 되살린다. */
+export function mapHrefForItem(item: string, filters: PriceFilters) {
+  const search = new URLSearchParams({ item, ...regionQuery(filters.region) });
+  const back = buildPriceFiltersQuery(filters);
+  if (back) search.set('back', back);
+  return `/map?${search.toString()}` as const;
 }

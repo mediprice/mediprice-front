@@ -51,6 +51,50 @@ export function groupItems<T extends NpayItem>(
   return [...groups.values()];
 }
 
+/**
+ * "더 보기"로 받은 페이지를 차례로 묶는다. 이미 보여 준 묶음과 행의 순서는 바뀌지 않고, 새 행은 항상 뒤에 붙는다.
+ * 새 페이지의 첫 묶음이 바로 앞 묶음과 같은 분류일 때만 그 묶음에 이어 붙인다. 묶음 키는 페이지마다 달라 겹치지 않는다.
+ */
+export function groupItemsByPages<T extends NpayItem>(
+  pages: readonly (readonly T[])[],
+): ItemGroup<T>[] {
+  const result: ItemGroup<T>[] = [];
+  pages.forEach((page, pageIndex) => {
+    groupItems(page).forEach((group, groupIndex) => {
+      const last = result.at(-1);
+      if (groupIndex === 0 && last && baseKey(last.key) === group.key) {
+        last.items.push(...group.items);
+        return;
+      }
+      result.push({ ...group, key: `${group.key}#${pageIndex}` });
+    });
+  });
+  return result;
+}
+
+const baseKey = (key: string) => key.replace(/#\d+$/, '');
+
+/** 묶음 머리에 보일 단계. omitSharedMajor면 모두 같은 대분류일 때 대분류를 빼고, 항목 하나뿐인 묶음의 머리가 그 이름과 같으면 null이다. */
+export function groupHeadingParts<T extends NpayItem>(
+  groups: readonly ItemGroup<T>[],
+  { omitSharedMajor = false }: { omitSharedMajor?: boolean } = {},
+) {
+  const firstMajor = groups[0]?.major?.code;
+  const isShared =
+    omitSharedMajor &&
+    firstMajor !== undefined &&
+    groups.every((group) => group.major?.code === firstMajor);
+  return groups.map((group) => {
+    if (!isShared) return { major: group.major, minor: group.minor };
+    const [only, ...rest] = group.items;
+    const label = group.minor?.name ?? group.major?.name;
+    if (only && rest.length === 0 && formatItemName(only) === label) {
+      return null;
+    }
+    return { major: group.minor ? null : group.major, minor: group.minor };
+  });
+}
+
 /** 그 지역에 가격이 없다고 확인된 항목만 따로 뺀다. 모르는 항목(null)은 가격이 있는 쪽에 둔다. */
 export function partitionByPrice<T extends { hasPrice: boolean | null }>(
   items: readonly T[],

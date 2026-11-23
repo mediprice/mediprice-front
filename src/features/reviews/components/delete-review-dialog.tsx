@@ -7,9 +7,8 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { CenteredDialogContent } from '@/features/auth/components/centered-dialog-content';
+import { reviewMutations } from '@/features/reviews/queries';
 import { errorMessageKey } from '@/lib/api/error-message';
-
-import { reviewMutations } from '../queries';
 
 export function DeleteReviewDialog({
   reviewId,
@@ -57,7 +56,7 @@ export function DeleteReviewDialog({
               {tErrors(errorMessageKey(remove.error))}
             </p>
           )}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex flex-wrap gap-2 *:flex-[1_1_8rem]">
             <Button
               variant="neutral"
               size="md"
