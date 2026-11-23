@@ -151,7 +151,7 @@ app ──▶ features ──▶ components, lib
   - `auth`: `use-session.ts`(`useSession`, `useLoginGuard`), `login-dialog-store.ts`(`openLoginDialog`)
   - `feedback`: `toast-store.ts`
   - `regions`: `service-region.ts`, `format-location.ts`
-  - `npay`: `average-verdict.ts`, `price-filters.ts`, `price-summary.ts`, `catalog.ts`, `use-category-label.ts`, `item-name.ts`
+  - `npay`: `average-verdict.ts`, `price-filters.ts`, `price-summary.ts`, `catalog.ts`, `use-category-label.ts`, `item-name.ts`, `use-regional-summary.ts`
   - `map`: `map-geo.ts`, `map-params.ts`, `exact-distance.ts`, `use-distance-label.ts`
   - `hospitals`: `detail-links.ts`
 - 새 파일을 다른 feature가 쓰게 되면 이 목록에 더한다. `app`은 조립하는 쪽이라 features의 어느 파일이든 import할 수 있다.
@@ -625,7 +625,7 @@ const t = await getTranslations('metadata');
 공개 가격 데이터의 특성 때문에 정한 규칙이다. 화면을 새로 만들 때도 지킨다.
 
 - **지역 (MUST)**: 지역은 `features/regions/service-region.ts` 하나로 다룬다. 기본은 서울·경기(`metro`)이고 선택지는 서울·경기 / 서울 / 경기 / 전국(`all`)이다. URL 파라미터 이름은 `region`이고 기본값은 링크에서 뺀다. 백엔드가 시도 하나만 받으므로 서울·경기는 `sidoCodesOf`로 나눠 조회해 합친다.
-- **가격 요약 (MUST)**: 최저~최고 범위를 대표값으로 내세우지 않는다. 범위는 "1일당 1,000원" 같은 예외 값에 끌려가 오해를 만든다. 평균을 크게, 범위와 병원 수를 작게 쓴다(`PriceOverview`). 여러 시도의 요약은 `npayQueries.summaryIn`이 합친다(평균은 가격 수로 가중).
+- **가격 요약 (MUST)**: 최저~최고 범위를 대표값으로 내세우지 않는다. 범위는 "1일당 1,000원" 같은 예외 값에 끌려가 오해를 만든다. 평균을 크게, 범위와 병원 수를 작게 쓴다(`PriceOverview`). 여러 시도의 요약은 `npayQueries.summaryIn`이 합친다(평균은 가격 수로 가중). 화면은 `useRegionalSummary`로 지역만 고르면 `summaryIn`, 시군구·종별이 있으면 `summaryOf`를 쓴다.
 - **값 점이 없는 범위 막대 금지 (MUST)**: `RangeBar`는 이 병원 값(`value`) 점이 있을 때만 쓴다. 막대는 평균을 가운데에 두는 눈금이라, 점이 없으면 평균 눈금이 늘 가운데에 있어 아무것도 알려 주지 않고 분포가 대칭인 것처럼 보인다. 점이 없는 곳(홈, 오늘의 가격, 항목 머리, 검색·분류 행, AI 결과)은 `PriceSpread` 글자나 `compactRange`로 쓴다.
 - **세부 항목이 다른 가격 (MUST)**: 한 항목(예: 도수치료) 안의 세부 항목은 병원마다 시간·횟수·구성이 다르다. 도수치료 서울·경기 2,744건에서 15분 세션 중앙값은 30,000원(평균 118,384원의 0.25배), 30분 80,000원, 60분 150,000원, 100분 400,000원(3.4배)이었다. "[1일당]"은 심평원 청구 단위 표기라 345건(12.6%)에 붙지만 중앙값이 95,000원으로 전체(100,000원)와 같아 단위를 가르는 표시가 아니다. 그래서 다음을 지킨다.
   - 가격 옆에는 그 가격의 세부 항목 이름을 쓴다("도수치료F 기준"). 행의 꼬리표·막대·큰 가격·병원 화면 링크(`variant`·`price` 파라미터)는 모두 같은 세부 항목을 말한다. 병원 화면은 그 세부 항목을 먼저 고르고 같은 지역 평균과 견줘, 행의 꼬리표와 같은 숫자를 말한다.
