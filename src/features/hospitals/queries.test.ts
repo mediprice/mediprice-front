@@ -161,6 +161,33 @@ describe('hospitalQueries.itemPrices', () => {
   });
 });
 
+describe('hospitalQueries.itemPrices 취소', () => {
+  it('쿼리가 취소되면 진행 중인 요청도 끊는다', async () => {
+    let requestSignal: AbortSignal | undefined;
+    let arrived: () => void = () => {};
+    const arrival = new Promise<void>((resolve) => {
+      arrived = resolve;
+    });
+    server.use(
+      http.get(`${BASE}/api/hospitals/H1/prices`, async ({ request }) => {
+        requestSignal = request.signal;
+        arrived();
+        await new Promise(() => {});
+        return HttpResponse.json({});
+      }),
+    );
+    const queryClient = new QueryClient();
+    const options = hospitalQueries.itemPrices('H1', 'MX1220000', '도수치료');
+
+    const pending = queryClient.fetchQuery(options).catch(() => null);
+    await arrival;
+    await queryClient.cancelQueries({ queryKey: options.queryKey });
+    await pending;
+
+    expect(requestSignal?.aborted).toBe(true);
+  });
+});
+
 describe('hospitalQueries.priceHistory', () => {
   it('비급여 코드를 평평한 쿼리로 보내 월별 추이를 가져온다', async () => {
     let url: URL | undefined;

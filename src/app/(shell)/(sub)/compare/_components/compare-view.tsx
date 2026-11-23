@@ -31,6 +31,7 @@ import { npayQueries } from '@/features/npay/queries';
 import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
 import { errorMessageKey } from '@/lib/api/error-message';
 import { ApiError } from '@/lib/api/errors';
+import { timeoutSignal } from '@/lib/timeout-signal';
 import { cn } from '@/lib/utils';
 
 import { BasketSyncNotice } from './basket-sync-notice';
@@ -46,18 +47,6 @@ const INITIAL_COMMON_ITEMS = 8;
 
 /** 적용일은 보조 정보라 응답이 늦어도 표가 계속 불러오는 중으로 보이지 않게 이 시간 뒤에는 "–"로 둔다. */
 const DATE_TIMEOUT_MS = 8000;
-
-function withTimeout<T>(run: () => Promise<T>, ms: number) {
-  return new Promise<T>((resolve, reject) => {
-    const timer = window.setTimeout(
-      () => reject(new Error('Applied date request timed out')),
-      ms,
-    );
-    run()
-      .then(resolve, reject)
-      .finally(() => window.clearTimeout(timer));
-  });
-}
 
 const hasCode = (error: unknown, code: string) =>
   error instanceof ApiError && error.code === code;
@@ -161,13 +150,21 @@ export function CompareView({
       );
       return {
         ...options,
-        queryFn: (
+        queryFn: async (
           context: Parameters<NonNullable<typeof options.queryFn>>[0],
-        ) =>
-          withTimeout(
-            async () => options.queryFn?.(context) ?? [],
-            DATE_TIMEOUT_MS,
-          ),
+        ) => {
+          const timeout = timeoutSignal(DATE_TIMEOUT_MS, context.signal);
+          try {
+            return (
+              (await options.queryFn?.({
+                ...context,
+                signal: timeout.signal,
+              })) ?? []
+            );
+          } finally {
+            timeout.clear();
+          }
+        },
         enabled: itemRow != null,
         /** 보조 정보라 실패하면 다시 기다리게 하지 않고 바로 "–"로 둔다. */
         retry: false,

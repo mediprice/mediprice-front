@@ -33,6 +33,7 @@ function fetchPrices(
   condition: HospitalPriceCondition,
   page: number,
   size: number,
+  signal?: AbortSignal,
 ) {
   return unwrap(
     client.GET('/api/hospitals/{ykiho}/prices', {
@@ -40,6 +41,7 @@ function fetchPrices(
         path: { ykiho },
         query: { condition, pageQuery: { page, size } },
       },
+      signal,
     }),
   );
 }
@@ -79,13 +81,14 @@ export const hospitalQueries = {
   ) =>
     queryOptions({
       queryKey: hospitalKeys.itemPrices(ykiho, npayCode, itemName),
-      queryFn: async () => {
+      queryFn: async ({ signal }) => {
         const page = await fetchPrices(
           client,
           ykiho,
           { keyword: itemName },
           0,
           MAX_PAGE_SIZE,
+          signal,
         );
         return page.content.filter((row) => row.npayCode === npayCode);
       },

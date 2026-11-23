@@ -126,6 +126,7 @@ src/
     range-position.ts     최저~최고 막대 위의 위치 계산 (RangeBar, CompareStrip)
     safe-storage.ts       sessionStorage·localStorage를 예외 없이 읽고 쓰기 (zod 검증 포함)
     search-params.ts      URL 파라미터가 여러 번 오면 첫 값 고르기(firstParam)
+    timeout-signal.ts     바깥 신호나 제한 시간에 끊기는 AbortSignal (Safari 15 호환)
     utils.ts              cn (토큰을 등록한 tailwind-merge)
   server/bff/             서버 전용 코드: 쿠키, 업스트림 호출, 재발급, 응답 헬퍼
   server/api/             서버 컴포넌트의 익명 공개 조회(publicApi, 요청마다 QueryClient, 404 판정, 홈·sitemap 데이터)
