@@ -1,5 +1,7 @@
 import { z } from 'zod/mini';
 
+import { safeStorage } from '@/lib/safe-storage';
+
 export type RecentItem = { code: string; name: string };
 
 export const RECENT_ITEMS_KEY = 'mediprice:recent-items';
@@ -37,14 +39,6 @@ export function pushRecentItem(
 
 type RecentStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
-function browserStorage(): RecentStorage | null {
-  try {
-    return typeof window === 'undefined' ? null : window.localStorage;
-  } catch {
-    return null;
-  }
-}
-
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((listener) => listener());
 
@@ -61,7 +55,9 @@ export function subscribeRecentItems(listener: () => void) {
   };
 }
 
-export function readRecentItemsRaw(storage = browserStorage()) {
+export function readRecentItemsRaw(
+  storage: RecentStorage | null = safeStorage('local'),
+) {
   try {
     return storage?.getItem(RECENT_ITEMS_KEY) ?? null;
   } catch {
@@ -69,7 +65,10 @@ export function readRecentItemsRaw(storage = browserStorage()) {
   }
 }
 
-export function recordRecentItem(item: RecentItem, storage = browserStorage()) {
+export function recordRecentItem(
+  item: RecentItem,
+  storage: RecentStorage | null = safeStorage('local'),
+) {
   const next = pushRecentItem(
     parseRecentItems(readRecentItemsRaw(storage)),
     item,
@@ -80,7 +79,9 @@ export function recordRecentItem(item: RecentItem, storage = browserStorage()) {
   notify();
 }
 
-export function clearRecentItems(storage = browserStorage()) {
+export function clearRecentItems(
+  storage: RecentStorage | null = safeStorage('local'),
+) {
   try {
     storage?.removeItem(RECENT_ITEMS_KEY);
   } catch {}

@@ -3,6 +3,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { useState, useSyncExternalStore } from 'react';
 
+import { safeStorage } from '@/lib/safe-storage';
+
 import {
   cooldownKey,
   readCooldownUntil,
@@ -10,15 +12,6 @@ import {
   startCooldown,
 } from './cooldown';
 import { liveFeeMutations } from './queries';
-
-/** 사파리 비공개 창 등에서는 sessionStorage에 접근만 해도 예외가 난다. */
-function sessionStorageOrNull() {
-  try {
-    return window.sessionStorage;
-  } catch {
-    return null;
-  }
-}
 
 function subscribeSecondTick(onTick: () => void) {
   const id = window.setInterval(onTick, 1000);
@@ -35,7 +28,7 @@ export function useLiveFeeCheck(ykiho: string, npayCode: string) {
       const now = Date.now();
       const until = Math.max(
         localUntil,
-        readCooldownUntil(sessionStorageOrNull(), key, now),
+        readCooldownUntil(safeStorage('session'), key, now),
       );
       return secondsUntil(until, now);
     },
@@ -45,7 +38,7 @@ export function useLiveFeeCheck(ykiho: string, npayCode: string) {
 
   function check() {
     if (mutation.isPending || secondsLeft > 0) return;
-    setLocalUntil(startCooldown(sessionStorageOrNull(), key, Date.now()));
+    setLocalUntil(startCooldown(safeStorage('session'), key, Date.now()));
     mutation.mutate();
   }
 
