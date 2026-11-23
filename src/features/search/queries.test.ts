@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/react-query';
+import { InfiniteQueryObserver, QueryClient } from '@tanstack/react-query';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -235,6 +235,83 @@ describe('searchQueries.items 가격 유무', () => {
     );
 
     expect(data.pages[0]?.content[0]?.hasPrice).toBeNull();
+  });
+});
+
+describe('searchQueries.items 이어 읽기', () => {
+  const params = { categoryCodes: ['1070Z'], sidoCodes: ['110000'] };
+  const listPages = (requests: URL[]) =>
+    requests.map((url) => Number(url.searchParams.get('page')));
+
+  async function observe(queryClient: QueryClient) {
+    const observer = new InfiniteQueryObserver(
+      queryClient,
+      searchQueries.items(params),
+    );
+    const unsubscribe = observer.subscribe(() => {});
+    await vi.waitFor(() =>
+      expect(observer.getCurrentResult().isSuccess).toBe(true),
+    );
+    return { observer, unsubscribe };
+  }
+
+  it('한 페이지의 항목 요약은 차례로가 아니라 함께 요청한다', async () => {
+    serveItems({ '1070Z': 5 });
+    let inFlight = 0;
+    let maxInFlight = 0;
+    server.use(
+      http.get(
+        `${BASE}/api/npay-items/:code/price-summary`,
+        async ({ params: p }) => {
+          inFlight += 1;
+          maxInFlight = Math.max(maxInFlight, inFlight);
+          await new Promise((resolve) => setTimeout(resolve, 10));
+          inFlight -= 1;
+          return HttpResponse.json(summary(String(p.code), 10000));
+        },
+      ),
+    );
+
+    await new QueryClient().fetchInfiniteQuery(searchQueries.items(params));
+
+    expect(maxInFlight).toBe(5);
+  });
+
+  it('가격 있는 항목이 아직 없으면 다음 페이지를 지금 페이지 요약과 함께 미리 받는다', async () => {
+    const requests = serveItems({ '1070Z': 40 });
+    serveSummaries(Array.from({ length: 40 }, (_, i) => `1070Z-${i}`));
+    const queryClient = new QueryClient();
+    const { observer, unsubscribe } = await observe(queryClient);
+    expect(listPages(requests)).toEqual([0]);
+
+    await observer.fetchNextPage();
+    await vi.waitFor(() => expect(listPages(requests)).toEqual([0, 1, 2]));
+    await observer.fetchNextPage();
+    await vi.waitFor(() => expect(listPages(requests)).toEqual([0, 1, 2, 3]));
+
+    expect(
+      observer
+        .getCurrentResult()
+        .data?.pages.map((page) => page.content.map((row) => row.code)),
+    ).toEqual(
+      [0, 1, 2].map((index) =>
+        Array.from({ length: 10 }, (_, i) => `1070Z-${index * 10 + i}`),
+      ),
+    );
+    unsubscribe();
+  });
+
+  it('가격 있는 항목이 이미 있으면 미리 받지 않는다', async () => {
+    const requests = serveItems({ '1070Z': 40 });
+    serveSummaries();
+    const queryClient = new QueryClient();
+    const { observer, unsubscribe } = await observe(queryClient);
+
+    await observer.fetchNextPage();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(listPages(requests)).toEqual([0, 1]);
+    unsubscribe();
   });
 });
 
