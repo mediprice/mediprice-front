@@ -18,3 +18,19 @@ export function shouldLocateOnEntry(input: {
 }): boolean {
   return input.access === 'ready' && input.permission === 'granted';
 }
+
+/** 지도 진입 때 할 일. denied는 지역 기준으로 보여 주며 권한을 바꾸는 방법을, fallback은 "내 위치 사용"을 안내한다. */
+export type EntryStep = 'wait' | 'locate' | 'fallback' | 'denied';
+
+/** 권한이 허용됐는데 로그인·동의 상태(access)를 아직 모르면 기다린다. 먼저 지역 중심을 조회했다가 다시 찾지 않게 한다. */
+export function locationEntryStep(input: {
+  access: LocationAccess | null;
+  permission: LocationPermission;
+}): EntryStep {
+  const { access, permission } = input;
+  if (permission === 'checking') return 'wait';
+  if (permission === 'denied') return 'denied';
+  if (permission !== 'granted') return 'fallback';
+  if (access === null) return 'wait';
+  return shouldLocateOnEntry({ access, permission }) ? 'locate' : 'fallback';
+}

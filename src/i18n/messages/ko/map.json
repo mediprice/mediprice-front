@@ -68,10 +68,6 @@
     "priceLabel": "가장 낮은 가격"
   },
   "location": {
-    "promptTitle": "현재 위치를 사용할까요?",
-    "promptDescription": "가까운 병원을 찾을 때만 써요. 서버에는 약 1km 단위로 흐린 위치만 보내고 저장하지 않아요. 거리는 이 기기에서 계산하고, 지도는 네이버 지도가 표시해요.",
-    "promptAllow": "허용",
-    "promptLater": "지금은 안 할래요",
     "deniedTitle": "위치를 사용할 수 없어요",
     "deniedDescription": "{place} 기준으로 보여 드려요. 주소창 왼쪽의 자물쇠(사이트 설정)를 눌러 위치를 '허용'으로 바꾼 뒤 이 화면을 새로 고치면 내 주변을 볼 수 있어요.",
     "deferredTitle": "{place} 기준으로 보여 드려요",
@@ -89,5 +85,24 @@
       "seoul": "서울시청",
       "gyeonggi": "경기도청"
     }
+  },
+  "locationConsent": {
+    "title": "위치정보 이용 동의",
+    "description": "가까운 병원을 찾을 때만 현재 위치를 써요.",
+    "purposeLabel": "이용 목적",
+    "purpose": "주변 병원 찾기와 병원까지의 거리 표시",
+    "itemsLabel": "이용 항목",
+    "itemsPosition": "현재 위치(서버에는 약 1km 단위로 흐려서 보내요)",
+    "itemsLog": "위치를 쓴 날짜와 시각(좌표 없이)",
+    "periodLabel": "보유 기간",
+    "periodPosition": "좌표는 저장하지 않아요.",
+    "periodLog": "이용 기록은 위치를 쓴 시각부터 {days, number}일 동안 보관한 뒤 지워요. 회원 탈퇴와 관계없이 이 기간 동안 남아요.",
+    "periodLogPending": "위치 이용 기록 보관 기간",
+    "refuseLabel": "거부할 권리",
+    "refuse": "동의하지 않아도 돼요. 동의하지 않으면 현재 위치는 쓸 수 없지만, 지역을 고르거나 지도를 옮겨 병원을 찾을 수 있어요.",
+    "termsLink": "위치기반서비스 이용약관 보기",
+    "agree": "위치정보 이용에 동의해요",
+    "agreeHint": "동의는 내 정보 › 계정에서 언제든 철회할 수 있어요.",
+    "confirm": "동의하고 위치 찾기"
   }
 }
