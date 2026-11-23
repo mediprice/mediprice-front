@@ -21,6 +21,11 @@ const ReportForm = dynamic(
   { loading: () => <Skeleton className="h-80 w-full" /> },
 );
 
+/** 신고로 이어질 수 있는 메뉴를 열면 폼을 미리 받아 다이얼로그에서 뼈대가 보이는 시간을 줄인다. */
+export function preloadReportForm() {
+  void import('./report-form');
+}
+
 /** S-20 후기 신고. 모바일은 바텀시트, 데스크톱은 가운데 모달이다. 이미 신고한 후기(409)는 실패가 아니라 결과로 보여 준다. */
 export function ReportDialog({
   review,
