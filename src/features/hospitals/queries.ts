@@ -4,9 +4,6 @@ import { type ApiClient, apiClient } from '@/lib/api/client';
 import type { paths } from '@/lib/api/schema';
 import { unwrap } from '@/lib/api/unwrap';
 
-export type HospitalSearchParams = NonNullable<
-  paths['/api/hospitals']['get']['parameters']['query']
->;
 export type HospitalPriceCondition = NonNullable<
   paths['/api/hospitals/{ykiho}/prices']['get']['parameters']['query']
 >['condition'];
@@ -20,9 +17,6 @@ const PRICE_PAGE_SIZE = 20;
 
 export const hospitalKeys = {
   all: ['hospitals'] as const,
-  lists: () => [...hospitalKeys.all, 'list'] as const,
-  list: (params: HospitalSearchParams) =>
-    [...hospitalKeys.lists(), params] as const,
   details: () => [...hospitalKeys.all, 'detail'] as const,
   detail: (ykiho: string) => [...hospitalKeys.details(), ykiho] as const,
   priceList: (ykiho: string, condition: HospitalPriceCondition) =>
@@ -51,13 +45,6 @@ function fetchPrices(
 }
 
 export const hospitalQueries = {
-  search: (params: HospitalSearchParams) =>
-    queryOptions({
-      queryKey: hospitalKeys.list(params),
-      queryFn: () =>
-        unwrap(apiClient.GET('/api/hospitals', { params: { query: params } })),
-    }),
-
   detail: (ykiho: string, client: ApiClient = apiClient) =>
     queryOptions({
       queryKey: hospitalKeys.detail(ykiho),

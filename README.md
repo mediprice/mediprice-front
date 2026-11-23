@@ -58,13 +58,8 @@ src/
 화면에서는 쿼리 옵션만 쓴다.
 
 ```tsx
-const { data } = useQuery(regionQueries.sido());
-const { data: hospitals } = useQuery(
-  hospitalQueries.search({
-    condition: { keyword: '삼성' },
-    pageQuery: { size: 20 },
-  }),
-);
+const { data: districts } = useQuery(regionQueries.sggu('110000'));
+const { data: hospital } = useQuery(hospitalQueries.detail(ykiho));
 ```
 
 - 응답 타입은 백엔드 스펙에서 생성된다. null이 될 수 있는 필드는 `string | null`이다.

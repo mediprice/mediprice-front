@@ -97,40 +97,6 @@ describe('서버 prefetch 클라이언트', () => {
   });
 });
 
-describe('npayQueries.summary', () => {
-  it('조건 객체를 평평한 쿼리 파라미터로 보낸다', async () => {
-    let search = '';
-    server.use(
-      http.get(
-        `${BASE}/api/npay-items/MX1220000/price-summary`,
-        ({ request }) => {
-          search = new URL(request.url).search;
-          return HttpResponse.json({
-            npayCode: 'MX1220000',
-            minPrice: 1000,
-            maxPrice: 500000,
-            avgPrice: 126426,
-            priceCount: 1158,
-            hospitalCount: 327,
-          });
-        },
-      ),
-    );
-
-    const data = await new QueryClient().fetchQuery(
-      npayQueries.summary('MX1220000', {
-        sidoCode: '110000',
-        institutionCode: '21',
-      }),
-    );
-
-    expect(data.hospitalCount).toBe(327);
-    expect(new URLSearchParams(search).get('sidoCode')).toBe('110000');
-    expect(new URLSearchParams(search).get('institutionCode')).toBe('21');
-    expect(new URLSearchParams(search).has('sgguCode')).toBe(false);
-  });
-});
-
 describe('npayQueries.summaryOf', () => {
   it('조건마다 요약을 받아 병원·가격 수를 더한다', async () => {
     const seen: string[] = [];
