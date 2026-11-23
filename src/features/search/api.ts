@@ -16,7 +16,7 @@ const priceSummarySchema = z.object({
 
 const nullableText = z.nullable(z.string());
 
-/** priceSummary가 없으면(키 자체가 없음) 목록에 요약을 넣지 못하는 이전 백엔드다. */
+/** priceSummary 키가 없으면 이전 백엔드다. null(파라미터를 무시한 경우 등)도 요약이 없는 것으로 보고 항목마다 읽는다. */
 const itemPageSchema = z.object({
   content: z.array(
     z.object({

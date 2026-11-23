@@ -413,35 +413,134 @@ describe('searchQueries.items 목록에 든 가격 요약(백엔드 #24)', () =>
     expect(mayFindMorePriced(data.pages)).toBe(true);
   });
 
-  it('분류가 여러 개면 뒤 분류의 첫 페이지에 가격이 있을 때만 더 읽는다', async () => {
+  /** 분류마다 항목 수와 가격 유무를 정해 새 백엔드처럼 답한다. */
+  function serveCategories(
+    byCode: Record<string, { total: number; avgPrice: number | null }>,
+    requests: string[] = [],
+  ) {
     server.use(
       http.get(`${BASE}/api/npay-items`, ({ request }) => {
-        const code = new URL(request.url).searchParams.get('categoryCode');
-        const avgPrice = code === '1180Z' ? 5000 : null;
-        return HttpResponse.json(
-          page(
-            [
-              {
-                ...item(`${code}-0`, code ?? ''),
-                priceSummary: summary(`${code}-0`, avgPrice),
-              },
-            ],
-            0,
-            1,
-          ),
+        const url = new URL(request.url);
+        const code = url.searchParams.get('categoryCode') ?? '';
+        const index = Number(url.searchParams.get('page'));
+        const size = Number(url.searchParams.get('size'));
+        requests.push(`${code}:${index}`);
+        const { total, avgPrice } = byCode[code] ?? {
+          total: 0,
+          avgPrice: null,
+        };
+        const content = Array.from(
+          { length: Math.max(0, Math.min(size, total - index * size)) },
+          (_, i) => {
+            const itemCode = `${code}-${index * size + i}`;
+            return {
+              ...item(itemCode, code),
+              priceSummary: summary(itemCode, avgPrice),
+            };
+          },
         );
+        return HttpResponse.json(page(content, index, total));
       }),
     );
+    return requests;
+  }
 
-    const withLater = await new QueryClient().fetchInfiniteQuery(
+  it('분류가 여러 개면 가격 있는 분류를 먼저 보여 주고 가격 없는 분류는 그 뒤에 읽는다', async () => {
+    const requests = serveCategories({
+      '1070Z': { total: 15, avgPrice: null },
+      '1180Z': { total: 3, avgPrice: 5000 },
+    });
+
+    const observer = new InfiniteQueryObserver(
+      new QueryClient(),
       searchQueries.items({ ...params, categoryCodes: ['1070Z', '1180Z'] }),
     );
-    const withoutLater = await new QueryClient().fetchInfiniteQuery(
-      searchQueries.items({ ...params, categoryCodes: ['1070Z', '1250Z'] }),
+    const unsubscribe = observer.subscribe(() => {});
+    await vi.waitFor(() =>
+      expect(observer.getCurrentResult().isSuccess).toBe(true),
+    );
+    await observer.fetchNextPage();
+    await observer.fetchNextPage();
+    unsubscribe();
+    const data = observer.getCurrentResult().data;
+    if (!data) throw new Error('no data');
+
+    expect(requests).toEqual(['1070Z:0', '1180Z:0', '1070Z:0', '1070Z:1']);
+    expect(data.pages.map((p) => p.content[0]?.code)).toEqual([
+      '1180Z-0',
+      '1070Z-0',
+      '1070Z-10',
+    ]);
+    expect(data.pages.flatMap((p) => p.content)).toHaveLength(18);
+    expect(mayFindMorePriced(data.pages)).toBe(false);
+  });
+
+  it('요약이 있는 항목과 없는 항목이 섞이면 없는 항목만 따로 읽고 이어 읽기를 막지 않는다', async () => {
+    server.use(
+      http.get(`${BASE}/api/npay-items`, () =>
+        HttpResponse.json(
+          page(
+            [{ ...item('A'), priceSummary: summary('A', 10000) }, item('B')],
+            0,
+            2,
+          ),
+        ),
+      ),
+    );
+    const perItem: string[] = [];
+    server.use(
+      http.get(
+        `${BASE}/api/npay-items/:code/price-summary`,
+        ({ params: p }) => {
+          perItem.push(String(p.code));
+          return HttpResponse.json(summary(String(p.code), null));
+        },
+      ),
     );
 
-    expect(mayFindMorePriced(withLater.pages)).toBe(true);
-    expect(mayFindMorePriced(withoutLater.pages)).toBe(false);
+    const data = await new QueryClient().fetchInfiniteQuery(
+      searchQueries.items(params),
+    );
+
+    expect(
+      data.pages[0]?.content.map(({ code, hasPrice }) => [code, hasPrice]),
+    ).toEqual([
+      ['A', true],
+      ['B', false],
+    ]);
+    expect([...new Set(perItem)]).toEqual(['B']);
+    expect(data.pages[0]?.pricedFirst).toBe(false);
+    expect(mayFindMorePriced(data.pages)).toBe(true);
+  });
+
+  it('priceSummary가 null이면 요약이 없는 것으로 보고 항목마다 읽는다', async () => {
+    server.use(
+      http.get(`${BASE}/api/npay-items`, () =>
+        HttpResponse.json(page([{ ...item('A'), priceSummary: null }], 0, 1)),
+      ),
+    );
+    const perItem = vi.fn(() => HttpResponse.json(summary('A', 7000)));
+    server.use(http.get(`${BASE}/api/npay-items/:code/price-summary`, perItem));
+
+    const data = await new QueryClient().fetchInfiniteQuery(
+      searchQueries.items(params),
+    );
+
+    expect(data.pages[0]?.content[0]?.hasPrice).toBe(true);
+    expect(perItem).toHaveBeenCalled();
+    expect(data.pages[0]?.pricedFirst).toBe(false);
+  });
+
+  it('목록의 요약은 그 뒤에 받은 상세 요약을 덮지 않는다', async () => {
+    serveItemsWithSummaries([{ code: 'A', avgPrice: 10000 }]);
+    const queryClient = new QueryClient();
+    const key = npayQueries.summaryIn('A', params.sidoCodes).queryKey;
+    const newer = summary('A', 12345);
+    queryClient.setQueryData(key, newer, { updatedAt: Date.now() + 60_000 });
+
+    await queryClient.fetchInfiniteQuery(searchQueries.items(params));
+
+    expect(queryClient.getQueryData(key)).toEqual(newer);
   });
 });
 

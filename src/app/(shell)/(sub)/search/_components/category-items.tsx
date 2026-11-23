@@ -49,9 +49,8 @@ export function CategoryItems({
   const items = pages.flat();
   const { isFilling } = useFillPriced({
     pages,
-    hasNextPage:
-      query.hasNextPage &&
-      (query.data ? mayFindMorePriced(query.data.pages) : true),
+    hasNextPage: query.hasNextPage,
+    canFindMore: query.data ? mayFindMorePriced(query.data.pages) : true,
     isFetchingNextPage: query.isFetchingNextPage,
     isError: query.isError,
     fetchNextPage: query.fetchNextPage,
