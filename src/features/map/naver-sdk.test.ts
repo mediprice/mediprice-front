@@ -106,19 +106,40 @@ describe('onNaverAuthFailure', () => {
 });
 
 describe('runCleanup', () => {
-  it('정리 중 던져진 오류를 삼킨다', () => {
-    expect(() =>
-      runCleanup(() => {
-        throw new TypeError(
-          "Cannot read properties of null (reading 'isArray')",
-        );
-      }),
-    ).not.toThrow();
-  });
-
   it('정상이면 정리를 실행한다', () => {
     const cleanup = vi.fn();
     runCleanup(cleanup);
     expect(cleanup).toHaveBeenCalledOnce();
+  });
+
+  it('인증 실패 뒤에는 SDK 정리 호출을 건너뛴다', () => {
+    const { target } = fakeTarget();
+    void loadNaverMaps('key', target).catch(() => {});
+    target.window.navermap_authFailure?.();
+    const cleanup = vi.fn();
+    runCleanup(cleanup);
+    expect(cleanup).not.toHaveBeenCalled();
+  });
+
+  it('SDK 안에서 던져도 삼키고, 개발에서는 경고를 남긴다', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    expect(() =>
+      runCleanup(() => {
+        throw new TypeError('boom');
+      }),
+    ).not.toThrow();
+    expect(warn).toHaveBeenCalledOnce();
+    warn.mockRestore();
+  });
+
+  it('운영에서는 경고 없이 삼킨다', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    runCleanup(() => {
+      throw new TypeError('boom');
+    });
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+    vi.unstubAllEnvs();
   });
 });

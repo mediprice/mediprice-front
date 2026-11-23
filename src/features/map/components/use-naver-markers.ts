@@ -69,10 +69,8 @@ export function useNaverMarkers(
     const ids = new Set(markers.map((marker) => marker.id));
     for (const [id, entry] of current) {
       if (ids.has(id)) continue;
-      runCleanup(() => {
-        api.Event.removeListener(entry.listeners);
-        entry.marker.setMap(null);
-      });
+      runCleanup(() => api.Event.removeListener(entry.listeners));
+      runCleanup(() => entry.marker.setMap(null));
       current.delete(id);
     }
     for (const marker of markers) {
@@ -123,10 +121,8 @@ export function useNaverMarkers(
     const current = entries.current;
     return () => {
       for (const entry of current.values()) {
-        runCleanup(() => {
-          handle.api.Event.removeListener(entry.listeners);
-          entry.marker.setMap(null);
-        });
+        runCleanup(() => handle.api.Event.removeListener(entry.listeners));
+        runCleanup(() => entry.marker.setMap(null));
       }
       current.clear();
     };

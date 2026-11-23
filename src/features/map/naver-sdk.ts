@@ -35,12 +35,15 @@ export function onNaverAuthFailure(listener: () => void) {
   };
 }
 
-/** 인증에 실패한 SDK는 지도·마커 객체가 불완전해 정리 호출이 던질 수 있다. 정리는 실패해도 화면을 깨지 않게 삼킨다. */
+/** 인증 실패 뒤의 SDK 객체는 불완전해 정리 호출이 던지므로 건너뛰고, 그 밖에 SDK 내부에서 던지는 오류는 개발에서만 경고로 남긴다. */
 export function runCleanup(cleanup: () => void) {
+  if (hasAuthFailed) return;
   try {
     cleanup();
-  } catch {
-    /* 인증 실패로 불완전한 SDK 객체의 정리 오류는 무시한다. */
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('Naver Maps cleanup failed', error);
+    }
   }
 }
 
