@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 
 import ts from 'typescript';
@@ -18,7 +18,11 @@ import { messages } from './messages/ko';
 
 const T_METHODS = new Set(['rich', 'markup', 'raw', 'has']);
 
-type Messages = { paths: Set<string>; scoped: string[] | null };
+type Messages = {
+  paths: Set<string>;
+  scoped: string[] | null;
+  misplaced: number;
+};
 
 const analyzed = new Map<string, Messages>();
 
@@ -66,14 +70,34 @@ function keysReadBy(translator: ts.Identifier, prefix: string) {
   return keys;
 }
 
+/** 테스트는 ClientMessages가 page·layout 전체를 감싼다고 보고 대조하므로, 반환하는 최상위 요소여야 한다. */
+function isReturnedRoot(opening: ts.JsxOpeningLikeElement, file: string) {
+  if (!/^(page|layout)\.tsx$/.test(path.basename(file))) return false;
+  let node: ts.Node = ts.isJsxOpeningElement(opening)
+    ? opening.parent
+    : opening;
+  while (ts.isParenthesizedExpression(node.parent)) node = node.parent;
+  return (
+    ts.isReturnStatement(node.parent) ||
+    (ts.isArrowFunction(node.parent) && node.parent.body === node)
+  );
+}
+
 /** 이 파일이 읽는 메시지 경로와 ClientMessages로 더하는 경로를 모은다. */
 function messagesOf(file: string): Messages {
   const cached = analyzed.get(file);
   if (cached) return cached;
-  const info: Messages = { paths: new Set(), scoped: null };
+  const info: Messages = { paths: new Set(), scoped: null, misplaced: 0 };
   analyzed.set(file, info);
 
   const visit = (node: ts.Node) => {
+    if (
+      ts.isImportSpecifier(node) &&
+      node.propertyName?.getText() === 'useTranslations'
+    )
+      throw new Error(
+        `useTranslations를 다른 이름으로 가져오지 않는다: ${file}`,
+      );
     if (
       ts.isCallExpression(node) &&
       ts.isIdentifier(node.expression) &&
@@ -101,6 +125,7 @@ function messagesOf(file: string): Messages {
           : undefined;
       if (!expression || !ts.isArrayLiteralExpression(expression))
         throw new Error(`ClientMessages namespaces must be an array: ${file}`);
+      if (!isReturnedRoot(node.parent.parent, file)) info.misplaced += 1;
       info.scoped = expression.elements.map((element) => {
         const literal = stringLiteralOf(element);
         if (literal === null)
@@ -137,6 +162,14 @@ function scopedNamespacesOf(entry: string) {
     dir = path.dirname(dir);
   }
   return scoped;
+}
+
+function sourceFiles(dir: string): string[] {
+  return readdirSync(dir).flatMap((name) => {
+    const full = path.join(dir, name);
+    if (statSync(full).isDirectory()) return sourceFiles(full);
+    return name.endsWith('.tsx') ? [full] : [];
+  });
 }
 
 function covers(scope: Iterable<string>, key: string) {
@@ -191,6 +224,14 @@ describe('브라우저에 넘기는 메시지', () => {
       expect(missing).toEqual([]);
     },
   );
+
+  it('ClientMessages는 page·layout이 돌려주는 최상위 요소로만 쓴다', () => {
+    const misplaced = sourceFiles(SRC)
+      .filter((file) => !file.startsWith(path.join(SRC, 'i18n')))
+      .filter((file) => messagesOf(file).misplaced > 0)
+      .map((file) => path.relative(SRC, file));
+    expect(misplaced).toEqual([]);
+  });
 
   it('provider에 넘기는 경로는 메시지 파일에 있다', () => {
     const declared = new Set<string>(CLIENT_NAMESPACES);

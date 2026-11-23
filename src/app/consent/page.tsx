@@ -20,19 +20,19 @@ export default async function ConsentPage({
     getTranslations('common'),
   ]);
   return (
-    <div className="flex min-h-dvh flex-col">
-      <header className="flex h-top-bar items-center border-b border-hairline lg:h-top-nav">
-        <PageContainer className="max-w-2xl">
-          <p className="text-subheading">{t('brand')}</p>
-        </PageContainer>
-      </header>
-      <main id="main" className="flex-1 py-8 lg:py-section">
-        <PageContainer className="max-w-2xl">
-          <ClientMessages namespaces={['legal.document']}>
+    <ClientMessages namespaces={['legal.document']}>
+      <div className="flex min-h-dvh flex-col">
+        <header className="flex h-top-bar items-center border-b border-hairline lg:h-top-nav">
+          <PageContainer className="max-w-2xl">
+            <p className="text-subheading">{t('brand')}</p>
+          </PageContainer>
+        </header>
+        <main id="main" className="flex-1 py-8 lg:py-section">
+          <PageContainer className="max-w-2xl">
             <ConsentStep returnTo={consentReturnPath(returnTo)} />
-          </ClientMessages>
-        </PageContainer>
-      </main>
-    </div>
+          </PageContainer>
+        </main>
+      </div>
+    </ClientMessages>
   );
 }
