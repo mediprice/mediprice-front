@@ -11,7 +11,11 @@ import {
   type ServiceRegion,
   sidoCodesOf,
 } from '@/features/regions/service-region';
-import { searchQueries, totalCount } from '@/features/search/queries';
+import {
+  mayFindMorePriced,
+  searchQueries,
+  totalCount,
+} from '@/features/search/queries';
 import { relaxedKeyword } from '@/features/search/relaxed-keyword';
 
 import { ItemGroupList } from './item-group-list';
@@ -58,7 +62,9 @@ export function ItemSearchView({
   const items = pages.flat();
   const { isFilling } = useFillPriced({
     pages,
-    hasNextPage: query.hasNextPage,
+    hasNextPage:
+      query.hasNextPage &&
+      (query.data ? mayFindMorePriced(query.data.pages) : true),
     isFetchingNextPage: query.isFetchingNextPage,
     isError: query.isError,
     fetchNextPage: query.fetchNextPage,

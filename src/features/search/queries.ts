@@ -10,7 +10,9 @@ import { apiClient } from '@/lib/api/client';
 import type { components } from '@/lib/api/schema';
 import { unwrap } from '@/lib/api/unwrap';
 
-/** 항목은 페이지마다 가격 요약을 함께 받으므로 작게 나눈다. */
+import { type ItemListPage, searchApi } from './api';
+
+/** 이전 백엔드는 페이지마다 항목별 가격 요약을 따로 받으므로 작게 나눈다. */
 const ITEM_PAGE_SIZE = 10;
 /** 가격 있는 항목이 나올 때까지 화면이 저절로 더 읽는 페이지 수(useFillPriced). 미리 읽기도 이 수를 넘지 않는다. */
 export const MAX_AUTO_PAGES = 6;
@@ -35,7 +37,13 @@ type MergedPage<T> = {
   totalPages: number;
   /** 조건별 전체 개수. 첫 페이지에만 있다. */
   totals: number[];
+  /** 조건별 첫 페이지에 가격 있는 항목이 있는지. 목록이 요약을 함께 줄 때 첫 페이지에만 있다. */
+  priced?: boolean[];
+  /** 백엔드가 요약을 함께 주고 가격 있는 항목을 먼저 준 페이지다(#24). 이전 백엔드면 false다. */
+  pricedFirst?: boolean;
 };
+
+type ListedItem = ItemListPage['content'][number];
 
 export type ItemSearchParams = {
   keyword?: string;
@@ -73,6 +81,7 @@ async function fetchMergedPage<T>(
   fetchPage: FetchStreamPage<T>,
   streamCount: number,
   cursor: StreamCursor,
+  isPriced?: (item: T) => boolean | null,
 ): Promise<MergedPage<T>> {
   if (cursor.stream !== FIRST_PAGE.stream || cursor.page !== FIRST_PAGE.page) {
     const response = await fetchPage(cursor.stream, cursor.page);
@@ -89,6 +98,9 @@ async function fetchMergedPage<T>(
     ...pick(response),
     cursor: { stream, page: 0 },
     totals: responses.map(({ totalElements }) => totalElements),
+    ...(isPriced && {
+      priced: responses.map((r) => r.content.some((item) => isPriced(item))),
+    }),
   };
 }
 
@@ -112,49 +124,77 @@ export function totalCount(pages: readonly { totals: number[] }[]) {
   return pages[0]?.totals.reduce((sum, total) => sum + total, 0);
 }
 
+/** 목록이 요약을 함께 줬으면 그 값, 아니면(이전 백엔드) null이다. */
+function listedPriced(item: ListedItem) {
+  return item.priceSummary ? item.priceSummary.avgPrice != null : null;
+}
+
 /** 목록 한 페이지(요약 전). 이어 읽기에서 미리 받은 페이지를 다음 페이지 조회가 다시 쓰도록 캐시에 둔다. */
 function itemListPage(params: ItemSearchParams, cursor: StreamCursor) {
   return queryOptions({
     queryKey: [...searchKeys.items(params), 'list', cursor] as const,
     /** 미리 받은 페이지를 이어 읽기가 다시 받지 않게 한다. 목록 전체의 다시 읽기 주기(기본 1분)와 같다. */
     staleTime: 60 * 1000,
-    queryFn: () =>
-      fetchMergedPage<Schemas['NpayItemResponse']>(
+    queryFn: async (): Promise<MergedPage<ListedItem>> => {
+      const page = await fetchMergedPage<ListedItem>(
         (stream, pageIndex) =>
-          unwrap(
-            apiClient.GET('/api/npay-items', {
-              params: {
-                query: {
-                  condition: {
-                    keyword: params.keyword,
-                    categoryCode: params.categoryCodes?.[stream],
-                  },
-                  pageQuery: { page: pageIndex, size: ITEM_PAGE_SIZE },
-                },
-              },
-            }),
-          ),
+          searchApi.fetchItems({
+            keyword: params.keyword,
+            categoryCode: params.categoryCodes?.[stream],
+            sidoCodes: params.sidoCodes,
+            page: pageIndex,
+            size: ITEM_PAGE_SIZE,
+          }),
         Math.max(1, params.categoryCodes?.length ?? 0),
         cursor,
-      ),
+        listedPriced,
+      );
+      const pricedFirst =
+        page.content.length > 0 &&
+        page.content.every((item) => item.priceSummary != null);
+      return pricedFirst
+        ? { ...page, pricedFirst }
+        : { ...page, pricedFirst, priced: undefined };
+    },
   });
 }
 
-/** 항목별 가격 요약을 캐시에 채워 두고 가격 유무를 붙인다. 요약은 항목마다 함께 요청한다. */
+/**
+ * 가격 있는 항목을 아직 못 찾았을 때 더 읽어서 찾을 수 있는지. 목록이 가격 있는 항목을 먼저 주면(#24) 지금 분류에는 더 없으므로
+ * 뒤 분류의 첫 페이지에 가격이 있을 때만 그렇다. 이전 백엔드면 알 수 없으므로 늘 그렇다고 본다.
+ */
+export function mayFindMorePriced(
+  pages: readonly Pick<
+    MergedPage<unknown>,
+    'cursor' | 'priced' | 'pricedFirst'
+  >[],
+) {
+  if (!pages.every((page) => page.pricedFirst)) return true;
+  const last = pages.at(-1);
+  if (!last) return false;
+  return (pages[0]?.priced ?? []).some(
+    (hasPriced, stream) => stream > last.cursor.stream && hasPriced,
+  );
+}
+
+/** 가격 유무를 붙인다. 목록에 요약이 있으면 상세 화면과 같은 키로 캐시에 넣고, 없으면(이전 백엔드) 항목마다 함께 요청한다. */
 async function withPrices(
   client: QueryClient,
   params: ItemSearchParams,
-  page: MergedPage<Schemas['NpayItemResponse']>,
+  page: MergedPage<ListedItem>,
 ): Promise<MergedPage<ItemResult>> {
   const content = await Promise.all(
-    page.content.map((item) =>
-      client
-        .ensureQueryData(npayQueries.summaryIn(item.code, params.sidoCodes))
-        .then(
-          (summary) => ({ ...item, hasPrice: summary.avgPrice != null }),
-          () => ({ ...item, hasPrice: null }),
-        ),
-    ),
+    page.content.map(({ priceSummary, ...item }) => {
+      const summary = npayQueries.summaryIn(item.code, params.sidoCodes);
+      if (priceSummary) {
+        client.setQueryData(summary.queryKey, priceSummary);
+        return { ...item, hasPrice: priceSummary.avgPrice != null };
+      }
+      return client.ensureQueryData(summary).then(
+        (loaded) => ({ ...item, hasPrice: loaded.avgPrice != null }),
+        () => ({ ...item, hasPrice: null }),
+      );
+    }),
   );
   return { ...page, content };
 }
@@ -166,7 +206,7 @@ async function withPrices(
 function prefetchFollowing(
   client: QueryClient,
   params: ItemSearchParams,
-  page: MergedPage<Schemas['NpayItemResponse']>,
+  page: MergedPage<ListedItem>,
 ) {
   const previous =
     client.getQueryData<InfiniteData<MergedPage<ItemResult>>>(
@@ -175,6 +215,7 @@ function prefetchFollowing(
   if (previous.length === 0 || previous.length + 1 >= MAX_AUTO_PAGES) return;
   if (previous.some((p) => p.content.some((item) => item.hasPrice === true)))
     return;
+  if (!mayFindMorePriced([...previous, page])) return;
   const next = nextCursor(page, [...previous, page]);
   if (!next) return;
   void client
