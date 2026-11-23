@@ -2,10 +2,18 @@ import { QueryClient } from '@tanstack/react-query';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 
+import { consentKeys } from '@/features/auth/queries';
 import type * as ClientModule from '@/lib/api/client';
+import { ApiError } from '@/lib/api/errors';
 import { server } from '@/test/server';
 
-import { mapKeys, mapQueries, toNearbyCondition } from './queries';
+import { locationUsageApi } from './location-usage-api';
+import {
+  locationUsageMutations,
+  mapKeys,
+  mapQueries,
+  toNearbyCondition,
+} from './queries';
 
 vi.mock('@/lib/api/client', async (importOriginal) => {
   const actual = await importOriginal<typeof ClientModule>();
@@ -201,5 +209,33 @@ describe('mapQueries.nearby', () => {
         mapQueries.nearby({ lat: 37.5665, lng: 126.978, radius: 1000 }),
       ),
     ).rejects.toMatchObject({ status: 503 });
+  });
+});
+
+describe('locationUsageMutations.record', () => {
+  async function recordFailingWith(error: Error) {
+    vi.spyOn(locationUsageApi, 'record').mockRejectedValue(error);
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(consentKeys.status(), { consents: [] });
+    await queryClient
+      .getMutationCache()
+      .build(queryClient, locationUsageMutations.record(queryClient))
+      .execute(undefined)
+      .catch(() => undefined);
+    return queryClient.getQueryState(consentKeys.status())?.isInvalidated;
+  }
+
+  it('동의가 없다고 하면(403) 동의 현황을 무효화한다', async () => {
+    expect(
+      await recordFailingWith(
+        new ApiError(403, 'LOCATION_CONSENT_REQUIRED', 'x'),
+      ),
+    ).toBe(true);
+  });
+
+  it('다른 실패는 동의 현황을 건드리지 않는다', async () => {
+    expect(
+      await recordFailingWith(new ApiError(500, 'INTERNAL_ERROR', 'x')),
+    ).toBe(false);
   });
 });

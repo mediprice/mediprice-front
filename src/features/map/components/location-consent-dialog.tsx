@@ -16,10 +16,7 @@ import { PendingFact } from '@/features/legal/components/pending-fact';
 import { savePendingLocation } from '@/features/map/pending-location';
 import { cn } from '@/lib/utils';
 
-/**
- * 현재 위치를 처음 쓸 때 받는 위치정보 이용 동의. 법이 정한 고지(목적·항목·보유 기간·거부할 권리)와 약관 링크를 보이고,
- * 체크해야 동의 버튼이 켜진다. 약관은 같은 탭으로 열고, 돌아오면 지도가 이 창을 다시 연다(로그인 뒤 이어 하기와 같은 방식).
- */
+/** 현재 위치를 처음 쓸 때 받는 위치정보 이용 동의. 고지(목적·항목·기간·거부 권리)를 읽고 체크해야 동의 버튼이 켜지며, 같은 탭에서 연 약관에서 돌아오면 지도가 이 창을 다시 연다. */
 export function LocationConsentDialog({
   open,
   onOpenChange,
@@ -156,7 +153,7 @@ export function LocationConsentDialog({
               strokeWidth={1.75}
             />
           </Link>
-          <div className="rounded-xl bg-primary-tint p-4 max-[22rem]:p-3">
+          <div className="rounded-xl border border-border p-4 max-[22rem]:p-3">
             <ConsentCheck
               id={`${id}-agree`}
               label={t('agree')}

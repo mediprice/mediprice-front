@@ -119,7 +119,7 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
           item={item}
           region={initialParams.region}
           back={initialParams.back ?? null}
-          isRetrying={state.isLocating}
+          isRetrying={state.isLocating || state.isCheckingAccess}
           onRetry={state.requestLocation}
           onDismiss={state.dismissNotice}
         />
@@ -148,7 +148,7 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
                       ? t('actions.locating')
                       : t('actions.myLocation')
                   }
-                  isLoading={state.isLocating}
+                  isLoading={state.isLocating || state.isCheckingAccess}
                   onClick={state.requestLocation}
                   className="rounded-full shadow-card"
                 >

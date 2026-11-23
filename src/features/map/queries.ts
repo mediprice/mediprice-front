@@ -1,7 +1,13 @@
-import { infiniteQueryOptions, mutationOptions } from '@tanstack/react-query';
+import {
+  infiniteQueryOptions,
+  mutationOptions,
+  type QueryClient,
+} from '@tanstack/react-query';
 
+import { consentKeys } from '@/features/auth/queries';
 import type { PriceBand } from '@/features/npay/average-verdict';
 import { apiClient } from '@/lib/api/client';
+import { ApiError } from '@/lib/api/errors';
 import { ANONYMOUS_REQUEST_HEADER } from '@/lib/api/paths';
 import type { components } from '@/lib/api/schema';
 import { unwrap } from '@/lib/api/unwrap';
@@ -70,7 +76,19 @@ export const mapQueries = {
 };
 
 export const locationUsageMutations = {
-  /** 현재 위치로 주변 병원을 찾았다는 사실을 기록한다. */
-  record: () =>
-    mutationOptions({ mutationFn: () => locationUsageApi.record() }),
+  /** 현재 위치로 주변 병원을 찾았다는 사실을 기록한다. 다른 탭·기기에서 철회해 동의가 없다고 하면(403) 동의 현황을 다시 받는다. */
+  record: (queryClient: QueryClient) =>
+    mutationOptions({
+      mutationFn: () => locationUsageApi.record(),
+      onError: (error) => {
+        if (
+          error instanceof ApiError &&
+          error.code === 'LOCATION_CONSENT_REQUIRED'
+        ) {
+          void queryClient.invalidateQueries({
+            queryKey: consentKeys.status(),
+          });
+        }
+      },
+    }),
 };

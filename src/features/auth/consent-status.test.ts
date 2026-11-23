@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import type { ConsentStatus } from './consent-api';
-import { isLocationConsentActive } from './consent-status';
+import {
+  isLocationConsentActive,
+  withLocationWithdrawn,
+} from './consent-status';
 
 function statusWith(
   location?: Partial<ConsentStatus['consents'][number]>,
@@ -43,5 +46,22 @@ describe('isLocationConsentActive', () => {
     ],
   ])('%s %s', (_name, status, expected) => {
     expect(isLocationConsentActive(status)).toBe(expected);
+  });
+});
+
+describe('withLocationWithdrawn', () => {
+  it('위치 동의만 끄고 다른 항목은 그대로 둔다', () => {
+    const status = statusWith({ agreed: true, agreedVersion: '2026-11-23' });
+    const privacy = { ...status.consents[0]!, type: 'PRIVACY', required: true };
+    const withdrawn = withLocationWithdrawn({
+      ...status,
+      consents: [privacy, ...status.consents],
+    });
+
+    expect(withdrawn.consents).toEqual([
+      privacy,
+      { ...status.consents[0], agreed: false },
+    ]);
+    expect(isLocationConsentActive(withdrawn)).toBe(false);
   });
 });

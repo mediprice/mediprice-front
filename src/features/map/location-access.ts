@@ -1,14 +1,28 @@
+import type { SessionStatus } from '@/features/auth/use-session';
 import type { LocationPermission } from '@/features/map/geolocation';
 
 export type LocationAccess = 'signedOut' | 'needsConsent' | 'ready';
 
-/** 로그인 여부와 현재 위치 사용 동의 상태로 위치 기능을 쓸 수 있는지 가른다. */
-export function locationAccess(input: {
-  isSignedIn: boolean;
+/** 동의 현황 쿼리의 상태와, 받은 값에서 위치 동의가 유효한지. */
+export type ConsentQueryState = {
+  isPending: boolean;
+  isFetching: boolean;
+  isStale: boolean;
+  isError: boolean;
   isConsentActive: boolean;
-}): LocationAccess {
-  if (!input.isSignedIn) return 'signedOut';
-  return input.isConsentActive ? 'ready' : 'needsConsent';
+};
+
+/** 세션·동의 현황으로 위치 기능을 쓸 수 있는지. 모르거나 오래된 값을 다시 받는 중이면 null, 받기에 실패했으면 동의 없음으로 닫는다. */
+export function resolveLocationAccess(input: {
+  session: SessionStatus;
+  consent: ConsentQueryState;
+}): LocationAccess | null {
+  const { session, consent } = input;
+  if (session === 'pending') return null;
+  if (session !== 'authenticated') return 'signedOut';
+  if (consent.isPending || (consent.isFetching && consent.isStale)) return null;
+  if (consent.isError) return 'needsConsent';
+  return consent.isConsentActive ? 'ready' : 'needsConsent';
 }
 
 /** 화면에 들어왔을 때 사용자 조작 없이 위치를 읽어도 되는지. 준비됐고 권한이 이미 허용됐을 때만 true. */

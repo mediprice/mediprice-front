@@ -1,6 +1,6 @@
 'use client';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
 import { openLoginDialog } from '@/features/auth/login-dialog-store';
@@ -49,7 +49,10 @@ export function useMapSearch(initial: MapParams) {
   );
   const [mapCenter, setMapCenter] = useState<LatLng | null>(null);
   const [notice, setNotice] = useState<LocationNotice | null>(null);
-  const { mutate: recordUsage } = useMutation(locationUsageMutations.record());
+  const queryClient = useQueryClient();
+  const { mutate: recordUsage } = useMutation(
+    locationUsageMutations.record(queryClient),
+  );
   const access = useLocationAccess();
   const geo = useGeolocation();
   const consent = useLocationConsent({
@@ -153,6 +156,8 @@ export function useMapSearch(initial: MapParams) {
     userPosition:
       geo.location.status === 'located' ? geo.location.position : null,
     isLocating: geo.location.status === 'locating',
+    /** 로그인·동의 상태를 확인하는 동안은 "내 위치 사용"을 눌러도 할 일을 정할 수 없어 불러오는 중으로 보인다. */
+    isCheckingAccess: access === null,
     requestLocation,
     consent,
     setMapCenter,

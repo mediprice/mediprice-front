@@ -1,31 +1,87 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  locationAccess,
   locationEntryStep,
+  resolveLocationAccess,
   shouldLocateOnEntry,
 } from './location-access';
 
-describe('locationAccess', () => {
-  it('비로그인이면 동의 값과 무관하게 signedOut', () => {
-    expect(locationAccess({ isSignedIn: false, isConsentActive: true })).toBe(
-      'signedOut',
-    );
-    expect(locationAccess({ isSignedIn: false, isConsentActive: false })).toBe(
-      'signedOut',
-    );
+const settled = {
+  isPending: false,
+  isFetching: false,
+  isStale: false,
+  isError: false,
+  isConsentActive: true,
+};
+
+describe('resolveLocationAccess', () => {
+  it('세션을 확인하는 중이면 null', () => {
+    expect(
+      resolveLocationAccess({ session: 'pending', consent: settled }),
+    ).toBeNull();
   });
 
-  it('로그인했지만 동의가 없으면 needsConsent', () => {
-    expect(locationAccess({ isSignedIn: true, isConsentActive: false })).toBe(
-      'needsConsent',
-    );
+  it.each(['anonymous', 'error'] as const)(
+    '세션이 %s면 동의 값과 무관하게 signedOut',
+    (session) => {
+      expect(resolveLocationAccess({ session, consent: settled })).toBe(
+        'signedOut',
+      );
+    },
+  );
+
+  it('로그인했고 동의가 유효하면 ready, 아니면 needsConsent', () => {
+    expect(
+      resolveLocationAccess({ session: 'authenticated', consent: settled }),
+    ).toBe('ready');
+    expect(
+      resolveLocationAccess({
+        session: 'authenticated',
+        consent: { ...settled, isConsentActive: false },
+      }),
+    ).toBe('needsConsent');
   });
 
-  it('로그인하고 동의도 있으면 ready', () => {
-    expect(locationAccess({ isSignedIn: true, isConsentActive: true })).toBe(
-      'ready',
-    );
+  it('동의 현황을 처음 받는 중이면 null', () => {
+    expect(
+      resolveLocationAccess({
+        session: 'authenticated',
+        consent: { ...settled, isPending: true, isFetching: true },
+      }),
+    ).toBeNull();
+  });
+
+  it('무효화된(오래된) 동의 현황을 다시 받는 중이면 옛 값을 믿지 않고 null', () => {
+    expect(
+      resolveLocationAccess({
+        session: 'authenticated',
+        consent: { ...settled, isFetching: true, isStale: true },
+      }),
+    ).toBeNull();
+  });
+
+  it('신선한 값을 뒤에서 다시 받는 중이면 그 값을 쓴다', () => {
+    expect(
+      resolveLocationAccess({
+        session: 'authenticated',
+        consent: { ...settled, isFetching: true },
+      }),
+    ).toBe('ready');
+  });
+
+  it('동의 현황 받기에 실패하면 옛 동의가 남아 있어도 needsConsent로 닫는다', () => {
+    expect(
+      resolveLocationAccess({
+        session: 'authenticated',
+        consent: { ...settled, isError: true, isStale: true },
+      }),
+    ).toBe('needsConsent');
+    expect(
+      resolveLocationAccess({
+        session: 'authenticated',
+        consent: { ...settled, isError: true, isConsentActive: false },
+      }),
+    ).toBe('needsConsent');
   });
 });
 

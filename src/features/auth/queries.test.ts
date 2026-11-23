@@ -154,12 +154,25 @@ describe('markSignedOut', () => {
 });
 
 describe('consentMutations', () => {
-  it('withdrawLocation 성공 시 동의 현황을 무효화한다', async () => {
+  it('withdrawLocation 성공 시 캐시의 위치 동의를 끄고 동의 현황을 무효화한다', async () => {
     const withdraw = vi
       .spyOn(consentApi, 'withdraw')
       .mockResolvedValue(undefined);
     const queryClient = new QueryClient();
-    queryClient.setQueryData(consentKeys.status(), { consents: [] });
+    const consent = (type: string) => ({
+      type,
+      required: type !== 'LOCATION',
+      currentVersion: '2026-11-23',
+      agreed: true,
+      agreedVersion: '2026-11-23',
+      agreedAt: '2026-11-23T00:00:00Z',
+      withdrawnAt: null,
+      reconsentRequired: false,
+    });
+    queryClient.setQueryData(consentKeys.status(), {
+      requiredConsentsMissing: false,
+      consents: [consent('PRIVACY'), consent('LOCATION')],
+    });
 
     await queryClient
       .getMutationCache()
@@ -170,5 +183,9 @@ describe('consentMutations', () => {
     expect(queryClient.getQueryState(consentKeys.status())?.isInvalidated).toBe(
       true,
     );
+    expect(queryClient.getQueryData(consentKeys.status())).toEqual({
+      requiredConsentsMissing: false,
+      consents: [consent('PRIVACY'), { ...consent('LOCATION'), agreed: false }],
+    });
   });
 });
