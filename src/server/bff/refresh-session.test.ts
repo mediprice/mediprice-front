@@ -54,6 +54,29 @@ describe('refreshSession', () => {
     expect(headers?.get('cookie')).toBeNull();
   });
 
+  it('리다이렉트를 따라가 Refresh를 다른 주소로 다시 보내지 않는다', async () => {
+    let redirected = false;
+    server.use(
+      http.post(
+        `${API}/api/auth/refresh`,
+        () =>
+          new HttpResponse(null, {
+            status: 307,
+            headers: { location: `${API}/elsewhere` },
+          }),
+      ),
+      http.post(`${API}/elsewhere`, () => {
+        redirected = true;
+        return HttpResponse.json(newTokens);
+      }),
+    );
+
+    expect(await refreshSession('r', new Headers())).toEqual({
+      status: 'unavailable',
+    });
+    expect(redirected).toBe(false);
+  });
+
   it('Refresh 쿠키가 없으면 백엔드를 부르지 않고 unauthenticated다', async () => {
     expect(await refreshSession(undefined, new Headers())).toEqual({
       status: 'unauthenticated',

@@ -24,7 +24,7 @@ export function SubTopBar<T extends string>({
   const tNav = useTranslations('nav');
   return (
     <header className="sticky top-0 z-(--z-header) border-b border-hairline bg-bg pt-safe lg:hidden">
-      <div className="flex h-top-bar items-center gap-1 px-safe pr-2 pl-1">
+      <div className="flex h-top-bar items-center gap-1 pr-safe-2 pl-safe-1">
         <BackLink
           fallbackHref={backHref}
           aria-label={t('back')}

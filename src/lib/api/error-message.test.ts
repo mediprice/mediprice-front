@@ -13,6 +13,8 @@ describe('errorMessageKey', () => {
     ['HOSPITAL_NOT_FOUND', 404, 'hospitalNotFound'],
     ['REVIEW_ALREADY_REPORTED', 409, 'reviewAlreadyReported'],
     ['UPSTREAM_UNAVAILABLE', 502, 'serverUnavailable'],
+    ['UPSTREAM_TIMEOUT', 504, 'serverUnavailable'],
+    ['INVALID_RESPONSE', 200, 'server'],
     ['AI_QUOTA_EXCEEDED', 429, 'aiQuotaExceeded'],
     ['AI_UNAVAILABLE', 503, 'aiUnavailable'],
     ['RATE_LIMITED', 429, 'tooManyRequests'],

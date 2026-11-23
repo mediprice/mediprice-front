@@ -13,15 +13,13 @@ import {
 } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
-import { errorMessageKey } from '@/lib/api/error-message';
-
-import { type Review, reviewMutations } from '../queries';
+import { type Review, reviewMutations } from '@/features/reviews/queries';
 import {
   clearReviewDraft,
   readReviewDraft,
   reviewDraftKey,
   writeReviewDraft,
-} from '../review-draft';
+} from '@/features/reviews/review-draft';
 import {
   buildReviewFormSchema,
   invalidFields,
@@ -30,7 +28,9 @@ import {
   type ReviewForm as ReviewFormValues,
   type ReviewFormInput,
   todayInSeoul,
-} from '../schemas';
+} from '@/features/reviews/schemas';
+import { errorMessageKey } from '@/lib/api/error-message';
+
 import { FieldError } from './field-error';
 import { StarRatingInput } from './star-rating-input';
 import { VisitFields } from './visit-fields';
@@ -108,16 +108,12 @@ export function ReviewForm({
     setRestoredDraft(null);
   }
   const content = useWatch({ control, name: 'content' });
-  const save = useMutation({
-    ...(review
+  /** 옵션의 onError(낡은 목록 다시 받기)를 덮지 않도록 화면 처리는 mutate에 넘긴다. */
+  const save = useMutation(
+    review
       ? reviewMutations.update(queryClient, review.id)
-      : reviewMutations.create(queryClient, ykiho)),
-    onError: (error) => {
-      const fields = invalidFields(error, REVIEW_FORM_FIELDS);
-      fields.forEach((field) => setError(field, { message: 'invalid' }));
-      if (fields[0]) setFocus(fields[0]);
-    },
-  });
+      : reviewMutations.create(queryClient, ykiho),
+  );
   const hasFieldErrors =
     save.isError && invalidFields(save.error, REVIEW_FORM_FIELDS).length > 0;
 
@@ -137,6 +133,13 @@ export function ReviewForm({
             onSuccess: (saved) => {
               clearReviewDraft(draftKey);
               onSuccess(saved);
+            },
+            onError: (error) => {
+              const fields = invalidFields(error, REVIEW_FORM_FIELDS);
+              fields.forEach((field) =>
+                setError(field, { message: 'invalid' }),
+              );
+              if (fields[0]) setFocus(fields[0]);
             },
           }),
         (invalid) => {

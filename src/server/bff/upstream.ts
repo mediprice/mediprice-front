@@ -94,12 +94,17 @@ function isTimeout(error: unknown) {
   return error instanceof Error && error.name === 'TimeoutError';
 }
 
-/** 연결 실패는 502, 제한 시간 초과는 504 응답으로 바꾼다. */
-export async function callBackend(url: URL, init: RequestInit) {
+/** 연결 실패는 502, 제한 시간 초과는 504 응답으로 바꾼다. 리다이렉트는 따라가지 않아 Refresh 본문·비밀 헤더가 다른 주소로 다시 가지 않는다. */
+export async function callBackend(
+  url: URL,
+  init: Omit<RequestInit, 'redirect'>,
+) {
+  const timeout = AbortSignal.timeout(UPSTREAM_TIMEOUT_MS);
   try {
     return await fetch(url, {
       ...init,
-      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+      redirect: 'manual',
+      signal: init.signal ? AbortSignal.any([init.signal, timeout]) : timeout,
     });
   } catch (error) {
     return isTimeout(error) ? gatewayTimeout() : unavailable();

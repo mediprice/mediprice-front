@@ -34,4 +34,12 @@ describe('cn', () => {
   it('움직임 곡선 토큰은 뒤의 것만 남긴다', () => {
     expect(cn('ease-standard', 'ease-enter')).toBe('ease-enter');
   });
+
+  it('safe-area 여백 유틸을 같은 축의 padding으로 인식한다', () => {
+    expect(cn('pb-safe', 'pb-4')).toBe('pb-4');
+    expect(cn('pt-4', 'pt-safe')).toBe('pt-safe');
+    expect(cn('pr-2 pl-2', 'px-safe')).toBe('px-safe');
+    expect(cn('pl-1', 'pl-safe-1')).toBe('pl-safe-1');
+    expect(cn('pr-safe-2', 'pr-4')).toBe('pr-4');
+  });
 });

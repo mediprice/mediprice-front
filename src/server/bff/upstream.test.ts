@@ -206,6 +206,33 @@ describe('callBackend', () => {
     expect(fetchMock.mock.calls[0]?.[1]?.signal).toBeInstanceOf(AbortSignal);
   });
 
+  it('호출하는 쪽이 정해도 리다이렉트를 따라가지 않는다', async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 204 }));
+    const init: RequestInit = { method: 'POST', redirect: 'follow' };
+
+    await callBackend(new URL('http://api.test/api/x'), init);
+
+    expect(fetchMock.mock.calls[0]?.[1]?.redirect).toBe('manual');
+  });
+
+  it('호출하는 쪽의 취소 신호를 함께 전달한다', async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 204 }));
+    const controller = new AbortController();
+
+    await callBackend(new URL('http://api.test/api/x'), {
+      signal: controller.signal,
+    });
+    const signal = fetchMock.mock.calls[0]?.[1]?.signal;
+    controller.abort();
+
+    expect(signal).not.toBe(controller.signal);
+    expect(signal?.aborted).toBe(true);
+  });
+
   it('제한 시간을 넘기면 504 UPSTREAM_TIMEOUT을 돌려준다', async () => {
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(
       new DOMException(

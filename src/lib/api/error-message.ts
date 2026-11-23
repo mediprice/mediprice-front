@@ -56,6 +56,8 @@ const MESSAGE_KEY_BY_CODE = {
   UNSUPPORTED_MEDIA_TYPE: 'unsupportedMedia',
   INTERNAL_ERROR: 'server',
   UPSTREAM_UNAVAILABLE: 'serverUnavailable',
+  UPSTREAM_TIMEOUT: 'serverUnavailable',
+  INVALID_RESPONSE: 'server',
 } as const satisfies Record<string, ErrorMessageKey>;
 
 type KnownErrorCode = keyof typeof MESSAGE_KEY_BY_CODE;
