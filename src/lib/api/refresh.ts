@@ -11,17 +11,22 @@ export function createRefresher(
   let inFlight: Promise<RefreshOutcome> | null = null;
   let pauses = 0;
 
+  /** AbortSignal.timeout은 Safari 15 이하에 없어 AbortController와 타이머로 끊는다. */
   async function request(): Promise<RefreshOutcome> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
       const response = await fetch(`${baseUrl}/session/refresh`, {
         method: 'POST',
         credentials: 'same-origin',
-        signal: AbortSignal.timeout(timeoutMs),
+        signal: controller.signal,
       });
       if (response.ok) return 'ok';
       return response.status === 401 ? 'unauthenticated' : 'unavailable';
     } catch {
       return 'unavailable';
+    } finally {
+      clearTimeout(timer);
     }
   }
 

@@ -103,4 +103,24 @@ describe('createRefresher', () => {
     expect(await refresh()).toBe('ok');
     expect(calls).toBe(1);
   });
+
+  it('AbortSignal.timeout이 없는 브라우저(Safari 15 이하)에서도 재발급한다', async () => {
+    server.use(
+      http.post(URL_, () => HttpResponse.json({ authenticated: true })),
+    );
+    const original = AbortSignal.timeout;
+    Object.defineProperty(AbortSignal, 'timeout', {
+      value: undefined,
+      configurable: true,
+    });
+
+    try {
+      expect(await createRefresher(BASE)()).toBe('ok');
+    } finally {
+      Object.defineProperty(AbortSignal, 'timeout', {
+        value: original,
+        configurable: true,
+      });
+    }
+  });
 });
