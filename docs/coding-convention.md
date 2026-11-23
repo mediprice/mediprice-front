@@ -399,7 +399,7 @@ export const hospitalQueries = {
 
 ### 7.2.1 생성 타입에 아직 없는 엔드포인트
 
-백엔드 브랜치에만 있고 배포·`pnpm api:generate`가 되지 않은 엔드포인트는 `features/<도메인>/api.ts`에서 `createApiFetch`로 `/bff/api/...`를 부르고, 응답을 zod로 검증한다(예: `features/ai/api.ts`, `features/live-fee/api.ts`). JSON을 주고받는 단순한 호출은 `createUntypedRequest`(`lib/api/untyped-request.ts`)를 쓴다(예: `features/auth/consent-api.ts`, `features/medical-profile/api.ts`). 배포된 백엔드에 아직 없는 경로는 404 `RESOURCE_NOT_FOUND`로 오므로, 화면은 이를 "아직 지원하지 않음"으로 다루고 막지 않는다(예: `/users/me`의 `requiredConsentsMissing`이 없으면 동의 화면을 띄우지 않는다). 실패는 같은 `ApiError`/`NetworkError`로 던져 `errorMessageKey`가 그대로 동작하게 한다. 파일에 "배포 후 생성 클라이언트로 바꾼다"는 한 줄 TSDoc을 남기고, 배포되면 `apiClient` + `unwrap`으로 옮긴다.
+백엔드 브랜치에만 있고 배포·`pnpm api:generate`가 되지 않은 엔드포인트는 `features/<도메인>/api.ts`에서 `createUntypedRequest`(`lib/api/untyped-request.ts`)로 `/bff/api/...`를 부르고, 응답을 zod로 검증한다(예: `features/ai/api.ts`, `features/live-fee/api.ts`, `features/auth/consent-api.ts`, `features/medical-profile/api.ts`). 재발급은 `apiClient`와 같은 공유 refresher를 쓴다. 배포된 백엔드에 아직 없는 경로는 404 `RESOURCE_NOT_FOUND`로 오므로, 화면은 이를 "아직 지원하지 않음"으로 다루고 막지 않는다(예: `/users/me`의 `requiredConsentsMissing`이 없으면 동의 화면을 띄우지 않는다). 실패는 같은 `ApiError`/`NetworkError`로 던져 `errorMessageKey`가 그대로 동작하게 한다. 파일에 "배포 후 생성 클라이언트로 바꾼다"는 한 줄 TSDoc을 남기고, 배포되면 `apiClient` + `unwrap`으로 옮긴다.
 
 ### 7.3 변경과 캐시
 

@@ -1,7 +1,6 @@
-import { createApiFetch } from '@/lib/api/client';
-import { ApiError, NetworkError, toApiError } from '@/lib/api/errors';
 import { BFF_BASE } from '@/lib/api/paths';
 import { emitSessionExpired } from '@/lib/api/session-events';
+import { createUntypedRequest } from '@/lib/api/untyped-request';
 
 import { type LiveFeeResponse, liveFeeResponseSchema } from './schemas';
 
@@ -11,43 +10,21 @@ type LiveFeeApiOptions = {
 };
 
 /** live-fee 경로가 아직 schema.d.ts에 없어 zod로 검증한다. 백엔드 배포 후 `pnpm api:generate`를 돌리면 apiClient + unwrap으로 바꾼다. */
-export function createLiveFeeApi({
-  baseUrl,
-  onSessionExpired,
-}: LiveFeeApiOptions) {
-  const apiFetch = createApiFetch({ baseUrl, onSessionExpired });
+export function createLiveFeeApi(options: LiveFeeApiOptions) {
+  const request = createUntypedRequest(options);
 
   return {
-    fetchLiveFee: async (
+    fetchLiveFee: (
       ykiho: string,
       npayCode: string,
       { signal }: { signal?: AbortSignal } = {},
     ): Promise<LiveFeeResponse> => {
       const query = new URLSearchParams({ ykiho, npayCode });
-      let response: Response;
-      try {
-        response = await apiFetch(
-          new Request(`${baseUrl}/api/ai/live-fee?${query.toString()}`, {
-            credentials: 'same-origin',
-            signal,
-          }),
-        );
-      } catch (cause) {
-        if (signal?.aborted) throw cause;
-        throw new NetworkError(cause);
-      }
-      if (!response.ok) throw await toApiError(response);
-      const parsed = liveFeeResponseSchema.safeParse(
-        await response.json().catch(() => null),
+      return request.json(
+        `/api/ai/live-fee?${query.toString()}`,
+        liveFeeResponseSchema,
+        { signal },
       );
-      if (!parsed.success) {
-        throw new ApiError(
-          response.status,
-          'INVALID_RESPONSE',
-          'Unexpected live fee response',
-        );
-      }
-      return parsed.data;
     },
   };
 }
