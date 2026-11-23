@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   findLowest,
-  formatComparisonItemName,
   groupComparisonItems,
   latestDate,
   orderHospitals,
@@ -44,29 +43,6 @@ describe('findLowest', () => {
     expect(findLowest([cell('A', 1000), cell('B', 1000)]).size).toBe(0);
     expect(findLowest([cell('A', 1000), cell('B', null)]).size).toBe(0);
     expect(findLowest([]).size).toBe(0);
-  });
-});
-
-describe('formatComparisonItemName', () => {
-  it('분류 경로를 떼고 나머지를 가운뎃점으로 잇는다', () => {
-    expect(
-      formatComparisonItemName({
-        itemName: '제증명수수료/상해진단서/3주 미만',
-        categoryName: '제증명수수료',
-      }),
-    ).toBe('상해진단서 · 3주 미만');
-    expect(
-      formatComparisonItemName({
-        itemName: '이학요법료/도수치료',
-        categoryName: '이학요법료',
-      }),
-    ).toBe('도수치료');
-  });
-
-  it('분류가 앞에 없으면 이름 전체를 쓴다', () => {
-    expect(
-      formatComparisonItemName({ itemName: '도수치료', categoryName: null }),
-    ).toBe('도수치료');
   });
 });
 

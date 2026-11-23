@@ -4,13 +4,13 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { PriceOverview } from '@/features/npay/components/price-overview';
+import { formatItemPath } from '@/features/npay/item-name';
 import { npayQueries } from '@/features/npay/queries';
 import {
   regionQuery,
   type ServiceRegion,
   sidoCodesOf,
 } from '@/features/regions/service-region';
-import { formatItemName } from '@/features/search/item-groups';
 import type { ItemResult } from '@/features/search/queries';
 import { cn } from '@/lib/utils';
 
@@ -35,7 +35,9 @@ export function ItemRow({
       className="group -mx-4 flex items-center gap-3 py-4 pr-2 pl-4 transition-colors hover:bg-surface active:bg-surface lg:-mx-6 lg:gap-6 lg:px-6 lg:py-5"
     >
       <div className="min-w-0 flex-1 space-y-1">
-        <p className="text-subheading">{formatItemName(item)}</p>
+        <p className="text-subheading">
+          {formatItemPath(item.name, item.mdivName)}
+        </p>
         {summary.data ? (
           <PriceOverview summary={summary.data} className={PRICE_SLOT} />
         ) : summary.isError ? (

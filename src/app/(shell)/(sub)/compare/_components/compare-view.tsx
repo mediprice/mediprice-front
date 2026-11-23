@@ -20,16 +20,13 @@ import {
   buildCompareHref,
   MAX_COMPARE,
 } from '@/features/comparison/compare-params';
-import {
-  formatComparisonItemName,
-  latestDate,
-  orderHospitals,
-} from '@/features/comparison/compare-rows';
+import { latestDate, orderHospitals } from '@/features/comparison/compare-rows';
 import { useCompareStore } from '@/features/comparison/compare-store';
 import { comparisonQueries } from '@/features/comparison/queries';
 import { priceRowName } from '@/features/hospitals/price-groups';
 import { hospitalQueries } from '@/features/hospitals/queries';
 import { comparableBand } from '@/features/npay/average-verdict';
+import { formatItemPath } from '@/features/npay/item-name';
 import { npayQueries } from '@/features/npay/queries';
 import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
 import { errorMessageKey } from '@/lib/api/error-message';
@@ -150,7 +147,9 @@ export function CompareView({
     ((activeItem &&
       selected.data?.items.find((row) => row.npayCode === activeItem)) ||
       null);
-  const itemName = itemRow ? formatComparisonItemName(itemRow) : null;
+  const itemName = itemRow
+    ? formatItemPath(itemRow.itemName, itemRow.categoryName)
+    : null;
 
   /** 병원별 세부 항목. 적용일과, 같은 세부 항목끼리 견줄 수 있는지 보는 데 쓴다. */
   const variantQueries = useQueries({

@@ -12,12 +12,8 @@ import {
   parsePublishedMonth,
   summarizeVerdict,
 } from '@/features/live-fee/verdict';
+import { lastSegment } from '@/features/npay/item-name';
 import { cn } from '@/lib/utils';
-
-/** 항목 이름의 "대분류/" 앞부분은 떼고 보여 준다. */
-function shortName(name: string) {
-  return name.split('/').at(-1)?.trim() || name;
-}
 
 /** 누리집 가격은 참고용이라 단정하지 않고, 앱 가격과 나란히 두고 출처와 확인 시각을 함께 보여 준다. */
 export function LiveFeeResult({
@@ -61,7 +57,7 @@ export function LiveFeeResult({
             >
               {showNames && (
                 <p className="text-label-bold text-text-primary">
-                  {shortName(item.name)}
+                  {lastSegment(item.name)}
                 </p>
               )}
               <PriceRow label={t('ourPrice')}>

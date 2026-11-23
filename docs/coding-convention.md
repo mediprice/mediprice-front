@@ -150,7 +150,7 @@ app ──▶ features ──▶ components, lib
   - `auth`: `use-session.ts`(`useSession`, `useLoginGuard`), `login-dialog-store.ts`(`openLoginDialog`)
   - `feedback`: `toast-store.ts`
   - `regions`: `service-region.ts`, `format-location.ts`
-  - `npay`: `average-verdict.ts`, `price-filters.ts`, `price-summary.ts`, `catalog.ts`, `use-category-label.ts`
+  - `npay`: `average-verdict.ts`, `price-filters.ts`, `price-summary.ts`, `catalog.ts`, `use-category-label.ts`, `item-name.ts`
   - `map`: `map-geo.ts`, `map-params.ts`, `exact-distance.ts`, `use-distance-label.ts`
   - `hospitals`: `detail-links.ts`
 - 새 파일을 다른 feature가 쓰게 되면 이 목록에 더한다. `app`은 조립하는 쪽이라 features의 어느 파일이든 import할 수 있다.
@@ -633,6 +633,6 @@ const t = await getTranslations('metadata');
   - 병원 비교(`features/comparison/compare-basis.ts`)는 모든 병원이 같은 이름으로 공개한 세부 항목이 있으면 그것끼리 견줘 "가장 저렴해요"라고 쓴다. 없으면 병원별 가장 낮은 공개 가격끼리 견주되 "가장 낮은 공개 가격은 OO병원이에요"라고 쓰고, 어느 세부 항목의 값인지 밝히고 금액 차이를 쓰지 않는다.
 - **"최저" 낱말**: 범위의 끝은 "최저 N원 / 최고 N원", 한 병원의 세부 항목 중 가장 낮은 값은 "가장 낮은 가격", 비교한 병원 중 가장 낮은 곳의 꼬리표는 "최저"로 쓴다. "최저가"는 뜻이 섞여 쓰지 않는다.
 - **병원 단위 (MUST)**: 가격 API는 병원의 세부 항목마다 한 줄을 준다. 병원을 비교하는 목록은 병원 하나에 카드 하나로 묶고, 세부 항목은 펼쳐서 보여 준다. 개수는 "병원 N곳"으로 쓴다.
-- **분류 이름**: 홈 분류(`features/npay/catalog.ts`)에 속하는 코드는 쉬운 이름("물리치료·재활")을 먼저, 공식 이름("이학요법료")은 보조로 쓴다. 항목 이름의 "대분류/" 앞부분은 떼고 보여 준다.
+- **분류 이름**: 홈 분류(`features/npay/catalog.ts`)에 속하는 코드는 쉬운 이름("물리치료·재활")을 먼저, 공식 이름("이학요법료")은 보조로 쓴다. 항목 이름의 "대분류/" 앞부분은 떼고 보여 준다(`formatItemPath`, 마지막 조각만 쓸 때는 `lastSegment`, `features/npay/item-name.ts`).
 - **지역 이름**: 시도·시군구는 `formatLocation`으로 정리한다("부산 부산남구" → "부산 남구", "경기 부천원미구" → "경기 부천시 원미구").
 - **없는 데이터**: 통계·업데이트 날짜·가격 범위 필터처럼 API가 없는 것은 그럴듯한 값으로 채우지 않고 뺀다. 빠진 것은 PR 설명에 적는다.

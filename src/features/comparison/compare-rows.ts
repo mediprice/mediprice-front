@@ -16,23 +16,6 @@ export function findLowest(cells: readonly PriceCell[]) {
   );
 }
 
-/** "제증명수수료/상해진단서/3주 미만"에서 분류 경로를 떼고 "상해진단서 · 3주 미만"으로 읽기 좋게 바꾼다. */
-export function formatComparisonItemName({
-  itemName,
-  categoryName,
-}: Pick<ComparisonItem, 'itemName' | 'categoryName'>) {
-  const prefix = categoryName ? `${categoryName}/` : '';
-  const name =
-    prefix && itemName.startsWith(prefix)
-      ? itemName.slice(prefix.length)
-      : itemName;
-  return name
-    .split('/')
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .join(' · ');
-}
-
 export type ItemGroup = { category: string | null; items: ComparisonItem[] };
 
 /** 분류별로 묶되 API 순서를 지키고, 앞에서부터 limit개 항목만 남긴다. */

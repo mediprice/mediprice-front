@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tag } from '@/components/ui/tag';
+import { formatItemPath } from '@/features/npay/item-name';
 import { npayQueries } from '@/features/npay/queries';
 import { useCategoryLabel } from '@/features/npay/use-category-label';
 import {
@@ -19,8 +20,6 @@ import {
   type ServiceRegion,
 } from '@/features/regions/service-region';
 import { errorMessageKey } from '@/lib/api/error-message';
-
-import { formatItemTitle } from './item-title';
 
 /** 데스크톱은 홈 › 대분류(검색 분류 화면) › 항목 경로를, 모바일은 대분류 꼬리표를 보여 준다. */
 export function ItemHeader({
@@ -71,7 +70,7 @@ export function ItemHeader({
     );
   }
 
-  const title = formatItemTitle(data);
+  const title = formatItemPath(data.name, data.mdivName);
   const categoryQuery = new URLSearchParams({
     ...(data.mdivCode && { code: data.mdivCode }),
     ...regionQuery(region),

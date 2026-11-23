@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { variantQuery } from '@/features/hospitals/detail-links';
 import { HospitalPriceGroupCard } from '@/features/npay/components/hospital-price-group-card';
 import { groupPricesByHospital } from '@/features/npay/group-prices';
+import { formatItemPath } from '@/features/npay/item-name';
 import {
   buildPriceFiltersQuery,
   type PriceFilters,
@@ -21,7 +22,6 @@ import { errorMessageKey } from '@/lib/api/error-message';
 
 import { ActiveFilterChips } from './active-filter-chips';
 import { FilterSheet } from './filter-sheet';
-import { formatItemTitle } from './item-title';
 import { PriceScopeNotice } from './price-scope-notice';
 import { SortMenu } from './sort-menu';
 import { RESULTS_HEADING_ID } from './use-apply-filters';
@@ -58,7 +58,9 @@ export function PriceResults({
   const item = useQuery(npayQueries.detail(code));
   /** 다시 온 사람을 위해 이 기기에만 최근 본 항목을 남긴다(홈 검색창 아래 칩). */
   useRecordRecentItem(
-    item.data ? { code, name: formatItemTitle(item.data) } : null,
+    item.data
+      ? { code, name: formatItemPath(item.data.name, item.data.mdivName) }
+      : null,
   );
   /** 기본은 평균의 1/3~3배 가격만 받는다. 범위가 평균에서 나오므로 요약을 받은 뒤 목록을 읽고, 요약이 실패하면 범위 없이 읽는다. */
   const { summary, band, conditions, bandSummary } = useComparableSummary(

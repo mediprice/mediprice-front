@@ -8,11 +8,11 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { AreaScope } from '@/features/ai/area-filters';
-import { formatItemName } from '@/features/ai/item-name';
 import { isShownReason } from '@/features/ai/result-text';
 import type { TurnItem } from '@/features/ai/schemas';
 import { comparableBand } from '@/features/npay/average-verdict';
 import { PriceOverview } from '@/features/npay/components/price-overview';
+import { formatItemPath } from '@/features/npay/item-name';
 import {
   buildPriceFiltersQuery,
   toPriceConditions,
@@ -71,7 +71,9 @@ export function ResultItemCard({
           {categoryLabel(detail.mdivCode, detail.mdivName)}
         </p>
       )}
-      <h3 className="text-heading">{formatItemName(detail)}</h3>
+      <h3 className="text-heading">
+        {formatItemPath(detail.name, detail.mdivName)}
+      </h3>
       {isShownReason(item.reason) && (
         <p className="text-body-sm text-text-secondary">{item.reason}</p>
       )}
@@ -109,7 +111,7 @@ export function ResultItemCard({
         {!summary.isPending && (
           <NearbyMapPanel
             code={item.code}
-            itemName={formatItemName(detail)}
+            itemName={formatItemPath(detail.name, detail.mdivName)}
             near={scope.near}
             band={comparableBand(summary.data?.avgPrice)}
           />
