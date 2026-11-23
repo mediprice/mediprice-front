@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 import { CLAIM_PRIVACY_NOTICE_VERSION } from '@/config/legal';
 import { BFF_BASE } from '@/lib/api/paths';
@@ -10,7 +10,7 @@ import type { ClaimForm } from './schemas';
 /** 백엔드 feature/review-claims의 ClaimNoticeResponse·ReviewClaimResponse. 배포 후 `pnpm api:generate`를 돌리면 생성 타입과 apiClient로 바꾼다. */
 const claimNoticeSchema = z.object({
   available: z.boolean(),
-  privacyNoticeVersion: z.string().nullable(),
+  privacyNoticeVersion: z.nullable(z.string()),
 });
 
 const claimReceiptSchema = z.object({

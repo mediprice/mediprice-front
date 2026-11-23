@@ -1,6 +1,6 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
-const npayCodeSchema = z.string().regex(/^[A-Za-z0-9]{1,20}$/);
+const npayCodeSchema = z.string().check(z.regex(/^[A-Za-z0-9]{1,20}$/));
 
 /** URL의 item 파라미터. 배열이거나 형식이 맞지 않으면 선택하지 않은 것으로 본다. */
 export function parseItemParam(value: unknown): string | null {
@@ -82,13 +82,13 @@ export function parseBackParam(value: unknown): string | null {
 export type VariantSelection = { name: string; price: number | null };
 
 const variantSchema = z.object({
-  variant: z.string().trim().min(1).max(120),
-  price: z
-    .string()
-    .regex(/^\d{1,10}$/)
-    .transform(Number)
-    .optional()
-    .catch(undefined),
+  variant: z.string().check(z.trim(), z.minLength(1), z.maxLength(120)),
+  price: z.catch(
+    z.optional(
+      z.pipe(z.string().check(z.regex(/^\d{1,10}$/)), z.transform(Number)),
+    ),
+    undefined,
+  ),
 });
 
 /** 목록 행이 보여 준 세부 항목(이름과 가격). 같은 이름이 여러 가격으로 있을 수 있어 가격을 함께 받는다. */

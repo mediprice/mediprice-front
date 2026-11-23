@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 /** 서비스 지역. 기본은 서울·경기(metro)이고 all은 전국이다. URL의 region 파라미터 값과 같다. */
 export const SERVICE_REGIONS = ['metro', 'seoul', 'gyeonggi', 'all'] as const;
@@ -7,9 +7,9 @@ export const DEFAULT_REGION: ServiceRegion = 'metro';
 
 const SIDO_CODE = { seoul: '110000', gyeonggi: '310000' } as const;
 
-const regionSchema = z.preprocess(
-  (value) => (Array.isArray(value) ? value[0] : value),
-  z.enum(SERVICE_REGIONS).catch(DEFAULT_REGION),
+const regionSchema = z.pipe(
+  z.transform((value: unknown) => (Array.isArray(value) ? value[0] : value)),
+  z.catch(z.enum(SERVICE_REGIONS), DEFAULT_REGION),
 );
 
 export function parseServiceRegion(value: unknown): ServiceRegion {

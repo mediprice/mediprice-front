@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import { z } from 'zod/mini';
 
 import { createApiFetch } from './client';
 import { ApiError, NetworkError, toApiError } from './errors';
@@ -32,11 +32,14 @@ export function createUntypedRequest({ baseUrl, onSessionExpired }: Options) {
   return {
     json: async <T>(
       path: string,
-      schema: z.ZodType<T>,
+      schema: z.core.$ZodType<T>,
       init: RequestInit = {},
     ): Promise<T> => {
       const response = await send(path, init);
-      const parsed = schema.safeParse(await response.json().catch(() => null));
+      const parsed = z.safeParse(
+        schema,
+        await response.json().catch(() => null),
+      );
       if (!parsed.success) {
         throw new ApiError(
           response.status,

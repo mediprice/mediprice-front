@@ -3,7 +3,7 @@ import {
   type QueryClient,
   queryOptions,
 } from '@tanstack/react-query';
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 import { apiClient } from '@/lib/api/client';
 import { ApiError } from '@/lib/api/errors';
@@ -24,11 +24,13 @@ export type CurrentUser = components['schemas']['UserResponse'];
 
 const sessionSchema = z.object({
   authenticated: z.boolean(),
-  refreshable: z.boolean().optional(),
+  refreshable: z.optional(z.boolean()),
   /** BFF가 백엔드 응답을 그대로 담는다. 백엔드 응답은 생성 타입을 믿는다(5.3). */
-  user: z
-    .custom<CurrentUser>((value) => typeof value === 'object' && value !== null)
-    .optional(),
+  user: z.optional(
+    z.custom<CurrentUser>(
+      (value) => typeof value === 'object' && value !== null,
+    ),
+  ),
 });
 
 export type SessionState = 'authenticated' | 'anonymous' | 'unavailable';

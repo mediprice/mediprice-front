@@ -241,6 +241,8 @@ const body = sessionSchema.parse(await response.json());
 
 서버 응답, 쿠키, URL 파라미터, 폼 값처럼 코드 밖에서 들어오는 값은 zod로 검증한 뒤 쓴다. 백엔드 API 응답은 생성된 타입(`schema.d.ts`)을 믿고, 스펙에 없는 에러 본문 같은 것만 zod로 검증한다.
 
+셸·공개 화면(홈·검색·항목·병원·지도·비교·관심·법률 문서 등)의 첫 로드에 들어가는 스키마는 `zod/mini`로 쓴다(`z.string().check(z.regex(...))`, `z.nullable(...)`). classic(`zod`)을 하나라도 import하면 그 화면 첫 번들에 classic 전체(약 12KB gz)가 더 들어간다. 첫 화면에 폼이 있는 라우트(AI, 운영자, 후기 작성, 내 정보 편집 등)의 폼 스키마는 classic을 쓴다. `app/client-zod.test.ts`가 이 경계를 검사한다.
+
 ### 5.4 타입 선언
 
 - 객체 모양은 `type`을 기본으로 쓴다. `interface`는 선언 병합이 필요할 때만 쓴다.

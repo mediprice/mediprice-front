@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 export type ReviewWriteFrom = 'hospital' | 'my';
 
@@ -21,9 +21,7 @@ export function reviewClaimHref(ykiho: string, reviewId: number) {
 
 const reviewIdSchema = z.coerce
   .number()
-  .int()
-  .positive()
-  .max(Number.MAX_SAFE_INTEGER);
+  .check(z.positive(), z.maximum(Number.MAX_SAFE_INTEGER));
 
 /** URL의 후기 번호(edit 파라미터, 신고 화면 경로). 배열이거나 양의 정수가 아니면 null이고, edit이면 새 후기 작성으로 본다. */
 export function parseReviewId(value: unknown): number | null {

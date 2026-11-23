@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 export type RecentItem = { code: string; name: string };
 
@@ -7,8 +7,8 @@ const RECENT_ITEMS_LIMIT = 3;
 
 const recentItemsSchema = z.array(
   z.object({
-    code: z.string().regex(/^[A-Za-z0-9]{1,20}$/),
-    name: z.string().trim().min(1).max(100),
+    code: z.string().check(z.regex(/^[A-Za-z0-9]{1,20}$/)),
+    name: z.string().check(z.trim(), z.minLength(1), z.maxLength(100)),
   }),
 );
 
