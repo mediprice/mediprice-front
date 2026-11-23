@@ -5,6 +5,7 @@ import {
   loadNaverMaps,
   onNaverAuthFailure,
   resetNaverSdkForTest,
+  runCleanup,
 } from './naver-sdk';
 import type { NaverMapsApi } from './naver-types';
 
@@ -101,5 +102,23 @@ describe('onNaverAuthFailure', () => {
     unsubscribe();
     target.window.navermap_authFailure?.();
     expect(early).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('runCleanup', () => {
+  it('정리 중 던져진 오류를 삼킨다', () => {
+    expect(() =>
+      runCleanup(() => {
+        throw new TypeError(
+          "Cannot read properties of null (reading 'isArray')",
+        );
+      }),
+    ).not.toThrow();
+  });
+
+  it('정상이면 정리를 실행한다', () => {
+    const cleanup = vi.fn();
+    runCleanup(cleanup);
+    expect(cleanup).toHaveBeenCalledOnce();
   });
 });

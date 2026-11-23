@@ -35,6 +35,15 @@ export function onNaverAuthFailure(listener: () => void) {
   };
 }
 
+/** 인증에 실패한 SDK는 지도·마커 객체가 불완전해 정리 호출이 던질 수 있다. 정리는 실패해도 화면을 깨지 않게 삼킨다. */
+export function runCleanup(cleanup: () => void) {
+  try {
+    cleanup();
+  } catch {
+    /* 인증 실패로 불완전한 SDK 객체의 정리 오류는 무시한다. */
+  }
+}
+
 /** SDK를 앱에서 한 번만 불러온다. 실패하면 다음 호출에서 다시 시도할 수 있게 비운다. */
 export function loadNaverMaps(
   clientId: string,
