@@ -7,7 +7,11 @@ import { z } from 'zod';
 
 import { apiClient } from '@/lib/api/client';
 import { ApiError } from '@/lib/api/errors';
-import { BFF_BASE } from '@/lib/api/paths';
+import {
+  BFF_BASE,
+  SESSION_PROBE_HEADER,
+  SESSION_PROBE_VERSION,
+} from '@/lib/api/paths';
 import { sharedRefresher } from '@/lib/api/refresh';
 import type { components } from '@/lib/api/schema';
 import { unwrap } from '@/lib/api/unwrap';
@@ -31,6 +35,7 @@ export async function getSession(baseUrl = BFF_BASE): Promise<SessionState> {
   try {
     const response = await fetch(`${baseUrl}/session`, {
       credentials: 'same-origin',
+      headers: { [SESSION_PROBE_HEADER]: SESSION_PROBE_VERSION },
     });
     if (!response.ok) return 'unavailable';
     const parsed = sessionSchema.safeParse(await response.json());

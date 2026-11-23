@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import type * as ClientModule from '@/lib/api/client';
 import { ApiError } from '@/lib/api/errors';
+import { SESSION_PROBE_HEADER, SESSION_PROBE_VERSION } from '@/lib/api/paths';
 import { server } from '@/test/server';
 
 import {
@@ -37,9 +38,12 @@ function sessionIs(authenticated: boolean) {
   );
 }
 
+/** 표시 헤더를 붙인 새 클라이언트에게만 재발급을 맡긴다(없으면 이전 클라이언트로 보고 서버가 재발급). */
 function refreshableSession() {
-  return http.get(`${BASE}/session`, () =>
-    HttpResponse.json({ authenticated: false, refreshable: true }),
+  return http.get(`${BASE}/session`, ({ request }) =>
+    request.headers.get(SESSION_PROBE_HEADER) === SESSION_PROBE_VERSION
+      ? HttpResponse.json({ authenticated: false, refreshable: true })
+      : HttpResponse.json({ authenticated: true }),
   );
 }
 

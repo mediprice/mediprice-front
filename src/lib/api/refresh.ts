@@ -17,15 +17,22 @@ export function createRefresher(baseUrl: string) {
     }
   }
 
-  return function refresh() {
+  function refresh() {
     inFlight ??= request().finally(() => {
       inFlight = null;
     });
     return inFlight;
-  };
+  }
+
+  /** 진행 중인 재발급이 있으면 끝날 때까지 기다린다. 로그아웃이 늦게 도착한 재발급 응답에 덮이지 않게 쓴다. */
+  async function settled() {
+    await inFlight;
+  }
+
+  return Object.assign(refresh, { settled });
 }
 
-const refreshers = new Map<string, () => Promise<RefreshOutcome>>();
+const refreshers = new Map<string, ReturnType<typeof createRefresher>>();
 
 /** 브라우저의 모든 API 클라이언트와 세션 확인이 같은 재발급을 함께 기다리도록 baseUrl마다 하나만 만든다. */
 export function sharedRefresher(baseUrl: string) {

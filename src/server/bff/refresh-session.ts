@@ -21,7 +21,9 @@ export type RefreshResult =
   /** Refresh가 없거나 백엔드가 거부했다. 다시 로그인해야 한다. */
   | { status: 'unauthenticated' }
   /** 백엔드 장애나 연결 실패. 토큰이 유효한지 알 수 없으므로 쿠키를 지우면 안 된다. */
-  | { status: 'unavailable' };
+  | { status: 'unavailable' }
+  /** 같은 Refresh로 방금 다른 요청이 재발급했다. 새 쿠키는 그 응답이 심으므로 쿠키를 건드리지 않는다. */
+  | { status: 'rotated' };
 
 /**
  * 백엔드는 재발급마다 두 토큰을 모두 새로 내리므로 호출하는 쪽이 두 쿠키를 함께 교체해야 한다.
@@ -72,6 +74,7 @@ export function refreshResponse(
     setSessionCookies(response, result.tokens);
     return response;
   }
+  if (result.status === 'rotated') return jsonNoStore({ authenticated: true });
   if (result.status === 'unauthenticated') {
     const response = rejected();
     clearSessionCookies(response);

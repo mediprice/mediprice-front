@@ -1,11 +1,14 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { SESSION_PROBE_HEADER, SESSION_PROBE_VERSION } from '@/lib/api/paths';
 import {
   clearSessionCookies,
   readTokens,
   setSessionCookies,
 } from '@/server/bff/cookies';
+import { refreshSessionOnce } from '@/server/bff/refresh-coalescer';
+import { refreshResponse } from '@/server/bff/refresh-session';
 import { errorResponse, forbidden, jsonNoStore } from '@/server/bff/responses';
 import { revokeSession } from '@/server/bff/revoke-session';
 import { isSameOrigin } from '@/server/bff/upstream';
@@ -31,11 +34,17 @@ export async function POST(request: NextRequest) {
 }
 
 /** 재발급은 브라우저가 POST /bff/session/refresh 한 곳으로만 하게 해, API 401의 재발급과 겹쳐 같은 Refresh를 두 번 쓰지 않게 한다. */
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const { accessToken, refreshToken } = readTokens(request);
   if (accessToken) return jsonNoStore({ authenticated: true });
   if (!refreshToken) return jsonNoStore({ authenticated: false });
-  return jsonNoStore({ authenticated: false, refreshable: true });
+  if (request.headers.get(SESSION_PROBE_HEADER) === SESSION_PROBE_VERSION) {
+    return jsonNoStore({ authenticated: false, refreshable: true });
+  }
+
+  /** 배포 전 JS를 띄워 둔 탭 호환. 이 PR이 운영에 나간 다음 릴리스에서 이 분기와 표시 헤더 검사를 지운다. */
+  const result = await refreshSessionOnce(refreshToken, request.headers);
+  return refreshResponse(result, () => jsonNoStore({ authenticated: false }));
 }
 
 /** 백엔드 폐기에 실패해도 이 브라우저의 쿠키는 지운다. */

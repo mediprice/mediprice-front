@@ -2,6 +2,7 @@ import type { QueryClient } from '@tanstack/react-query';
 
 import { toApiError } from '@/lib/api/errors';
 import { BFF_BASE } from '@/lib/api/paths';
+import { sharedRefresher } from '@/lib/api/refresh';
 import { getQueryClient } from '@/lib/query-client';
 
 import { parseOAuthCallbackHash } from './oauth';
@@ -60,11 +61,12 @@ export async function completeOAuthCallback(
   return { ok: true, returnTo };
 }
 
-/** 서버 요청이 실패해도 쿼리 캐시는 비운다. 이전 사용자의 데이터가 남으면 안 된다. */
+/** 서버 요청이 실패해도 쿼리 캐시는 비운다. 진행 중인 재발급이 끝난 뒤 보내야 그 응답이 지운 쿠키를 다시 심지 않는다. */
 export async function signOut(
   baseUrl = BFF_BASE,
   queryClient = getQueryClient(),
 ) {
+  await sharedRefresher(baseUrl).settled();
   try {
     await fetch(`${baseUrl}/session`, {
       method: 'DELETE',

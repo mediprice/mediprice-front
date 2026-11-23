@@ -6,12 +6,13 @@ type Options = {
   body?: unknown;
   /** 기본은 같은 출처. `null`이면 Origin 헤더를 보내지 않는다. */
   origin?: string | null;
+  headers?: Record<string, string>;
 };
 
 /** BFF 라우트 핸들러에 넘길 요청을 만든다. */
 export function bffRequest(path: string, options: Options = {}) {
   const { method = 'GET', cookies = {}, body, origin } = options;
-  const headers = new Headers({ host: 'localhost:3000' });
+  const headers = new Headers({ host: 'localhost:3000', ...options.headers });
   if (origin !== null) headers.set('origin', origin ?? 'http://localhost:3000');
   const cookie = Object.entries(cookies)
     .map(([name, value]) => `${name}=${value}`)
