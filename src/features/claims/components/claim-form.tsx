@@ -8,11 +8,8 @@ import { useForm, useWatch } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import { RadioList } from '@/components/ui/radio-list';
-import { errorMessageKey } from '@/lib/api/error-message';
-import { ApiError } from '@/lib/api/errors';
-
-import type { ClaimReceipt } from '../api';
-import { claimMutations } from '../queries';
+import type { ClaimReceipt } from '@/features/claims/api';
+import { claimMutations } from '@/features/claims/queries';
 import {
   CLAIM_REASONS,
   CLAIMANT_EMAIL_MAX,
@@ -23,7 +20,10 @@ import {
   type ClaimFormInput,
   claimFormSchema,
   claimInvalidFields,
-} from '../schemas';
+} from '@/features/claims/schemas';
+import { errorMessageKey } from '@/lib/api/error-message';
+import { ApiError } from '@/lib/api/errors';
+
 import { ClaimDescriptionField } from './claim-description-field';
 import { ClaimPrivacyNotice } from './claim-privacy-notice';
 import { ClaimTextField } from './claim-text-field';

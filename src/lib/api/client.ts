@@ -1,11 +1,10 @@
 import createClient from 'openapi-fetch';
 
-import { emitSessionExpired } from '@/lib/api/session-events';
-
 import { BFF_BASE } from './paths';
 import { serializeQuery } from './query';
 import { createRefresher } from './refresh';
 import type { paths } from './schema';
+import { emitSessionExpired } from './session-events';
 
 type Options = {
   baseUrl: string;

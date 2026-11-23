@@ -4,8 +4,8 @@ import { useFormatter, useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
 import { PageContainer } from '@/components/layout/page-container';
+import { parseLegalDate } from '@/features/legal/legal-date';
 
-import { parseLegalDate } from '../legal-date';
 import { FloatingToc } from './floating-toc';
 import { LegalToc, type TocEntry } from './legal-toc';
 import { PendingFact } from './pending-fact';

@@ -4,13 +4,13 @@ import { CircleCheck, Info } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
-import { Button } from '@/components/ui/button';
+import { DialogConfirmButton } from '@/components/ui/dialog-confirm-button';
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
 } from '@/components/ui/responsive-dialog';
+import type { Review } from '@/features/reviews/queries';
 
-import type { Review } from '../queries';
 import { ReportForm, type ReportOutcome } from './report-form';
 
 /** S-20 후기 신고. 모바일은 바텀시트, 데스크톱은 가운데 모달이다. 이미 신고한 후기(409)는 실패가 아니라 결과로 보여 준다. */
@@ -66,7 +66,10 @@ export function ReportDialog({
                 ? t('doneDescription')
                 : t('alreadyDescription')}
             </p>
-            <ConfirmButton onClick={() => onOpenChange(false)} />
+            <DialogConfirmButton
+              onClick={() => onOpenChange(false)}
+              className="lg:min-h-11"
+            />
           </div>
         ) : (
           <ReportForm
@@ -77,14 +80,5 @@ export function ReportDialog({
         )}
       </ResponsiveDialogContent>
     </ResponsiveDialog>
-  );
-}
-
-function ConfirmButton({ onClick }: { onClick: () => void }) {
-  const t = useTranslations('common.actions');
-  return (
-    <Button size="lg" onClick={onClick} className="w-full lg:min-h-11">
-      {t('confirm')}
-    </Button>
   );
 }

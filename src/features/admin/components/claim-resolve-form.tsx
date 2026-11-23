@@ -8,21 +8,20 @@ import { useForm, useWatch } from 'react-hook-form';
 
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { RadioList } from '@/components/ui/radio-list';
-import { errorMessageKey } from '@/lib/api/error-message';
-
 import {
   type AdminClaim,
   CLAIM_ACTIONS,
   CLAIM_NOTE_MAX,
   type ClaimAction,
-} from '../claim-api';
-import { adminClaimMutations } from '../claim-queries';
+} from '@/features/admin/claim-api';
+import { adminClaimMutations } from '@/features/admin/claim-queries';
 import {
   claimResolveErrorKey,
   type ClaimResolveForm as ResolveValues,
   type ClaimResolveInput,
   claimResolveSchema,
-} from '../schemas';
+} from '@/features/admin/schemas';
+import { errorMessageKey } from '@/lib/api/error-message';
 
 /** 처리 방법·사유·알림 기록을 받고, 확인을 한 번 더 받은 뒤 보낸다. 제출 버튼은 다이얼로그 바닥에 있어 formId로 잇는다. */
 export function ClaimResolveForm({

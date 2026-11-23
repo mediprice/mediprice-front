@@ -4,7 +4,7 @@ import {
   QueryClient,
 } from '@tanstack/react-query';
 
-import { ApiError } from './api/errors';
+import { ApiError } from '@/lib/api/errors';
 
 /**
  * 4xx는 다시 보내도 결과가 같고 401은 refresh가 따로 처리하므로 재시도하지 않는다.
@@ -26,7 +26,7 @@ function makeQueryClient() {
         retryDelay: RETRY_DELAY_MS,
       },
       dehydrate: {
-        // Include pending queries so server-started prefetches can stream to the client.
+        /** 서버에서 시작한 prefetch가 끝나기 전에도 클라이언트로 스트리밍되게 pending 쿼리를 함께 넘긴다. */
         shouldDehydrateQuery: (query) =>
           defaultShouldDehydrateQuery(query) ||
           query.state.status === 'pending',
@@ -38,8 +38,7 @@ function makeQueryClient() {
 let browserQueryClient: QueryClient | undefined;
 
 export function getQueryClient() {
-  // Server: always a new client per request. Browser: reuse a singleton so it
-  // survives React discarding state when the initial render suspends.
+  /** 서버는 요청마다 새로 만들고, 브라우저는 첫 렌더가 suspend돼 React가 상태를 버려도 남도록 하나를 다시 쓴다. */
   if (isServer) return makeQueryClient();
   return (browserQueryClient ??= makeQueryClient());
 }

@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
-import { MAX_COMPARE } from '../compare-params';
-import { useCompareStore } from '../compare-store';
+import { MAX_COMPARE } from '@/features/comparison/compare-params';
+import { useCompareStore } from '@/features/comparison/compare-store';
 
 /** 비교함 변화를 스크린 리더에 알린다. 알림 영역이 먼저 있어야 읽히므로 비교함이 비어 있어도 항상 렌더한다. */
 export function CompareAnnouncer() {

@@ -21,6 +21,7 @@
     },
     "selected": {
       "label": "선택 항목 · {name}",
+      "valueLabel": "이 병원",
       "variants": "세부 항목 {count, plural, other {#개}}",
       "singleMeta": "{name} · {date} 적용",
       "notOffered": "이 병원은 이 항목의 가격을 공개하지 않았어요.",
@@ -116,8 +117,10 @@
     },
     "areaMap": {
       "legend": "파란 점: 같은 항목 가격을 공개한 주변 병원",
+      "markerLabel": "{name} · 가장 낮은 가격 {amount, number}원",
       "lowestPrice": "가장 낮은 가격 {amount, number}원",
       "distance": "이 병원에서 직선 {distance}",
+      "priceAndDistance": "가장 낮은 가격 {amount, number}원 · 이 병원에서 직선 {distance}",
       "open": "상세 보기"
     },
     "reviews": {

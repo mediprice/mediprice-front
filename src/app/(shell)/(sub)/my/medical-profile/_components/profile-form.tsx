@@ -22,12 +22,12 @@ import {
 } from '@/features/medical-profile/schemas';
 import { errorMessageKey } from '@/lib/api/error-message';
 import { ApiError } from '@/lib/api/errors';
+import { useLeaveGuard } from '@/lib/navigation/use-leave-guard';
 
 import { BasicInfoFields } from './basic-info-fields';
 import { ConsentField } from './consent-field';
 import { ProfileDialogs } from './profile-dialogs';
 import { ProfileTextField } from './profile-text-field';
-import { useLeaveGuard } from './use-leave-guard';
 
 /** 서버 검증 실패를 칸에 붙였으면 true. 붙일 칸이 없으면 일반 오류로 보여 준다. */
 function isFieldRejection(error: unknown) {

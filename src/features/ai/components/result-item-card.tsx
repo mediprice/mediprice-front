@@ -7,6 +7,10 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { AreaScope } from '@/features/ai/area-filters';
+import { formatItemName } from '@/features/ai/item-name';
+import { isShownReason } from '@/features/ai/result-text';
+import type { TurnItem } from '@/features/ai/schemas';
 import { comparableBand } from '@/features/npay/average-verdict';
 import { PriceOverview } from '@/features/npay/components/price-overview';
 import {
@@ -18,10 +22,6 @@ import { useCategoryLabel } from '@/features/npay/use-category-label';
 import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
 import type { components } from '@/lib/api/schema';
 
-import type { AreaScope } from '../area-filters';
-import { formatItemName } from '../item-name';
-import { isShownReason } from '../result-text';
-import type { TurnItem } from '../schemas';
 import { NearbyMapPanel } from './nearby-map-panel';
 
 type NpayItemDetail = components['schemas']['NpayItemDetailResponse'];

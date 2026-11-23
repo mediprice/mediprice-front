@@ -19,7 +19,8 @@ import {
 import type { CategoryView } from '@/features/search/category-tree';
 
 import { categoryHref } from './category-href';
-import { ChipLinks, ChipLinksSkeleton } from './chip-links';
+import { ChipLinks } from './chip-links';
+import { ChipLinksSkeleton } from './chip-links-skeleton';
 import { KeepPhrase } from './keep-phrase';
 
 type Crumb = {

@@ -47,7 +47,6 @@ export function HospitalAreaMap({
   band: PriceBand | null;
 }) {
   const t = useTranslations('hospitals.detail.areaMap');
-  const tPrice = useTranslations('common.price');
   const [previewId, setPreviewId] = useState<string | null>(null);
   const neighbors = useInfiniteQuery({
     ...mapQueries.nearby({
@@ -87,12 +86,15 @@ export function HospitalAreaMap({
               label:
                 hospital.minPrice == null
                   ? hospital.name
-                  : `${hospital.name} · ${tPrice('won', { amount: hospital.minPrice })}`,
+                  : t('markerLabel', {
+                      name: hospital.name,
+                      amount: hospital.minPrice,
+                    }),
             },
           ],
     );
     return [{ id: ykiho, position, kind: 'plain', label: name }, ...others];
-  }, [neighborList, ykiho, position, name, tPrice]);
+  }, [neighborList, ykiho, position, name, t]);
   const preview =
     itemCode && previewId
       ? neighborList?.find((hospital) => hospital.ykiho === previewId)
@@ -165,6 +167,15 @@ function NeighborPreview({
           }),
         );
   const distance = useDistanceLabel(meters ?? 0);
+  const amount = hospital.minPrice;
+  const summary =
+    amount != null && meters != null
+      ? t('priceAndDistance', { amount, distance })
+      : amount != null
+        ? t('lowestPrice', { amount })
+        : meters != null
+          ? t('distance', { distance })
+          : null;
 
   return (
     <div
@@ -175,15 +186,7 @@ function NeighborPreview({
         <p className="line-clamp-2 text-label-bold break-keep text-text-primary">
           {hospital.name}
         </p>
-        <p className="text-caption text-text-secondary">
-          {[
-            hospital.minPrice != null &&
-              t('lowestPrice', { amount: hospital.minPrice }),
-            meters != null && t('distance', { distance }),
-          ]
-            .filter(Boolean)
-            .join(' · ')}
-        </p>
+        <p className="text-caption text-text-secondary">{summary}</p>
       </div>
       <Button asChild variant="tint" size="sm" className="shrink-0">
         <Link href={href}>

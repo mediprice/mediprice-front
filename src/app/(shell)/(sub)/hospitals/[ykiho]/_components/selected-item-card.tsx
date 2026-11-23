@@ -392,7 +392,10 @@ function RegionComparison({
         max={scope.maxPrice}
         average={data.avgPrice}
         value={price}
-        isComparable={verdict.kind !== 'incomparable'}
+        valueLabel={t('valueLabel')}
+        comparison={
+          verdict.kind === 'comparable' ? verdict.comparison.direction : null
+        }
         className="w-full"
       />
       <p className="text-caption text-text-tertiary">

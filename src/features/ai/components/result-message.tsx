@@ -6,6 +6,9 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { areaScope } from '@/features/ai/area-filters';
+import type { AssistantMessage } from '@/features/ai/conversation';
+import { withoutNotice } from '@/features/ai/result-text';
 import { npayQueries } from '@/features/npay/queries';
 import {
   DEFAULT_REGION,
@@ -13,9 +16,6 @@ import {
 } from '@/features/regions/service-region';
 import { ApiError } from '@/lib/api/errors';
 
-import { areaScope } from '../area-filters';
-import type { AssistantMessage } from '../conversation';
-import { withoutNotice } from '../result-text';
 import { AssistantBubble } from './assistant-bubble';
 import { NoMatchLinks } from './no-match-links';
 import { ResultList } from './result-list';

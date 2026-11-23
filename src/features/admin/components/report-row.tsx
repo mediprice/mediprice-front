@@ -4,10 +4,13 @@ import { useFormatter, useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Tag } from '@/components/ui/tag';
+import type { AdminReport } from '@/features/admin/queries';
+import {
+  reportReasonKey,
+  reviewStatusKey,
+} from '@/features/admin/report-labels';
 import { RatingStars } from '@/features/reviews/components/rating-stars';
 
-import type { AdminReport } from '../queries';
-import { reportReasonKey, reviewStatusKey } from '../report-labels';
 import { ReportOutcomeChip } from './report-outcome-chip';
 
 /** 목록에서 판단에 필요한 것(사유·설명·후기 앞부분)만 보이고, 전체 내용과 처리는 검토 다이얼로그에서 한다. */

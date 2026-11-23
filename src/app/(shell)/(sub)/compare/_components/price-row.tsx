@@ -75,7 +75,7 @@ export function PriceRow({
                 className={cn(
                   isEmphasized
                     ? 'text-label-bold lg:text-price-md xl:text-price-lg'
-                    : 'text-label lg:text-label-bold',
+                    : 'text-label lg:font-bold',
                   cell?.minPrice != null && 'text-text-primary',
                 )}
               />

@@ -44,7 +44,7 @@ export function FavoriteList() {
         current?.favorite.ykiho === variables.ykiho ? null : current,
       );
       const key = variables.isFavorite ? 'restoreFailed' : 'removeFailed';
-      setFailure(`${t(key)} ${tErrors(errorMessageKey(error))}`);
+      setFailure(t(key, { reason: tErrors(errorMessageKey(error)) }));
     },
   });
   const announce = (text: string) =>

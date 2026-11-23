@@ -4,7 +4,7 @@ import { CircleCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 
-import type { ReviewNoticeKind } from '../review-notice';
+import type { ReviewNoticeKind } from '@/features/reviews/review-notice';
 
 /** 후기 작성·수정·삭제 결과. 나타날 때 화면에 보이게 옮기고 포커스를 받아 스크린 리더가 읽는다. */
 export function ReviewNoticeBanner({ kind }: { kind: ReviewNoticeKind }) {

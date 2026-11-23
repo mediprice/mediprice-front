@@ -7,15 +7,14 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useLoginGuard, useSession } from '@/features/auth/use-session';
-import { cn } from '@/lib/utils';
-
-import { savePendingFavorite } from '../pending-favorite';
+import { savePendingFavorite } from '@/features/favorites/pending-favorite';
 import {
   favoriteMutations,
   favoriteQueries,
   type FavoriteSeed,
   isFavoriteIn,
-} from '../queries';
+} from '@/features/favorites/queries';
+import { cn } from '@/lib/utils';
 
 type Notice = { id: number; kind: 'added' | 'removed' | 'failed' };
 

@@ -38,8 +38,8 @@ function interceptedHref(event: MouseEvent) {
 
 /**
  * 저장하지 않은 입력이 있을 때 새로고침·창 닫기와 문서 전체(상단 메뉴·푸터 포함)의 앱 안 링크 이동을 멈추고 확인을 받는다.
- * 링크 클릭을 문서 캡처 단계에서 막는다(Next Link는 defaultPrevented면 이동하지 않는다). 브라우저 뒤로 가기는 막을 수 없지만
- * 초안이 이 탭에 남아 다시 들어오면 이어 쓸 수 있다.
+ * App Router에는 이동 취소 API가 없어 링크 클릭을 문서 캡처 단계에서 막는다(Next Link는 defaultPrevented면 이동하지 않는다).
+ * 브라우저 뒤로 가기는 막을 수 없다.
  */
 export function useLeaveGuard(isDirty: boolean) {
   const router = useRouter();
@@ -74,7 +74,7 @@ export function useLeaveGuard(isDirty: boolean) {
     confirmLeave: () => {
       if (!pendingHref) return;
       setPendingHref(null);
-      /** 같은 출처의 링크나 이 화면이 만든 경로만 들어온다. */
+      /** 같은 출처의 DOM 링크나 화면이 만든 앱 안 경로라 typedRoutes가 미리 검사할 수 없다. */
       router.push(pendingHref as Route);
     },
     cancelLeave: () => setPendingHref(null),

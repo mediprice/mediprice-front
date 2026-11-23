@@ -35,6 +35,10 @@ export function stampHistoryDepth() {
 
 /** 앱 안에서 이동해 온 기록이 있어 브라우저 뒤로 가기가 이 사이트 안에 머무는지. */
 export function canGoBackInApp() {
-  const depth = (window.history.state as Record<string, unknown> | null)?.[KEY];
+  const state: unknown = window.history.state;
+  const depth =
+    typeof state === 'object' && state !== null && KEY in state
+      ? state[KEY]
+      : undefined;
   return typeof depth === 'number' && depth > 0;
 }

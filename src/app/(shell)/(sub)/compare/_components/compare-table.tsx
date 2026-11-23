@@ -312,7 +312,7 @@ function InfoRow({
       {hospitals.map((hospital, index) => (
         <td
           key={hospital.ykiho}
-          className="p-3 align-top text-body-sm text-text-primary lg:px-6 lg:py-4 lg:text-body"
+          className="p-3 align-top text-body-sm text-text-primary lg:px-6 lg:py-4"
         >
           {children(hospital, index)}
         </td>

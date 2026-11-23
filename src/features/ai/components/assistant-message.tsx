@@ -1,4 +1,5 @@
-import type { AssistantMessage as Message } from '../conversation';
+import type { AssistantMessage as Message } from '@/features/ai/conversation';
+
 import { AssistantBubble } from './assistant-bubble';
 import { CrisisCard } from './crisis-card';
 import { NoMatchLinks } from './no-match-links';

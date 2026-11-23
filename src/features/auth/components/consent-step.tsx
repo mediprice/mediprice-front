@@ -9,11 +9,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import { needsRequiredConsent } from '@/features/auth/required-consent';
+import { signOut } from '@/features/auth/session';
+import { useSession } from '@/features/auth/use-session';
 import { showToast } from '@/features/feedback/toast-store';
 
-import { needsRequiredConsent } from '../required-consent';
-import { signOut } from '../session';
-import { useSession } from '../use-session';
 import { RequiredConsentForm } from './required-consent-form';
 
 /** 로그인 직후나 약관이 바뀐 뒤 필수 동의를 받는 화면. 동의가 필요 없으면(동의를 마쳤거나, 로그인하지 않았거나, 동의를 모르는 예전 백엔드) 돌아갈 경로로 보낸다. */

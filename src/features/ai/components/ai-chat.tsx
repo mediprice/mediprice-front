@@ -13,9 +13,6 @@ import {
 
 import { PageContainer } from '@/components/layout/page-container';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { useSession } from '@/features/auth/use-session';
-import { cn } from '@/lib/utils';
-
 import {
   canRetry,
   canSend,
@@ -25,15 +22,18 @@ import {
   isOverDailyLimit,
   SESSION_TURN_LIMIT,
   shouldConfirmRestart,
-} from '../conversation';
+} from '@/features/ai/conversation';
 import {
   restoreConversation,
   restoredState,
   useConversation,
-} from '../conversation-store';
-import { AI_DAILY_LIMIT } from '../usage-limits';
-import { useAiNotice } from '../use-ai-notice';
-import { useVoiceInput } from '../use-voice-input';
+} from '@/features/ai/conversation-store';
+import { AI_DAILY_LIMIT } from '@/features/ai/usage-limits';
+import { useAiNotice } from '@/features/ai/use-ai-notice';
+import { useVoiceInput } from '@/features/ai/use-voice-input';
+import { useSession } from '@/features/auth/use-session';
+import { cn } from '@/lib/utils';
+
 import { AiNoticeDialog } from './ai-notice-dialog';
 import { AiSideRail } from './ai-side-rail';
 import { AssistantMessage } from './assistant-message';

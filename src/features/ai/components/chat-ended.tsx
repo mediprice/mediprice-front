@@ -2,8 +2,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
-
-import { SESSION_TURN_LIMIT } from '../conversation';
+import { SESSION_TURN_LIMIT } from '@/features/ai/conversation';
 
 /** 한 대화에서 말할 수 있는 횟수를 다 썼을 때. 행동은 빈 상태 규칙대로 tint 하나와 ghost 보조다. */
 export function ChatEnded({ onRestart }: { onRestart: () => void }) {

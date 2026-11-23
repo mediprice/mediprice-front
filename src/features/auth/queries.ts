@@ -1,4 +1,8 @@
-import { type QueryClient, queryOptions } from '@tanstack/react-query';
+import {
+  mutationOptions,
+  type QueryClient,
+  queryOptions,
+} from '@tanstack/react-query';
 import { z } from 'zod';
 
 import { apiClient } from '@/lib/api/client';
@@ -9,6 +13,7 @@ import { unwrap } from '@/lib/api/unwrap';
 
 import { consentApi } from './consent-api';
 import { myDataApi } from './my-data-export';
+import { requiredConsentDecisions } from './required-consent';
 
 export type CurrentUser = components['schemas']['UserResponse'];
 
@@ -93,5 +98,19 @@ export const consentQueries = {
     queryOptions({
       queryKey: consentKeys.status(),
       queryFn: () => consentApi.fetchStatus(),
+    }),
+};
+
+export const consentMutations = {
+  /** 저장한 동의 상태를 바로 쓰고, 내 정보(필수 동의 누락 여부)를 다시 받아 동의 화면을 벗어난다. */
+  saveRequired: (queryClient: QueryClient) =>
+    mutationOptions({
+      mutationFn: () => consentApi.save(requiredConsentDecisions()),
+      onSuccess: async (saved) => {
+        queryClient.setQueryData(consentKeys.status(), saved);
+        await queryClient.invalidateQueries({
+          queryKey: sessionKeys.current(),
+        });
+      },
     }),
 };

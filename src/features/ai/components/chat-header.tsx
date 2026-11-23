@@ -28,10 +28,7 @@ export function ChatHeader({
   return (
     <div className="@container py-2 px-page lg:px-8 lg:pt-7 lg:pb-0">
       <div className="flex min-h-11 flex-wrap items-center gap-x-2 gap-y-1">
-        <h1
-          id={titleId}
-          className="min-w-0 grow basis-32 text-subheading lg:text-title"
-        >
+        <h1 id={titleId} className="min-w-0 grow basis-32 text-section">
           {t('header.title')}
         </h1>
         {usage && (

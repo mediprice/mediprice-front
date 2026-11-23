@@ -8,10 +8,13 @@ import { type CSSProperties, useEffect, useRef, useState } from 'react';
 
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
+import { MAX_COMPARE } from '@/features/comparison/compare-params';
+import {
+  buildBasketHref,
+  useCompareStore,
+} from '@/features/comparison/compare-store';
+import { isTrayHiddenOn } from '@/features/comparison/tray-visibility';
 
-import { MAX_COMPARE } from '../compare-params';
-import { buildBasketHref, useCompareStore } from '../compare-store';
-import { isTrayHiddenOn } from '../tray-visibility';
 import { ClearCompareDialog } from './clear-compare-dialog';
 import { CompareAnnouncer } from './compare-announcer';
 import { CompareNumber } from './compare-number';
@@ -38,6 +41,8 @@ export function CompareTray() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const isVisible = hospitals.length > 0 && !isTrayHiddenOn(pathname);
   const coveredHeight = useCoveredHeight(barRef, isVisible);
+  /** CSSProperties 타입이 CSS 변수(--x)를 몰라 단언한다. */
+  const trayHeight = { '--tray-h': `${coveredHeight}px` } as CSSProperties;
   const isFull = notice?.kind === 'full' && notice.id !== dismissedNotice;
   const canCompare = hospitals.length >= 2;
   const names = hospitals.map((hospital) => hospital.name).join(' · ');
@@ -67,7 +72,7 @@ export function CompareTray() {
         <>
           <div
             aria-hidden="true"
-            style={{ '--tray-h': `${coveredHeight}px` } as CSSProperties}
+            style={trayHeight}
             className="h-(--tray-h) bg-surface"
           />
           <aside

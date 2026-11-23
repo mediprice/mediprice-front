@@ -4,9 +4,11 @@ import { Navigation } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import {
+  buildNaverMapUrl,
+  buildNaverRouteScheme,
+} from '@/features/hospitals/detail-links';
 import { cn } from '@/lib/utils';
-
-import { buildNaverMapUrl, buildNaverRouteScheme } from '../detail-links';
 
 /** 앱이 열리면 페이지가 가려진다. 이 시간 안에 가려지지 않으면 앱이 없다고 보고 웹 지도로 보낸다. */
 const APP_OPEN_WAIT_MS = 1500;

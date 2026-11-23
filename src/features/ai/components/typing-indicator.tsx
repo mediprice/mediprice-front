@@ -2,9 +2,13 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import {
+  msUntilNextStage,
+  type WaitStage,
+  waitStage,
+} from '@/features/ai/wait-stage';
 import { cn } from '@/lib/utils';
 
-import { msUntilNextStage, type WaitStage, waitStage } from '../wait-stage';
 import { AssistantBubble } from './assistant-bubble';
 
 const DOT_DELAYS = [

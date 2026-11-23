@@ -1,19 +1,15 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { env } from '@/env';
 import {
   clearSessionCookies,
   readTokens,
   setSessionCookies,
 } from '@/server/bff/cookies';
-import {
-  jsonHeaders,
-  refreshResponse,
-  refreshSession,
-} from '@/server/bff/refresh-session';
+import { refreshResponse, refreshSession } from '@/server/bff/refresh-session';
 import { errorResponse, forbidden, jsonNoStore } from '@/server/bff/responses';
-import { callBackend, isSameOrigin } from '@/server/bff/upstream';
+import { revokeSession } from '@/server/bff/revoke-session';
+import { isSameOrigin } from '@/server/bff/upstream';
 
 const signInSchema = z.object({
   accessToken: z.string().min(1),
@@ -50,13 +46,7 @@ export async function DELETE(request: NextRequest) {
   if (!isSameOrigin(request)) return forbidden();
 
   const { refreshToken } = readTokens(request);
-  if (refreshToken) {
-    await callBackend(new URL('/api/auth/logout', env.NEXT_PUBLIC_API_URL), {
-      method: 'POST',
-      headers: jsonHeaders(request.headers),
-      body: JSON.stringify({ refreshToken }),
-    });
-  }
+  if (refreshToken) await revokeSession(refreshToken, request.headers);
 
   const response = new NextResponse(null, {
     status: 204,

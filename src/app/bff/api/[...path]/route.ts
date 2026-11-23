@@ -36,7 +36,6 @@ async function relay(
     headers: forwardHeaders(request.headers, accessToken),
     body: METHODS_WITHOUT_BODY.has(request.method) ? undefined : request.body,
     duplex: 'half',
-    redirect: 'manual',
   };
   const upstream = await callBackend(url, init);
 

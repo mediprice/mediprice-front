@@ -2,8 +2,9 @@
 
 import { useEffect, useEffectEvent, useRef } from 'react';
 
-import { isWithinView, type LatLng } from '../map-geo';
-import type { NaverCircle } from '../naver-types';
+import { isWithinView, type LatLng } from '@/features/map/map-geo';
+import type { NaverCircle } from '@/features/map/naver-types';
+
 import type { MapMarker } from './marker-icon';
 import {
   type MapSearchArea,

@@ -5,10 +5,13 @@ import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 
 import { useSession } from '@/features/auth/use-session';
+import { takePendingFavorite } from '@/features/favorites/pending-favorite';
+import {
+  favoriteMutations,
+  favoriteQueries,
+  isFavoriteIn,
+} from '@/features/favorites/queries';
 import { showToast } from '@/features/feedback/toast-store';
-
-import { takePendingFavorite } from '../pending-favorite';
-import { favoriteMutations, favoriteQueries, isFavoriteIn } from '../queries';
 
 /**
  * 로그인하지 않은 채 관심을 눌러 로그인하고 돌아오면, 같은 화면에서 그 병원을 관심에 넣고 보던 위치로 돌려놓은 뒤 알린다.

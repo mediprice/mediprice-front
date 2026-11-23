@@ -83,6 +83,7 @@
       "empty": "{place} 근처 {km, number}km 안에는 이 항목 가격을 공개한 병원이 없어요.",
       "error": "주변 병원을 불러오지 못했어요.",
       "distance": "직선 {distance}",
+      "classAndDistance": "{className} · 직선 {distance}",
       "price": "{item} {amount, number}원부터",
       "call": "전화",
       "map": "지도에서 더 넓게 보기"
@@ -128,6 +129,7 @@
   "voice": {
     "note": "음성 원본은 저장하지 않아요.",
     "timer": "{elapsed} / {limit}",
+    "clock": "{minutes, number}:{seconds}",
     "timerLabel": "녹음 시간 {seconds, number}초, 최대 {limit, number}초",
     "typeInstead": "글로 입력",
     "ready": {

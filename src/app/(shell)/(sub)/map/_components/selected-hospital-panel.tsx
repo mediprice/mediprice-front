@@ -1,14 +1,11 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { NearbyHospitalCard } from '@/features/map/components/nearby-hospital-card';
 import type { NearbyHospital } from '@/features/map/queries';
-import { npayQueries } from '@/features/npay/queries';
-import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
 
 import { hospitalHref } from './nearby-list';
 
@@ -23,11 +20,6 @@ export function SelectedHospitalPanel({
   onClear: () => void;
 }) {
   const t = useTranslations('map.card');
-  /** 목록과 같은 꼬리표 기준(서울·경기 평균). 같은 조회라 목록과 캐시를 함께 쓴다. */
-  const regionSummary = useQuery({
-    ...npayQueries.summaryIn(item ?? '', sidoCodesOf(DEFAULT_REGION)),
-    enabled: item !== null,
-  });
   return (
     <section
       aria-labelledby="map-selected-title"
@@ -49,7 +41,6 @@ export function SelectedHospitalPanel({
         hospital={hospital}
         href={hospitalHref(hospital.ykiho, item)}
         hasItem={item !== null}
-        average={regionSummary.data?.avgPrice}
         isSelected
         isCompact
       />

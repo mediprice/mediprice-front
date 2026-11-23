@@ -9,8 +9,8 @@ import {
   consentHref,
   isConsentExemptPath,
   needsRequiredConsent,
-} from '../required-consent';
-import { useSession } from '../use-session';
+} from '@/features/auth/required-consent';
+import { useSession } from '@/features/auth/use-session';
 
 /** 셸에 한 번 둔다. 내 정보가 필수 동의 누락을 알리면(로그인 중 약관이 바뀐 경우 등) 동의 화면으로 보내고, 그동안 화면을 가린다. 약관 문서는 읽을 수 있게 둔다. */
 export function ConsentGate() {

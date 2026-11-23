@@ -4,8 +4,8 @@ import { useTranslations } from 'next-intl';
 
 import { PageContainer } from '@/components/layout/page-container';
 import { LoginRequired } from '@/features/auth/components/login-required';
-import { MySubPageHeader } from '@/features/auth/components/my-page-header';
 import { MySideNav } from '@/features/auth/components/my-side-nav';
+import { MySubPageHeader } from '@/features/auth/components/my-sub-page-header';
 import { useSession } from '@/features/auth/use-session';
 import { cn } from '@/lib/utils';
 

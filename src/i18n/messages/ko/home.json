@@ -11,11 +11,7 @@
     "keyword": "검색어",
     "keywordPlaceholder": "진료 항목이나 병원 이름 (예: 도수치료)",
     "region": "지역",
-    "regionAll": "서울·경기",
-    "regionSeoul": "서울",
-    "regionGyeonggi": "경기",
-    "submit": "검색",
-    "regionNationwide": "전국"
+    "submit": "검색"
   },
   "ai": {
     "title": "어떤 진료가 필요한지 모르겠다면?",

@@ -22,11 +22,11 @@ import { useSession } from '@/features/auth/use-session';
 import { hospitalQueries } from '@/features/hospitals/queries';
 import { setReviewNotice } from '@/features/reviews/review-notice';
 import type { ReviewWriteFrom } from '@/features/reviews/write-href';
+import { useLeaveGuard } from '@/lib/navigation/use-leave-guard';
 
 import { LeaveConfirmDialog } from './leave-confirm-dialog';
 import { ReviewWriteBody } from './review-write-body';
 import { TargetHospitalCard } from './target-hospital-card';
-import { useLeaveGuard } from './use-leave-guard';
 
 export function ReviewWriteView({
   ykiho,

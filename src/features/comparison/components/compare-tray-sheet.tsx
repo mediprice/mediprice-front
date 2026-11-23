@@ -10,9 +10,12 @@ import {
   ResponsiveDialogContent,
   ResponsiveDialogTrigger,
 } from '@/components/ui/responsive-dialog';
+import { MAX_COMPARE } from '@/features/comparison/compare-params';
+import {
+  buildBasketHref,
+  type CompareHospital,
+} from '@/features/comparison/compare-store';
 
-import { MAX_COMPARE } from '../compare-params';
-import { buildBasketHref, type CompareHospital } from '../compare-store';
 import { CompareNumber } from './compare-number';
 
 /** 비교함에 담은 병원을 하나씩 빼는 시트. 병원별 칩이 없는 모바일·큰 글자 비교함에서 연다. */

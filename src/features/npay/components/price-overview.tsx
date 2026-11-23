@@ -1,8 +1,8 @@
 import { useTranslations } from 'next-intl';
 
+import type { PriceSummary } from '@/features/npay/price-summary';
 import { cn } from '@/lib/utils';
 
-import type { PriceSummary } from '../price-summary';
 import { PriceSpread } from './price-spread';
 
 /**

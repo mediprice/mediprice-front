@@ -3,8 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-
-import type { useLeaveGuard } from './use-leave-guard';
+import type { useLeaveGuard } from '@/lib/navigation/use-leave-guard';
 
 /** 삭제 확인과 저장하지 않은 채 나가기 확인. */
 export function ProfileDialogs({
@@ -48,13 +47,13 @@ export function ProfileDialogs({
       <ConfirmDialog
         open={leaveGuard.pendingHref !== null}
         onOpenChange={(open) => {
-          if (!open) leaveGuard.stay();
+          if (!open) leaveGuard.cancelLeave();
         }}
         title={t('leaveDialog.title')}
         description={t('leaveDialog.description')}
         cancelLabel={t('leaveDialog.stay')}
         confirmLabel={t('leaveDialog.leave')}
-        onConfirm={leaveGuard.leave}
+        onConfirm={leaveGuard.confirmLeave}
         cancelVariant="primary"
         confirmVariant="tint"
         isConfirmFirst

@@ -11,16 +11,16 @@ import {
   ResponsiveDialog,
   ResponsiveDialogContent,
 } from '@/components/ui/responsive-dialog';
-import { RatingStars } from '@/features/reviews/components/rating-stars';
-
-import type { AdminClaim, ClaimAction } from '../claim-api';
+import type { AdminClaim, ClaimAction } from '@/features/admin/claim-api';
 import {
   claimantRoleKey,
   claimReasonKey,
   isClaimActive,
-} from '../claim-labels';
-import { adminClaimQueries } from '../claim-queries';
-import { reviewStatusKey } from '../report-labels';
+} from '@/features/admin/claim-labels';
+import { adminClaimQueries } from '@/features/admin/claim-queries';
+import { reviewStatusKey } from '@/features/admin/report-labels';
+import { RatingStars } from '@/features/reviews/components/rating-stars';
+
 import { ClaimNotifySection } from './claim-notify-section';
 import { ClaimOutcomeChip } from './claim-outcome-chip';
 import { ClaimResolveForm } from './claim-resolve-form';

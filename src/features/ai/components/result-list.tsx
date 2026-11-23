@@ -5,14 +5,14 @@ import { useId } from 'react';
 import { Button } from '@/components/ui/button';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { AreaScope } from '@/features/ai/area-filters';
+import type { TurnItem } from '@/features/ai/schemas';
 import {
   DEFAULT_REGION,
   SERVICE_REGIONS,
   type ServiceRegion,
 } from '@/features/regions/service-region';
 
-import type { AreaScope } from '../area-filters';
-import type { TurnItem } from '../schemas';
 import { type ItemDetail, ResultItemCard } from './result-item-card';
 
 /** S-05 AI 후보 결과. 이름을 아직 받는 중인 후보는 같은 높이의 자리로 둔다. 마지막 결과에만 이어 묻기·다시 찾기를 둔다. 장소를 말하지 않았으면 기본 지역임을 알리고 지역을 바꾸게 한다. */

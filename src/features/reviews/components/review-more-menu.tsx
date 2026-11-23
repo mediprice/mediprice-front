@@ -14,9 +14,12 @@ import {
 } from '@/components/ui/responsive-dialog';
 import { useLoginGuard } from '@/features/auth/use-session';
 import { claimNoticeState, claimQueries } from '@/features/claims/queries';
+import { type Review, reviewKeys } from '@/features/reviews/queries';
+import {
+  reviewClaimHref,
+  reviewWriteHref,
+} from '@/features/reviews/write-href';
 
-import { type Review, reviewKeys } from '../queries';
-import { reviewClaimHref, reviewWriteHref } from '../write-href';
 import { DeleteReviewDialog } from './delete-review-dialog';
 import { ReportDialog } from './report-dialog';
 

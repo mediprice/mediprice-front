@@ -38,7 +38,9 @@ export function HistoryList() {
     ...removeOptions,
     onError: (error, id, result, context) => {
       void removeOptions.onError?.(error, id, result, context);
-      setFailure(`${t('removeFailed')} ${tErrors(errorMessageKey(error))}`);
+      setFailure(
+        t('removeFailed', { reason: tErrors(errorMessageKey(error)) }),
+      );
     },
   });
   const clear = useMutation(historyMutations.clear());

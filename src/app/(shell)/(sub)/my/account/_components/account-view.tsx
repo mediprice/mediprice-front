@@ -7,8 +7,8 @@ import { useTranslations } from 'next-intl';
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
 import { LoginRequired } from '@/features/auth/components/login-required';
-import { MySubPageHeader } from '@/features/auth/components/my-page-header';
 import { MySideNav } from '@/features/auth/components/my-side-nav';
+import { MySubPageHeader } from '@/features/auth/components/my-sub-page-header';
 import { signOut } from '@/features/auth/session';
 import { showToast } from '@/features/feedback/toast-store';
 

@@ -14,7 +14,11 @@ import { PageContainer } from '@/components/layout/page-container';
 import { Tag } from '@/components/ui/tag';
 import { CompareToggle } from '@/features/comparison/components/compare-toggle';
 import { FavoriteButton } from '@/features/favorites/components/favorite-button';
-import { toHomepageUrl, toTelHref } from '@/features/hospitals/detail-links';
+import {
+  parseItemParam,
+  toHomepageUrl,
+  toTelHref,
+} from '@/features/hospitals/detail-links';
 import { formatLocation } from '@/features/regions/format-location';
 import type { components } from '@/lib/api/schema';
 
@@ -38,7 +42,7 @@ export function HospitalHeader<T extends string>({
   const t = useTranslations('hospitals.detail.header');
   const tNav = useTranslations('nav');
   /** HospitalDetail이 선택 항목을 history로 바꿔도 useSearchParams가 따라온다. */
-  const itemCode = useSearchParams().get('item');
+  const itemCode = parseItemParam(useSearchParams().get('item'));
   const region = [
     formatLocation(hospital.sidoName, hospital.sgguName),
     hospital.emdongName,

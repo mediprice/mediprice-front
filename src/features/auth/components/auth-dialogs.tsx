@@ -3,9 +3,9 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
+import { markSignedOut, sessionKeys } from '@/features/auth/queries';
 import { subscribeSessionExpired } from '@/lib/api/session-events';
 
-import { markSignedOut, sessionKeys } from '../queries';
 import { LoginDialog } from './login-dialog';
 import { SessionExpiredDialog } from './session-expired-dialog';
 

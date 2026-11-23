@@ -69,7 +69,6 @@
   "rangeBar": {
     "range": "가격 범위: 최저 {min, number}원, 최고 {max, number}원",
     "rangeWithAverage": "가격 범위: 최저 {min, number}원, 평균 {average, number}원, 최고 {max, number}원",
-    "valueLabel": "이 병원",
     "value": "{label} {value, number}원",
     "valueComparison": "{label} {value, number}원, {position, select, below {평균보다 낮아요} above {평균보다 높아요} other {평균과 비슷해요}}",
     "average": "평균",

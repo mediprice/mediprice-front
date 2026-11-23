@@ -52,7 +52,7 @@ export function MixedItemsNotice({
               <Link
                 href={buildCompareHref(ykihos, code)}
                 replace
-                className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4"
+                className="inline-flex min-h-11 items-center text-label-bold underline underline-offset-4"
               >
                 {t('mixedItemsSwitch', { item: nameOf(code) })}
               </Link>

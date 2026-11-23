@@ -4,8 +4,8 @@ import { useTranslations } from 'next-intl';
 import { type ComponentProps, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { startGoogleLogin } from '@/features/auth/start-login';
 
-import { startGoogleLogin } from '../start-login';
 import { GoogleMark } from './google-mark';
 
 /** 로그인 다이얼로그는 닫기(X)보다 로그인 버튼에 먼저 포커스를 둔다. Radix의 onOpenAutoFocus에 넘긴다. */

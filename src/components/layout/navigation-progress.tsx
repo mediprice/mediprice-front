@@ -16,7 +16,8 @@ function isAppNavigation(event: MouseEvent) {
     event.altKey
   )
     return false;
-  const anchor = (event.target as Element | null)?.closest?.('a[href]');
+  const anchor =
+    event.target instanceof Element ? event.target.closest('a[href]') : null;
   if (!(anchor instanceof HTMLAnchorElement)) return false;
   if (anchor.target && anchor.target !== '_self') return false;
   if (anchor.hasAttribute('download')) return false;

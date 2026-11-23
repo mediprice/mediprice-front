@@ -7,10 +7,10 @@ import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { LoginReason } from '@/features/auth/login-dialog-store';
+import type { CurrentUser } from '@/features/auth/queries';
+import { useSession } from '@/features/auth/use-session';
 
-import type { LoginReason } from '../login-dialog-store';
-import type { CurrentUser } from '../queries';
-import { useSession } from '../use-session';
 import { GoogleLoginButton } from './google-login-button';
 
 /** 로그인한 사용자에게만 children을 보여 준다. 로그인하지 않았으면 이유와 로그인 버튼을, 확인 중에는 fallback을 보여 준다. */

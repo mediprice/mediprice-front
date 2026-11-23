@@ -5,14 +5,8 @@ import { useTranslations } from 'next-intl';
 import type { CSSProperties } from 'react';
 
 import { useFirstView } from '@/lib/motion/use-first-view';
+import { hasRange, rangePosition, type RangeScale } from '@/lib/range-position';
 import { cn } from '@/lib/utils';
-
-import {
-  compareToAverage,
-  hasRange,
-  rangePosition,
-  type RangeScale,
-} from './range-position';
 
 type Size = 'md' | 'sm';
 
@@ -20,16 +14,16 @@ type RangeBarProps = {
   min: number | null | undefined;
   max: number | null | undefined;
   average?: number | null;
-  /** 이 병원의 값. 파란 점으로 찍는다. 점이 없는 막대는 평균이 늘 가운데라 아무것도 알려 주지 않아 받지 않는다(docs 14장). */
+  /** 점으로 찍을 값(예: 이 병원 가격). 파란 점으로 찍는다. 점이 없는 막대는 평균이 늘 가운데라 아무것도 알려 주지 않아 받지 않는다(docs 14장). */
   value: number;
-  /** 점 위 이름. 기본은 "이 병원"이다. */
-  valueLabel?: string;
+  /** 점 위 이름(예: "이 병원"). 번역한 문자열을 넘긴다. */
+  valueLabel: string;
   /** md는 금액 라벨이 붙은 막대, sm은 목록 행의 라벨 없는 작은 막대다. */
   size?: Size;
   /** sm에서 평균 눈금 아래에 작은 "평균" 라벨을 붙인다. 목록에서 한 번만 켠다. */
   showAverageTick?: boolean;
-  /** 평균과 비교하기 어려운 값(구성이 다른 세부 항목)이면 false로 넘겨 화면 낭독 문장에서 높다·낮다를 뺀다. */
-  isComparable?: boolean;
+  /** 값을 평균과 견준 방향. 넘기면 화면 낭독 문장에 높다·낮다를 붙이고, 비교하기 어려운 값(구성이 다른 세부 항목)이면 넘기지 않는다. */
+  comparison?: 'below' | 'above' | 'same' | null;
   className?: string;
 };
 
@@ -55,14 +49,15 @@ const anchoredLabel =
   'absolute top-0 left-(--pos) -translate-x-(--pos) whitespace-nowrap';
 
 function position(scale: RangeScale, value: number) {
+  /** CSSProperties는 사용자 정의 속성(--pos)을 모르므로 단언한다. */
   return {
     '--pos': `${rangePosition(scale, value) * 100}%`,
   } as CSSProperties;
 }
 
 /**
- * 이 병원 값이 최저–평균–최고 사이 어디인지 보여 주는 막대. 평균이 가운데인 구간별 눈금이라 극단값이 있어도 점이 퍼지고, 양 끝 라벨은 실제 최저·최고를 쓴다. 범위가 없으면 그리지 않는다. 막대는 장식이고 의미는 sr-only 문장으로 전한다
- * (md는 범위와 이 병원 위치, sm은 이 병원 위치만). 처음 보일 때 왼쪽부터 그려진다.
+ * 값이 최저–평균–최고 사이 어디인지 보여 주는 막대. 평균이 가운데인 구간별 눈금이라 극단값이 있어도 점이 퍼지고, 양 끝 라벨은 실제 최저·최고를 쓴다. 범위가 없으면 그리지 않는다. 막대는 장식이고 의미는 sr-only 문장으로 전한다
+ * (md는 범위와 값 위치, sm은 값 위치만). 처음 보일 때 왼쪽부터 그려진다.
  */
 export function RangeBar({ min, max, ...props }: RangeBarProps) {
   if (min == null || max == null || !hasRange(min, max)) return null;
@@ -74,26 +69,20 @@ function RangeBarBody({
   max,
   average,
   value,
-  valueLabel,
+  valueLabel: label,
   size = 'md',
   showAverageTick = false,
-  isComparable = true,
+  comparison,
   className,
 }: Omit<RangeBarProps, 'min' | 'max'> & { min: number; max: number }) {
   const t = useTranslations('common.rangeBar');
   const tPrice = useTranslations('common.price');
   const [ref, phase] = useFirstView<HTMLDivElement>({ playIfVisible: true });
-  const label = valueLabel ?? t('valueLabel');
   const hasAverage = average != null;
   const scale = { min, max, average };
-  const comparison = isComparable ? compareToAverage(value, average) : null;
 
   const valueSentence = comparison
-    ? t('valueComparison', {
-        label,
-        value,
-        position: comparison.direction,
-      })
+    ? t('valueComparison', { label, value, position: comparison })
     : t('value', { label, value });
   const rangeSentence =
     size === 'sm'

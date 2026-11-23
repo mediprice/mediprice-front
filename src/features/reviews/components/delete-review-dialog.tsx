@@ -7,9 +7,8 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { CenteredDialogContent } from '@/features/auth/components/centered-dialog-content';
+import { reviewMutations } from '@/features/reviews/queries';
 import { errorMessageKey } from '@/lib/api/error-message';
-
-import { reviewMutations } from '../queries';
 
 export function DeleteReviewDialog({
   reviewId,

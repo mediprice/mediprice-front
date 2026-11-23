@@ -8,8 +8,7 @@ import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-
-import { MAX_INPUT_LENGTH, turnInputSchema } from '../schemas';
+import { MAX_INPUT_LENGTH, turnInputSchema } from '@/features/ai/schemas';
 
 const composerSchema = z.object({ input: turnInputSchema });
 const COUNTER_FROM = MAX_INPUT_LENGTH - 100;

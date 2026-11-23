@@ -8,20 +8,20 @@ import { useId, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
+import { DialogConfirmButton } from '@/components/ui/dialog-confirm-button';
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
 } from '@/components/ui/responsive-dialog';
-import { errorMessageKey } from '@/lib/api/error-message';
-import { ApiError } from '@/lib/api/errors';
-
-import { claimMutations } from '../queries';
+import { claimMutations } from '@/features/claims/queries';
 import {
   claimFormErrorKey,
   OBJECTION_CONTENT_MAX,
   type ObjectionForm,
   objectionFormSchema,
-} from '../schemas';
+} from '@/features/claims/schemas';
+import { errorMessageKey } from '@/lib/api/error-message';
+import { ApiError } from '@/lib/api/errors';
 
 type Outcome = 'done' | 'already' | 'closed';
 
@@ -77,7 +77,7 @@ export function ObjectionDialog({
               )}
               {t(`${outcome}Description`)}
             </p>
-            <ConfirmButton onClick={() => onOpenChange(false)} />
+            <DialogConfirmButton onClick={() => onOpenChange(false)} />
           </div>
         ) : (
           open && <ObjectionForm reviewId={reviewId} onOutcome={setOutcome} />
@@ -177,14 +177,5 @@ function ObjectionForm({
         {t('submit')}
       </Button>
     </form>
-  );
-}
-
-function ConfirmButton({ onClick }: { onClick: () => void }) {
-  const t = useTranslations('common.actions');
-  return (
-    <Button size="lg" onClick={onClick} className="w-full">
-      {t('confirm')}
-    </Button>
   );
 }

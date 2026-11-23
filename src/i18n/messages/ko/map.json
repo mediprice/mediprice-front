@@ -56,9 +56,9 @@
   },
   "card": {
     "distance": "직선 {distance}",
+    "classAndDistance": "{className} · 직선 {distance}",
     "meters": "{value, number}m",
     "kilometers": "{value, number, ::.#}km",
-    "minPrice": "최저 {amount, number}원",
     "showOnMap": "지도에서 보기",
     "showOnMapLabel": "{name} 지도에서 보기",
     "noPosition": "지도 위치 정보 없음",

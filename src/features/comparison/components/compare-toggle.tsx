@@ -5,10 +5,9 @@ import { useTranslations } from 'next-intl';
 import { useId } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { isNpayCode, MAX_COMPARE } from '@/features/comparison/compare-params';
+import { useCompareStore } from '@/features/comparison/compare-store';
 import { cn } from '@/lib/utils';
-
-import { isNpayCode, MAX_COMPARE } from '../compare-params';
-import { useCompareStore } from '../compare-store';
 
 /**
  * 병원을 비교함에 담거나 뺀다. 3곳이 차면 담지 않은 병원의 버튼은 비활성으로 보이되(aria-disabled) 포커스와 누름은 남겨,

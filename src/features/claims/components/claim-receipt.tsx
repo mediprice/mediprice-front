@@ -7,8 +7,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 
 import { Button } from '@/components/ui/button';
-
-import type { ClaimReceipt as Receipt } from '../api';
+import type { ClaimReceipt as Receipt } from '@/features/claims/api';
 
 /** 접수 결과. 양식이 사라지므로 제목으로 포커스를 옮겨 결과를 바로 읽게 한다. */
 export function ClaimReceipt<T extends string>({

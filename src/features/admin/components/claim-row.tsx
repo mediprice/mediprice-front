@@ -5,12 +5,12 @@ import { useFormatter, useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Tag } from '@/components/ui/tag';
+import type { AdminClaim } from '@/features/admin/claim-api';
+import { claimReasonKey, isClaimActive } from '@/features/admin/claim-labels';
+import { reviewStatusKey } from '@/features/admin/report-labels';
 import { RatingStars } from '@/features/reviews/components/rating-stars';
 import { cn } from '@/lib/utils';
 
-import type { AdminClaim } from '../claim-api';
-import { claimReasonKey, isClaimActive } from '../claim-labels';
-import { reviewStatusKey } from '../report-labels';
 import { ClaimOutcomeChip } from './claim-outcome-chip';
 
 /** 목록에는 판단에 필요한 것(사유·기한·후기 앞부분)만 둔다. 신청인 이름·이메일(개인정보)은 검토 다이얼로그에서만 보인다. */

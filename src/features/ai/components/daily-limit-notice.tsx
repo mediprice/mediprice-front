@@ -2,9 +2,8 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { AI_DAILY_LIMIT } from '@/features/ai/usage-limits';
 import { openLoginDialog } from '@/features/auth/login-dialog-store';
-
-import { AI_DAILY_LIMIT } from '../usage-limits';
 
 /** 오늘 한도를 다 썼을 때. 새 대화도 같은 한도를 쓰므로 비회원은 로그인을, 회원은 일반 검색을 tint 하나로 앞세운다. */
 export function DailyLimitNotice({ isMember }: { isMember: boolean }) {

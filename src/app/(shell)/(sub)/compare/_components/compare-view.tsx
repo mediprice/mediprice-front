@@ -228,7 +228,7 @@ export function CompareView({
 
   /** 앞 화면(항목 가격)이 바꿔 둔 제목이 남지 않도록 항목 이름이 들어간 제목으로 맞춘다. */
   useEffect(() => {
-    document.title = tMeta('titleTemplate').replace('%s', documentTitle);
+    document.title = tMeta('pageTitle', { title: documentTitle });
   }, [documentTitle, tMeta]);
 
   /** 공유받은 주소로 들어오면 비어 있는 비교함을 이 병원들로 채워, 병원을 더 담을 때 이어지게 한다. */

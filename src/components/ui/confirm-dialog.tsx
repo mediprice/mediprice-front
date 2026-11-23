@@ -3,8 +3,9 @@
 import { AlertDialog } from 'radix-ui';
 import { type ComponentProps, type ReactNode, useRef } from 'react';
 
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+import { Button } from './button';
 
 type ButtonVariant = ComponentProps<typeof Button>['variant'];
 
@@ -56,6 +57,7 @@ export function ConfirmDialog({
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="fixed inset-0 z-(--z-overlay) bg-overlay duration-200 ease-standard data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
         <AlertDialog.Content
+          data-slot="confirm-dialog"
           onOpenAutoFocus={() => {
             openerRef.current =
               document.activeElement instanceof HTMLElement

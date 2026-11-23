@@ -3,10 +3,13 @@
 import { useEffect, useState } from 'react';
 
 import { env } from '@/env';
-
-import { boundsAround, KOREA_BOUNDS, type LatLng } from '../map-geo';
-import { loadNaverMaps, onNaverAuthFailure } from '../naver-sdk';
-import type { NaverMap, NaverMapsApi } from '../naver-types';
+import {
+  boundsAround,
+  KOREA_BOUNDS,
+  type LatLng,
+} from '@/features/map/map-geo';
+import { loadNaverMaps, onNaverAuthFailure } from '@/features/map/naver-sdk';
+import type { NaverMap, NaverMapsApi } from '@/features/map/naver-types';
 
 export type NaverHandle = { api: NaverMapsApi; map: NaverMap };
 type MapStatus = 'loading' | 'ready' | 'unavailable';

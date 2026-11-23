@@ -79,6 +79,7 @@
   },
   "card": {
     "meta": "{kind} · {region}",
+    "valueLabel": "이 병원",
     "startDate": "{date}부터 적용",
     "startDateUnknown": "적용일 미확인",
     "showVariants": "세부 {count, number}건 보기",

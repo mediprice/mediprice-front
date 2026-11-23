@@ -9,10 +9,13 @@ import {
   ResponsiveDialog,
   ResponsiveDialogContent,
 } from '@/components/ui/responsive-dialog';
+import type { AdminReport, ReportAction } from '@/features/admin/queries';
+import {
+  reportReasonKey,
+  reviewStatusKey,
+} from '@/features/admin/report-labels';
 import { RatingStars } from '@/features/reviews/components/rating-stars';
 
-import type { AdminReport, ReportAction } from '../queries';
-import { reportReasonKey, reviewStatusKey } from '../report-labels';
 import { DetailField } from './detail-field';
 import { ReportOutcomeChip } from './report-outcome-chip';
 

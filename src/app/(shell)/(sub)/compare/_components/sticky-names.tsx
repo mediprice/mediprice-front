@@ -84,7 +84,7 @@ export function StickyNames({
     <div
       ref={anchorRef}
       aria-hidden="true"
-      className="sticky top-[calc(var(--spacing-top-bar)+env(safe-area-inset-top,0px))] z-20 h-0 lg:top-top-nav"
+      className="sticky top-[calc(var(--spacing-top-bar)+env(safe-area-inset-top,0px))] z-(--z-header) h-0 lg:top-top-nav"
     >
       <div
         ref={cloneRef}

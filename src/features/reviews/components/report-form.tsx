@@ -7,10 +7,7 @@ import { useId } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
-import { errorMessageKey } from '@/lib/api/error-message';
-import { ApiError } from '@/lib/api/errors';
-
-import { type Review, reviewMutations } from '../queries';
+import { type Review, reviewMutations } from '@/features/reviews/queries';
 import {
   invalidFields,
   REPORT_DETAIL_MAX,
@@ -19,7 +16,9 @@ import {
   type ReportForm as ReportFormValues,
   type ReportFormInput,
   reportFormSchema,
-} from '../schemas';
+} from '@/features/reviews/schemas';
+import { errorMessageKey } from '@/lib/api/error-message';
+import { ApiError } from '@/lib/api/errors';
 
 export type ReportOutcome = 'done' | 'already';
 
