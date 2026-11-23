@@ -1,6 +1,6 @@
 import { z } from 'zod/mini';
 
-import { ApiError } from '@/lib/api/errors';
+import { ApiError, isUnsupportedEndpoint } from '@/lib/api/errors';
 import { BFF_BASE } from '@/lib/api/paths';
 import { emitSessionExpired } from '@/lib/api/session-events';
 import { createUntypedRequest } from '@/lib/api/untyped-request';
@@ -36,10 +36,8 @@ export function myDataFileName(now: Date) {
 /** 내려받기 경로가 아직 없는 백엔드(배포 전). */
 export function isExportUnsupported(error: unknown) {
   return (
-    error instanceof ApiError &&
-    (error.status === 405 ||
-      (error.status === 404 &&
-        (error.code === 'RESOURCE_NOT_FOUND' || error.code === 'NOT_FOUND')))
+    isUnsupportedEndpoint(error) ||
+    (error instanceof ApiError && error.status === 405)
   );
 }
 
