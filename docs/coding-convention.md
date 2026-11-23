@@ -121,7 +121,7 @@ src/
   lib/                    도메인을 모르는 공용 코드
     api/                  HTTP 클라이언트, 에러, 에러 코드 → 문구 키, 쿼리 직렬화, 재발급, 세션 만료 이벤트, schema.d.ts
     motion/               처음 보일 때 한 번 움직이기(useFirstView), reduced-motion 확인
-    navigation/           앱 안 이동 깊이 기록(뒤로 가기를 앱 안에서 할 수 있는지), 저장 전 나가기 확인(useLeaveGuard)
+    navigation/           앱 안 이동 깊이 기록(뒤로 가기를 앱 안에서 할 수 있는지), 저장 전 나가기 확인(useLeaveGuard), 앱 안 링크 클릭 판정(appLinkTarget)
     query-client.ts       QueryClient 기본값
     range-position.ts     최저~최고 막대 위의 위치 계산 (RangeBar, CompareStrip)
     safe-storage.ts       sessionStorage·localStorage를 예외 없이 읽고 쓰기 (zod 검증 포함)
