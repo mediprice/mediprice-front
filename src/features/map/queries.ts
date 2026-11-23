@@ -2,9 +2,10 @@ import {
   infiniteQueryOptions,
   mutationOptions,
   type QueryClient,
+  queryOptions,
 } from '@tanstack/react-query';
 
-import { consentKeys } from '@/features/auth/queries';
+import { consentKeys, consentQueries } from '@/features/auth/queries';
 import type { PriceBand } from '@/features/npay/average-verdict';
 import { apiClient } from '@/lib/api/client';
 import { ApiError } from '@/lib/api/errors';
@@ -50,6 +51,13 @@ export const mapKeys = {
 };
 
 export const mapQueries = {
+  /** 위치 기능을 판단할 동의 현황. 다른 탭·기기의 철회를 놓치지 않게 화면에 붙을 때마다 다시 받고, 받는 동안은 판단을 미룬다. */
+  locationConsent: (isSignedIn: boolean) =>
+    queryOptions({
+      ...consentQueries.status(),
+      staleTime: 0,
+      enabled: isSignedIn,
+    }),
   /** 가까운 순. 항목 코드를 주면 그 항목 가격이 있는 병원만, 병원별 최저가(minPrice)와 함께 온다. 흐린 위치가 계정과 묶이지 않게 로그인 없이 보낸다. */
   nearby: (search: NearbySearch) => {
     const condition = toNearbyCondition(search);

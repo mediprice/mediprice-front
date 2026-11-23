@@ -93,7 +93,7 @@
     "purpose": "주변 병원 찾기와 병원까지의 거리 표시",
     "itemsLabel": "이용 항목",
     "itemsPosition": "현재 위치(서버에는 약 1km 단위로 흐려서 보내요)",
-    "itemsLog": "위치를 쓴 날짜와 시각(좌표 없이)",
+    "itemsLog": "위치를 쓴 날짜·시각과 동의한 약관 버전(좌표 없이)",
     "periodLabel": "보유 기간",
     "periodPosition": "좌표는 저장하지 않아요.",
     "periodLog": "이용 기록은 위치를 쓴 시각부터 {days, number}일 동안 보관한 뒤 지워요. 회원 탈퇴와 관계없이 이 기간 동안 남아요.",

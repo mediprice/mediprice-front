@@ -1,12 +1,14 @@
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryObserver } from '@tanstack/react-query';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 
-import { consentKeys } from '@/features/auth/queries';
+import { isLocationConsentActive } from '@/features/auth/consent-status';
+import { consentKeys, consentQueries } from '@/features/auth/queries';
 import type * as ClientModule from '@/lib/api/client';
 import { ApiError } from '@/lib/api/errors';
 import { server } from '@/test/server';
 
+import { resolveLocationAccess } from './location-access';
 import { locationUsageApi } from './location-usage-api';
 import {
   locationUsageMutations,
@@ -237,5 +239,55 @@ describe('locationUsageMutations.record', () => {
     expect(
       await recordFailingWith(new ApiError(500, 'INTERNAL_ERROR', 'x')),
     ).toBe(false);
+  });
+});
+
+describe('mapQueries.locationConsent', () => {
+  const agreed = {
+    requiredConsentsMissing: false,
+    consents: [
+      {
+        type: 'LOCATION',
+        required: false,
+        currentVersion: '2026-11-23',
+        agreed: true,
+        agreedVersion: '2026-11-23',
+        agreedAt: '2026-11-23T00:00:00Z',
+        withdrawnAt: null,
+        reconsentRequired: false,
+      },
+    ],
+  };
+
+  /** useQuery가 첫 렌더에 쓰는 결과(getOptimisticResult)로 화면이 붙자마자 내리는 판단을 본다. */
+  function accessOnMount(options: ReturnType<typeof consentQueries.status>) {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: 60 * 1000 } },
+    });
+    queryClient.setQueryData(consentKeys.status(), agreed);
+    const defaulted = queryClient.defaultQueryOptions(options);
+    defaulted._optimisticResults = 'optimistic';
+    const result = new QueryObserver(
+      queryClient,
+      defaulted,
+    ).getOptimisticResult(defaulted);
+    return resolveLocationAccess({
+      session: 'authenticated',
+      consent: {
+        isPending: result.isPending,
+        isFetching: result.isFetching,
+        isStale: result.isStale,
+        isError: result.isError,
+        isConsentActive: isLocationConsentActive(result.data),
+      },
+    });
+  }
+
+  it('방금 받은 동의가 캐시에 있어도 화면에 붙으면 다시 받기 전까지 판단하지 않는다', () => {
+    expect(accessOnMount(mapQueries.locationConsent(true))).toBeNull();
+  });
+
+  it('기본 staleTime(60초)을 쓰면 다른 곳의 철회를 모른 채 바로 ready가 된다', () => {
+    expect(accessOnMount(consentQueries.status())).toBe('ready');
   });
 });
