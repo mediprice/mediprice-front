@@ -125,7 +125,6 @@
     },
     "reviews": {
       "title": "후기",
-      "count": "{count, plural, other {#건}}",
       "loginNote": "후기 작성과 신고는 로그인 후 이용할 수 있어요.",
       "anonymous": "익명",
       "mine": "내 후기",

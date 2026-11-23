@@ -90,9 +90,7 @@
     "subCategories": "하위 분류",
     "popular": "자주 찾는 분야",
     "all": "전체",
-    "subCount": "하위 분류 {count, plural, other {#개}}",
     "itemCount": "항목 {count, plural, other {#건}}",
-    "otherCategories": "다른 분류 보기",
     "notFound": "분류를 찾을 수 없어요",
     "notFoundDescription": "주소가 바뀌었거나 없어진 분류예요. 전체 분류에서 다시 골라 주세요.",
     "home": {

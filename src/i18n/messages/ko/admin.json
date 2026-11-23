@@ -18,7 +18,6 @@
     "label": "운영"
   },
   "overview": {
-    "title": "운영 개요",
     "heading": "운영 현황",
     "description": "처리할 신고와 데이터 동기화 상태를 한눈에 봐요.",
     "queues": "처리할 일",
@@ -76,7 +75,6 @@
     "pageOutOfRangeDescription": "처리된 항목이 빠지면서 페이지 수가 줄었어요."
   },
   "reports": {
-    "title": "후기 신고",
     "heading": "후기 신고 처리",
     "description": "먼저 들어온 신고부터 보여요. 후기를 숨기면 같은 후기에 들어온 다른 대기 중 신고도 함께 처리돼요.",
     "filterLabel": "처리 상태",
@@ -139,7 +137,6 @@
       "authorWithdrawn": "탈퇴한 회원",
       "writtenAt": "작성 시각",
       "reviewStatus": "후기 상태",
-      "content": "본문",
       "hospital": "병원 화면 열기",
       "hospitalHint": "새 탭에서 열려요",
       "actions": "처리"
