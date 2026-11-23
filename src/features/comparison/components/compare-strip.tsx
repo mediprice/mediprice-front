@@ -3,15 +3,15 @@
 import { useTranslations } from 'next-intl';
 import type { CSSProperties } from 'react';
 
-import { rangePosition, type RangeScale } from '@/components/ui/range-position';
-import { useFirstView } from '@/lib/motion/use-first-view';
-import { cn } from '@/lib/utils';
-
 import {
   clusterStripMarkers,
   type StripDomain,
   type StripMarker,
-} from '../compare-strip';
+} from '@/features/comparison/compare-strip';
+import { useFirstView } from '@/lib/motion/use-first-view';
+import { rangePosition, type RangeScale } from '@/lib/range-position';
+import { cn } from '@/lib/utils';
+
 import { CompareNumber } from './compare-number';
 
 /** 이보다 가까운 점(막대 폭 대비)은 번호를 합친 점 하나로 묶는다. */
@@ -26,8 +26,10 @@ const fade =
 const anchoredLabel =
   'relative left-(--pos) block w-max max-w-full -translate-x-(--pos)';
 
-const at = (position: number) =>
-  ({ '--pos': `${position * 100}%` }) as CSSProperties;
+/** CSSProperties 타입이 CSS 변수(--x)를 몰라 단언한다. */
+const cssVars = (vars: Record<`--${string}`, string>) => vars as CSSProperties;
+
+const at = (position: number) => cssVars({ '--pos': `${position * 100}%` });
 
 /**
  * 여러 병원의 가격을 막대 하나에 번호 점으로 찍는다. 가까운 점은 위로 쌓지 않고 "2·3"처럼 번호를 합친 점 하나로 둔다.
@@ -66,7 +68,7 @@ export function CompareStrip({
     >
       <div
         className="relative mx-3.5 h-(--strip-h)"
-        style={{ '--strip-h': `${STEM_PX + MARKER_PX}px` } as CSSProperties}
+        style={cssVars({ '--strip-h': `${STEM_PX + MARKER_PX}px` })}
       >
         {clusters.map((cluster) => (
           <span

@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { PageContainer } from '@/components/layout/page-container';
 import { SubTopBar } from '@/components/layout/sub-top-bar';
 import { parsePriceFilters } from '@/features/npay/price-filters';
+import { fetchSiteStats } from '@/server/api/home-data';
 
 import { FilterColumn } from './_components/filter-column';
 import {
@@ -23,13 +24,15 @@ export async function generateMetadata({
   params,
 }: PageProps<'/items/[code]'>): Promise<Metadata> {
   const { code } = await params;
-  const [item, summary, t, tRegion] = await Promise.all([
+  const [item, summary, t, tRegion, tMeta] = await Promise.all([
     loadItem(code),
     loadDefaultSummary(code),
     getTranslations('items.metadata'),
     getTranslations('common.region'),
+    getTranslations('metadata'),
   ]);
   return buildItemMetadata({
+    siteName: tMeta('title'),
     code,
     item,
     summary,
@@ -45,9 +48,10 @@ export default async function ItemPricePage({
 }: PageProps<'/items/[code]'>) {
   const { code } = await params;
   const filters = parsePriceFilters(await searchParams);
-  const [state, t] = await Promise.all([
+  const [state, t, stats] = await Promise.all([
     prefetchItemPage(code, filters),
     getTranslations('items'),
+    fetchSiteStats(),
   ]);
 
   return (
@@ -56,8 +60,12 @@ export default async function ItemPricePage({
       <HydrationBoundary state={state}>
         <ItemGate code={code}>
           <div className="rounded-b-4xl bg-primary-tint lg:rounded-none">
-            <PageContainer className="flex flex-col gap-5 py-6 lg:py-10">
-              <ItemHeader code={code} region={filters.region} />
+            <PageContainer className="flex flex-col gap-5 py-6 md:max-w-2xl lg:max-w-page lg:py-10">
+              <ItemHeader
+                code={code}
+                region={filters.region}
+                dataDate={stats?.dataDate ?? null}
+              />
               <PriceSummary
                 code={code}
                 filters={filters}
@@ -67,7 +75,7 @@ export default async function ItemPricePage({
           </div>
           <MobileToolbar code={code} filters={filters} />
           <div className="flex-1 bg-surface">
-            <PageContainer className="flex flex-col gap-4 pt-4 pb-section lg:flex-row lg:items-start lg:gap-8 lg:pt-8">
+            <PageContainer className="flex flex-col gap-4 pt-4 pb-section md:max-w-2xl lg:max-w-page lg:flex-row lg:items-start lg:gap-8 lg:pt-8">
               <FilterColumn code={code} filters={filters} />
               <div className="flex min-w-0 flex-1 flex-col gap-4 lg:gap-6">
                 <PriceSummary

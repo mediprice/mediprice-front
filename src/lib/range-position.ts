@@ -41,35 +41,3 @@ export function hasRange(
     max > min
   );
 }
-
-export type AverageComparison = {
-  direction: 'below' | 'above' | 'same';
-  /** 평균과의 차이(%)를 반올림한 값. same이면 0이다. */
-  percent: number;
-};
-
-/** 평균과 이만큼(%) 안쪽으로 차이 나면 "평균 수준"으로 본다. 몇 % 차이는 싼 편인지 판단하는 데 도움이 되지 않는다. */
-const SAME_WITHIN_PERCENT = 5;
-
-/**
- * 가격이 평균보다 몇 % 싸거나 비싼가. 차이가 SAME_WITHIN_PERCENT 미만이면 같다고 보고,
- * 0원이 아닌데 100% 싸다고 말하지 않게 99%에서 멈춘다. 쓸 수 없는 값이면 null이다.
- */
-export function compareToAverage(
-  price: number | null | undefined,
-  average: number | null | undefined,
-): AverageComparison | null {
-  if (price == null || average == null) return null;
-  if (!Number.isFinite(price) || !Number.isFinite(average)) return null;
-  if (average <= 0 || price < 0) return null;
-  const exact = (Math.abs(price - average) / average) * 100;
-  if (exact < SAME_WITHIN_PERCENT) return { direction: 'same', percent: 0 };
-  const percent = Math.round(exact);
-  if (price < average) {
-    return {
-      direction: 'below',
-      percent: price > 0 ? Math.min(percent, 99) : 100,
-    };
-  }
-  return { direction: 'above', percent };
-}

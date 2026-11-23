@@ -11,13 +11,17 @@ import { RangeBar } from '@/components/ui/range-bar';
 import { CompareToggle } from '@/features/comparison/components/compare-toggle';
 import { FavoriteButton } from '@/features/favorites/components/favorite-button';
 import { HospitalIdentity } from '@/features/hospitals/components/hospital-identity';
+import { compareToAverage } from '@/features/npay/average-verdict';
+import type { HospitalPriceGroup } from '@/features/npay/group-prices';
+import type {
+  HospitalPrice,
+  PriceSortOrder,
+} from '@/features/npay/price-stream';
+import type { PriceSummary } from '@/features/npay/price-summary';
+import { representativeVariant } from '@/features/npay/representative-price';
 import { formatLocation } from '@/features/regions/format-location';
 import { cn } from '@/lib/utils';
 
-import type { HospitalPriceGroup } from '../group-prices';
-import type { HospitalPrice, PriceSortOrder } from '../price-stream';
-import type { PriceSummary } from '../price-summary';
-import { representativeVariant } from '../representative-price';
 import { AverageTag } from './average-tag';
 
 /**
@@ -105,6 +109,10 @@ export function HospitalPriceGroupCard<T extends string>({
               max={summary.maxPrice}
               average={summary.avgPrice}
               value={variant.price}
+              valueLabel={t('valueLabel')}
+              comparison={
+                compareToAverage(variant.price, summary.avgPrice)?.direction
+              }
               showAverageTick={showAverageTick}
             />
           </div>

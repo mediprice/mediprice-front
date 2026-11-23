@@ -10,7 +10,10 @@ import type { components } from '@/lib/api/schema';
 
 type Hospital = components['schemas']['HospitalDetailResponse'];
 
-/** 주소와 길찾기(네이버 지도 앱 딥링크)·네이버 지도 열기. 위치 지도는 화면의 지도 영역이 보여 준다. */
+/**
+ * 주소와 길찾기(네이버 지도 앱 딥링크)·네이버 지도 열기. 위치 지도는 화면의 지도 영역이 보여 준다.
+ * 마우스 기기에서는 길찾기도 같은 웹 지도를 열어 지도 보기 하나만 둔다.
+ */
 export function LocationSection({ hospital }: { hospital: Hospital }) {
   const t = useTranslations('hospitals.detail.location');
   const query = hospital.address?.trim() || hospital.name;
@@ -55,7 +58,7 @@ export function LocationSection({ hospital }: { hospital: Hospital }) {
           name={hospital.name}
           query={query}
           position={position}
-          className="min-h-13 px-5 py-3"
+          className="min-h-13 px-5 py-3 pointer-fine:hidden"
         />
         <Button asChild variant="tint" size="lg">
           <a
@@ -63,8 +66,7 @@ export function LocationSection({ hospital }: { hospital: Hospital }) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            {t('openMap')}
-            <span className="text-caption-strong">{t('newWindow')}</span>
+            {t('openMap')} <span className="sr-only">{t('newWindow')}</span>
             <ExternalLink aria-hidden="true" />
           </a>
         </Button>

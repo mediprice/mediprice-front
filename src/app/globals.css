@@ -147,7 +147,8 @@
   --container-page: 79rem;
   --spacing-top-nav: 4.5rem;
   --spacing-top-bar: 3.5rem;
-  --spacing-tab-bar: 4rem;
+  /* 글자를 키워도 아이콘은 24px라, 글자 몫(2.5rem)만 커지게 한다. 100%에서 64px. */
+  --spacing-tab-bar: calc(2.5rem + 24px);
   /* 섹션 사이 세로 간격. lg 이상은 아래 @media에서 바꾼다. */
   --spacing-section: 2.5rem;
 
@@ -290,6 +291,21 @@
   padding-right: env(safe-area-inset-right, 0px);
 }
 
+/* 최소 여백과 노치 여백 중 큰 쪽(pl-safe-1 = 4px 이상). px-safe에 pl·pr을 덧붙이면 노치 여백이 지워지므로 이것을 쓴다. */
+@utility pl-safe-* {
+  padding-left: max(
+    calc(var(--spacing) * --value(integer)),
+    env(safe-area-inset-left, 0px)
+  );
+}
+
+@utility pr-safe-* {
+  padding-right: max(
+    calc(var(--spacing) * --value(integer)),
+    env(safe-area-inset-right, 0px)
+  );
+}
+
 /* 가격 글자는 자릿수가 맞도록 항상 tabular-nums. 같은 이름의 테마 유틸리티에 속성을 더한다. */
 @utility text-price-md {
   font-variant-numeric: tabular-nums;
@@ -361,6 +377,16 @@
     ):focus
   ) {
     scroll-padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+  }
+}
+
+/* 화면 이동 중 진행 막대(NavigationProgress). 줄인 움직임 설정이면 전역 규칙이 멈춘다. */
+@keyframes nav-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
   }
 }
 

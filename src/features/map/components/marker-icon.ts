@@ -1,6 +1,5 @@
+import type { LatLng } from '@/features/map/map-geo';
 import { cn } from '@/lib/utils';
-
-import type { LatLng } from '../map-geo';
 
 /** place는 병원이 아니라 사용자가 말한 장소(기준점)다. 늘 이름 알약으로 보이고 고를 수 없다. */
 export type MapMarkerKind = 'price' | 'noPrice' | 'plain' | 'place';

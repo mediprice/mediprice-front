@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ComparePage({
   searchParams,
 }: PageProps<'/compare'>) {
-  const [{ ykihos, item }, t] = await Promise.all([
+  const [{ ykihos, item, dropped }, t] = await Promise.all([
     searchParams.then(parseCompareParams),
     getTranslations('comparison.page'),
   ]);
@@ -26,7 +26,7 @@ export default async function ComparePage({
         title={t('topBarTitle')}
         backHref={item ? `/items/${item}` : '/'}
       />
-      <CompareView ykihos={ykihos} item={item} />
+      <CompareView ykihos={ykihos} item={item} dropped={dropped} />
     </>
   );
 }

@@ -1,6 +1,8 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import {
+  ArrowDown,
   ChartLine,
   ChevronDown,
   ChevronRight,
@@ -15,6 +17,7 @@ import { useParams } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useId, useState } from 'react';
 
+import { Button } from '@/components/ui/button';
 import { PriceRange } from '@/components/ui/price-range';
 import { RangeBar } from '@/components/ui/range-bar';
 import { RollingNumber } from '@/components/ui/rolling-number';
@@ -28,8 +31,14 @@ import {
   visibleVariantRows,
 } from '@/features/hospitals/price-groups';
 import { LiveFeeCheck } from '@/features/live-fee/components/live-fee-check';
-import { judgeAgainstAverage } from '@/features/npay/average-verdict';
+import {
+  comparableBand,
+  judgeAgainstAverage,
+} from '@/features/npay/average-verdict';
+import { toPriceConditions } from '@/features/npay/price-filters';
+import { npayQueries } from '@/features/npay/queries';
 import type { ServiceRegion } from '@/features/regions/service-region';
+import { ApiError } from '@/lib/api/errors';
 import { cn } from '@/lib/utils';
 
 import { SectionError } from './section-error';
@@ -60,6 +69,7 @@ export function SelectedItemCard({
   expectedRows,
   onVariantChange,
   onClear,
+  onBackToList,
 }: {
   item: string;
   prices: ItemPrices;
@@ -73,6 +83,8 @@ export function SelectedItemCard({
   expectedRows: number;
   onVariantChange: (variant: VariantSelection) => void;
   onClear: () => void;
+  /** 아래 목록에서 골랐을 때만 있다. 고른 행으로 돌아간다. */
+  onBackToList?: () => void;
 }) {
   const t = useTranslations('hospitals.detail.selected');
   const tPrice = useTranslations('common.price');
@@ -90,6 +102,11 @@ export function SelectedItemCard({
       : rows;
   const isLoading =
     prices.isPending || !rows || (trend.isPending && !trend.error);
+  /** 주소에 남은 옛 항목 코드처럼 더 이상 없는 항목이면 다시 시도해도 소용없다. */
+  const isMissing =
+    failure.error instanceof ApiError &&
+    (failure.error.code === 'NPAY_ITEM_NOT_FOUND' ||
+      failure.error.status === 404);
 
   return (
     <section
@@ -106,6 +123,8 @@ export function SelectedItemCard({
         >
           {displayName ? (
             t('label', { name: displayName })
+          ) : isMissing ? (
+            t('missingLabel')
           ) : (
             <Skeleton className="h-5 w-40" />
           )}
@@ -120,7 +139,25 @@ export function SelectedItemCard({
         </button>
       </div>
 
-      {failure.error ? (
+      {onBackToList && (
+        <button
+          type="button"
+          onClick={onBackToList}
+          className="-mt-3 inline-flex min-h-11 w-fit items-center gap-1 text-label-bold text-primary-text hover:underline"
+        >
+          <ArrowDown aria-hidden="true" className="size-4" strokeWidth={2} />
+          {t('backToList')}
+        </button>
+      )}
+
+      {isMissing ? (
+        <div className="flex flex-col items-start gap-3">
+          <p className="text-body-sm text-text-secondary">{t('missing')}</p>
+          <Button variant="outline" size="md" onClick={onClear}>
+            {t('clear')}
+          </Button>
+        </div>
+      ) : failure.error ? (
         <SectionError
           error={failure.error}
           onRetry={() => void failure.retry()}
@@ -151,6 +188,7 @@ export function SelectedItemCard({
           </div>
 
           <RegionComparison
+            item={item}
             price={activeRow.price}
             summary={summary}
             region={region}
@@ -247,7 +285,7 @@ export function SelectedItemCard({
         </>
       )}
 
-      {!isLoading && (
+      {!isLoading && !isMissing && (
         <Link
           href={`/items/${item}`}
           className="inline-flex min-h-11 w-fit items-center gap-1 text-label-bold text-primary-text hover:underline"
@@ -272,10 +310,12 @@ const DIRECTION_STYLE = {
  * 평균의 1/3~3배 밖이면 % 대신 단위·구성이 달라 비교하기 어렵다고 쓴다(목록 행의 꼬리표와 같은 규칙).
  */
 function RegionComparison({
+  item,
   price,
   summary,
   region: regionId,
 }: {
+  item: string;
   price: number;
   summary: RegionSummaryState;
   region: ServiceRegion;
@@ -283,6 +323,15 @@ function RegionComparison({
   const t = useTranslations('hospitals.detail.selected');
   const region = useTranslations('common.region')(regionId);
   const failure = useStickyError(summary.error, summary.refetch);
+  /** 막대의 최저~최고와 병원 수는 항목 목록과 같은 "평균과 견줄 수 있는 가격" 범위로 그린다(1일당 1,000원 같은 극단값 제외). */
+  const band = comparableBand(summary.data?.avgPrice);
+  const comparable = useQuery({
+    ...npayQueries.summaryOf(
+      item,
+      toPriceConditions({ region: regionId, sort: 'price_asc' }, band),
+    ),
+    enabled: band !== null,
+  });
 
   if (failure.error) {
     return (
@@ -294,7 +343,7 @@ function RegionComparison({
       />
     );
   }
-  if (summary.isPending) {
+  if (summary.isPending || (band !== null && comparable.isPending)) {
     return <RegionComparisonSkeleton />;
   }
   const data = summary.data;
@@ -306,6 +355,9 @@ function RegionComparison({
       </p>
     );
   }
+  /** 비교할 수 없는 가격(범위 밖)이면 점이 범위 안에 없으므로 전체 범위를 그대로 보여 준다. */
+  const scope =
+    verdict.kind === 'comparable' && comparable.data ? comparable.data : data;
   const { icon: Icon, tone } =
     verdict.kind === 'comparable'
       ? DIRECTION_STYLE[verdict.comparison.direction]
@@ -336,15 +388,21 @@ function RegionComparison({
         </p>
       )}
       <RangeBar
-        min={data.minPrice}
-        max={data.maxPrice}
+        min={scope.minPrice}
+        max={scope.maxPrice}
         average={data.avgPrice}
         value={price}
-        isComparable={verdict.kind !== 'incomparable'}
+        valueLabel={t('valueLabel')}
+        comparison={
+          verdict.kind === 'comparable' ? verdict.comparison.direction : null
+        }
         className="w-full"
       />
       <p className="text-caption text-text-tertiary">
-        {t('basis', { region, count: data.hospitalCount })}
+        {t(scope === data ? 'basis' : 'comparableBasis', {
+          region,
+          count: scope.hospitalCount,
+        })}
       </p>
     </div>
   );

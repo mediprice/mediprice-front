@@ -69,7 +69,6 @@
   "rangeBar": {
     "range": "가격 범위: 최저 {min, number}원, 최고 {max, number}원",
     "rangeWithAverage": "가격 범위: 최저 {min, number}원, 평균 {average, number}원, 최고 {max, number}원",
-    "valueLabel": "이 병원",
     "value": "{label} {value, number}원",
     "valueComparison": "{label} {value, number}원, {position, select, below {평균보다 낮아요} above {평균보다 높아요} other {평균과 비슷해요}}",
     "average": "평균",
@@ -78,5 +77,8 @@
   "directions": {
     "label": "길찾기",
     "description": "{name}까지 네이버 지도에서 길찾기 (앱 또는 새 창)"
+  },
+  "connection": {
+    "offline": "인터넷 연결이 끊겼어요. 다시 연결되면 이어서 불러와요."
   }
 }

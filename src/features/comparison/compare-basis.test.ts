@@ -55,6 +55,7 @@ describe('comparisonBasis', () => {
     );
     expect(basis).toEqual({
       kind: 'sameVariant',
+      excluded: [],
       entries: [
         { ykiho: 'A', price: 90_000, variant: '도수치료 30분' },
         { ykiho: 'B', price: 80_000, variant: '도수치료  30분' },
@@ -71,6 +72,7 @@ describe('comparisonBasis', () => {
       ]),
     ).toEqual({
       kind: 'lowest',
+      excluded: [],
       entries: [
         { ykiho: 'A', price: 1000, variant: '도수치료 [1일당] - N' },
         { ykiho: 'B', price: 50_000, variant: '도수치료R' },
@@ -86,11 +88,74 @@ describe('comparisonBasis', () => {
       ]),
     ).toEqual({
       kind: 'lowest',
+      excluded: [],
       entries: [
         { ykiho: 'A', price: 1000, variant: '도수치료' },
         { ykiho: 'B', price: 50_000, variant: null },
       ],
     });
+  });
+});
+
+describe('comparisonBasis with 평균 범위', () => {
+  const band = { minPrice: 39_462, maxPrice: 355_152 };
+
+  it('범위 밖 세부 항목(1일당 1,000원)은 기준으로 쓰지 않고 범위 안 가장 낮은 가격을 쓴다', () => {
+    expect(
+      comparisonBasis(
+        row(['A', 1000], ['B', 50_000]),
+        hospitals,
+        [
+          [
+            { name: '도수치료 [1일당] - N', price: 1000 },
+            { name: '도수치료 30분', price: 90_000 },
+          ],
+          [{ name: '도수치료R', price: 50_000 }],
+        ],
+        band,
+      ),
+    ).toEqual({
+      kind: 'lowest',
+      excluded: [],
+      entries: [
+        { ykiho: 'A', price: 90_000, variant: '도수치료 30분' },
+        { ykiho: 'B', price: 50_000, variant: '도수치료R' },
+      ],
+    });
+  });
+
+  it('범위 안 가격이 하나도 없는 병원은 결론에서 빼고 알린다', () => {
+    const basis = comparisonBasis(
+      row(['A', 1000], ['B', 50_000], ['C', 60_000]),
+      hospitals,
+      [[{ name: '도수치료 [1일당] - N', price: 1000 }], undefined, undefined],
+      band,
+    );
+    expect(basis.excluded).toEqual(['A']);
+    expect(basis.entries.map((entry) => entry.ykiho)).toEqual(['B', 'C']);
+  });
+
+  it('같은 이름의 세부 항목도 범위 밖이면 그 항목으로 견주지 않는다', () => {
+    expect(
+      comparisonBasis(
+        row(['A', 1000], ['B', 1200]),
+        hospitals,
+        [
+          [
+            { name: '1일당', price: 1000 },
+            { name: '30분', price: 80_000 },
+          ],
+          [
+            { name: '1일당', price: 1200 },
+            { name: '30분', price: 70_000 },
+          ],
+        ],
+        band,
+      ).entries,
+    ).toEqual([
+      { ykiho: 'A', price: 80_000, variant: '30분' },
+      { ykiho: 'B', price: 70_000, variant: '30분' },
+    ]);
   });
 });
 

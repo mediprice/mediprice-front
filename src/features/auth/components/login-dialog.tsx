@@ -8,9 +8,12 @@ import {
   ResponsiveDialog,
   ResponsiveDialogContent,
 } from '@/components/ui/responsive-dialog';
+import {
+  closeLoginDialog,
+  useLoginDialogState,
+} from '@/features/auth/login-dialog-store';
 
-import { closeLoginDialog, useLoginDialogState } from '../login-dialog-store';
-import { GoogleLoginButton } from './google-login-button';
+import { focusGoogleLogin, GoogleLoginButton } from './google-login-button';
 
 /** 로그인 흐름(돌아올 경로)을 잃지 않도록 약관은 새 탭으로 연다. */
 function newTabLink(href: '/terms' | '/privacy') {
@@ -54,6 +57,7 @@ export function LoginDialog() {
       <ResponsiveDialogContent
         title={reason === 'general' ? t('titleGeneral') : t('title')}
         className="md:max-w-md"
+        onOpenAutoFocus={focusGoogleLogin}
         onCloseAutoFocus={(event) => {
           if (!opener?.isConnected) return;
           event.preventDefault();

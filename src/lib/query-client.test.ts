@@ -11,10 +11,10 @@ describe('shouldRetryQuery', () => {
     },
   );
 
-  it('5xx 응답은 세 번까지 재시도한다', () => {
+  it('5xx 응답은 한 번만 재시도한다', () => {
     const error = new ApiError(502, 'UPSTREAM_UNAVAILABLE', '');
-    expect(shouldRetryQuery(2, error)).toBe(true);
-    expect(shouldRetryQuery(3, error)).toBe(false);
+    expect(shouldRetryQuery(0, error)).toBe(true);
+    expect(shouldRetryQuery(1, error)).toBe(false);
   });
 
   it('네트워크 오류는 재시도한다', () => {

@@ -8,7 +8,7 @@ import {
   ServerOff,
   UserRoundX,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { type ReactNode, useRef } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -17,10 +17,9 @@ import {
   ResponsiveDialogContent,
 } from '@/components/ui/responsive-dialog';
 import { LEGAL_FACTS } from '@/config/legal';
+import { type AiNoticeKind, aiProviders } from '@/features/ai/ai-notice';
+import type { VoiceEngine } from '@/features/ai/voice-state';
 import { PendingFact } from '@/features/legal/components/pending-fact';
-
-import { type AiNoticeKind, aiProviders } from '../ai-notice';
-import type { VoiceEngine } from '../voice-state';
 
 /** 첫 전송(또는 첫 음성 입력) 전에 한 번 보이는 안내. 확인하면 막았던 행동을 이어서 한다. 닫으면 아무것도 보내지 않는다. */
 export function AiNoticeDialog({
@@ -38,6 +37,7 @@ export function AiNoticeDialog({
   const t = useTranslations('ai.notice');
   const tCommon = useTranslations('common.actions');
   const tCountries = useTranslations('legal.countries');
+  const format = useFormatter();
   const opener = useRef<HTMLElement | null>(null);
   const isOpen = kinds.length > 0;
   const hasVoice = kinds.includes('voice');
@@ -89,21 +89,24 @@ export function AiNoticeDialog({
                 <p>{t('sent')}</p>
                 <p className="text-body-sm text-text-secondary">
                   {t('providersLabel')}:{' '}
-                  {aiProviders().map((provider, index) => (
-                    <span key={provider.company ?? index}>
-                      {index > 0 && ', '}
-                      {provider.company && provider.countries ? (
-                        t('provider', {
-                          company: provider.company,
-                          countries: provider.countries
-                            .map((country) => tCountries(country))
-                            .join(', '),
-                        })
-                      ) : (
-                        <PendingFact />
-                      )}
-                    </span>
-                  ))}
+                  {format.list(
+                    aiProviders().map((provider, index) => (
+                      <span key={provider.company ?? index}>
+                        {provider.company && provider.countries ? (
+                          t('provider', {
+                            company: provider.company,
+                            countries: format.list(
+                              provider.countries.map((country) =>
+                                tCountries(country),
+                              ),
+                            ),
+                          })
+                        ) : (
+                          <PendingFact />
+                        )}
+                      </span>
+                    )),
+                  )}
                 </p>
               </NoticeItem>
               <NoticeItem icon={<ServerOff {...icon} />}>

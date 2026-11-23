@@ -1,4 +1,5 @@
 import { useTranslations } from 'next-intl';
+import type { ComponentProps } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -7,10 +8,10 @@ export function PriceRange({
   min,
   max,
   className,
-}: {
+  ...props
+}: ComponentProps<'span'> & {
   min: number | null | undefined;
   max: number | null | undefined;
-  className?: string;
 }) {
   const t = useTranslations('common.price');
   const low = min ?? max;
@@ -18,11 +19,21 @@ export function PriceRange({
 
   if (low == null || high == null) {
     return (
-      <span className={cn('text-text-tertiary', className)}>{t('none')}</span>
+      <span
+        data-slot="price-range"
+        className={cn('text-text-tertiary', className)}
+        {...props}
+      >
+        {t('none')}
+      </span>
     );
   }
   return (
-    <span className={cn('tabular-nums', className)}>
+    <span
+      data-slot="price-range"
+      className={cn('tabular-nums', className)}
+      {...props}
+    >
       {low === high
         ? t('won', { amount: low })
         : t.rich('rangeParts', {

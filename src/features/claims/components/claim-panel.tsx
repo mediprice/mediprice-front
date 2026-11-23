@@ -10,10 +10,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { ClaimReceipt as Receipt } from '@/features/claims/api';
+import { claimNoticeState, claimQueries } from '@/features/claims/queries';
 import { errorMessageKey } from '@/lib/api/error-message';
 
-import type { ClaimReceipt as Receipt } from '../api';
-import { claimNoticeState, claimQueries } from '../queries';
 import { ClaimForm } from './claim-form';
 import { ClaimReceipt } from './claim-receipt';
 

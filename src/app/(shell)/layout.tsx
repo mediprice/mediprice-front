@@ -5,6 +5,9 @@ import { TopNav } from '@/components/layout/top-nav';
 import { AccountAction } from '@/features/auth/components/account-action';
 import { AuthDialogs } from '@/features/auth/components/auth-dialogs';
 import { ConsentGate } from '@/features/auth/components/consent-gate';
+import { PendingFavoriteRunner } from '@/features/favorites/components/pending-favorite-runner';
+import { ConnectionBanner } from '@/features/feedback/connection-banner';
+import { Toaster } from '@/features/feedback/toaster';
 
 import { useNavItems } from './_components/use-nav-items';
 
@@ -14,10 +17,13 @@ export default function ShellLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <SkipLink />
+      <ConnectionBanner />
       <TopNav items={navItems} actions={<AccountAction />} />
       {children}
       <AuthDialogs />
       <ConsentGate />
+      <Toaster />
+      <PendingFavoriteRunner />
     </>
   );
 }

@@ -26,6 +26,20 @@ describe('areaScope', () => {
     });
   });
 
+  it('장소가 없을 때 결과에서 고른 지역이 있으면 그 지역으로 본다', () => {
+    expect(areaScope(null, 'gyeonggi')).toMatchObject({
+      kind: 'default',
+      filters: { region: 'gyeonggi' },
+    });
+  });
+
+  it('장소를 말했으면 고른 지역보다 그 장소를 쓴다', () => {
+    expect(areaScope(area('110000', null, '서울'), 'all')).toMatchObject({
+      kind: 'area',
+      filters: { region: 'seoul' },
+    });
+  });
+
   it('서울 시군구면 서울과 그 시군구로 좁힌다', () => {
     expect(areaScope(area('110000', '110015', '서울 은평구'))).toEqual({
       kind: 'area',

@@ -218,6 +218,24 @@ describe('unwrap', () => {
     ).rejects.toBeInstanceOf(ApiError);
   });
 
+  it('본문 없는 실패 응답도 ApiError로 던진다', async () => {
+    server.use(
+      http.get(
+        SIDO,
+        () =>
+          new HttpResponse(null, {
+            status: 502,
+            headers: { 'content-length': '0' },
+          }),
+      ),
+    );
+    const { client } = setup();
+
+    await expect(unwrap(client.GET('/api/regions/sido'))).rejects.toMatchObject(
+      { name: 'ApiError', status: 502, code: 'UNKNOWN' },
+    );
+  });
+
   it('연결 실패는 NetworkError로 던진다', async () => {
     server.use(http.get(SIDO, () => HttpResponse.error()));
     const { client } = setup();

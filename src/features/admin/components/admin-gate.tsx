@@ -8,9 +8,9 @@ import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
+import { isAdmin } from '@/features/admin/access';
 import { useSession } from '@/features/auth/use-session';
 
-import { isAdmin } from '../access';
 import { AdminNotFound } from './admin-not-found';
 
 /** 운영자에게만 children을 보여 준다. 서버도 막지만, 운영자가 아니면 화면이 있다는 것도 알리지 않도록 404와 같은 모습을 보여 준다. */

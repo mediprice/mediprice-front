@@ -207,6 +207,52 @@ describe('conversationStore', () => {
     });
   });
 
+  it('기다리다 그만두면 요청을 끊고, 같은 입력으로 다시 보낼 수 있다', async () => {
+    let aborted = false;
+    const store = createConversationStore({
+      api: {
+        sendTurn: (_input, _state, { signal } = {}) =>
+          new Promise((_, reject) => {
+            signal?.addEventListener('abort', () => {
+              aborted = true;
+              reject(new DOMException('aborted', 'AbortError'));
+            });
+          }),
+      },
+    });
+
+    store.getState().send('허리가 아파요', 'anonymous');
+    expect(store.getState().sentAt).not.toBeNull();
+    store.getState().cancel();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(aborted).toBe(true);
+    expect(store.getState()).toMatchObject({
+      status: 'failed',
+      failure: 'cancelled',
+      pendingInput: '허리가 아파요',
+    });
+  });
+
+  it('정한 시간 안에 답이 없으면 끊고 다시 보낼 수 있는 실패로 바꾼다', async () => {
+    server.use(http.post(TURN, () => new Promise<Response>(() => {})));
+    let id = 0;
+    const store = createConversationStore({
+      api: createAiApi({ baseUrl: BASE }),
+      createId: () => `id-${(id += 1)}`,
+      timeoutMs: 30,
+    });
+
+    store.getState().send('허리가 아파요', 'anonymous');
+    await settled(store);
+
+    expect(store.getState()).toMatchObject({
+      status: 'failed',
+      failure: 'unavailable',
+      pendingInput: '허리가 아파요',
+    });
+  });
+
   it('저장한 대화를 다시 열고, 기다리던 요청은 재시도할 수 있게 연다', async () => {
     storage.setItem(
       CONVERSATION_STORAGE_KEY,

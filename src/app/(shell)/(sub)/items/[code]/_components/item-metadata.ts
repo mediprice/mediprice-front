@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { getTranslations } from 'next-intl/server';
 
+import { openGraphFor } from '@/app/_components/open-graph';
 import type { PriceSummary } from '@/features/npay/price-summary';
 import type { components } from '@/lib/api/schema';
 
@@ -15,20 +16,26 @@ export function buildItemMetadata({
   item,
   summary,
   regionLabel,
+  siteName,
   t,
 }: {
   code: string;
   item: Item | null;
   summary: PriceSummary | null;
   regionLabel: string;
+  /** 공유 미리보기의 사이트 이름(루트 metadata.title과 같다). */
+  siteName: string;
   t: Translate;
 }): Metadata {
-  const alternates = { canonical: `/items/${encodeURIComponent(code)}` };
+  const canonical = `/items/${encodeURIComponent(code)}`;
+  const alternates = { canonical };
+  const openGraph = openGraphFor(canonical, siteName);
   if (!item) {
     return {
       title: t('fallbackTitle'),
       description: t('fallbackDescription'),
       alternates,
+      openGraph,
     };
   }
   const name = formatItemTitle(item);
@@ -41,5 +48,5 @@ export function buildItemMetadata({
           hospitals: summary.hospitalCount,
         })
       : t('descriptionWithoutAverage', { name });
-  return { title: t('title', { name }), description, alternates };
+  return { title: t('title', { name }), description, alternates, openGraph };
 }

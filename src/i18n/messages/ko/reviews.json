@@ -47,7 +47,9 @@
       "paidAmountInvalid": "1억 원 이하의 숫자로 입력해 주세요.",
       "cannotClear": "이미 입력한 값은 지울 수 없어요. 바꿀 값을 입력해 주세요.",
       "invalid": "입력한 내용을 다시 확인해 주세요."
-    }
+    },
+    "draftRestored": "저장하지 않은 내용을 불러왔어요.",
+    "draftDiscard": "지우고 새로 쓰기"
   },
   "leave": {
     "title": "작성 중인 내용이 있어요",

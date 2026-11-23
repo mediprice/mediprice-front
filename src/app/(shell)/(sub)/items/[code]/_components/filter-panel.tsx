@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { type ComponentProps, type ReactNode, useId } from 'react';
 
 import { SegmentedControl } from '@/components/ui/segmented-control';
+import { isPricedInstitution } from '@/features/institutions/price-institutions';
 import { institutionQueries } from '@/features/institutions/queries';
 import {
   type PriceFilters,
@@ -104,11 +105,13 @@ export function FilterPanel({
         }
       >
         <option value="">{t('filters.institutionAll')}</option>
-        {institutionTypes.data?.map((item) => (
-          <option key={item.code} value={item.code}>
-            {item.name}
-          </option>
-        ))}
+        {institutionTypes.data
+          ?.filter((item) => isPricedInstitution(item.code))
+          .map((item) => (
+            <option key={item.code} value={item.code}>
+              {item.name}
+            </option>
+          ))}
       </FilterSelect>
     </div>
   );

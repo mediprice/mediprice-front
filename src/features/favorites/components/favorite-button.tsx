@@ -7,14 +7,14 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useLoginGuard, useSession } from '@/features/auth/use-session';
-import { cn } from '@/lib/utils';
-
+import { savePendingFavorite } from '@/features/favorites/pending-favorite';
 import {
   favoriteMutations,
   favoriteQueries,
   type FavoriteSeed,
   isFavoriteIn,
-} from '../queries';
+} from '@/features/favorites/queries';
+import { cn } from '@/lib/utils';
 
 type Notice = { id: number; kind: 'added' | 'removed' | 'failed' };
 
@@ -53,7 +53,10 @@ export function FavoriteButton({
   });
   const [notice, setNotice] = useState<Notice | null>(null);
   const toggle = useMutation(favoriteMutations.toggle());
-  const isPressed = toggle.isPending ? toggle.variables.isFavorite : isSaved;
+  /** 캐시에 목록이 있어도 세션 확인 전(서버 렌더·hydration 중)에는 쓰지 않아 서버 HTML과 어긋나지 않게 한다. */
+  const isPressed = toggle.isPending
+    ? toggle.variables.isFavorite
+    : isSignedIn && isSaved;
   const isBusy = isSignedIn && (isListPending || toggle.isPending);
   const name = hospital?.name?.trim();
   const label = isPressed
@@ -64,7 +67,7 @@ export function FavoriteButton({
       ? t('addLabelNamed', { name })
       : t('addLabel');
 
-  const handleClick = guard('favorite', () => {
+  const guardedToggle = guard('favorite', () => {
     if (isBusy) return;
     const isFavorite = !isPressed;
     if (onToggle) {
@@ -89,6 +92,19 @@ export function FavoriteButton({
       },
     );
   });
+
+  /** 로그인하지 않았으면 로그인하고 돌아왔을 때 이어서 넣도록 남긴다(PendingFavoriteRunner가 실행한다). */
+  function handleClick() {
+    if (status === 'anonymous' && !isPressed && !onToggle) {
+      savePendingFavorite({
+        ykiho,
+        name: name ?? null,
+        path: window.location.pathname + window.location.search,
+        scrollY: window.scrollY,
+      });
+    }
+    guardedToggle();
+  }
 
   return (
     <>

@@ -1,11 +1,11 @@
 'use client';
 
-import {
-  type InfiniteData,
-  type UseInfiniteQueryResult,
-  useQuery,
+import type {
+  InfiniteData,
+  UseInfiniteQueryResult,
 } from '@tanstack/react-query';
 import { CircleAlert, MapPinned } from 'lucide-react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
@@ -14,10 +14,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { NearbyHospitalCard } from '@/features/map/components/nearby-hospital-card';
 import { RADIUS_OPTIONS, type RadiusOption } from '@/features/map/map-geo';
 import type { NearbyHospital } from '@/features/map/queries';
-import { npayQueries } from '@/features/npay/queries';
-import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
+import { DEFAULT_REGION } from '@/features/regions/service-region';
 import { errorMessageKey } from '@/lib/api/error-message';
 import { cn } from '@/lib/utils';
+
+import type { itemListHref } from './item-list-href';
 
 type NearbyPage = { content: NearbyHospital[]; totalElements: number };
 
@@ -38,6 +39,7 @@ export function NearbyList({
   selectedId,
   onShowOnMap,
   onRadiusChange,
+  listHref,
   className,
 }: {
   query: UseInfiniteQueryResult<InfiniteData<NearbyPage>>;
@@ -49,17 +51,14 @@ export function NearbyList({
   selectedId: string | null;
   onShowOnMap: (id: string) => void;
   onRadiusChange: (radius: RadiusOption) => void;
+  /** 항목으로 들어왔으면 그 항목의 지역 가격 목록. 주변에 없을 때 다른 지역 병원을 보러 간다. */
+  listHref: ReturnType<typeof itemListHref> | null;
   className?: string;
 }) {
   const t = useTranslations('map.list');
   const tErrors = useTranslations('errors');
   const tActions = useTranslations('common.actions');
   const tRegion = useTranslations('common.region');
-  /** 꼬리표의 기준. 지도는 어디든 볼 수 있어 항목 화면의 기본 지역(서울·경기) 평균을 쓴다. */
-  const regionSummary = useQuery({
-    ...npayQueries.summaryIn(item ?? '', sidoCodesOf(DEFAULT_REGION)),
-    enabled: item !== null,
-  });
   const total = query.data?.pages[0]?.totalElements;
   const noPositionCount = hospitals.filter(
     (h) => h.latitude === null || h.longitude === null,
@@ -133,17 +132,41 @@ export function NearbyList({
           <EmptyState
             icon={<MapPinned />}
             title={item ? t('emptyItemTitle') : t('emptyTitle')}
-            description={t('emptyDescription')}
+            description={
+              wider
+                ? t('emptyDescription')
+                : t(
+                    listHref
+                      ? 'emptyMaxItemDescription'
+                      : 'emptyMaxDescription',
+                    {
+                      km: radius / 1000,
+                    },
+                  )
+            }
             className="rounded-xl bg-bg"
             action={
-              wider && (
-                <Button
-                  variant="tint"
-                  size="md"
-                  onClick={() => onRadiusChange(wider)}
-                >
-                  {t('widen', { km: wider / 1000 })}
-                </Button>
+              (wider || listHref) && (
+                <>
+                  {wider && (
+                    <Button
+                      variant="tint"
+                      size="md"
+                      onClick={() => onRadiusChange(wider)}
+                    >
+                      {t('widen', { km: wider / 1000 })}
+                    </Button>
+                  )}
+                  {listHref && (
+                    <Button
+                      asChild
+                      variant={wider ? 'ghost' : 'tint'}
+                      size="md"
+                    >
+                      <Link href={listHref}>{t('openPriceList')}</Link>
+                    </Button>
+                  )}
+                </>
               )
             }
           />
@@ -160,7 +183,6 @@ export function NearbyList({
                     hospital={hospital}
                     href={hospitalHref(hospital.ykiho, item)}
                     hasItem={item !== null}
-                    average={regionSummary.data?.avgPrice}
                     isSelected={hospital.ykiho === selectedId}
                     onShowOnMap={() => onShowOnMap(hospital.ykiho)}
                   />

@@ -14,10 +14,13 @@ export function useCoveredHeight(
     if (!isActive || !element) return;
     const root = document.documentElement;
     const measure = () => {
-      const covered = Math.max(
-        0,
-        Math.ceil(window.innerHeight - element.getBoundingClientRect().top),
-      );
+      const rect = element.getBoundingClientRect();
+      /** 입력 중에 숨은(display: none) 동안은 여백을 그대로 두고, 스크롤 여백만 전역 규칙에 맡긴다. */
+      if (rect.height === 0) {
+        root.style.removeProperty('scroll-padding-bottom');
+        return;
+      }
+      const covered = Math.max(0, Math.ceil(window.innerHeight - rect.top));
       setHeight(covered);
       root.style.setProperty('scroll-padding-bottom', `${covered + 8}px`);
     };

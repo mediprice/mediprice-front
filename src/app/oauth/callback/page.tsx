@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
+import { BrandLink } from '@/components/layout/brand-link';
+import { PageContainer } from '@/components/layout/page-container';
+
 import { OAuthCallback } from './_components/oauth-callback';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -16,12 +19,19 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function OAuthCallbackPage() {
   const t = await getTranslations('auth.callback');
   return (
-    <main
-      id="main"
-      className="flex min-h-dvh items-center justify-center py-section px-page"
-    >
-      <h1 className="sr-only">{t('metaTitle')}</h1>
-      <OAuthCallback />
-    </main>
+    <div className="flex min-h-dvh flex-col">
+      <header className="flex h-top-bar items-center border-b border-hairline lg:h-top-nav">
+        <PageContainer>
+          <BrandLink />
+        </PageContainer>
+      </header>
+      <main
+        id="main"
+        className="flex flex-1 items-center justify-center py-section px-page"
+      >
+        <h1 className="sr-only">{t('metaTitle')}</h1>
+        <OAuthCallback />
+      </main>
+    </div>
   );
 }

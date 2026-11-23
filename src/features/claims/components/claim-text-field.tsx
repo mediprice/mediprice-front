@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 import type { ComponentProps } from 'react';
 
-import { claimFormErrorKey } from '../schemas';
+import { claimFormErrorKey } from '@/features/claims/schemas';
 
 /** 한 줄 입력 칸. 안내 문구는 항상 보이고, 오류는 그 아래에 붙는다. */
 export function ClaimTextField({

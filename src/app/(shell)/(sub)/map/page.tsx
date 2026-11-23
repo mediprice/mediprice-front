@@ -24,7 +24,11 @@ export default async function MapPage({ searchParams }: PageProps<'/map'>) {
     <>
       <SubTopBar
         title={t('title')}
-        backHref={params.item ? itemListHref(params.item, params.region) : '/'}
+        backHref={
+          params.item
+            ? itemListHref(params.item, params.region, params.back ?? null)
+            : '/'
+        }
       />
       <MapView initialParams={params} />
     </>

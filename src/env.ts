@@ -52,7 +52,7 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID,
     BFF_SHARED_SECRET: process.env.BFF_SHARED_SECRET,
   },
-  // Set SKIP_ENV_VALIDATION=1 for builds that run without real env values (e.g. Docker, CI lint).
+  /** 실제 값 없이 돌리는 빌드(Docker, CI lint)는 SKIP_ENV_VALIDATION=1로 검증을 건너뛴다. */
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,
 });

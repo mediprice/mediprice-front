@@ -202,6 +202,32 @@ describe('reviewMutations.update', () => {
     ).rejects.toMatchObject({ status: 403, code: 'REVIEW_FORBIDDEN' });
     expect(isStale(client, reviewKeys.hospital('H1', 'latest'))).toBe(true);
   });
+
+  it('화면이 mutate에 onError를 넘겨도 낡은 목록을 다시 받게 한다', async () => {
+    server.use(
+      http.patch(`${BASE}/api/reviews/7`, () =>
+        errorBody('REVIEW_NOT_FOUND', 404),
+      ),
+    );
+    const client = seededClient();
+    const onError = vi.fn();
+    const observer = new MutationObserver(
+      client,
+      reviewMutations.update(client, 7),
+    );
+    /** mutate에 넘긴 콜백은 구독 중인 화면(useMutation)에만 불린다. */
+    const unsubscribe = observer.subscribe(() => {});
+
+    await expect(
+      observer.mutate(
+        { rating: 3, content: '열 글자가 넘는 후기 내용', ...NO_VISIT },
+        { onError },
+      ),
+    ).rejects.toMatchObject({ code: 'REVIEW_NOT_FOUND' });
+    unsubscribe();
+    expect(onError).toHaveBeenCalledOnce();
+    expect(isStale(client, reviewKeys.hospital('H1', 'latest'))).toBe(true);
+  });
 });
 
 describe('reviewMutations.remove', () => {

@@ -2,10 +2,15 @@ import { ChevronDown, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import {
+  DEFAULT_REGION,
+  SERVICE_REGIONS,
+} from '@/features/regions/service-region';
 
 /** JS 없이 동작하는 GET 폼. /search가 type·q·region 파라미터를 읽는다. */
 export function HomeSearchForm() {
   const t = useTranslations('home.search');
+  const tRegion = useTranslations('common.region');
   return (
     <form
       action="/search"
@@ -72,13 +77,14 @@ export function HomeSearchForm() {
           <span className="relative flex items-center">
             <select
               name="region"
-              defaultValue="metro"
+              defaultValue={DEFAULT_REGION}
               className="min-h-11 w-full appearance-none rounded-md bg-transparent pr-8 text-field text-text-primary -outline-offset-2"
             >
-              <option value="metro">{t('regionAll')}</option>
-              <option value="seoul">{t('regionSeoul')}</option>
-              <option value="gyeonggi">{t('regionGyeonggi')}</option>
-              <option value="all">{t('regionNationwide')}</option>
+              {SERVICE_REGIONS.map((value) => (
+                <option key={value} value={value}>
+                  {tRegion(value)}
+                </option>
+              ))}
             </select>
             <ChevronDown
               aria-hidden="true"

@@ -8,6 +8,7 @@ import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { NearPlace } from '@/features/ai/area-filters';
 import { DirectionsButton } from '@/features/hospitals/components/directions-button';
 import { toTelHref } from '@/features/hospitals/detail-links';
 import { LazyHospitalMap } from '@/features/map/components/lazy-hospital-map';
@@ -20,8 +21,6 @@ import { useDistanceLabel } from '@/features/map/use-distance-label';
 import type { PriceBand } from '@/features/npay/average-verdict';
 import { DEFAULT_REGION } from '@/features/regions/service-region';
 import { cn } from '@/lib/utils';
-
-import type { NearPlace } from '../area-filters';
 
 const SHOWN = 5;
 /** 서버는 약 1km로 흐린 중심에서 재므로 넉넉히 받아 정확한 중심에서 다시 잰 뒤 가까운 곳을 고른다. */
@@ -245,9 +244,12 @@ function NearbyRow({
             </Link>
           </h5>
           <p className="text-caption text-text-secondary">
-            {[hospital.className, t('distance', { distance })]
-              .filter(Boolean)
-              .join(' · ')}
+            {hospital.className
+              ? t('classAndDistance', {
+                  className: hospital.className,
+                  distance,
+                })
+              : t('distance', { distance })}
           </p>
           {hospital.address && (
             <p className="text-caption wrap-break-word text-text-tertiary">

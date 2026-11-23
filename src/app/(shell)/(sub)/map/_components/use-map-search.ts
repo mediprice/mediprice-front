@@ -14,7 +14,8 @@ import {
 import { buildMapQuery, type MapParams } from '@/features/map/map-params';
 import { useGeolocation } from '@/features/map/use-geolocation';
 
-export type LocationNotice = 'denied' | 'unavailable' | 'outside';
+/** deferred: 위치 묻기를 미뤄 지역 중심(서울시청 등)을 보고 있다. */
+export type LocationNotice = 'denied' | 'unavailable' | 'outside' | 'deferred';
 /** 지도가 맞출 검색 영역. 사용자 동작마다 새 객체라서 같은 곳을 다시 골라도 지도가 돌아온다. */
 export type MapSearch = { center: LatLng; radius: RadiusOption };
 type CenterSource = 'url' | 'area' | 'location' | 'fallback';
@@ -77,12 +78,18 @@ export function useMapSearch(initial: MapParams) {
       setNotice('denied');
     } else if (sessionStorage.getItem(PROMPT_DISMISSED_KEY) === null) {
       setIsPromptOpen(true);
+    } else {
+      setNotice('deferred');
     }
   }
 
   function replaceUrl(center: LatLng | null, nextRadius: RadiusOption) {
     const query = buildMapQuery({ ...initial, center, radius: nextRadius });
-    window.history.replaceState(null, '', query ? `/map?${query}` : '/map');
+    window.history.replaceState(
+      window.history.state,
+      '',
+      query ? `/map?${query}` : '/map',
+    );
   }
 
   return {
@@ -108,6 +115,8 @@ export function useMapSearch(initial: MapParams) {
         void locate();
       } else {
         sessionStorage.setItem(PROMPT_DISMISSED_KEY, '1');
+        if (source === 'fallback')
+          setNotice((current) => current ?? 'deferred');
       }
     },
     retryLocation: () => void locate(),

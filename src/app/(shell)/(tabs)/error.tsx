@@ -1,6 +1,6 @@
 'use client';
 
-import { RouteError } from '../_components/route-error';
+import { RouteError } from '@/app/(shell)/_components/route-error';
 
 export default function TabsError(props: {
   error: unknown;

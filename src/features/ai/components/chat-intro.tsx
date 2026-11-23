@@ -4,17 +4,20 @@ import { useTranslations } from 'next-intl';
 import { openLoginDialog } from '@/features/auth/login-dialog-store';
 
 import { AssistantBubble } from './assistant-bubble';
+import { type DailyUsage, SendCostHint } from './send-cost-hint';
 
 const EXAMPLES = ['manualTherapy', 'shoulder', 'implant', 'shingles'] as const;
 
-/** 시작 화면. 예시를 누르면 그 문장을 바로 보낸다. 로그인 안내 줄은 세션 확인 전에도 자리를 잡아 화면이 밀리지 않게 한다. */
+/** 시작 화면. 예시를 누르면 그 문장을 바로 보내므로 1회 쓴다는 안내를 함께 둔다. 안내 줄은 세션 확인 전에도 자리를 잡아 화면이 밀리지 않게 한다. */
 export function ChatIntro({
   onPick,
   isAnonymous,
+  usage,
 }: {
-  /** 대화가 시작되면 예시를 숨기려고 넘기지 않는다. */
+  /** 대화가 시작됐거나 더 보낼 수 없으면 예시를 숨기려고 넘기지 않는다. */
   onPick?: (text: string) => void;
   isAnonymous: boolean;
+  usage: DailyUsage;
 }) {
   const t = useTranslations('ai');
   return (
@@ -43,6 +46,8 @@ export function ChatIntro({
             ))}
           </ul>
           <p className="min-h-5 text-caption text-text-tertiary">
+            <SendCostHint usage={usage} isInstant />
+            {isAnonymous && ' '}
             {isAnonymous &&
               t.rich('usage.anonymousHint', {
                 login: (chunks) => (

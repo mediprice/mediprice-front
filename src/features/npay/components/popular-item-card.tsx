@@ -4,9 +4,9 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { npayQueries } from '@/features/npay/queries';
 import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
 
-import { npayQueries } from '../queries';
 import { PriceOverview } from './price-overview';
 
 /** 홈 인기 항목 카드의 가격 영역. 기본 지역(서울·경기)의 평균과 범위를 보여 준다. */

@@ -39,7 +39,9 @@ export function onNaverAuthFailure(listener: () => void) {
 export function loadNaverMaps(
   clientId: string,
   target: SdkTarget = {
+    /** SDK가 window에 붙이는 전역(naver, navermap_authFailure)은 DOM 타입에 없어 단언한다. */
     window: window as SdkWindow,
+    /** 테스트가 가짜를 넘기도록 쓰는 부분만 좁힌 타입이라, 실제 document와는 append 매개변수가 달라 단언한다. */
     document: document as unknown as SdkDocument,
   },
 ) {

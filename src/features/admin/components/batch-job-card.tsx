@@ -4,14 +4,13 @@ import { useFormatter, useTranslations } from 'next-intl';
 
 import { StatusChip } from '@/components/ui/status-chip';
 import { Tag } from '@/components/ui/tag';
-
 import {
   batchDuration,
   batchStatusKey,
   batchStatusTone,
   parseBatchTime,
-} from '../batch-status';
-import type { BatchJob } from '../queries';
+} from '@/features/admin/batch-status';
+import type { BatchJob } from '@/features/admin/queries';
 
 function BatchStatusLabel({ status }: { status: string | null }) {
   const t = useTranslations('admin.batch.status');

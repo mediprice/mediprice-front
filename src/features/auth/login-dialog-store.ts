@@ -7,6 +7,8 @@ export type LoginReason =
   | 'history'
   | 'review'
   | 'medicalProfile'
+  | 'myReviews'
+  | 'account'
   | 'ai'
   | 'expired';
 

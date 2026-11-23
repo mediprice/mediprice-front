@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { getTranslations } from 'next-intl/server';
 
+import { openGraphFor } from '@/app/_components/open-graph';
 import { formatLocation } from '@/features/regions/format-location';
 import type { components } from '@/lib/api/schema';
 
@@ -14,13 +15,18 @@ export function buildHospitalMetadata({
   ykiho,
   hospital,
   t,
+  siteName,
 }: {
   ykiho: string;
   hospital: Hospital | null;
   t: Translate;
+  /** og:site_name(metadata.title). */
+  siteName: string;
 }): Metadata {
-  const alternates = { canonical: `/hospitals/${encodeURIComponent(ykiho)}` };
-  if (!hospital) return { title: t('metaTitle'), alternates };
+  const canonical = `/hospitals/${encodeURIComponent(ykiho)}`;
+  const alternates = { canonical };
+  const openGraph = openGraphFor(canonical, siteName);
+  if (!hospital) return { title: t('metaTitle'), alternates, openGraph };
 
   const { name } = hospital;
   const location = formatLocation(hospital.sidoName, hospital.sgguName);
@@ -29,10 +35,12 @@ export function buildHospitalMetadata({
         title: t('metadata.titleWithLocation', { name, location }),
         description: t('metadata.descriptionWithLocation', { name, location }),
         alternates,
+        openGraph,
       }
     : {
         title: t('metadata.title', { name }),
         description: t('metadata.description', { name }),
         alternates,
+        openGraph,
       };
 }

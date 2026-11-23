@@ -6,6 +6,7 @@ import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
 
 import { HomeSearchForm } from './home-search-form';
+import { RecentItemChips } from './recent-item-chips';
 
 export function HomeHero() {
   const t = useTranslations('home');
@@ -20,8 +21,9 @@ export function HomeHero() {
         </h1>
         <p className="text-body text-text-secondary">{t('hero.subtitle')}</p>
 
-        <div className="mt-2 w-full md:flex md:justify-center">
+        <div className="mt-2 flex w-full flex-col gap-3 md:items-center">
           <HomeSearchForm />
+          <RecentItemChips />
         </div>
 
         <div className="mt-4 flex flex-col gap-3 border-t border-border pt-6 lg:mt-2 lg:flex-row lg:items-center lg:gap-4 lg:border-t-0 lg:pt-0">

@@ -7,7 +7,7 @@ import {
   isRectInViewport,
   startPhase,
 } from './first-view';
-import { prefersReducedMotion } from './use-prefers-reduced-motion';
+import { prefersReducedMotion } from './prefers-reduced-motion';
 
 /**
  * 요소가 처음 화면에 들어올 때 'playing'이 된다. 서버 렌더와 JS가 없을 때는 'static'이라 내용이 그대로 보인다.

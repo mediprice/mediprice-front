@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 
 import { LEGAL_FACTS } from '@/config/legal';
 import { legalRichTags } from '@/features/legal/components/legal-rich-tags';
@@ -31,6 +31,7 @@ function OverseasTable({ processors }: { processors: Processor[] }) {
   const t = useTranslations('legal.privacy.overseas');
   const tProcessors = useTranslations('legal.processors');
   const tCountries = useTranslations('legal.countries');
+  const format = useFormatter();
   return (
     <LegalTable
       caption={t('caption')}
@@ -45,7 +46,7 @@ function OverseasTable({ processors }: { processors: Processor[] }) {
       rows={processors.map((processor) => [
         <Recipient key="recipient" processor={processor} />,
         processor.countries ? (
-          processor.countries.map((country) => tCountries(country)).join(', ')
+          format.list(processor.countries.map((country) => tCountries(country)))
         ) : (
           <PendingFact />
         ),

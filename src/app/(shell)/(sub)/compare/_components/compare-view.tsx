@@ -29,14 +29,20 @@ import { useCompareStore } from '@/features/comparison/compare-store';
 import { comparisonQueries } from '@/features/comparison/queries';
 import { priceRowName } from '@/features/hospitals/price-groups';
 import { hospitalQueries } from '@/features/hospitals/queries';
+import { comparableBand } from '@/features/npay/average-verdict';
+import { npayQueries } from '@/features/npay/queries';
+import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
 import { errorMessageKey } from '@/lib/api/error-message';
 import { ApiError } from '@/lib/api/errors';
 import { cn } from '@/lib/utils';
 
+import { BasketSyncNotice } from './basket-sync-notice';
 import { CompareEmpty } from './compare-empty';
 import { CompareHeader } from './compare-header';
+import { CompareShare } from './compare-share';
 import { CompareSkeleton } from './compare-skeleton';
 import { CompareTable } from './compare-table';
+import { MixedItemsNotice } from './mixed-items-notice';
 
 /** 함께 공개한 항목은 많으면 100개라 처음에는 이만큼만 펼친다. */
 const INITIAL_COMMON_ITEMS = 8;
@@ -62,9 +68,12 @@ const hasCode = (error: unknown, code: string) =>
 export function CompareView({
   ykihos,
   item,
+  dropped,
 }: {
   ykihos: string[];
   item: string | null;
+  /** 공유 링크에서 더 이상 공개되지 않아 뺀 병원 수. */
+  dropped: number;
 }) {
   const t = useTranslations('comparison');
   const tErrors = useTranslations('errors');
@@ -99,6 +108,39 @@ export function CompareView({
   const activeItem = item && !isItemMissing ? item : null;
   const error = base.error ?? (isItemMissing ? null : selected.error);
   const isPending = base.isPending || (needsItemQuery && selected.isPending);
+
+  /** 공유받은 주소에 더 이상 공개되지 않는 병원이 섞여 있으면 그 병원만 빼고 다시 연다(전체 비교를 막지 않게). */
+  const isHospitalMissing = hasCode(base.error, 'HOSPITAL_NOT_FOUND');
+  const checks = useQueries({
+    queries: ykihos.map((ykiho) => ({
+      ...hospitalQueries.detail(ykiho),
+      enabled: isHospitalMissing,
+      retry: false,
+    })),
+  });
+  const isChecking =
+    isHospitalMissing && checks.some((check) => check.isPending);
+  const missing =
+    isHospitalMissing && !isChecking
+      ? ykihos.filter(
+          (_, index) =>
+            hasCode(checks[index]?.error, 'HOSPITAL_NOT_FOUND') ||
+            (checks[index]?.error instanceof ApiError &&
+              checks[index].error.status === 404),
+        )
+      : [];
+  const remaining = ykihos.filter((ykiho) => !missing.includes(ykiho));
+  const missingKey = missing.join(',');
+  useEffect(() => {
+    if (!missingKey || remaining.length === 0) return;
+    for (const ykiho of missingKey.split(',')) removeFromBasket(ykiho);
+    router.replace(
+      buildCompareHref(remaining, item, dropped + missingKey.split(',').length),
+      { scroll: false },
+    );
+    // remaining은 missingKey에서 나온다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [missingKey]);
 
   const hospitals = base.data
     ? orderHospitals(base.data.hospitals, ykihos)
@@ -136,6 +178,15 @@ export function CompareView({
   const isVariantsPending = variantQueries.some(
     (query) => query.fetchStatus === 'fetching' && !query.data,
   );
+  /** 병원 상세·항목 목록과 같은 기준: 서울·경기 평균의 1/3~3배 밖 가격(시간·횟수가 다른 세부 항목)은 결론에 쓰지 않는다. */
+  const regional = useQuery({
+    ...npayQueries.summaryIn(
+      itemRow?.npayCode ?? '',
+      sidoCodesOf(DEFAULT_REGION),
+    ),
+    enabled: itemRow != null,
+  });
+  const band = comparableBand(regional.data?.avgPrice);
   const basis = itemRow
     ? comparisonBasis(
         itemRow,
@@ -146,11 +197,12 @@ export function CompareView({
             price: row.price,
           })),
         ),
+        band,
       )
     : null;
   /** 세부 항목을 받을 때까지(최대 DATE_TIMEOUT_MS) 결론을 미뤄, 제목이 "가장 낮은 공개 가격"에서 "가장 저렴"으로 바뀌지 않게 한다. */
   const summary =
-    basis && !error && !isPending && !isVariantsPending
+    basis && !error && !isPending && !isVariantsPending && !regional.isLoading
       ? summarizeComparison(basis, hospitals)
       : null;
 
@@ -176,7 +228,7 @@ export function CompareView({
 
   /** 앞 화면(항목 가격)이 바꿔 둔 제목이 남지 않도록 항목 이름이 들어간 제목으로 맞춘다. */
   useEffect(() => {
-    document.title = tMeta('titleTemplate').replace('%s', documentTitle);
+    document.title = tMeta('pageTitle', { title: documentTitle });
   }, [documentTitle, tMeta]);
 
   /** 공유받은 주소로 들어오면 비어 있는 비교함을 이 병원들로 채워, 병원을 더 담을 때 이어지게 한다. */
@@ -205,6 +257,9 @@ export function CompareView({
 
   function renderBody() {
     if (!hasHospitals) return <CompareEmpty />;
+    if (isHospitalMissing && (isChecking || remaining.length > 0)) {
+      return <CompareSkeleton columns={ykihos.length} />;
+    }
     if (hasCode(error, 'HOSPITAL_NOT_FOUND')) {
       return (
         <EmptyState
@@ -248,7 +303,18 @@ export function CompareView({
           id={headingId}
           title={t('page.sectionTitle')}
           description={t('page.notice')}
+          action={<CompareShare title={documentTitle} />}
         />
+        <BasketSyncNotice
+          hospitals={hospitals.map((hospital) => ({
+            ykiho: hospital.ykiho,
+            name: hospital.name,
+            itemCode: activeItem,
+          }))}
+        />
+        {dropped > 0 && (
+          <Notice>{t('page.dropped', { count: dropped })}</Notice>
+        )}
         {isItemMissing && <Notice>{t('page.itemNotFound')}</Notice>}
         {hospitals.length < 2 && (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-warning-tint px-4 py-3 text-body-sm text-warning">
@@ -279,35 +345,36 @@ export function CompareView({
           itemLowest={basis ? lowestOf(basis.entries) : undefined}
           itemName={itemName}
           dates={dates}
-          commonItems={visibleItems}
-          commonTotal={otherItems.length}
+          commonItems={hospitals.length < 2 ? [] : visibleItems}
+          commonTotal={hospitals.length < 2 ? 0 : otherItems.length}
           onRemove={handleRemove}
           regionRef={regionRef}
           regionId={regionId}
           headingId={headingId}
         />
         <div className="flex flex-col items-center gap-2">
-          {otherItems.length > INITIAL_COMMON_ITEMS && (
-            <Button
-              variant="outline"
-              size="md"
-              aria-expanded={isCommonExpanded}
-              aria-controls={regionId}
-              onClick={() => setIsCommonExpanded((value) => !value)}
-              className="w-full lg:w-auto lg:min-w-60"
-            >
-              {isCommonExpanded
-                ? t('common.showLess')
-                : t('common.showAll', { count: otherItems.length })}
-              <ChevronDown
-                aria-hidden="true"
-                className={cn(
-                  'transition-transform duration-150 ease-standard',
-                  isCommonExpanded && 'rotate-180',
-                )}
-              />
-            </Button>
-          )}
+          {hospitals.length >= 2 &&
+            otherItems.length > INITIAL_COMMON_ITEMS && (
+              <Button
+                variant="outline"
+                size="md"
+                aria-expanded={isCommonExpanded}
+                aria-controls={regionId}
+                onClick={() => setIsCommonExpanded((value) => !value)}
+                className="w-full lg:w-auto lg:min-w-60"
+              >
+                {isCommonExpanded
+                  ? t('common.showLess')
+                  : t('common.showAll', { count: otherItems.length })}
+                <ChevronDown
+                  aria-hidden="true"
+                  className={cn(
+                    'transition-transform duration-150 ease-standard',
+                    isCommonExpanded && 'rotate-180',
+                  )}
+                />
+              </Button>
+            )}
           {base.data?.truncated && (
             <p className="text-caption text-text-tertiary">
               {t('common.truncated', { count: base.data.items.length })}
@@ -335,8 +402,9 @@ export function CompareView({
         basis={basis}
         hospitals={hospitals}
       />
-      <PageContainer className="pt-2 pb-section lg:pt-4">
-        {renderBody()}
+      <PageContainer className="flex flex-col gap-4 pt-2 pb-section md:max-w-2xl lg:max-w-page lg:pt-4">
+        <MixedItemsNotice ykihos={ykihos} item={activeItem} />
+        <div>{renderBody()}</div>
       </PageContainer>
     </>
   );

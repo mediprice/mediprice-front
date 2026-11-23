@@ -5,8 +5,11 @@ import { useFormatter, useNow, useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import {
+  measurePhase,
+  type TemporaryMeasure,
+} from '@/features/claims/review-moderation';
 
-import { measurePhase, type TemporaryMeasure } from '../review-moderation';
 import { ObjectionDialog } from './objection-dialog';
 
 /** 내 후기의 임시조치 안내. 기한, 신고 사유(신청인은 알리지 않음), 재게시 요청을 보여 준다. */

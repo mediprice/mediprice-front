@@ -3,13 +3,13 @@
 import { useMutation } from '@tanstack/react-query';
 import { useState, useSyncExternalStore } from 'react';
 
-import { liveFeeApi } from './api';
 import {
   cooldownKey,
   readCooldownUntil,
   secondsUntil,
   startCooldown,
 } from './cooldown';
+import { liveFeeMutations } from './queries';
 
 /** 사파리 비공개 창 등에서는 sessionStorage에 접근만 해도 예외가 난다. */
 function sessionStorageOrNull() {
@@ -41,9 +41,7 @@ export function useLiveFeeCheck(ykiho: string, npayCode: string) {
     },
     () => 0,
   );
-  const mutation = useMutation({
-    mutationFn: () => liveFeeApi.fetchLiveFee(ykiho, npayCode),
-  });
+  const mutation = useMutation(liveFeeMutations.check(ykiho, npayCode));
 
   function check() {
     if (mutation.isPending || secondsLeft > 0) return;

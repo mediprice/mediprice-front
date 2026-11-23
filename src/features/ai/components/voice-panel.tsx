@@ -1,15 +1,17 @@
 'use client';
 
 import { Pencil, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { type ReactNode, useEffect, useId, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { MAX_INPUT_LENGTH } from '@/features/ai/schemas';
+import {
+  MAX_RECORDING_SECONDS,
+  type VoiceState,
+} from '@/features/ai/voice-state';
 import { cn } from '@/lib/utils';
-
-import { MAX_INPUT_LENGTH } from '../schemas';
-import { MAX_RECORDING_SECONDS, type VoiceState } from '../voice-state';
 
 const WAVE_HEIGHTS = [
   'h-3',
@@ -43,11 +45,6 @@ const WAVE_DELAYS = [
   '[animation-delay:300ms]',
   '[animation-delay:450ms]',
 ];
-
-function formatClock(seconds: number) {
-  const minutes = Math.floor(seconds / 60);
-  return `${minutes}:${String(seconds % 60).padStart(2, '0')}`;
-}
 
 type VoicePanelProps = {
   state: Exclude<VoiceState, { phase: 'off' }>;
@@ -123,6 +120,12 @@ function PanelBody({
 }: VoicePanelProps) {
   const t = useTranslations('ai.voice');
   const tActions = useTranslations('common.actions');
+  const format = useFormatter();
+  const clock = (total: number) =>
+    t('clock', {
+      minutes: Math.floor(total / 60),
+      seconds: format.number(total % 60, { minimumIntegerDigits: 2 }),
+    });
   const cancel = (
     <Button variant="neutral" size="md" onClick={onCancel}>
       {tActions('cancel')}
@@ -149,8 +152,8 @@ function PanelBody({
                 })}
               >
                 {t('timer', {
-                  elapsed: formatClock(elapsed),
-                  limit: formatClock(MAX_RECORDING_SECONDS),
+                  elapsed: clock(elapsed),
+                  limit: clock(MAX_RECORDING_SECONDS),
                 })}
               </span>
             </p>

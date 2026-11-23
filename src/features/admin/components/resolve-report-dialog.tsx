@@ -4,13 +4,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { errorMessageKey } from '@/lib/api/error-message';
-
 import {
   adminMutations,
   type AdminReport,
   type ReportAction,
-} from '../queries';
+} from '@/features/admin/queries';
+import { errorMessageKey } from '@/lib/api/error-message';
 
 const COPY = {
   HIDE_REVIEW: {

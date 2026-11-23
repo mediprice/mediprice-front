@@ -2,8 +2,10 @@
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import type { ReactNode } from 'react';
+import { type ReactNode, Suspense } from 'react';
 
+import { HistoryTracker } from '@/components/layout/history-tracker';
+import { NavigationProgress } from '@/components/layout/navigation-progress';
 import { getQueryClient } from '@/lib/query-client';
 
 /** devDependency라서 개발 빌드에서만 불러온다. 운영 번들에서는 이 분기가 통째로 빠진다. */
@@ -24,6 +26,10 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
+      <Suspense fallback={null}>
+        <HistoryTracker />
+        <NavigationProgress />
+      </Suspense>
       {ReactQueryDevtools && (
         <ReactQueryDevtools
           initialIsOpen={false}

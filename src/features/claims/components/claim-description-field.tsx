@@ -1,7 +1,10 @@
 import { useTranslations } from 'next-intl';
 import type { ComponentProps } from 'react';
 
-import { CLAIM_DESCRIPTION_MAX, claimFormErrorKey } from '../schemas';
+import {
+  CLAIM_DESCRIPTION_MAX,
+  claimFormErrorKey,
+} from '@/features/claims/schemas';
 
 /** 침해 내용 칸. 글자 수는 접수할 때처럼 앞뒤 공백을 빼고 센다. */
 export function ClaimDescriptionField({

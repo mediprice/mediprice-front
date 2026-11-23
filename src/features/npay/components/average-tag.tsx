@@ -3,9 +3,8 @@
 import { ArrowDown, ArrowUp, Equal, Info } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { judgeAgainstAverage } from '@/features/npay/average-verdict';
 import { cn } from '@/lib/utils';
-
-import { judgeAgainstAverage } from '../average-verdict';
 
 const TAG_STYLE = {
   below: { icon: ArrowDown, tone: 'bg-positive-tint text-positive' },

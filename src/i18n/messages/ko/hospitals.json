@@ -21,6 +21,7 @@
     },
     "selected": {
       "label": "선택 항목 · {name}",
+      "valueLabel": "이 병원",
       "variants": "세부 항목 {count, plural, other {#개}}",
       "singleMeta": "{name} · {date} 적용",
       "notOffered": "이 병원은 이 항목의 가격을 공개하지 않았어요.",
@@ -33,7 +34,11 @@
       "incomparable": "이 세부 항목은 단위·구성이 달라 {region} 평균과 비교하기 어려워요",
       "incomparableNote": "평균({average, number}원)의 1/3보다 낮거나 3배보다 높은 가격은 시간·횟수 같은 구성이 다른 항목일 수 있어 % 차이를 쓰지 않아요.",
       "showAll": "세부 항목 {count, plural, other {#개}} 모두 보기",
-      "showLess": "세부 항목 접기"
+      "showLess": "세부 항목 접기",
+      "comparableBasis": "{region} 병원 {count, plural, other {#곳}}의 평균과 견줄 수 있는 세부 항목별 공개 가격 기준",
+      "backToList": "목록으로 돌아가기",
+      "missingLabel": "선택 항목",
+      "missing": "더 이상 공개되지 않는 항목이에요. 아래 공개 가격 목록에서 다시 골라 주세요."
     },
     "trend": {
       "label": "가격 추이",
@@ -109,6 +114,14 @@
       "openMap": "지도에서 보기",
       "newWindow": "새 창",
       "noAddress": "주소 정보가 없어요."
+    },
+    "areaMap": {
+      "legend": "파란 점: 같은 항목 가격을 공개한 주변 병원",
+      "markerLabel": "{name} · 가장 낮은 가격 {amount, number}원",
+      "lowestPrice": "가장 낮은 가격 {amount, number}원",
+      "distance": "이 병원에서 직선 {distance}",
+      "priceAndDistance": "가장 낮은 가격 {amount, number}원 · 이 병원에서 직선 {distance}",
+      "open": "상세 보기"
     },
     "reviews": {
       "title": "후기",

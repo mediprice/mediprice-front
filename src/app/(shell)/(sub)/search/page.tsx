@@ -61,6 +61,7 @@ export default async function SearchPage({
           state.mode === 'prompt' ? t('topBar.search') : t('topBar.results')
         }
         backHref="/"
+        showSearch={false}
       />
       <SearchHeader
         type={type}

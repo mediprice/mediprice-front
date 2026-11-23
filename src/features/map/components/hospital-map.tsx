@@ -5,9 +5,9 @@ import { useTranslations } from 'next-intl';
 import { type ReactNode, useState } from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import type { LatLng } from '@/features/map/map-geo';
+import { useReducedMotion } from '@/features/map/use-reduced-motion';
 
-import type { LatLng } from '../map-geo';
-import { useReducedMotion } from '../use-reduced-motion';
 import type { MapMarker } from './marker-icon';
 import { type MapSearchArea, useNaverMap } from './use-naver-map';
 import { useNaverMarkers } from './use-naver-markers';

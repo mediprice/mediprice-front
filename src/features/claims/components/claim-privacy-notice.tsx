@@ -3,10 +3,9 @@ import { useTranslations } from 'next-intl';
 import type { ComponentProps } from 'react';
 
 import { LEGAL_FACTS } from '@/config/legal';
+import { claimFormErrorKey } from '@/features/claims/schemas';
 import { PendingFact } from '@/features/legal/components/pending-fact';
 import { cn } from '@/lib/utils';
-
-import { claimFormErrorKey } from '../schemas';
 
 const NOTICES = ['purpose', 'items', 'period', 'refuse'] as const;
 

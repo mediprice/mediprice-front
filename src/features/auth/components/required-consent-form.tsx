@@ -5,11 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useId, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { errorMessageKey } from '@/lib/api/error-message';
-import { ApiError } from '@/lib/api/errors';
-
-import { consentApi } from '../consent-api';
-import { consentKeys, consentQueries, sessionKeys } from '../queries';
+import { consentMutations, consentQueries } from '@/features/auth/queries';
 import {
   checkAllConsents,
   type ConsentChecks,
@@ -18,10 +14,13 @@ import {
   isReconsent,
   MINIMUM_AGE,
   REQUIRED_CONSENTS,
-  requiredConsentDecisions,
-} from '../required-consent';
-import { ConsentCheck, DocumentLink } from './consent-check';
+} from '@/features/auth/required-consent';
+import { errorMessageKey } from '@/lib/api/error-message';
+import { ApiError } from '@/lib/api/errors';
+
+import { ConsentCheck } from './consent-check';
 import { ConsentSummary } from './consent-summary';
+import { DocumentLink } from './document-link';
 
 type Notice = 'missing' | 'outdated' | 'reload' | null;
 
@@ -35,22 +34,8 @@ export function RequiredConsentForm({ onDecline }: { onDecline: () => void }) {
   const [checks, setChecks] = useState<ConsentChecks>(checkAllConsents(false));
   const [notice, setNotice] = useState<Notice>(null);
   const isAll = REQUIRED_CONSENTS.every((type) => checks[type]);
-  const save = useMutation({
-    mutationFn: () => consentApi.save(requiredConsentDecisions()),
-    onSuccess: async (saved) => {
-      queryClient.setQueryData(consentKeys.status(), saved);
-      await queryClient.invalidateQueries({ queryKey: sessionKeys.current() });
-    },
-    onError: async (error) => {
-      if (!(error instanceof ApiError)) return;
-      if (error.code !== 'CONSENT_VERSION_OUTDATED') return;
-      const fresh = await status.refetch();
-      setChecks(checkAllConsents(false));
-      setNotice(
-        fresh.data && hasNewerDocuments(fresh.data) ? 'reload' : 'outdated',
-      );
-    },
-  });
+  /** 옵션의 onSuccess(캐시 갱신)를 덮지 않도록 화면 처리는 mutate에 넘긴다. */
+  const save = useMutation(consentMutations.saveRequired(queryClient));
 
   // 안내가 그려진 뒤에 포커스를 옮긴다(그리기 전에는 빈 칸이 숨어 있어 포커스가 가지 않는다).
   useEffect(() => {
@@ -73,7 +58,19 @@ export function RequiredConsentForm({ onDecline }: { onDecline: () => void }) {
       return;
     }
     setNotice(null);
-    save.mutate();
+    save.mutate(undefined, {
+      onError: (error) => void handleSaveError(error),
+    });
+  }
+
+  async function handleSaveError(error: Error) {
+    if (!(error instanceof ApiError)) return;
+    if (error.code !== 'CONSENT_VERSION_OUTDATED') return;
+    const fresh = await status.refetch();
+    setChecks(checkAllConsents(false));
+    setNotice(
+      fresh.data && hasNewerDocuments(fresh.data) ? 'reload' : 'outdated',
+    );
   }
 
   return (

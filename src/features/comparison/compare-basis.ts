@@ -1,3 +1,5 @@
+import type { PriceBand } from '@/features/npay/average-verdict';
+
 import type { ComparisonHospital, ComparisonItem } from './queries';
 
 /** 병원 한 곳이 공개한 세부 항목 하나(이름·가격). */
@@ -17,7 +19,12 @@ export type BasisEntry = {
 export type ComparisonBasis = {
   kind: 'sameVariant' | 'lowest';
   entries: BasisEntry[];
+  /** 가격은 있지만 평균과 견줄 수 있는 범위 안 가격이 없어(시간·횟수 같은 구성이 다른 세부 항목) 결론에서 뺀 병원. */
+  excluded: string[];
 };
+
+const inBand = (price: number, band: PriceBand | null | undefined) =>
+  !band || (price >= band.minPrice && price <= band.maxPrice);
 
 const normalizeName = (name: string) =>
   name.trim().replace(/\s+/g, ' ').toLowerCase();
@@ -41,6 +48,8 @@ export function comparisonBasis(
   row: ComparisonItem,
   hospitals: readonly ComparisonHospital[],
   variants: readonly (readonly VariantPrice[] | undefined)[] = [],
+  /** 지역 평균의 1/3~3배. 주면 이 범위 밖 가격(단위가 다른 세부 항목)은 기준으로 쓰지 않는다. */
+  band: PriceBand | null = null,
 ): ComparisonBasis {
   const priced = hospitals.flatMap((hospital, index) => {
     const cell = row.prices.find((price) => price.ykiho === hospital.ykiho);
@@ -59,12 +68,16 @@ export function comparisonBasis(
       ([, a], [, b]) => a.price - b.price,
     );
     const shared = candidates.find(([key]) =>
-      maps.every((map) => map?.has(key)),
+      maps.every((map) => {
+        const variant = map?.get(key);
+        return variant !== undefined && inBand(variant.price, band);
+      }),
     );
     if (shared) {
       const [key] = shared;
       return {
         kind: 'sameVariant',
+        excluded: [],
         entries: priced.flatMap(({ ykiho }, index) => {
           const variant = maps[index]?.get(key);
           return variant
@@ -75,16 +88,33 @@ export function comparisonBasis(
     }
   }
 
-  return {
-    kind: 'lowest',
-    entries: priced.map(({ ykiho, minPrice, index }) => ({
-      ykiho,
-      price: minPrice,
-      variant:
-        variants[index]?.find((variant) => variant.price === minPrice)?.name ??
-        null,
-    })),
-  };
+  /** 병원마다 범위 안 가격 중 가장 낮은 것. 세부 항목을 모르면 공개 최저가가 범위 안일 때만 쓴다. */
+  const entries: BasisEntry[] = [];
+  const excluded: string[] = [];
+  priced.forEach(({ ykiho, minPrice, index }) => {
+    const list = variants[index];
+    const comparable =
+      list && list.length > 0
+        ? list
+            .filter((variant) => inBand(variant.price, band))
+            .sort((a, b) => a.price - b.price)[0]
+        : inBand(minPrice, band)
+          ? {
+              price: minPrice,
+              name:
+                list?.find((variant) => variant.price === minPrice)?.name ??
+                null,
+            }
+          : undefined;
+    if (comparable)
+      entries.push({
+        ykiho,
+        price: comparable.price,
+        variant: comparable.name,
+      });
+    else excluded.push(ykiho);
+  });
+  return { kind: 'lowest', entries, excluded };
 }
 
 /** 기준 가격이 가장 낮은 병원들. 둘 이상이고 서로 다를 때만 고른다. */

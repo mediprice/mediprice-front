@@ -2,8 +2,9 @@
 
 import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 
-import { findCollapsedLabels } from '../marker-layout';
-import type { NaverListener, NaverMarker } from '../naver-types';
+import { findCollapsedLabels } from '@/features/map/marker-layout';
+import type { NaverListener, NaverMarker } from '@/features/map/naver-types';
+
 import {
   createMarkerContent,
   type MapMarker,

@@ -6,10 +6,9 @@ import { useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import type { AdminClaim } from '@/features/admin/claim-api';
+import { adminClaimMutations } from '@/features/admin/claim-queries';
 import { errorMessageKey } from '@/lib/api/error-message';
-
-import type { AdminClaim } from '../claim-api';
-import { adminClaimMutations } from '../claim-queries';
 
 type Target = 'claimant' | 'author';
 

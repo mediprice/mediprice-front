@@ -7,8 +7,8 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
+import { adminQueries } from '@/features/admin/queries';
 
-import { adminQueries } from '../queries';
 import { AdminQueryError } from './admin-query-error';
 import { BatchJobCard } from './batch-job-card';
 

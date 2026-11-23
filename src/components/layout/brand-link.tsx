@@ -12,7 +12,7 @@ export function BrandLink() {
     >
       <span aria-hidden="true" className="flex h-11 shrink-0 items-center">
         <span className="flex size-7 items-center justify-center rounded-md bg-primary text-on-primary">
-          <Tag className="size-4" strokeWidth={2} />
+          <Tag className="size-4" strokeWidth={1.75} />
         </span>
       </span>
       <span className="text-subheading whitespace-nowrap">{t('brand')}</span>

@@ -14,6 +14,8 @@ import type {
   ComparisonHospital,
   ComparisonItem,
 } from '@/features/comparison/queries';
+import { comparableBand } from '@/features/npay/average-verdict';
+import { toPriceConditions } from '@/features/npay/price-filters';
 import { npayQueries } from '@/features/npay/queries';
 import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
 
@@ -43,10 +45,18 @@ export function CompareSummaryPanel({
   const regional = useQuery(
     npayQueries.summaryIn(row.npayCode, sidoCodesOf(DEFAULT_REGION)),
   );
+  /** 막대 범위와 병원 수도 결론과 같은 "견줄 수 있는 가격" 범위로 그린다(극단값이 막대를 늘리지 않게). */
+  const band = comparableBand(regional.data?.avgPrice);
+  const comparable = useQuery({
+    ...npayQueries.summaryOf(
+      row.npayCode,
+      toPriceConditions({ region: DEFAULT_REGION, sort: 'price_asc' }, band),
+    ),
+    enabled: band !== null,
+  });
+  const scope = band ? comparable.data : regional.data;
   const markers = stripMarkers(basis, hospitals);
-  const range = regional.data
-    ? { min: regional.data.minPrice, max: regional.data.maxPrice }
-    : null;
+  const range = scope ? { min: scope.minPrice, max: scope.maxPrice } : null;
   const domain = stripDomain(
     markers.map((marker) => marker.value),
     range,
@@ -63,7 +73,7 @@ export function CompareSummaryPanel({
         {gap && <p className="text-body-sm text-text-secondary">{gap}</p>}
       </div>
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-10">
-        {regional.isPending ? (
+        {regional.isPending || (band !== null && comparable.isPending) ? (
           <Skeleton className="h-24 w-full lg:flex-1" />
         ) : (
           domain && (
@@ -79,10 +89,10 @@ export function CompareSummaryPanel({
                 }
               />
               <p className="text-body-sm text-text-tertiary">
-                {regional.data && range?.min != null
+                {scope && range?.min != null
                   ? t('regionNote', {
                       region,
-                      count: regional.data.hospitalCount,
+                      count: scope.hospitalCount,
                     })
                   : t('hospitalsNote')}
               </p>
@@ -117,6 +127,11 @@ export function CompareSummaryPanel({
                   {variant && value != null && (
                     <span className="text-body-sm text-text-secondary">
                       {t('variantBasis', { name: variant })}
+                    </span>
+                  )}
+                  {basis.excluded.includes(hospital.ykiho) && (
+                    <span className="text-body-sm text-text-secondary">
+                      {t('excludedUnit')}
                     </span>
                   )}
                 </span>

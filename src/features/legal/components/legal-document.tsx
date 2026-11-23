@@ -4,8 +4,9 @@ import { useFormatter, useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
 import { PageContainer } from '@/components/layout/page-container';
+import { parseLegalDate } from '@/features/legal/legal-date';
 
-import { parseLegalDate } from '../legal-date';
+import { FloatingToc } from './floating-toc';
 import { LegalToc, type TocEntry } from './legal-toc';
 import { PendingFact } from './pending-fact';
 
@@ -17,7 +18,7 @@ const DOCUMENTS = [
 
 type LegalDocumentName = (typeof DOCUMENTS)[number]['name'];
 
-/** 법적 문서 한 편의 틀: 제목, 시행일·버전, 목차, 본문, 다른 문서 링크. */
+/** 법적 문서 한 편의 틀: 제목, 시행일·버전, 목차(모바일은 본문을 지나면 떠 있는 목차 버튼도), 본문, 다른 문서 링크. */
 export function LegalDocument({
   name,
   intro,
@@ -72,9 +73,10 @@ export function LegalDocument({
             </div>
           </dl>
         </header>
-        <div className="mt-6 max-w-prose lg:hidden">
+        <div id="legal-toc" className="mt-6 max-w-prose lg:hidden">
           <LegalToc entries={toc} variant="inline" />
         </div>
+        <FloatingToc entries={toc} anchorId="legal-toc" />
         <div className="mt-10 space-y-10">{children}</div>
         <nav
           aria-labelledby="legal-related"
