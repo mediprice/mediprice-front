@@ -67,7 +67,23 @@ describe('POST /bff/session', () => {
 describe('GET /bff/session', () => {
   const probe = { [SESSION_PROBE_HEADER]: SESSION_PROBE_VERSION };
 
-  it('Access 쿠키가 있으면 백엔드를 부르지 않고 로그인 상태다', async () => {
+  const user = {
+    id: 1,
+    email: 'user@example.com',
+    name: '건강한하루',
+    profileImageUrl: null,
+    role: 'USER',
+  };
+
+  it('Access 쿠키가 있으면 같은 왕복에서 내 정보를 읽어 함께 돌려준다', async () => {
+    let authorization: string | null = null;
+    server.use(
+      http.get(`${API}/api/users/me`, ({ request }) => {
+        authorization = request.headers.get('authorization');
+        return HttpResponse.json(user);
+      }),
+    );
+
     const response = await GET(
       bffRequest('/bff/session', {
         cookies: { [ACCESS_COOKIE]: 'a1' },
@@ -75,9 +91,41 @@ describe('GET /bff/session', () => {
       }),
     );
 
-    expect(await response.json()).toEqual({ authenticated: true });
+    expect(await response.json()).toEqual({ authenticated: true, user });
+    expect(authorization).toBe('Bearer a1');
+    expect(response.headers.get('cache-control')).toBe('no-store');
     expect(setCookies(response)).toEqual([]);
   });
+
+  it.each([
+    [
+      'Access가 거부되면(401)',
+      () =>
+        HttpResponse.json(
+          { code: 'INVALID_ACCESS_TOKEN', message: 'x', errors: [] },
+          { status: 401 },
+        ),
+    ],
+    ['백엔드 장애', () => new HttpResponse(null, { status: 503 })],
+    ['연결 실패', () => HttpResponse.error()],
+    ['본문이 JSON이 아니면', () => new HttpResponse('oops', { status: 200 })],
+  ])(
+    '%s 내 정보 없이 로그인 상태로 답해 브라우저가 따로 읽는다',
+    async (_name, resolver) => {
+      server.use(http.get(`${API}/api/users/me`, resolver));
+
+      const response = await GET(
+        bffRequest('/bff/session', {
+          cookies: { [ACCESS_COOKIE]: 'a1', [REFRESH_COOKIE]: 'r1' },
+          headers: probe,
+        }),
+      );
+
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({ authenticated: true });
+      expect(setCookies(response)).toEqual([]);
+    },
+  );
 
   it('쿠키가 없으면 로그아웃 상태다', async () => {
     const response = await GET(bffRequest('/bff/session', { headers: probe }));
