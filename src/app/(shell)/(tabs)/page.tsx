@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
 import { openGraphFor } from '@/app/_components/open-graph';
+import { ClientMessages } from '@/i18n/client-messages';
 import { fetchPopularItems, fetchSiteStats } from '@/server/api/home-data';
 
 import { CategoryGrid } from './_components/category-grid';
@@ -39,7 +40,7 @@ export default async function HomePage() {
     fetchPopularItems(6),
   ]);
   return (
-    <>
+    <ClientMessages namespaces={['home.popular', 'home.recent']}>
       <HomeHero />
       <CategoryGrid />
       <PopularItems
@@ -48,6 +49,6 @@ export default async function HomePage() {
       <HowItWorks />
       <TrustSection stats={stats} />
       <FaqSection />
-    </>
+    </ClientMessages>
   );
 }

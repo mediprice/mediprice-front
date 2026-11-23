@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
+import { ClientMessages } from '@/i18n/client-messages';
+
 import { MyHome } from './_components/my-home';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -9,5 +11,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function MyPage() {
-  return <MyHome />;
+  return (
+    <ClientMessages namespaces={['mypage.home', 'mypage.menu']}>
+      <MyHome />
+    </ClientMessages>
+  );
 }

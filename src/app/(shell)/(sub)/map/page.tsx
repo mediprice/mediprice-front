@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { SubTopBar } from '@/components/layout/sub-top-bar';
 import { parseMapParams } from '@/features/map/map-params';
+import { ClientMessages } from '@/i18n/client-messages';
 
 import { itemListHref } from './_components/item-list-href';
 import { MapView } from './_components/map-view';
@@ -21,7 +22,7 @@ export default async function MapPage({ searchParams }: PageProps<'/map'>) {
   const t = await getTranslations('map.topBar');
 
   return (
-    <>
+    <ClientMessages namespaces={['map']}>
       <SubTopBar
         title={t('title')}
         backHref={
@@ -31,6 +32,6 @@ export default async function MapPage({ searchParams }: PageProps<'/map'>) {
         }
       />
       <MapView initialParams={params} />
-    </>
+    </ClientMessages>
   );
 }
