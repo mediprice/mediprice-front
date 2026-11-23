@@ -66,8 +66,10 @@ const legalFactsSchema = z.object({
   effectiveDates: z.object({
     TERMS: date,
     PRIVACY: date,
+    LOCATION: date,
     REVIEW_POLICY: date,
   }),
+  locationService: z.object({ reportNumber: text.nullable() }),
   minimumAge: z.number().int().min(14).nullable(),
   retention: z.object({
     accessLogMonths: count,
@@ -75,6 +77,8 @@ const legalFactsSchema = z.object({
     reviewOnWithdrawal: z.enum(['anonymize', 'delete']).nullable(),
     /** 처리를 마친 권리침해 신고(신청인 이름·이메일 포함)를 지우기까지의 일수. 백엔드 RETENTION_REVIEW_CLAIM_DAYS와 같은 값이다. */
     rightsClaimDays: count,
+    /** 위치 이용 기록(좌표 없음)을 지우기까지의 일수. 백엔드 RETENTION_LOCATION_USAGE_DAYS와 같은 값이다. */
+    locationUsageDays: z.number().int().positive().nullable(),
   }),
   ai: z.object({
     providerTrainingUse: z.boolean().nullable(),

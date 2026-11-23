@@ -10,6 +10,7 @@ import { PageContainer } from './page-container';
 const POLICY_LINKS = [
   { key: 'terms', href: '/terms', emphasized: false },
   { key: 'privacy', href: '/privacy', emphasized: true },
+  { key: 'locationTerms', href: '/location-terms', emphasized: false },
   { key: 'reviewPolicy', href: '/policy/reviews', emphasized: false },
 ] as const;
 

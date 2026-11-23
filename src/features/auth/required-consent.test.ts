@@ -76,6 +76,7 @@ describe('isConsentExemptPath', () => {
     expect(isConsentExemptPath('/consent')).toBe(true);
     expect(isConsentExemptPath('/terms')).toBe(true);
     expect(isConsentExemptPath('/privacy')).toBe(true);
+    expect(isConsentExemptPath('/location-terms')).toBe(true);
     expect(isConsentExemptPath('/policy/reviews')).toBe(true);
   });
 

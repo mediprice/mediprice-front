@@ -24,6 +24,11 @@ export const legalRichTags = {
       {chunks}
     </Link>
   ),
+  locationTermsLink: (chunks: ReactNode) => (
+    <Link href="/location-terms" className={LINK}>
+      {chunks}
+    </Link>
+  ),
   reviewsLink: (chunks: ReactNode) => (
     <Link href="/policy/reviews" className={LINK}>
       {chunks}

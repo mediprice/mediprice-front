@@ -11,6 +11,7 @@ describe('isTrayHiddenOn', () => {
       '/my/history',
       '/privacy',
       '/terms',
+      '/location-terms',
       '/policy/reviews',
     ]) {
       expect(isTrayHiddenOn(path)).toBe(true);

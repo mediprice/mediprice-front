@@ -16,14 +16,19 @@
   "effectiveDates": {
     "TERMS": null,
     "PRIVACY": null,
+    "LOCATION": null,
     "REVIEW_POLICY": null
+  },
+  "locationService": {
+    "reportNumber": null
   },
   "minimumAge": null,
   "retention": {
     "accessLogMonths": null,
     "backupDays": null,
     "reviewOnWithdrawal": null,
-    "rightsClaimDays": null
+    "rightsClaimDays": null,
+    "locationUsageDays": null
   },
   "ai": {
     "providerTrainingUse": null,
