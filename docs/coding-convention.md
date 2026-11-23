@@ -120,7 +120,7 @@ src/
     layout/               여러 라우트가 공유하는 틀 (TopNav, MobileTopBar, SubTopBar, BottomTabBar, PageContainer, SiteFooter)
   lib/                    도메인을 모르는 공용 코드
     api/                  HTTP 클라이언트, 에러, 에러 코드 → 문구 키, 쿼리 직렬화, 재발급, 세션 만료 이벤트, schema.d.ts
-    motion/               처음 보일 때 한 번 움직이기(useFirstView), reduced-motion 확인
+    motion/               처음 보일 때 한 번 움직이기(useFirstView), reduced-motion 확인과 구독(useReducedMotion)
     navigation/           앱 안 이동 깊이 기록(뒤로 가기를 앱 안에서 할 수 있는지), 저장 전 나가기 확인(useLeaveGuard), 앱 안 링크 클릭 판정(appLinkTarget)
     query-client.ts       QueryClient 기본값
     range-position.ts     최저~최고 막대 위의 위치 계산 (RangeBar, CompareStrip)
@@ -465,7 +465,7 @@ export const hospitalQueries = {
 | `Reveal`(`components/ui/reveal.tsx`)                                   | 스크롤 등장(12px 아래에서 떠오름). `asChild` `delayMs`. 서버 렌더·이미 보이는 것·reduced-motion은 그대로 보인다                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `PriceOverview`·`PriceSpread`·`AverageTag`(`features/npay/components`) | `PriceOverview`는 목록·카드의 평균 + "최저 N원 ~ 최고 N원 (세부 항목별 가격)" + 병원 수. `PriceSpread`는 그 범위 한 줄(15–16px, 머리·카드에서도 쓴다). 홈 목록처럼 좁은 곳은 `common.price.compactRange`("37만~495만원"). `AverageTag`는 "평균보다 N% 저렴" 꼬리표로, 평균의 1/3~3배 밖이면 "구성이 달라 비교 어려움"을 쓴다                                                                                                                                                                                                            |
 
-- 움직임은 `lib/motion`의 `useFirstView`(처음 보일 때 한 번)와 `prefersReducedMotion`으로 만든다. 서버 렌더와 JS가 없을 때는 항상 최종 모습이다.
+- 움직임은 `lib/motion`의 `useFirstView`(처음 보일 때 한 번)와 `prefersReducedMotion`으로 만든다. JS로 그리는 애니메이션(지도 SDK 이동 등)은 `useReducedMotion`으로 설정 변화를 구독한다. 서버 렌더와 JS가 없을 때는 항상 최종 모습이다.
 - 움직이는 숫자·막대는 장식이다. 같은 뜻을 글자로 함께 둔다.
 - 자동으로 바뀌는 것은 멈춤 수단이 있어야 한다(MUST). 멈출 수 없는 자동 슬라이드는 쓰지 않는다.
 
