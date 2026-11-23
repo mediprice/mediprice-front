@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { env } from '@/env';
 
 /** 홈 통계·인기 순위는 백엔드가 10분 캐시한다. 같은 주기로 다시 읽는다. */
-const HOME_REVALIDATE_SECONDS = 600;
+export const HOME_REVALIDATE_SECONDS = 600;
 const HOME_TIMEOUT_MS = 5_000;
 
 /** 백엔드 feature/public-stats의 StatsResponse. 배포 후 `pnpm api:generate`를 돌리면 생성 타입과 publicApi로 바꾼다. */
