@@ -24,3 +24,15 @@ export function createRefresher(baseUrl: string) {
     return inFlight;
   };
 }
+
+const refreshers = new Map<string, () => Promise<RefreshOutcome>>();
+
+/** 브라우저의 모든 API 클라이언트와 세션 확인이 같은 재발급을 함께 기다리도록 baseUrl마다 하나만 만든다. */
+export function sharedRefresher(baseUrl: string) {
+  let refresh = refreshers.get(baseUrl);
+  if (!refresh) {
+    refresh = createRefresher(baseUrl);
+    refreshers.set(baseUrl, refresh);
+  }
+  return refresh;
+}

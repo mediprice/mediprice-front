@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { apiClient } from '@/lib/api/client';
 import { ApiError } from '@/lib/api/errors';
 import { BFF_BASE } from '@/lib/api/paths';
+import { sharedRefresher } from '@/lib/api/refresh';
 import type { components } from '@/lib/api/schema';
 import { unwrap } from '@/lib/api/unwrap';
 
@@ -17,12 +18,16 @@ import { requiredConsentDecisions } from './required-consent';
 
 export type CurrentUser = components['schemas']['UserResponse'];
 
-const sessionSchema = z.object({ authenticated: z.boolean() });
+const sessionSchema = z.object({
+  authenticated: z.boolean(),
+  refreshable: z.boolean().optional(),
+});
 
 export type SessionState = 'authenticated' | 'anonymous' | 'unavailable';
 
-/** 쿠키만 보고 답하는 BFF 세션 확인. 401 재발급 흐름을 타지 않아 로그인하지 않은 방문에서 세션 만료 이벤트가 나지 않는다. */
+/** 쿠키만 보고 답하는 BFF 세션 확인. Refresh만 남았으면 API 401과 같은 재발급을 함께 기다리고, 세션 만료 이벤트는 내지 않는다. */
 export async function getSession(baseUrl = BFF_BASE): Promise<SessionState> {
+  let session: z.infer<typeof sessionSchema>;
   try {
     const response = await fetch(`${baseUrl}/session`, {
       credentials: 'same-origin',
@@ -30,10 +35,16 @@ export async function getSession(baseUrl = BFF_BASE): Promise<SessionState> {
     if (!response.ok) return 'unavailable';
     const parsed = sessionSchema.safeParse(await response.json());
     if (!parsed.success) return 'unavailable';
-    return parsed.data.authenticated ? 'authenticated' : 'anonymous';
+    session = parsed.data;
   } catch {
     return 'unavailable';
   }
+  if (session.authenticated) return 'authenticated';
+  if (!session.refreshable) return 'anonymous';
+
+  const outcome = await sharedRefresher(baseUrl)();
+  if (outcome === 'ok') return 'authenticated';
+  return outcome === 'unauthenticated' ? 'anonymous' : 'unavailable';
 }
 
 /** 로그인하지 않았거나 토큰이 거부되면(401) 에러가 아니라 `null`이다. */

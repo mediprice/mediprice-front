@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { ACCESS_COOKIE, REFRESH_COOKIE } from '@/server/bff/cookies';
 import { bffRequest } from '@/test/request';
@@ -78,63 +78,20 @@ describe('GET /bff/session', () => {
     expect(await response.json()).toEqual({ authenticated: false });
   });
 
-  it('Refresh만 있으면 재발급해서 쿠키를 새로 설정한다', async () => {
-    server.use(
-      http.post(`${API}/api/auth/refresh`, () =>
-        HttpResponse.json({
-          accessToken: 'a2',
-          refreshToken: 'r2',
-          tokenType: 'Bearer',
-          expiresIn: 3600,
-        }),
-      ),
-    );
+  it('Refresh만 있으면 재발급하지 않고 재발급할 수 있다고만 알린다', async () => {
+    const backend = vi.fn(() => HttpResponse.json({}));
+    server.use(http.post(`${API}/api/auth/refresh`, backend));
 
     const response = await GET(
       bffRequest('/bff/session', { cookies: { [REFRESH_COOKIE]: 'r1' } }),
     );
 
-    expect(await response.json()).toEqual({ authenticated: true });
-    expect(
-      setCookies(response).some((c) => c.startsWith(`${ACCESS_COOKIE}=a2`)),
-    ).toBe(true);
-    expect(
-      setCookies(response).some((c) => c.startsWith(`${REFRESH_COOKIE}=r2`)),
-    ).toBe(true);
-  });
-
-  it('Refresh가 거부되면 쿠키를 지우고 로그아웃 상태다', async () => {
-    server.use(
-      http.post(`${API}/api/auth/refresh`, () =>
-        HttpResponse.json(
-          { code: 'EXPIRED_REFRESH_TOKEN', message: '만료', errors: [] },
-          { status: 401 },
-        ),
-      ),
-    );
-
-    const response = await GET(
-      bffRequest('/bff/session', { cookies: { [REFRESH_COOKIE]: 'r1' } }),
-    );
-
-    expect(await response.json()).toEqual({ authenticated: false });
-    expect(setCookies(response).every((c) => /Max-Age=0/i.test(c))).toBe(true);
-    expect(setCookies(response)).toHaveLength(2);
-  });
-
-  it('백엔드에 닿지 못하면 502이고 쿠키는 그대로 둔다', async () => {
-    server.use(
-      http.post(`${API}/api/auth/refresh`, () => HttpResponse.error()),
-    );
-
-    const response = await GET(
-      bffRequest('/bff/session', { cookies: { [REFRESH_COOKIE]: 'r1' } }),
-    );
-
-    expect(response.status).toBe(502);
-    expect(await response.json()).toMatchObject({
-      code: 'UPSTREAM_UNAVAILABLE',
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      authenticated: false,
+      refreshable: true,
     });
+    expect(backend).not.toHaveBeenCalled();
     expect(setCookies(response)).toEqual([]);
   });
 });

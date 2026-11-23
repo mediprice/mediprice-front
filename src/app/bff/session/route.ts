@@ -6,7 +6,6 @@ import {
   readTokens,
   setSessionCookies,
 } from '@/server/bff/cookies';
-import { refreshResponse, refreshSession } from '@/server/bff/refresh-session';
 import { errorResponse, forbidden, jsonNoStore } from '@/server/bff/responses';
 import { revokeSession } from '@/server/bff/revoke-session';
 import { isSameOrigin } from '@/server/bff/upstream';
@@ -31,14 +30,12 @@ export async function POST(request: NextRequest) {
   return response;
 }
 
-/** Access가 만료돼도 Refresh가 있으면 재발급해서 로그인을 이어 간다. */
-export async function GET(request: NextRequest) {
+/** 재발급은 브라우저가 POST /bff/session/refresh 한 곳으로만 하게 해, API 401의 재발급과 겹쳐 같은 Refresh를 두 번 쓰지 않게 한다. */
+export function GET(request: NextRequest) {
   const { accessToken, refreshToken } = readTokens(request);
   if (accessToken) return jsonNoStore({ authenticated: true });
   if (!refreshToken) return jsonNoStore({ authenticated: false });
-
-  const result = await refreshSession(refreshToken, request.headers);
-  return refreshResponse(result, () => jsonNoStore({ authenticated: false }));
+  return jsonNoStore({ authenticated: false, refreshable: true });
 }
 
 /** 백엔드 폐기에 실패해도 이 브라우저의 쿠키는 지운다. */
