@@ -1,5 +1,5 @@
 {
-  "brand": "MediPrice",
+  "brand": "Mediprice",
   "actions": {
     "close": "닫기",
     "cancel": "취소",
@@ -27,7 +27,7 @@
   "footer": {
     "source": "데이터 출처: 건강보험심사평가원 비급여 진료비 공개 자료",
     "notice": "공개 가격은 병원이 신고한 기준 가격이며, 실제 진료비와 다를 수 있어요.",
-    "copyright": "© MediPrice",
+    "copyright": "© Mediprice",
     "policies": "약관 및 정책",
     "terms": "이용약관",
     "privacy": "개인정보 처리방침",

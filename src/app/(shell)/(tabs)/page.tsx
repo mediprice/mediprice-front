@@ -11,7 +11,7 @@ import { HowItWorks } from './_components/how-it-works';
 import { PopularItems } from './_components/popular-items';
 import { TrustSection } from './_components/trust-section';
 
-/** 홈은 제목 틀(%s | MediPrice) 없이 서비스 이름과 하는 일을 함께 쓴다. */
+/** 홈은 제목 틀(%s | Mediprice) 없이 서비스 이름과 하는 일을 함께 쓴다. */
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata');
   return {

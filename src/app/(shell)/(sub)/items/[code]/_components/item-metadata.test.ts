@@ -32,7 +32,7 @@ const SUMMARY = {
 describe('buildItemMetadata', () => {
   it('대분류를 뗀 항목 이름을 제목에, 서울·경기 평균과 병원 수를 설명에 넣는다', () => {
     const metadata = buildItemMetadata({
-      siteName: 'MediPrice',
+      siteName: 'Mediprice',
       code: 'MX1220000',
       item: ITEM,
       summary: SUMMARY,
@@ -52,7 +52,7 @@ describe('buildItemMetadata', () => {
     ['요약을 읽지 못했으면', null],
   ])('%s 평균 없는 설명을 쓴다', (_name, summary) => {
     const metadata = buildItemMetadata({
-      siteName: 'MediPrice',
+      siteName: 'Mediprice',
       code: 'MX1220000',
       item: ITEM,
       summary,
@@ -67,7 +67,7 @@ describe('buildItemMetadata', () => {
 
   it('항목을 읽지 못했으면 공통 제목·설명이고 canonical은 그대로다', () => {
     const metadata = buildItemMetadata({
-      siteName: 'MediPrice',
+      siteName: 'Mediprice',
       code: 'A B',
       item: null,
       summary: null,
@@ -81,7 +81,7 @@ describe('buildItemMetadata', () => {
       alternates: { canonical: '/items/A%20B' },
       openGraph: {
         type: 'website',
-        siteName: 'MediPrice',
+        siteName: 'Mediprice',
         locale: 'ko_KR',
         url: '/items/A%20B',
       },
