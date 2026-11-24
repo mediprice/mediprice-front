@@ -3,6 +3,7 @@
 import { useEffect, useEffectEvent, useRef } from 'react';
 
 import { isWithinView, type LatLng } from '@/features/map/map-geo';
+import { runCleanup } from '@/features/map/naver-sdk';
 import type { NaverCircle } from '@/features/map/naver-types';
 
 import type { MapMarker } from './marker-icon';
@@ -78,7 +79,7 @@ export function useNaverView({
       const center = map.getCenter();
       reportMove({ lat: center.lat(), lng: center.lng() });
     });
-    return () => api.Event.removeListener(listener);
+    return () => runCleanup(() => api.Event.removeListener(listener));
   }, [handle]);
 
   useEffect(() => {
@@ -121,7 +122,7 @@ export function useNaverView({
     });
     circle.current = created;
     return () => {
-      created.setMap(null);
+      runCleanup(() => created.setMap(null));
       circle.current = null;
     };
   }, [handle, showArea]);
@@ -154,7 +155,7 @@ export function useNaverView({
       zIndex: 500,
       clickable: false,
     });
-    return () => marker.setMap(null);
+    return () => runCleanup(() => marker.setMap(null));
   }, [handle, userLat, userLng]);
 
   const selected = markers.find((marker) => marker.id === selectedId);

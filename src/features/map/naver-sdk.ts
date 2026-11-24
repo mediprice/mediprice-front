@@ -35,6 +35,18 @@ export function onNaverAuthFailure(listener: () => void) {
   };
 }
 
+/** 인증 실패 뒤의 SDK 객체는 불완전해 정리 호출이 던지므로 건너뛰고, 그 밖에 SDK 내부에서 던지는 오류는 개발에서만 경고로 남긴다. */
+export function runCleanup(cleanup: () => void) {
+  if (hasAuthFailed) return;
+  try {
+    cleanup();
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('Naver Maps cleanup failed', error);
+    }
+  }
+}
+
 /** SDK를 앱에서 한 번만 불러온다. 실패하면 다음 호출에서 다시 시도할 수 있게 비운다. */
 export function loadNaverMaps(
   clientId: string,
