@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  formatItemName,
   groupHeadingParts,
   groupItems,
   groupItemsByPages,
@@ -22,24 +21,6 @@ function item(
     sdivName: sdiv?.[1] ?? null,
   };
 }
-
-describe('formatItemName', () => {
-  it('대분류 이름을 빼고 나머지 단계를 가운뎃점으로 잇는다', () => {
-    expect(formatItemName(item('MX1220000', '이학요법료/도수치료'))).toBe(
-      '도수치료',
-    );
-    expect(
-      formatItemName({
-        ...item('UB0010012', '치과의 보철료/치과임플란트(1치당)/PFM'),
-        mdivName: '치과의 보철료',
-      }),
-    ).toBe('치과임플란트(1치당) · PFM');
-  });
-
-  it('대분류 자체인 항목은 이름을 그대로 쓴다', () => {
-    expect(formatItemName(item('1070Z', '이학요법료'))).toBe('이학요법료');
-  });
-});
 
 describe('groupItems', () => {
   it('중분류로 묶고 처음 나온 순서를 지키며, 대분류는 코드와 함께 둔다', () => {

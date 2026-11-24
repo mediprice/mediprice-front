@@ -2,10 +2,9 @@ import type { Metadata } from 'next';
 import type { getTranslations } from 'next-intl/server';
 
 import { openGraphFor } from '@/app/_components/open-graph';
+import { formatItemPath } from '@/features/npay/item-name';
 import type { PriceSummary } from '@/features/npay/price-summary';
 import type { components } from '@/lib/api/schema';
-
-import { formatItemTitle } from './item-title';
 
 type Item = components['schemas']['NpayItemDetailResponse'];
 type Translate = Awaited<ReturnType<typeof getTranslations<'items.metadata'>>>;
@@ -38,7 +37,7 @@ export function buildItemMetadata({
       openGraph,
     };
   }
-  const name = formatItemTitle(item);
+  const name = formatItemPath(item.name, item.mdivName);
   const description =
     summary?.avgPrice != null
       ? t('descriptionWithAverage', {

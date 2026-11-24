@@ -9,6 +9,7 @@ import { Chip } from '@/components/ui/chip';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RADIUS_OPTIONS, type RadiusOption } from '@/features/map/map-geo';
+import { formatItemPath } from '@/features/npay/item-name';
 import { npayQueries } from '@/features/npay/queries';
 import type { ServiceRegion } from '@/features/regions/service-region';
 
@@ -109,10 +110,5 @@ function ItemTitle({ code }: { code: string }) {
     );
   }
   if (!data) return t('title');
-  const prefix = data.mdivName ? `${data.mdivName}/` : '';
-  const name =
-    prefix && data.name.startsWith(prefix)
-      ? data.name.slice(prefix.length)
-      : data.name;
-  return t('itemTitle', { item: name.split('/').join(' · ') });
+  return t('itemTitle', { item: formatItemPath(data.name, data.mdivName) });
 }

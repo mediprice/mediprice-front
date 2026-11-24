@@ -4,25 +4,25 @@ import {
   parseServiceRegion,
   type ServiceRegion,
 } from '@/features/regions/service-region';
+import { firstParam } from '@/lib/search-params';
 
 const KEYWORD_MAX_LENGTH = 100;
 
-/** 같은 이름이 여러 번 오면(`?q=a&q=b`) 첫 값만 쓴다. */
-const first = <T extends z.ZodType>(schema: T) =>
-  z.preprocess((value) => (Array.isArray(value) ? value[0] : value), schema);
+const firstOf = <T extends z.ZodType>(schema: T) =>
+  z.preprocess(firstParam, schema);
 
 const searchParamsSchema = z.object({
-  type: first(z.enum(['item', 'hospital'])).catch('item'),
-  q: first(
+  type: firstOf(z.enum(['item', 'hospital'])).catch('item'),
+  q: firstOf(
     z.string().transform((value) => value.trim().slice(0, KEYWORD_MAX_LENGTH)),
   ).catch(''),
-  category: first(
+  category: firstOf(
     z
       .string()
       .regex(/^[a-z]{1,20}$/)
       .optional(),
   ).catch(undefined),
-  code: first(
+  code: firstOf(
     z
       .string()
       .regex(/^[0-9A-Z]{5,10}$/)

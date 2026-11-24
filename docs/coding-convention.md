@@ -120,10 +120,13 @@ src/
     layout/               여러 라우트가 공유하는 틀 (TopNav, MobileTopBar, SubTopBar, BottomTabBar, PageContainer, SiteFooter)
   lib/                    도메인을 모르는 공용 코드
     api/                  HTTP 클라이언트, 에러, 에러 코드 → 문구 키, 쿼리 직렬화, 재발급, 세션 만료 이벤트, schema.d.ts
-    motion/               처음 보일 때 한 번 움직이기(useFirstView), reduced-motion 확인
-    navigation/           앱 안 이동 깊이 기록(뒤로 가기를 앱 안에서 할 수 있는지), 저장 전 나가기 확인(useLeaveGuard)
+    motion/               처음 보일 때 한 번 움직이기(useFirstView), reduced-motion 확인과 구독(useReducedMotion)
+    navigation/           앱 안 이동 깊이 기록(뒤로 가기를 앱 안에서 할 수 있는지), 저장 전 나가기 확인(useLeaveGuard), 앱 안 링크 클릭 판정(appLinkTarget)
     query-client.ts       QueryClient 기본값
     range-position.ts     최저~최고 막대 위의 위치 계산 (RangeBar, CompareStrip)
+    safe-storage.ts       sessionStorage·localStorage를 예외 없이 읽고 쓰기 (zod 검증 포함)
+    search-params.ts      URL 파라미터가 여러 번 오면 첫 값 고르기(firstParam)
+    timeout-signal.ts     바깥 신호나 제한 시간에 끊기는 AbortSignal (Safari 15 호환)
     utils.ts              cn (토큰을 등록한 tailwind-merge)
   server/bff/             서버 전용 코드: 쿠키, 업스트림 호출, 재발급, 응답 헬퍼
   server/api/             서버 컴포넌트의 익명 공개 조회(publicApi, 요청마다 QueryClient, 404 판정, 홈·sitemap 데이터)
@@ -149,7 +152,7 @@ app ──▶ features ──▶ components, lib
   - `auth`: `use-session.ts`(`useSession`, `useLoginGuard`), `login-dialog-store.ts`(`openLoginDialog`)
   - `feedback`: `toast-store.ts`
   - `regions`: `service-region.ts`, `format-location.ts`
-  - `npay`: `average-verdict.ts`, `price-filters.ts`, `price-summary.ts`, `catalog.ts`, `use-category-label.ts`
+  - `npay`: `average-verdict.ts`, `price-filters.ts`, `price-summary.ts`, `catalog.ts`, `use-category-label.ts`, `item-name.ts`, `use-regional-summary.ts`
   - `map`: `map-geo.ts`, `map-params.ts`, `exact-distance.ts`, `use-distance-label.ts`
   - `hospitals`: `detail-links.ts`
 - 새 파일을 다른 feature가 쓰게 되면 이 목록에 더한다. `app`은 조립하는 쪽이라 features의 어느 파일이든 import할 수 있다.
@@ -397,7 +400,7 @@ export const hospitalQueries = {
 
 ### 7.2.1 생성 타입에 아직 없는 엔드포인트
 
-백엔드 브랜치에만 있고 배포·`pnpm api:generate`가 되지 않은 엔드포인트는 `features/<도메인>/api.ts`에서 `createApiFetch`로 `/bff/api/...`를 부르고, 응답을 zod로 검증한다(예: `features/ai/api.ts`, `features/live-fee/api.ts`). JSON을 주고받는 단순한 호출은 `createUntypedRequest`(`lib/api/untyped-request.ts`)를 쓴다(예: `features/auth/consent-api.ts`, `features/medical-profile/api.ts`). 배포된 백엔드에 아직 없는 경로는 404 `RESOURCE_NOT_FOUND`로 오므로, 화면은 이를 "아직 지원하지 않음"으로 다루고 막지 않는다(예: `/users/me`의 `requiredConsentsMissing`이 없으면 동의 화면을 띄우지 않는다). 실패는 같은 `ApiError`/`NetworkError`로 던져 `errorMessageKey`가 그대로 동작하게 한다. 파일에 "배포 후 생성 클라이언트로 바꾼다"는 한 줄 TSDoc을 남기고, 배포되면 `apiClient` + `unwrap`으로 옮긴다.
+백엔드 브랜치에만 있고 배포·`pnpm api:generate`가 되지 않은 엔드포인트는 `features/<도메인>/api.ts`에서 `createUntypedRequest`(`lib/api/untyped-request.ts`)로 `/bff/api/...`를 부르고, 응답을 zod로 검증한다(예: `features/ai/api.ts`, `features/live-fee/api.ts`, `features/auth/consent-api.ts`, `features/medical-profile/api.ts`). 재발급은 `apiClient`와 같은 공유 refresher를 쓴다. 배포된 백엔드에 아직 없는 경로는 404 `RESOURCE_NOT_FOUND`로 오므로, 화면은 이를 "아직 지원하지 않음"으로 다루고 막지 않는다(예: `/users/me`의 `requiredConsentsMissing`이 없으면 동의 화면을 띄우지 않는다). 실패는 같은 `ApiError`/`NetworkError`로 던져 `errorMessageKey`가 그대로 동작하게 한다. 파일에 "배포 후 생성 클라이언트로 바꾼다"는 한 줄 TSDoc을 남기고, 배포되면 `apiClient` + `unwrap`으로 옮긴다.
 
 ### 7.3 변경과 캐시
 
@@ -461,9 +464,9 @@ export const hospitalQueries = {
 | `RangeBar`(`components/ui/range-bar.tsx`)                              | `min` `max` `average?` `value`(이 병원 점, 필수) `valueLabel`(점 라벨, 필수. ui는 도메인 문구를 모르므로 호출부가 넘긴다) `comparison?`(`below`·`above`·`same`, 호출부가 `compareToAverage`로 계산) `size`(`md` 라벨 붙은 막대, `sm` 목록 행의 작은 막대) `showAverageTick?`(sm 평균 눈금 라벨). 평균이 가운데인 구간별 눈금(최저→평균 0–50%, 평균→최고 50–100%), 끝 라벨은 실제 최저·최고. 범위가 없거나 최저=최고면 그리지 않는다. 막대는 `aria-hidden`, 뜻은 sr-only 문장. 값 점이 있는 곳(항목 행, 병원 선택 항목)에서만 쓴다(14장) |
 | `RollingNumber`(`components/ui/rolling-number.tsx`)                    | `value` `format?`(가격은 `(n) => t('won', { amount: n })`). 처음 보일 때와 값이 바뀔 때 0부터 굴린다. 접근성 이름은 최종값                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `Reveal`(`components/ui/reveal.tsx`)                                   | 스크롤 등장(12px 아래에서 떠오름). `asChild` `delayMs`. 서버 렌더·이미 보이는 것·reduced-motion은 그대로 보인다                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `PriceOverview`·`PriceSpread`·`AverageTag`(`features/npay/components`) | `PriceOverview`는 목록·카드의 평균 + "최저 N원 ~ 최고 N원 (세부 항목별 가격)" + 병원 수. `PriceSpread`는 그 범위 한 줄(15–16px, 머리·카드에서도 쓴다). 홈 목록처럼 좁은 곳은 `common.price.compactRange`("37만~495만원"). `AverageTag`는 "평균보다 N% 저렴" 꼬리표로, 평균의 1/3~3배 밖이면 "구성이 달라 비교 어려움"을 쓴다                                                                                                                                                                                                            |
+| `PriceOverview`·`PriceSpread`·`AverageTag`(`features/npay/components`) | `PriceOverview`는 목록·카드의 평균 + "최저 N원 ~ 최고 N원 (세부 항목별 가격)" + 병원 수. `PriceSpread`는 그 범위 한 줄(15–16px, 머리·카드에서도 쓴다). `AverageTag`는 "평균보다 N% 저렴" 꼬리표로, 평균의 1/3~3배 밖이면 "구성이 달라 비교 어려움"을 쓴다                                                                                                                                                                                                                                                                               |
 
-- 움직임은 `lib/motion`의 `useFirstView`(처음 보일 때 한 번)와 `prefersReducedMotion`으로 만든다. 서버 렌더와 JS가 없을 때는 항상 최종 모습이다.
+- 움직임은 `lib/motion`의 `useFirstView`(처음 보일 때 한 번)와 `prefersReducedMotion`으로 만든다. JS로 그리는 애니메이션(지도 SDK 이동 등)은 `useReducedMotion`으로 설정 변화를 구독한다. 서버 렌더와 JS가 없을 때는 항상 최종 모습이다.
 - 움직이는 숫자·막대는 장식이다. 같은 뜻을 글자로 함께 둔다.
 - 자동으로 바뀌는 것은 멈춤 수단이 있어야 한다(MUST). 멈출 수 없는 자동 슬라이드는 쓰지 않는다.
 
@@ -623,8 +626,8 @@ const t = await getTranslations('metadata');
 공개 가격 데이터의 특성 때문에 정한 규칙이다. 화면을 새로 만들 때도 지킨다.
 
 - **지역 (MUST)**: 지역은 `features/regions/service-region.ts` 하나로 다룬다. 기본은 서울·경기(`metro`)이고 선택지는 서울·경기 / 서울 / 경기 / 전국(`all`)이다. URL 파라미터 이름은 `region`이고 기본값은 링크에서 뺀다. 백엔드가 시도 하나만 받으므로 서울·경기는 `sidoCodesOf`로 나눠 조회해 합친다.
-- **가격 요약 (MUST)**: 최저~최고 범위를 대표값으로 내세우지 않는다. 범위는 "1일당 1,000원" 같은 예외 값에 끌려가 오해를 만든다. 평균을 크게, 범위와 병원 수를 작게 쓴다(`PriceOverview`). 여러 시도의 요약은 `npayQueries.summaryIn`이 합친다(평균은 가격 수로 가중).
-- **값 점이 없는 범위 막대 금지 (MUST)**: `RangeBar`는 이 병원 값(`value`) 점이 있을 때만 쓴다. 막대는 평균을 가운데에 두는 눈금이라, 점이 없으면 평균 눈금이 늘 가운데에 있어 아무것도 알려 주지 않고 분포가 대칭인 것처럼 보인다. 점이 없는 곳(홈, 오늘의 가격, 항목 머리, 검색·분류 행, AI 결과)은 `PriceSpread` 글자나 `compactRange`로 쓴다.
+- **가격 요약 (MUST)**: 최저~최고 범위를 대표값으로 내세우지 않는다. 범위는 "1일당 1,000원" 같은 예외 값에 끌려가 오해를 만든다. 평균을 크게, 범위와 병원 수를 작게 쓴다(`PriceOverview`). 여러 시도의 요약은 `npayQueries.summaryIn`이 합친다(평균은 가격 수로 가중). 화면은 `useRegionalSummary`로 지역만 고르면 `summaryIn`, 시군구·종별이 있으면 `summaryOf`를 쓴다.
+- **값 점이 없는 범위 막대 금지 (MUST)**: `RangeBar`는 이 병원 값(`value`) 점이 있을 때만 쓴다. 막대는 평균을 가운데에 두는 눈금이라, 점이 없으면 평균 눈금이 늘 가운데에 있어 아무것도 알려 주지 않고 분포가 대칭인 것처럼 보인다. 점이 없는 곳(홈, 오늘의 가격, 항목 머리, 검색·분류 행, AI 결과)은 `PriceOverview`·`PriceSpread` 글자로 쓴다.
 - **세부 항목이 다른 가격 (MUST)**: 한 항목(예: 도수치료) 안의 세부 항목은 병원마다 시간·횟수·구성이 다르다. 도수치료 서울·경기 2,744건에서 15분 세션 중앙값은 30,000원(평균 118,384원의 0.25배), 30분 80,000원, 60분 150,000원, 100분 400,000원(3.4배)이었다. "[1일당]"은 심평원 청구 단위 표기라 345건(12.6%)에 붙지만 중앙값이 95,000원으로 전체(100,000원)와 같아 단위를 가르는 표시가 아니다. 그래서 다음을 지킨다.
   - 가격 옆에는 그 가격의 세부 항목 이름을 쓴다("도수치료F 기준"). 행의 꼬리표·막대·큰 가격·병원 화면 링크(`variant`·`price` 파라미터)는 모두 같은 세부 항목을 말한다. 병원 화면은 그 세부 항목을 먼저 고르고 같은 지역 평균과 견줘, 행의 꼬리표와 같은 숫자를 말한다.
   - 평균 대비 %는 가격이 평균의 1/3~3배 안일 때만 쓴다(`features/npay/average-verdict.ts`의 `judgeAgainstAverage`). 밖이면 "구성이 달라 비교 어려움"으로 쓴다. 이 범위는 도수치료 가격의 8.9%, 체외충격파 4.5%, 임플란트 1.1%, 라식·라섹·대상포진 예방접종 0%를 거른다.
@@ -632,6 +635,6 @@ const t = await getTranslations('metadata');
   - 병원 비교(`features/comparison/compare-basis.ts`)는 모든 병원이 같은 이름으로 공개한 세부 항목이 있으면 그것끼리 견줘 "가장 저렴해요"라고 쓴다. 없으면 병원별 가장 낮은 공개 가격끼리 견주되 "가장 낮은 공개 가격은 OO병원이에요"라고 쓰고, 어느 세부 항목의 값인지 밝히고 금액 차이를 쓰지 않는다.
 - **"최저" 낱말**: 범위의 끝은 "최저 N원 / 최고 N원", 한 병원의 세부 항목 중 가장 낮은 값은 "가장 낮은 가격", 비교한 병원 중 가장 낮은 곳의 꼬리표는 "최저"로 쓴다. "최저가"는 뜻이 섞여 쓰지 않는다.
 - **병원 단위 (MUST)**: 가격 API는 병원의 세부 항목마다 한 줄을 준다. 병원을 비교하는 목록은 병원 하나에 카드 하나로 묶고, 세부 항목은 펼쳐서 보여 준다. 개수는 "병원 N곳"으로 쓴다.
-- **분류 이름**: 홈 분류(`features/npay/catalog.ts`)에 속하는 코드는 쉬운 이름("물리치료·재활")을 먼저, 공식 이름("이학요법료")은 보조로 쓴다. 항목 이름의 "대분류/" 앞부분은 떼고 보여 준다.
+- **분류 이름**: 홈 분류(`features/npay/catalog.ts`)에 속하는 코드는 쉬운 이름("물리치료·재활")을 먼저, 공식 이름("이학요법료")은 보조로 쓴다. 항목 이름의 "대분류/" 앞부분은 떼고 보여 준다(`formatItemPath`, 마지막 조각만 쓸 때는 `lastSegment`, `features/npay/item-name.ts`).
 - **지역 이름**: 시도·시군구는 `formatLocation`으로 정리한다("부산 부산남구" → "부산 남구", "경기 부천원미구" → "경기 부천시 원미구").
 - **없는 데이터**: 통계·업데이트 날짜·가격 범위 필터처럼 API가 없는 것은 그럴듯한 값으로 채우지 않고 뺀다. 빠진 것은 PR 설명에 적는다.

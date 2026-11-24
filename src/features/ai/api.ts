@@ -1,9 +1,6 @@
-import type { z } from 'zod';
-
-import { createApiFetch } from '@/lib/api/client';
-import { ApiError, NetworkError, toApiError } from '@/lib/api/errors';
 import { BFF_BASE } from '@/lib/api/paths';
 import { emitSessionExpired } from '@/lib/api/session-events';
+import { createUntypedRequest } from '@/lib/api/untyped-request';
 
 import {
   transcribeResponseSchema,
@@ -20,37 +17,8 @@ type AiApiOptions = {
 type RequestOptions = { signal?: AbortSignal };
 
 /** AI 경로가 아직 schema.d.ts에 없어 zod로 검증한다. 백엔드 배포 후 `pnpm api:generate`를 돌리면 apiClient + unwrap으로 바꾼다. */
-export function createAiApi({ baseUrl, onSessionExpired }: AiApiOptions) {
-  const apiFetch = createApiFetch({ baseUrl, onSessionExpired });
-
-  async function call<T>(
-    path: string,
-    init: RequestInit,
-    schema: z.ZodType<T>,
-  ): Promise<T> {
-    let response: Response;
-    try {
-      response = await apiFetch(
-        new Request(`${baseUrl}${path}`, {
-          ...init,
-          credentials: 'same-origin',
-        }),
-      );
-    } catch (cause) {
-      if (init.signal?.aborted) throw cause;
-      throw new NetworkError(cause);
-    }
-    if (!response.ok) throw await toApiError(response);
-    const parsed = schema.safeParse(await response.json().catch(() => null));
-    if (!parsed.success) {
-      throw new ApiError(
-        response.status,
-        'INVALID_RESPONSE',
-        'Unexpected AI response',
-      );
-    }
-    return parsed.data;
-  }
+export function createAiApi(options: AiApiOptions) {
+  const request = createUntypedRequest(options);
 
   return {
     sendTurn: (
@@ -58,28 +26,24 @@ export function createAiApi({ baseUrl, onSessionExpired }: AiApiOptions) {
       state: TurnState | null,
       { signal }: RequestOptions = {},
     ): Promise<TurnResponse> =>
-      call(
-        '/api/ai/chat/turn',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ input, state }),
-          signal,
-        },
-        turnResponseSchema,
-      ),
+      request.json('/api/ai/chat/turn', turnResponseSchema, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input, state }),
+        signal,
+      }),
 
     transcribe: async (audio: Blob, { signal }: RequestOptions = {}) =>
       (
-        await call(
+        await request.json(
           '/api/ai/speech/transcribe',
+          transcribeResponseSchema,
           {
             method: 'POST',
             headers: { 'Content-Type': audio.type || 'audio/webm' },
             body: audio,
             signal,
           },
-          transcribeResponseSchema,
         )
       ).text,
   };

@@ -1,14 +1,9 @@
+import { lastSegment } from '@/features/npay/item-name';
 import type { components } from '@/lib/api/schema';
 
 type PriceRow = components['schemas']['HospitalItemPriceResponse'];
 
 export type PriceGroup = { category: string | null; rows: PriceRow[] };
-
-/** "예방접종료/대상포진/스카이조스터주"처럼 분류 경로가 붙은 표준 이름의 마지막 조각. */
-export function lastSegment(name: string) {
-  const parts = name.split('/').map((part) => part.trim());
-  return parts.findLast((part) => part !== '') ?? name.trim();
-}
 
 /** 목록에 보일 이름. 병원이 붙인 세부 이름을 먼저 쓰고, 없으면 표준 이름의 마지막 조각을 쓴다. */
 export function priceRowName(row: PriceRow) {

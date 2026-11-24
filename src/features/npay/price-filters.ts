@@ -7,6 +7,7 @@ import {
   type ServiceRegion,
   sidoCodesOf,
 } from '@/features/regions/service-region';
+import { firstParam } from '@/lib/search-params';
 
 import type { PriceBand } from './average-verdict';
 import type { NpayPriceCondition } from './queries';
@@ -28,10 +29,8 @@ export type PriceFilters = {
   prices?: 'all';
 };
 
-const first = (value: unknown) => (Array.isArray(value) ? value[0] : value);
-
 const firstOf = <T extends z.core.$ZodType>(schema: T) =>
-  z.pipe(z.transform(first), schema);
+  z.pipe(z.transform(firstParam), schema);
 const optionalCode = (pattern: RegExp) =>
   firstOf(z.catch(z.optional(z.string().check(z.regex(pattern))), undefined));
 

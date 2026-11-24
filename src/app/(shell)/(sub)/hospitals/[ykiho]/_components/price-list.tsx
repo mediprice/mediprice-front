@@ -24,10 +24,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { VariantSelection } from '@/features/hospitals/detail-links';
 import {
   groupPriceRows,
-  lastSegment,
   priceRowName,
 } from '@/features/hospitals/price-groups';
 import { hospitalQueries } from '@/features/hospitals/queries';
+import { lastSegment } from '@/features/npay/item-name';
 import { npayQueries } from '@/features/npay/queries';
 import type { components } from '@/lib/api/schema';
 import { cn } from '@/lib/utils';
