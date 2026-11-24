@@ -17,6 +17,14 @@ export function decodeYkiho(value: string) {
   }
 }
 
+const ykihoSchema = z.string().check(z.regex(/^[A-Za-z0-9+/]{16,200}={0,2}$/));
+
+/** 형식이 병원 키(base64 문자)가 아니면 백엔드에 묻지 않도록 null이다. */
+export function parseYkiho(value: string): string | null {
+  const result = ykihoSchema.safeParse(decodeYkiho(value));
+  return result.success ? result.data : null;
+}
+
 /**
  * 네이버 지도 앱의 대중교통 길찾기(URL Scheme, nmap://route/public). 출발지를 비우면 앱이 현재 위치에서 시작해,
  * 사용자의 위치를 우리 서버에 보내지 않고 길을 안내할 수 있다. appname은 웹이면 이 사이트 주소다.

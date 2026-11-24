@@ -8,7 +8,7 @@ import {
   OgFrame,
   OgHighlight,
 } from '@/app/_components/og-image';
-import { decodeYkiho } from '@/features/hospitals/detail-links';
+import { parseYkiho } from '@/features/hospitals/detail-links';
 import { hospitalQueries } from '@/features/hospitals/queries';
 import { formatLocation } from '@/features/regions/format-location';
 import metadata from '@/i18n/messages/ko/metadata.json';
@@ -23,21 +23,25 @@ export const alt = createTranslator({
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-/** 병원 이름, 종별·지역, 공개한 비급여 항목 수, 공개 가격 기준일. */
+/** 병원 이름, 종별·지역, 공개한 비급여 항목 수, 공개 가격 기준일. 병원 키 형식이 아니면 백엔드에 묻지 않고 공통 문구로 그린다. */
 export default async function HospitalOpengraphImage({
   params,
 }: {
   params: Promise<{ ykiho: string }>;
 }) {
-  const ykiho = decodeYkiho((await params).ykiho);
+  const ykiho = parseYkiho((await params).ykiho);
   const queryClient = new QueryClient();
   const [hospital, prices, stats, fonts, t, format] = await Promise.all([
-    queryClient
-      .fetchQuery(hospitalQueries.detail(ykiho, publicApi))
-      .catch(() => null),
-    queryClient
-      .fetchInfiniteQuery(hospitalQueries.priceList(ykiho, {}, publicApi))
-      .catch(() => null),
+    ykiho
+      ? queryClient
+          .fetchQuery(hospitalQueries.detail(ykiho, publicApi))
+          .catch(() => null)
+      : null,
+    ykiho
+      ? queryClient
+          .fetchInfiniteQuery(hospitalQueries.priceList(ykiho, {}, publicApi))
+          .catch(() => null)
+      : null,
     fetchSiteStats(),
     loadPretendard(),
     getTranslations('metadata'),
