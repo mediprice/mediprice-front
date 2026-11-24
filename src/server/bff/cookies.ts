@@ -39,19 +39,8 @@ function baseOptions() {
   return { httpOnly: true, sameSite: 'lax', secure: isSecure() } as const;
 }
 
-/** 접두사 없던 이전 이름의 쿠키. Refresh 수명(14일)이 지나면 이 이전 처리를 지운다. */
-function hasLegacyNames() {
-  return isSecure();
-}
-
 function expire(response: NextResponse, name: string, path: string) {
   response.cookies.set(name, '', { ...baseOptions(), path, maxAge: 0 });
-}
-
-function expireLegacy(response: NextResponse) {
-  if (!hasLegacyNames()) return;
-  expire(response, ACCESS_NAME, ACCESS_PATH);
-  expire(response, REFRESH_NAME, REFRESH_PATH);
 }
 
 export function setSessionCookies(response: NextResponse, tokens: Tokens) {
@@ -66,7 +55,6 @@ export function setSessionCookies(response: NextResponse, tokens: Tokens) {
     path: REFRESH_PATH,
     maxAge: REFRESH_MAX_AGE_SECONDS,
   });
-  expireLegacy(response);
 }
 
 /** 쿠키는 설정할 때와 같은 Path로 지워야 브라우저에서 실제로 삭제된다. */
@@ -74,17 +62,12 @@ export function clearSessionCookies(response: NextResponse) {
   const names = sessionCookieNames();
   expire(response, names.access, ACCESS_PATH);
   expire(response, names.refresh, REFRESH_PATH);
-  expireLegacy(response);
 }
 
-/** 이전 이름의 Access는 읽지 않고, 이전 Refresh는 새 이름의 쿠키가 없을 때만 한 번 재발급해 새 이름으로 옮기는 데 쓴다. */
 export function readTokens(request: NextRequest) {
   const names = sessionCookieNames();
-  const legacyRefresh = hasLegacyNames()
-    ? request.cookies.get(REFRESH_NAME)?.value
-    : undefined;
   return {
     accessToken: request.cookies.get(names.access)?.value,
-    refreshToken: request.cookies.get(names.refresh)?.value ?? legacyRefresh,
+    refreshToken: request.cookies.get(names.refresh)?.value,
   };
 }
