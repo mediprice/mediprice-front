@@ -3,7 +3,7 @@ import { createTranslator } from 'next-intl';
 
 import metadata from '@/i18n/messages/ko/metadata.json';
 
-import { BRAND_COLORS, BrandTile } from './_components/brand-tile';
+import { BRAND_COLORS, OgSymbol } from './_components/brand-tile';
 import { loadPretendard } from './_components/og-image';
 
 const t = createTranslator({
@@ -33,7 +33,7 @@ export default async function OpengraphImage() {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-        <BrandTile size={72} />
+        <OgSymbol height={68} />
         <span style={{ fontSize: 44, fontWeight: 700, letterSpacing: -0.5 }}>
           {t('title')}
         </span>
