@@ -119,7 +119,7 @@ src/
     ui/                   디자인 시스템 컴포넌트 (Figma 컴포넌트와 1:1, 도메인 모름)
     layout/               여러 라우트가 공유하는 틀 (TopNav, MobileTopBar, SubTopBar, BottomTabBar, PageContainer, SiteFooter)
   lib/                    도메인을 모르는 공용 코드
-    api/                  HTTP 클라이언트, 에러, 에러 코드 → 문구 키, 쿼리 직렬화, 재발급, 세션 만료 이벤트, schema.d.ts
+    api/                  HTTP 클라이언트, 에러, 에러 코드 → 문구 키, 쿼리 직렬화, 재발급, 세션 만료·필수 동의 누락 이벤트, schema.d.ts
     motion/               처음 보일 때 한 번 움직이기(useFirstView), reduced-motion 확인과 구독(useReducedMotion)
     navigation/           앱 안 이동 깊이 기록(뒤로 가기를 앱 안에서 할 수 있는지), 저장 전 나가기 확인(useLeaveGuard), 앱 안 링크 클릭 판정(appLinkTarget)
     query-client.ts       QueryClient 기본값

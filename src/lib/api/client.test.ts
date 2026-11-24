@@ -1,11 +1,12 @@
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { z } from 'zod';
 
 import { server } from '@/test/server';
 
 import { createApiClient } from './client';
 import { ApiError, NetworkError } from './errors';
+import { subscribeRequiredConsentsMissing } from './session-events';
 import { createUntypedRequest } from './untyped-request';
 import { unwrap } from './unwrap';
 
@@ -215,6 +216,64 @@ describe('401 처리', () => {
     const result = await client.GET('/api/regions/sido');
 
     expect(result.response.status).toBe(404);
+  });
+});
+
+describe('필수 동의 누락(403)', () => {
+  const REVIEWS = `${BASE}/api/hospitals/H1/reviews`;
+
+  function listen() {
+    const listener = vi.fn();
+    onTestFinished(subscribeRequiredConsentsMissing(listener));
+    return listener;
+  }
+
+  function postReview(client: ReturnType<typeof setup>['client']) {
+    return client.POST('/api/hospitals/{ykiho}/reviews', {
+      params: { path: { ykiho: 'H1' } },
+      body: { rating: 5, content: '좋아요' },
+    });
+  }
+
+  it('쓰기 요청이 REQUIRED_CONSENTS_MISSING으로 거부되면 알리고, 응답 본문은 그대로 읽힌다', async () => {
+    server.use(
+      http.post(REVIEWS, () =>
+        HttpResponse.json(
+          {
+            code: 'REQUIRED_CONSENTS_MISSING',
+            message: '동의 필요',
+            errors: [],
+          },
+          { status: 403 },
+        ),
+      ),
+    );
+    const listener = listen();
+    const { client } = setup();
+
+    await expect(unwrap(postReview(client))).rejects.toMatchObject({
+      status: 403,
+      code: 'REQUIRED_CONSENTS_MISSING',
+    });
+    expect(listener).toHaveBeenCalledOnce();
+  });
+
+  it('다른 403은 알리지 않는다', async () => {
+    server.use(
+      http.post(REVIEWS, () =>
+        HttpResponse.json(
+          { code: 'ACCESS_DENIED', message: '거부', errors: [] },
+          { status: 403 },
+        ),
+      ),
+    );
+    const listener = listen();
+    const { client } = setup();
+
+    const result = await postReview(client);
+
+    expect(result.response.status).toBe(403);
+    expect(listener).not.toHaveBeenCalled();
   });
 });
 

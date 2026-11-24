@@ -100,6 +100,23 @@ describe('POST /bff/session/refresh', () => {
     expect(cookies.every((c) => /Max-Age=0/i.test(c))).toBe(true);
   });
 
+  it('다른 탭·인스턴스가 방금 회전했다고 백엔드가 답하면 200이고 쿠키를 주지도 지우지도 않는다', async () => {
+    server.use(
+      http.post(`${API}/api/auth/refresh`, () =>
+        HttpResponse.json(
+          { code: 'REFRESH_TOKEN_ALREADY_ROTATED', message: '', errors: [] },
+          { status: 401 },
+        ),
+      ),
+    );
+
+    const response = await POST(request());
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ authenticated: true });
+    expect(response.headers.getSetCookie()).toEqual([]);
+  });
+
   it('백엔드에 닿지 못하면 502이고 쿠키는 그대로 둔다', async () => {
     server.use(
       http.post(`${API}/api/auth/refresh`, () => HttpResponse.error()),

@@ -103,6 +103,38 @@ describe('refreshSession', () => {
     },
   );
 
+  it('다른 요청이 방금 같은 Refresh로 회전했다는 401이면 rotated다', async () => {
+    server.use(
+      http.post(`${API}/api/auth/refresh`, () =>
+        HttpResponse.json(
+          {
+            code: 'REFRESH_TOKEN_ALREADY_ROTATED',
+            message: '이미 재발급됨',
+            errors: [],
+          },
+          { status: 401 },
+        ),
+      ),
+    );
+
+    expect(await refreshSession('r', new Headers())).toEqual({
+      status: 'rotated',
+    });
+  });
+
+  it('본문이 없는 401은 unauthenticated다', async () => {
+    server.use(
+      http.post(
+        `${API}/api/auth/refresh`,
+        () => new HttpResponse(null, { status: 401 }),
+      ),
+    );
+
+    expect(await refreshSession('r', new Headers())).toEqual({
+      status: 'unauthenticated',
+    });
+  });
+
   it('백엔드 장애(5xx)와 연결 실패는 unavailable이다', async () => {
     server.use(
       http.post(
