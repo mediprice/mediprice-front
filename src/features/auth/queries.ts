@@ -5,6 +5,7 @@ import {
 } from '@tanstack/react-query';
 import { z } from 'zod/mini';
 
+import { LEGAL_DOCUMENT_VERSIONS } from '@/config/legal';
 import { apiClient } from '@/lib/api/client';
 import { ApiError } from '@/lib/api/errors';
 import {
@@ -17,6 +18,7 @@ import type { components } from '@/lib/api/schema';
 import { unwrap } from '@/lib/api/unwrap';
 
 import { consentApi } from './consent-api';
+import { withLocationWithdrawn } from './consent-status';
 import { myDataApi } from './my-data-export';
 import { requiredConsentDecisions } from './required-consent';
 
@@ -140,6 +142,35 @@ export const consentMutations = {
         queryClient.setQueryData(consentKeys.status(), saved);
         await queryClient.invalidateQueries({
           queryKey: sessionKeys.current(),
+        });
+      },
+    }),
+  /** 위치 동의를 저장하고 바뀐 동의 현황을 바로 쓴다. */
+  agreeLocation: (queryClient: QueryClient) =>
+    mutationOptions({
+      mutationFn: () =>
+        consentApi.save([
+          {
+            type: 'LOCATION',
+            version: LEGAL_DOCUMENT_VERSIONS.LOCATION,
+            agreed: true,
+          },
+        ]),
+      onSuccess: (saved) => {
+        queryClient.setQueryData(consentKeys.status(), saved);
+      },
+    }),
+  /** 위치 동의를 철회하면 캐시의 위치 동의를 먼저 끄고 동의 현황을 다시 받는다(다시 받기에 실패해도 옛 동의가 남지 않게). */
+  withdrawLocation: (queryClient: QueryClient) =>
+    mutationOptions({
+      mutationFn: () => consentApi.withdraw('LOCATION'),
+      onSuccess: () => {
+        queryClient.setQueryData(
+          consentQueries.status().queryKey,
+          (current) => current && withLocationWithdrawn(current),
+        );
+        return queryClient.invalidateQueries({
+          queryKey: consentKeys.status(),
         });
       },
     }),

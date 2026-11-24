@@ -65,6 +65,9 @@ export function WithdrawDialog({
             <p className="mt-3 text-body-sm text-text-secondary">
               {t('reviewsKept')}
             </p>
+            <p className="mt-2 text-body-sm text-text-secondary">
+              {t('locationRecords')}
+            </p>
           </div>
           <p className="text-body-sm text-text-secondary">{t('note')}</p>
           {withdraw.isError && (

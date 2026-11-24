@@ -13,6 +13,7 @@ import { signOut } from '@/features/auth/session';
 import { showToast } from '@/features/feedback/toast-store';
 
 import { AccountInfoCard } from './account-info-card';
+import { LocationConsentSection } from './location-consent-section';
 import { MyDataSection } from './my-data-section';
 import { WithdrawSection } from './withdraw-section';
 
@@ -49,6 +50,7 @@ export function AccountView() {
                   </Button>
                 }
               />
+              <LocationConsentSection />
               <MyDataSection />
               <WithdrawSection />
             </div>

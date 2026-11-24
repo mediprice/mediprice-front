@@ -27,6 +27,7 @@
   "claimAlreadyResolved": "이미 처리된 권리침해 신고예요.",
   "consentVersionOutdated": "약관이 바뀌었어요. 바뀐 내용을 확인하고 다시 동의해 주세요.",
   "consentWithdrawalNotAllowed": "필수 동의는 철회할 수 없어요. 서비스를 그만 쓰려면 회원 탈퇴를 해 주세요.",
+  "locationConsentRequired": "현재 위치 사용 동의가 필요해요. 동의한 뒤 다시 시도해 주세요.",
   "medicalProfileConsentRequired": "건강 정보 수집·이용 동의가 바뀌었어요. 동의를 다시 확인한 뒤 저장해 주세요.",
   "conflict": "다른 변경과 겹쳤어요. 새로고침한 뒤 다시 시도해 주세요.",
   "tooManyRequests": "요청이 너무 많아요. 잠시 후 다시 시도해 주세요.",

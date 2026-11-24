@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { LazyHospitalMap } from '@/features/map/components/lazy-hospital-map';
+import { LocationConsentDialog } from '@/features/map/components/location-consent-dialog';
 import type { MapParams } from '@/features/map/map-params';
 import { cn } from '@/lib/utils';
 
@@ -119,12 +119,8 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
           item={item}
           region={initialParams.region}
           back={initialParams.back ?? null}
-          isRetrying={state.isLocating}
-          onRetry={
-            state.notice === 'deferred'
-              ? state.requestLocation
-              : state.retryLocation
-          }
+          isRetrying={state.isLocating || state.isCheckingAccess}
+          onRetry={state.requestLocation}
           onDismiss={state.dismissNotice}
         />
       )}
@@ -152,7 +148,7 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
                       ? t('actions.locating')
                       : t('actions.myLocation')
                   }
-                  isLoading={state.isLocating}
+                  isLoading={state.isLocating || state.isCheckingAccess}
                   onClick={state.requestLocation}
                   className="rounded-full shadow-card"
                 >
@@ -209,18 +205,13 @@ export function MapView({ initialParams }: { initialParams: MapParams }) {
           />
         )}
       </div>
-      <ConfirmDialog
-        open={state.isPromptOpen}
+      <LocationConsentDialog
+        open={state.consent.isOpen}
         onOpenChange={(open) => {
-          if (!open) state.answerPrompt(false);
+          if (!open) state.consent.close();
         }}
-        title={t('location.promptTitle')}
-        description={t('location.promptDescription')}
-        cancelLabel={t('location.promptLater')}
-        confirmLabel={t('location.promptAllow')}
-        confirmVariant="primary"
-        cancelVariant="tint"
-        onConfirm={() => state.answerPrompt(true)}
+        onAgree={state.consent.agree}
+        isSaving={state.consent.isSaving}
       />
     </div>
   );

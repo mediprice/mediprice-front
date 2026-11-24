@@ -13,6 +13,7 @@ import { PendingFact } from './pending-fact';
 const DOCUMENTS = [
   { name: 'terms', href: '/terms' },
   { name: 'privacy', href: '/privacy' },
+  { name: 'locationTerms', href: '/location-terms' },
   { name: 'reviewPolicy', href: '/policy/reviews' },
 ] as const;
 

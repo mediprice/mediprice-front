@@ -7,7 +7,10 @@ import { ApiError } from '@/lib/api/errors';
 import { SESSION_PROBE_HEADER, SESSION_PROBE_VERSION } from '@/lib/api/paths';
 import { server } from '@/test/server';
 
+import { consentApi } from './consent-api';
 import {
+  consentKeys,
+  consentMutations,
   fetchCurrentUser,
   getSession,
   markSignedOut,
@@ -222,5 +225,42 @@ describe('markSignedOut', () => {
 
     expect(queryClient.getQueryData(sessionKeys.current())).toBeNull();
     expect(queryClient.getQueryData(['favorites', 'list'])).toBeUndefined();
+  });
+});
+
+describe('consentMutations', () => {
+  it('withdrawLocation 성공 시 캐시의 위치 동의를 끄고 동의 현황을 무효화한다', async () => {
+    const withdraw = vi
+      .spyOn(consentApi, 'withdraw')
+      .mockResolvedValue(undefined);
+    const queryClient = new QueryClient();
+    const consent = (type: string) => ({
+      type,
+      required: type !== 'LOCATION',
+      currentVersion: '2026-11-23',
+      agreed: true,
+      agreedVersion: '2026-11-23',
+      agreedAt: '2026-11-23T00:00:00Z',
+      withdrawnAt: null,
+      reconsentRequired: false,
+    });
+    queryClient.setQueryData(consentKeys.status(), {
+      requiredConsentsMissing: false,
+      consents: [consent('PRIVACY'), consent('LOCATION')],
+    });
+
+    await queryClient
+      .getMutationCache()
+      .build(queryClient, consentMutations.withdrawLocation(queryClient))
+      .execute(undefined);
+
+    expect(withdraw).toHaveBeenCalledWith('LOCATION');
+    expect(queryClient.getQueryState(consentKeys.status())?.isInvalidated).toBe(
+      true,
+    );
+    expect(queryClient.getQueryData(consentKeys.status())).toEqual({
+      requiredConsentsMissing: false,
+      consents: [consent('PRIVACY'), { ...consent('LOCATION'), agreed: false }],
+    });
   });
 });

@@ -33,12 +33,23 @@ describe.skipIf(process.env.LAUNCH_CHECK !== '1')(
       expect(nullPaths(LEGAL_FACTS, '')).toEqual([]);
     });
 
+    it('위치 약관의 운영자 값(신고번호, 이용 기록 보관 기간, 시행일)이 설정 대상에 있다', () => {
+      expect(LEGAL_FACTS).toHaveProperty('locationService.reportNumber');
+      expect(LEGAL_FACTS.retention).toHaveProperty('locationUsageDays');
+      expect(LEGAL_FACTS.effectiveDates).toHaveProperty('LOCATION');
+    });
+
     it('위탁·국외 이전 업체가 한 곳 이상 있다', () => {
       expect(LEGAL_FACTS.processors.length).toBeGreaterThan(0);
     });
 
     it('시행일이 문서 버전 날짜보다 앞서지 않는다', () => {
-      const keys: LegalDocumentKey[] = ['TERMS', 'PRIVACY', 'REVIEW_POLICY'];
+      const keys: LegalDocumentKey[] = [
+        'TERMS',
+        'PRIVACY',
+        'LOCATION',
+        'REVIEW_POLICY',
+      ];
       for (const key of keys) {
         const effectiveDate = LEGAL_FACTS.effectiveDates[key] ?? '';
         expect(effectiveDate >= LEGAL_DOCUMENT_VERSIONS[key], key).toBe(true);

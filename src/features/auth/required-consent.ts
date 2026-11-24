@@ -13,7 +13,12 @@ export type RequiredConsent = (typeof REQUIRED_CONSENTS)[number];
 export const MINIMUM_AGE = LEGAL_FACTS.minimumAge ?? 14;
 
 /** 동의 화면이 떠 있어도 새 탭으로 열어 읽을 수 있어야 하는 문서. */
-const READABLE_PATHS = ['/terms', '/privacy', '/policy/reviews'];
+const READABLE_PATHS = [
+  '/terms',
+  '/privacy',
+  '/location-terms',
+  '/policy/reviews',
+];
 
 /**
  * /api/users/me의 requiredConsentsMissing. 아직 배포되지 않은 백엔드에는 이 값이 없으므로 그때는 막지 않는다(false).

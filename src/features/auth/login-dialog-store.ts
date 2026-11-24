@@ -10,6 +10,7 @@ export type LoginReason =
   | 'myReviews'
   | 'account'
   | 'ai'
+  | 'location'
   | 'expired';
 
 type LoginDialogState = {

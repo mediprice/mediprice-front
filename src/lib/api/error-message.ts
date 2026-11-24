@@ -31,6 +31,7 @@ const MESSAGE_KEY_BY_CODE = {
   NOT_FOUND: 'notFound',
   MEDICAL_PROFILE_NOT_FOUND: 'notFound',
   MEDICAL_PROFILE_CONSENT_REQUIRED: 'medicalProfileConsentRequired',
+  LOCATION_CONSENT_REQUIRED: 'locationConsentRequired',
   CONSENT_VERSION_OUTDATED: 'consentVersionOutdated',
   CONSENT_WITHDRAWAL_NOT_ALLOWED: 'consentWithdrawalNotAllowed',
   HOSPITAL_NOT_FOUND: 'hospitalNotFound',

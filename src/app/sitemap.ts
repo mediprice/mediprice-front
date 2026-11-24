@@ -9,7 +9,14 @@ import {
 } from '@/server/api/hospital-sitemap';
 import { listItemCodes } from '@/server/api/item-codes';
 
-const STATIC_ROUTES = ['/', '/map', '/privacy', '/terms', '/policy/reviews'];
+const STATIC_ROUTES = [
+  '/',
+  '/map',
+  '/privacy',
+  '/terms',
+  '/location-terms',
+  '/policy/reviews',
+];
 
 /** 사이트맵 한 파일의 한도는 50,000개다. 항목과 병원을 합쳐 그보다 작게 둔다. 넘으면 generateSitemaps로 나눈다. */
 const MAX_ITEMS = 5_000;

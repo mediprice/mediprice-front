@@ -5,7 +5,8 @@ import facts from './legal-facts.json';
 /** 동의 기록에 남기는 문서 버전. 백엔드가 같은 키를 쓰므로(app.consent.versions) 문서를 고치면 양쪽을 함께 올린다. AGE_14는 "만 N세 이상" 확인 문구의 버전이다. */
 export const LEGAL_DOCUMENT_VERSIONS = {
   TERMS: '2026-11-19',
-  PRIVACY: '2026-11-19',
+  PRIVACY: '2026-11-23',
+  LOCATION: '2026-11-23',
   AGE_14: '2026-11-19',
   REVIEW_POLICY: '2026-11-19',
   MEDICAL_PROFILE: '2026-11-19',
@@ -65,8 +66,10 @@ const legalFactsSchema = z.object({
   effectiveDates: z.object({
     TERMS: date,
     PRIVACY: date,
+    LOCATION: date,
     REVIEW_POLICY: date,
   }),
+  locationService: z.object({ reportNumber: z.nullable(text) }),
   minimumAge: z.nullable(z.int().check(z.minimum(14))),
   retention: z.object({
     accessLogMonths: count,
@@ -74,6 +77,8 @@ const legalFactsSchema = z.object({
     reviewOnWithdrawal: z.nullable(z.enum(['anonymize', 'delete'])),
     /** 처리를 마친 권리침해 신고(신청인 이름·이메일 포함)를 지우기까지의 일수. 백엔드 RETENTION_REVIEW_CLAIM_DAYS와 같은 값이다. */
     rightsClaimDays: count,
+    /** 위치 이용 기록(좌표 없음)을 지우기까지의 일수. 백엔드 RETENTION_LOCATION_USAGE_DAYS와 같은 값이다. */
+    locationUsageDays: z.nullable(z.int().check(z.positive())),
   }),
   ai: z.object({
     providerTrainingUse: z.nullable(z.boolean()),

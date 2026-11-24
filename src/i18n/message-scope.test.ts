@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { mergeMessages, pickMessages } from './message-scope';
 
 const messages = {
-  common: { actions: { close: '닫기' }, brand: 'MediPrice' },
+  common: { actions: { close: '닫기' }, brand: 'Mediprice' },
   legal: { document: { toc: '목차' }, privacy: { title: '처리방침' } },
 };
 

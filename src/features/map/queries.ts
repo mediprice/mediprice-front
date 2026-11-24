@@ -1,11 +1,19 @@
-import { infiniteQueryOptions } from '@tanstack/react-query';
+import {
+  infiniteQueryOptions,
+  mutationOptions,
+  type QueryClient,
+  queryOptions,
+} from '@tanstack/react-query';
 
+import { consentKeys, consentQueries } from '@/features/auth/queries';
 import type { PriceBand } from '@/features/npay/average-verdict';
 import { apiClient } from '@/lib/api/client';
+import { ApiError } from '@/lib/api/errors';
 import { ANONYMOUS_REQUEST_HEADER } from '@/lib/api/paths';
 import type { components } from '@/lib/api/schema';
 import { unwrap } from '@/lib/api/unwrap';
 
+import { locationUsageApi } from './location-usage-api';
 import { clampRadius, clampToKorea, coarsenLatLng } from './map-geo';
 
 export type NearbyHospital = components['schemas']['NearbyHospitalResponse'];
@@ -43,6 +51,13 @@ export const mapKeys = {
 };
 
 export const mapQueries = {
+  /** 위치 기능을 판단할 동의 현황. 다른 탭·기기의 철회를 놓치지 않게 화면에 붙을 때마다 다시 받고, 받는 동안은 판단을 미룬다. */
+  locationConsent: (isSignedIn: boolean) =>
+    queryOptions({
+      ...consentQueries.status(),
+      staleTime: 0,
+      enabled: isSignedIn,
+    }),
   /** 가까운 순. 항목 코드를 주면 그 항목 가격이 있는 병원만, 병원별 최저가(minPrice)와 함께 온다. 흐린 위치가 계정과 묶이지 않게 로그인 없이 보낸다. */
   nearby: (search: NearbySearch) => {
     const condition = toNearbyCondition(search);
@@ -66,4 +81,22 @@ export const mapQueries = {
         last.page + 1 < last.totalPages ? last.page + 1 : undefined,
     });
   },
+};
+
+export const locationUsageMutations = {
+  /** 현재 위치로 주변 병원을 찾았다는 사실을 기록한다. 다른 탭·기기에서 철회해 동의가 없다고 하면(403) 동의 현황을 다시 받는다. */
+  record: (queryClient: QueryClient) =>
+    mutationOptions({
+      mutationFn: () => locationUsageApi.record(),
+      onError: (error) => {
+        if (
+          error instanceof ApiError &&
+          error.code === 'LOCATION_CONSENT_REQUIRED'
+        ) {
+          void queryClient.invalidateQueries({
+            queryKey: consentKeys.status(),
+          });
+        }
+      },
+    }),
 };

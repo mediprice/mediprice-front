@@ -41,6 +41,19 @@ describe('createConsentApi', () => {
     expect(body).toEqual({ consents: requiredConsentDecisions() });
   });
 
+  it('선택 동의를 철회하면 DELETE /consents/{type}을 부른다', async () => {
+    let called = false;
+    server.use(
+      http.delete(`${CONSENTS}/LOCATION`, () => {
+        called = true;
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    await expect(api.withdraw('LOCATION')).resolves.toBeUndefined();
+    expect(called).toBe(true);
+  });
+
   it('버전이 다르면 ApiError(CONSENT_VERSION_OUTDATED)로 실패한다', async () => {
     server.use(
       http.post(CONSENTS, () =>

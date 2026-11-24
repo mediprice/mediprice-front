@@ -22,7 +22,7 @@ export default async function MapPage({ searchParams }: PageProps<'/map'>) {
   const t = await getTranslations('map.topBar');
 
   return (
-    <ClientMessages namespaces={['map']}>
+    <ClientMessages namespaces={['map', 'legal.document']}>
       <SubTopBar
         title={t('title')}
         backHref={
