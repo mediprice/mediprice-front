@@ -2,6 +2,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 
+import { sharedRefresher } from '@/lib/api/refresh';
 import { server } from '@/test/server';
 
 import { sessionKeys } from './queries';
@@ -146,6 +147,48 @@ describe('로그인 상태 전환 시 쿼리 캐시', () => {
 });
 
 describe('signOut', () => {
+  it('로그아웃 중에 시작된 재발급은 네트워크 요청을 보내지 않는다', async () => {
+    let refreshes = 0;
+    let duringSignOut: Promise<string> | undefined;
+    server.use(
+      http.post(`${BASE}/session/refresh`, () => {
+        refreshes += 1;
+        return HttpResponse.json({ authenticated: true });
+      }),
+      http.delete(`${BASE}/session`, async () => {
+        duringSignOut = sharedRefresher(BASE)();
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    await signOut(BASE);
+
+    expect(await duringSignOut).toBe('unavailable');
+    expect(refreshes).toBe(0);
+  });
+
+  it('진행 중인 재발급이 끝난 뒤에 로그아웃을 보내 새 쿠키가 되살아나지 않게 한다', async () => {
+    const events: string[] = [];
+    server.use(
+      http.post(`${BASE}/session/refresh`, async () => {
+        await new Promise((resolve) => setTimeout(resolve, 30));
+        events.push('refresh');
+        return HttpResponse.json({ authenticated: true });
+      }),
+      http.delete(`${BASE}/session`, () => {
+        events.push('delete');
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    const refreshing = sharedRefresher(BASE)();
+    await signOut(BASE);
+    await refreshing;
+
+    expect(events).toEqual(['refresh', 'delete']);
+  });
+
   it('BFF에 로그아웃을 요청한다', async () => {
     let called = false;
     server.use(

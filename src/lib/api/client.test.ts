@@ -1,10 +1,12 @@
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
+import { z } from 'zod';
 
 import { server } from '@/test/server';
 
 import { createApiClient } from './client';
 import { ApiError, NetworkError } from './errors';
+import { createUntypedRequest } from './untyped-request';
 import { unwrap } from './unwrap';
 
 const BASE = 'http://app.test/bff';
@@ -101,6 +103,35 @@ describe('401 처리', () => {
     ]);
 
     expect(results.map((r) => r.data)).toEqual([sido, sido, sido]);
+    expect(refreshes).toBe(1);
+  });
+
+  it('서로 다른 클라이언트가 동시에 401을 받아도 재발급은 한 번이다', async () => {
+    let refreshes = 0;
+    let authorized = false;
+    server.use(
+      http.get(SIDO, () => (authorized ? HttpResponse.json(sido) : expired())),
+      http.get(`${BASE}/api/extra`, () =>
+        authorized ? HttpResponse.json({ ok: true }) : expired(),
+      ),
+      http.post(REFRESH, async () => {
+        refreshes += 1;
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        authorized = true;
+        return HttpResponse.json({ authenticated: true });
+      }),
+    );
+    const { client: first } = setup();
+    const { client: second } = setup();
+    const untyped = createUntypedRequest({ baseUrl: BASE });
+
+    const [a, b, c] = await Promise.all([
+      first.GET('/api/regions/sido'),
+      second.GET('/api/regions/sido'),
+      untyped.json('/api/extra', z.object({ ok: z.boolean() })),
+    ]);
+
+    expect([a.data, b.data, c]).toEqual([sido, sido, { ok: true }]);
     expect(refreshes).toBe(1);
   });
 

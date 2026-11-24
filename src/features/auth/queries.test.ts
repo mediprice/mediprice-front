@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import type * as ClientModule from '@/lib/api/client';
 import { ApiError } from '@/lib/api/errors';
+import { SESSION_PROBE_HEADER, SESSION_PROBE_VERSION } from '@/lib/api/paths';
 import { server } from '@/test/server';
 
 import {
@@ -34,6 +35,15 @@ const user = {
 function sessionIs(authenticated: boolean) {
   return http.get(`${BASE}/session`, () =>
     HttpResponse.json({ authenticated }),
+  );
+}
+
+/** 표시 헤더를 붙인 새 클라이언트에게만 재발급을 맡긴다(없으면 이전 클라이언트로 보고 서버가 재발급). */
+function refreshableSession() {
+  return http.get(`${BASE}/session`, ({ request }) =>
+    request.headers.get(SESSION_PROBE_HEADER) === SESSION_PROBE_VERSION
+      ? HttpResponse.json({ authenticated: false, refreshable: true })
+      : HttpResponse.json({ authenticated: true }),
   );
 }
 
@@ -68,6 +78,58 @@ describe('getSession', () => {
     server.use(http.get(`${BASE}/session`, () => HttpResponse.error()));
 
     expect(await getSession(BASE)).toBe('unavailable');
+  });
+
+  it.each([
+    [200, 'authenticated'],
+    [401, 'anonymous'],
+    [502, 'unavailable'],
+  ] as const)(
+    'Refresh만 남았으면 공용 재발급을 거친다(재발급 %i이면 %s)',
+    async (status, expected) => {
+      server.use(
+        refreshableSession(),
+        http.post(`${BASE}/session/refresh`, () =>
+          status === 200
+            ? HttpResponse.json({ authenticated: true })
+            : new HttpResponse(null, { status }),
+        ),
+      );
+
+      expect(await getSession(BASE)).toBe(expected);
+    },
+  );
+
+  it('세션 확인과 API 401이 겹쳐도 재발급은 한 번이다', async () => {
+    let refreshes = 0;
+    let authorized = false;
+    server.use(
+      refreshableSession(),
+      http.get(`${BASE}/api/users/me`, () =>
+        authorized
+          ? HttpResponse.json(user)
+          : HttpResponse.json(
+              { code: 'EXPIRED_ACCESS_TOKEN', message: 'x', errors: [] },
+              { status: 401 },
+            ),
+      ),
+      http.post(`${BASE}/session/refresh`, async () => {
+        refreshes += 1;
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        authorized = true;
+        return HttpResponse.json({ authenticated: true });
+      }),
+    );
+    const { apiClient } = await import('@/lib/api/client');
+
+    const [session, me] = await Promise.all([
+      getSession(BASE),
+      apiClient.GET('/api/users/me'),
+    ]);
+
+    expect(session).toBe('authenticated');
+    expect(me.data).toEqual(user);
+    expect(refreshes).toBe(1);
   });
 });
 

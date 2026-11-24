@@ -2,7 +2,7 @@ import createClient from 'openapi-fetch';
 
 import { BFF_BASE } from './paths';
 import { serializeQuery } from './query';
-import { createRefresher } from './refresh';
+import { type createRefresher, sharedRefresher } from './refresh';
 import type { paths } from './schema';
 import { emitSessionExpired } from './session-events';
 
@@ -16,7 +16,7 @@ type Options = {
 export function createApiFetch({
   baseUrl,
   onSessionExpired,
-  refresh = createRefresher(baseUrl),
+  refresh = sharedRefresher(baseUrl),
 }: Options) {
   return async function apiFetch(input: Request) {
     const retry = input.clone();

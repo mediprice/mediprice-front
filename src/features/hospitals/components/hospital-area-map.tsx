@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { areaViewRadius } from '@/features/hospitals/area-view';
 import { LazyHospitalMap } from '@/features/map/components/lazy-hospital-map';
 import type { MapMarker } from '@/features/map/components/marker-icon';
 import type { LatLng } from '@/features/map/map-geo';
@@ -17,10 +18,6 @@ import type { PriceBand } from '@/features/npay/average-verdict';
 
 import { DirectionsButton } from './directions-button';
 
-/** 병원이 가운데에 오고, 가까운 이웃 몇 곳이 함께 보이는 폭(최소·최대). */
-const MIN_VIEW_RADIUS = 400;
-const MAX_VIEW_RADIUS = 1000;
-const NEIGHBORS_IN_VIEW = 4;
 /** 같은 항목 가격이 있는 이웃을 찾는 반경과 수. 지도에 점으로만 올린다. */
 const NEIGHBOR_RADIUS = 1000;
 const NEIGHBOR_COUNT = 30;
@@ -48,9 +45,13 @@ export function HospitalAreaMap({
 }) {
   const t = useTranslations('hospitals.detail.areaMap');
   const [previewId, setPreviewId] = useState<string | null>(null);
+  /** 부모가 렌더마다 새 객체를 넘겨도 지도가 처음 범위로 돌아가지 않게 좌표 값으로 고정한다. */
+  const { lat, lng } = position;
+  const center = useMemo(() => ({ lat, lng }), [lat, lng]);
   const neighbors = useInfiniteQuery({
     ...mapQueries.nearby({
-      ...position,
+      lat,
+      lng,
       radius: NEIGHBOR_RADIUS,
       npayCode: itemCode ?? undefined,
       band,
@@ -59,19 +60,8 @@ export function HospitalAreaMap({
     enabled: itemCode !== null,
   });
   const neighborList = neighbors.data?.pages[0]?.content;
-  const search = useMemo(() => {
-    const distances = (neighborList ?? [])
-      .filter((hospital) => hospital.ykiho !== ykiho)
-      .map((hospital) => hospital.distanceMeters);
-    const reach = distances[Math.min(NEIGHBORS_IN_VIEW, distances.length) - 1];
-    return {
-      center: position,
-      radius: Math.min(
-        MAX_VIEW_RADIUS,
-        Math.max(MIN_VIEW_RADIUS, (reach ?? 0) * 1.15),
-      ),
-    };
-  }, [neighborList, position, ykiho]);
+  const radius = areaViewRadius(neighborList, ykiho);
+  const search = useMemo(() => ({ center, radius }), [center, radius]);
   const markers = useMemo<MapMarker[]>(() => {
     const others = (neighborList ?? []).flatMap((hospital) =>
       hospital.ykiho === ykiho ||
@@ -93,8 +83,11 @@ export function HospitalAreaMap({
             },
           ],
     );
-    return [{ id: ykiho, position, kind: 'plain', label: name }, ...others];
-  }, [neighborList, ykiho, position, name, t]);
+    return [
+      { id: ykiho, position: center, kind: 'plain', label: name },
+      ...others,
+    ];
+  }, [neighborList, ykiho, center, name, t]);
   const preview =
     itemCode && previewId
       ? neighborList?.find((hospital) => hospital.ykiho === previewId)
@@ -114,7 +107,7 @@ export function HospitalAreaMap({
           <DirectionsButton
             name={name}
             query={directionsQuery}
-            position={position}
+            position={center}
             className="rounded-full shadow-float"
           />
         }
@@ -122,7 +115,7 @@ export function HospitalAreaMap({
       {preview && itemCode ? (
         <NeighborPreview
           hospital={preview}
-          from={position}
+          from={center}
           href={
             `/hospitals/${encodeURIComponent(preview.ykiho)}?${new URLSearchParams({ item: itemCode }).toString()}` as const
           }

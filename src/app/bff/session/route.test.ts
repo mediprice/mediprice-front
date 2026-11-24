@@ -1,6 +1,9 @@
-import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { randomUUID } from 'node:crypto';
 
+import { http, HttpResponse } from 'msw';
+import { describe, expect, it, vi } from 'vitest';
+
+import { SESSION_PROBE_HEADER, SESSION_PROBE_VERSION } from '@/lib/api/paths';
 import { ACCESS_COOKIE, REFRESH_COOKIE } from '@/server/bff/cookies';
 import { bffRequest } from '@/test/request';
 import { API, server } from '@/test/server';
@@ -62,9 +65,14 @@ describe('POST /bff/session', () => {
 });
 
 describe('GET /bff/session', () => {
+  const probe = { [SESSION_PROBE_HEADER]: SESSION_PROBE_VERSION };
+
   it('Access 쿠키가 있으면 백엔드를 부르지 않고 로그인 상태다', async () => {
     const response = await GET(
-      bffRequest('/bff/session', { cookies: { [ACCESS_COOKIE]: 'a1' } }),
+      bffRequest('/bff/session', {
+        cookies: { [ACCESS_COOKIE]: 'a1' },
+        headers: probe,
+      }),
     );
 
     expect(await response.json()).toEqual({ authenticated: true });
@@ -72,70 +80,90 @@ describe('GET /bff/session', () => {
   });
 
   it('쿠키가 없으면 로그아웃 상태다', async () => {
-    const response = await GET(bffRequest('/bff/session'));
+    const response = await GET(bffRequest('/bff/session', { headers: probe }));
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ authenticated: false });
   });
 
-  it('Refresh만 있으면 재발급해서 쿠키를 새로 설정한다', async () => {
-    server.use(
-      http.post(`${API}/api/auth/refresh`, () =>
-        HttpResponse.json({
-          accessToken: 'a2',
-          refreshToken: 'r2',
-          tokenType: 'Bearer',
-          expiresIn: 3600,
-        }),
-      ),
-    );
+  it('Refresh만 있으면 재발급하지 않고 재발급할 수 있다고만 알린다', async () => {
+    const backend = vi.fn(() => HttpResponse.json({}));
+    server.use(http.post(`${API}/api/auth/refresh`, backend));
 
     const response = await GET(
-      bffRequest('/bff/session', { cookies: { [REFRESH_COOKIE]: 'r1' } }),
+      bffRequest('/bff/session', {
+        cookies: { [REFRESH_COOKIE]: randomUUID() },
+        headers: probe,
+      }),
     );
 
-    expect(await response.json()).toEqual({ authenticated: true });
-    expect(
-      setCookies(response).some((c) => c.startsWith(`${ACCESS_COOKIE}=a2`)),
-    ).toBe(true);
-    expect(
-      setCookies(response).some((c) => c.startsWith(`${REFRESH_COOKIE}=r2`)),
-    ).toBe(true);
-  });
-
-  it('Refresh가 거부되면 쿠키를 지우고 로그아웃 상태다', async () => {
-    server.use(
-      http.post(`${API}/api/auth/refresh`, () =>
-        HttpResponse.json(
-          { code: 'EXPIRED_REFRESH_TOKEN', message: '만료', errors: [] },
-          { status: 401 },
-        ),
-      ),
-    );
-
-    const response = await GET(
-      bffRequest('/bff/session', { cookies: { [REFRESH_COOKIE]: 'r1' } }),
-    );
-
-    expect(await response.json()).toEqual({ authenticated: false });
-    expect(setCookies(response).every((c) => /Max-Age=0/i.test(c))).toBe(true);
-    expect(setCookies(response)).toHaveLength(2);
-  });
-
-  it('백엔드에 닿지 못하면 502이고 쿠키는 그대로 둔다', async () => {
-    server.use(
-      http.post(`${API}/api/auth/refresh`, () => HttpResponse.error()),
-    );
-
-    const response = await GET(
-      bffRequest('/bff/session', { cookies: { [REFRESH_COOKIE]: 'r1' } }),
-    );
-
-    expect(response.status).toBe(502);
-    expect(await response.json()).toMatchObject({
-      code: 'UPSTREAM_UNAVAILABLE',
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      authenticated: false,
+      refreshable: true,
     });
+    expect(backend).not.toHaveBeenCalled();
     expect(setCookies(response)).toEqual([]);
+  });
+
+  describe('표시 헤더가 없는 이전 클라이언트', () => {
+    const legacy = () =>
+      bffRequest('/bff/session', {
+        cookies: { [REFRESH_COOKIE]: randomUUID() },
+      });
+
+    it('Refresh만 있으면 예전처럼 재발급해서 쿠키를 새로 설정한다', async () => {
+      server.use(
+        http.post(`${API}/api/auth/refresh`, () =>
+          HttpResponse.json({
+            accessToken: 'a2',
+            refreshToken: 'r2',
+            tokenType: 'Bearer',
+            expiresIn: 3600,
+          }),
+        ),
+      );
+
+      const response = await GET(legacy());
+
+      expect(await response.json()).toEqual({ authenticated: true });
+      expect(
+        setCookies(response).some((c) => c.startsWith(`${ACCESS_COOKIE}=a2`)),
+      ).toBe(true);
+      expect(
+        setCookies(response).some((c) => c.startsWith(`${REFRESH_COOKIE}=r2`)),
+      ).toBe(true);
+    });
+
+    it('Refresh가 거부되면 쿠키를 지우고 로그아웃 상태다', async () => {
+      server.use(
+        http.post(`${API}/api/auth/refresh`, () =>
+          HttpResponse.json(
+            { code: 'EXPIRED_REFRESH_TOKEN', message: '만료', errors: [] },
+            { status: 401 },
+          ),
+        ),
+      );
+
+      const response = await GET(legacy());
+
+      expect(await response.json()).toEqual({ authenticated: false });
+      expect(setCookies(response)).toHaveLength(2);
+      expect(setCookies(response).every((c) => /Max-Age=0/i.test(c))).toBe(
+        true,
+      );
+    });
+
+    it('백엔드에 닿지 못하면 502이고 쿠키는 그대로 둔다', async () => {
+      server.use(
+        http.post(`${API}/api/auth/refresh`, () => HttpResponse.error()),
+      );
+
+      const response = await GET(legacy());
+
+      expect(response.status).toBe(502);
+      expect(setCookies(response)).toEqual([]);
+    });
   });
 });
 
