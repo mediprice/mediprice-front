@@ -1,4 +1,4 @@
-# MediPrice Frontend
+# Mediprice Frontend
 
 의료비(비급여) 가격 비교 서비스의 웹 프론트엔드. Next.js 16 · React 19 · TanStack Query.
 

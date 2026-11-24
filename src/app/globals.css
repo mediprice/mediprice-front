@@ -6,7 +6,7 @@
 @custom-variant inactive (&:is(:disabled, [aria-disabled='true']):not([data-loading]));
 
 /*
- * 디자인 토큰. Figma(MediPrice) 변수·텍스트 스타일·이펙트 스타일을 바탕으로 하고, QA에서 대비·가독성 때문에 바꾼 값은 옆에 이유를 적는다.
+ * 디자인 토큰. Figma(Mediprice) 변수·텍스트 스타일·이펙트 스타일을 바탕으로 하고, QA에서 대비·가독성 때문에 바꾼 값은 옆에 이유를 적는다.
  * 이름을 바꾸거나 추가하면 docs/coding-convention.md 8장과 src/lib/utils.ts의 twMerge 설정도 함께 고친다.
  */
 @theme {

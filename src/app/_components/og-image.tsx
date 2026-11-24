@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import type { ReactNode } from 'react';
 
-import { BRAND_COLORS, BrandTile } from './brand-tile';
+import { BRAND_COLORS, OgSymbol } from './brand-tile';
 
 const FONT_DIR = join(
   process.cwd(),
@@ -57,7 +57,7 @@ export function OgFrame({
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-        <BrandTile size={60} />
+        <OgSymbol height={56} />
         <span style={{ fontSize: 38, fontWeight: 700, letterSpacing: -0.5 }}>
           {siteName}
         </span>

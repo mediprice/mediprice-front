@@ -30,7 +30,7 @@ describe('buildHospitalMetadata', () => {
       ykiho: 'a+b==',
       hospital: HOSPITAL,
       t,
-      siteName: 'MediPrice',
+      siteName: 'Mediprice',
     });
 
     expect(metadata.title).toBe(
@@ -46,7 +46,7 @@ describe('buildHospitalMetadata', () => {
       ykiho: 'a+b==',
       hospital: { ...HOSPITAL, sidoName: null, sgguName: null },
       t,
-      siteName: 'MediPrice',
+      siteName: 'Mediprice',
     });
 
     expect(metadata.title).toBe('metadata.title {"name":"프라임병원"}');
@@ -61,7 +61,7 @@ describe('buildHospitalMetadata', () => {
         ykiho: 'a+b==',
         hospital: HOSPITAL,
         t,
-        siteName: 'MediPrice',
+        siteName: 'Mediprice',
       }).alternates,
     ).toEqual({ canonical: '/hospitals/a%2Bb%3D%3D' });
   });
@@ -72,11 +72,11 @@ describe('buildHospitalMetadata', () => {
         ykiho: 'H1',
         hospital: HOSPITAL,
         t,
-        siteName: 'MediPrice',
+        siteName: 'Mediprice',
       }).openGraph,
     ).toEqual({
       type: 'website',
-      siteName: 'MediPrice',
+      siteName: 'Mediprice',
       locale: 'ko_KR',
       url: '/hospitals/H1',
     });
@@ -88,7 +88,7 @@ describe('buildHospitalMetadata', () => {
         ykiho: 'H1',
         hospital: null,
         t,
-        siteName: 'MediPrice',
+        siteName: 'Mediprice',
       }),
     ).toMatchObject({
       title: 'metaTitle',
