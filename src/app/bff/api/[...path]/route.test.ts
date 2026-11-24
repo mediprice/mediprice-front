@@ -144,16 +144,6 @@ describe('GET /bff/api/**', () => {
     },
   );
 
-  it('중계한 응답은 문서로 열려도 아무것도 실행하지 않는다', async () => {
-    server.use(http.get(`${API}/api/x`, () => HttpResponse.json({})));
-
-    const response = await GET(bffRequest('/bff/api/x'), ctx('x'));
-
-    expect(response.headers.get('content-security-policy')).toBe(
-      "default-src 'none'; frame-ancestors 'none'; sandbox",
-    );
-  });
-
   it('로그인하지 않은 공개 조회는 CDN 캐시를 허용한다', async () => {
     server.use(
       http.get(`${API}/api/regions/sido`, () => HttpResponse.json([])),

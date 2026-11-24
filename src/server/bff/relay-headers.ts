@@ -12,5 +12,3 @@ export function relayedContentType(value: string | null) {
   const mediaType = value.split(';')[0]?.trim().toLowerCase() ?? '';
   return RELAYABLE_TYPES.has(mediaType) ? value : 'application/octet-stream';
 }
-
-export const RELAY_CSP = "default-src 'none'; frame-ancestors 'none'; sandbox";

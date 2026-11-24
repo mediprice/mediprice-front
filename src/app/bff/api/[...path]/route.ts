@@ -2,7 +2,7 @@ import type { NextRequest } from 'next/server';
 
 import { cacheControlFor } from '@/server/bff/cache-policy';
 import { readTokens } from '@/server/bff/cookies';
-import { RELAY_CSP, relayedContentType } from '@/server/bff/relay-headers';
+import { relayedContentType } from '@/server/bff/relay-headers';
 import { errorResponse, forbidden } from '@/server/bff/responses';
 import {
   callBackend,
@@ -46,10 +46,7 @@ async function relay(
     hasSession: accessToken !== undefined,
     status: upstream.status,
   });
-  const headers = new Headers({
-    'Cache-Control': cacheControl,
-    'Content-Security-Policy': RELAY_CSP,
-  });
+  const headers = new Headers({ 'Cache-Control': cacheControl });
   const contentType = relayedContentType(upstream.headers.get('content-type'));
   if (contentType) headers.set('Content-Type', contentType);
   return new Response(upstream.body, { status: upstream.status, headers });
