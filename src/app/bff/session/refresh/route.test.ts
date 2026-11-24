@@ -1,13 +1,15 @@
 import { randomUUID } from 'node:crypto';
 
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ACCESS_COOKIE, REFRESH_COOKIE } from '@/server/bff/cookies';
+import { sessionCookieNames } from '@/server/bff/cookies';
 import { bffRequest } from '@/test/request';
 import { API, server } from '@/test/server';
 
 import { POST } from './route';
+
+const { access: ACCESS_COOKIE, refresh: REFRESH_COOKIE } = sessionCookieNames();
 
 /** 같은 인스턴스는 성공한 재발급을 잠시 다시 쓰므로 테스트마다 다른 Refresh를 쓴다. */
 const freshCookies = () => ({ [REFRESH_COOKIE]: randomUUID() });
@@ -157,5 +159,41 @@ describe('POST /bff/session/refresh', () => {
     );
 
     expect(response.status).toBe(403);
+  });
+});
+
+describe('접두사 없던 이전 쿠키로 로그인한 사용자', () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it('운영에서 이전 Refresh로 한 번 재발급해 새 이름의 쿠키로 옮긴다', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    let sent: unknown;
+    server.use(
+      http.post(`${API}/api/auth/refresh`, async ({ request: backend }) => {
+        sent = await backend.json();
+        return HttpResponse.json({
+          accessToken: 'a2',
+          refreshToken: 'r2',
+          tokenType: 'Bearer',
+          expiresIn: 3600,
+        });
+      }),
+    );
+    const legacyRefresh = randomUUID();
+
+    const response = await POST(request({ mp_refresh: legacyRefresh }));
+
+    expect(response.status).toBe(200);
+    expect(sent).toEqual({ refreshToken: legacyRefresh });
+    const cookies = response.headers.getSetCookie();
+    expect(cookies.some((c) => c.startsWith('__Secure-mp_access=a2'))).toBe(
+      true,
+    );
+    expect(cookies.some((c) => c.startsWith('__Secure-mp_refresh=r2'))).toBe(
+      true,
+    );
+    expect(cookies.find((c) => c.startsWith('mp_refresh='))).toMatch(
+      /Max-Age=0/i,
+    );
   });
 });

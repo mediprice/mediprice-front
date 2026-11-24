@@ -1,11 +1,13 @@
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
-import { ACCESS_COOKIE } from '@/server/bff/cookies';
+import { sessionCookieNames } from '@/server/bff/cookies';
 import { bffRequest } from '@/test/request';
 import { API, server } from '@/test/server';
 
 import { DELETE, GET, PATCH, POST, PUT } from './route';
+
+const { access: ACCESS_COOKIE } = sessionCookieNames();
 
 const ctx = (...path: string[]) => ({ params: Promise.resolve({ path }) });
 const withAccess = { [ACCESS_COOKIE]: 'a1' };
@@ -114,6 +116,33 @@ describe('GET /bff/api/**', () => {
 
     expect(response.headers.getSetCookie()).toEqual([]);
   });
+
+  it.each([
+    ['application/json', 'application/json'],
+    ['application/json;charset=UTF-8', 'application/json;charset=UTF-8'],
+    ['application/problem+json', 'application/problem+json'],
+    ['text/plain; charset=utf-8', 'text/plain; charset=utf-8'],
+    ['text/html; charset=utf-8', 'application/octet-stream'],
+    ['image/svg+xml', 'application/octet-stream'],
+    ['application/xml', 'application/octet-stream'],
+  ])(
+    '백엔드 Content-Type %s는 %s로 돌려준다',
+    async (upstreamType, relayedType) => {
+      server.use(
+        http.get(
+          `${API}/api/x`,
+          () =>
+            new HttpResponse('{}', {
+              headers: { 'Content-Type': upstreamType },
+            }),
+        ),
+      );
+
+      const response = await GET(bffRequest('/bff/api/x'), ctx('x'));
+
+      expect(response.headers.get('content-type')).toBe(relayedType);
+    },
+  );
 
   it('로그인하지 않은 공개 조회는 CDN 캐시를 허용한다', async () => {
     server.use(

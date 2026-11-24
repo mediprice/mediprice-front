@@ -7,6 +7,7 @@ import {
   parseBackParam,
   parseItemParam,
   parseVariantParam,
+  parseYkiho,
   toHomepageUrl,
   toTelHref,
   variantQuery,
@@ -26,6 +27,28 @@ describe('decodeYkiho', () => {
     expect(decodeYkiho('a%2Bb%3D')).toBe('a+b=');
     expect(decodeYkiho('a+b=')).toBe('a+b=');
     expect(decodeYkiho('%E0%A4%A')).toBe('%E0%A4%A');
+  });
+});
+
+describe('parseYkiho', () => {
+  const ykiho =
+    'JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQzNjEwMDIjNTEjJDEjJDIjJDgz';
+
+  it('base64 문자로 된 병원 키는 풀어서 받는다', () => {
+    expect(parseYkiho(ykiho)).toBe(ykiho);
+    expect(parseYkiho('JDQ4MTg4MSM1MSMk%2Bab%2Fcd%3D%3D')).toBe(
+      'JDQ4MTg4MSM1MSMk+ab/cd==',
+    );
+  });
+
+  it.each([
+    ['너무 짧은 값', 'AAAA'],
+    ['너무 긴 값', 'A'.repeat(201)],
+    ['base64가 아닌 문자', `${ykiho.slice(0, 40)}<svg>`],
+    ['경로 조작', '..%2F..%2Factuator%2Fhealth'],
+    ['깨진 인코딩', '%E0%A4%A'],
+  ])('%s는 받지 않는다', (_name, value) => {
+    expect(parseYkiho(value)).toBeNull();
   });
 });
 

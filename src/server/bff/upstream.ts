@@ -39,13 +39,17 @@ export function isSameOrigin(request: NextRequest) {
 
   const origin = request.headers.get('origin');
   if (!origin) return false;
-  const host =
-    request.headers.get('x-forwarded-host') ?? request.headers.get('host');
   try {
-    return new URL(origin).host === host;
+    return new URL(origin).host === requestHostOf(request.headers);
   } catch {
     return false;
   }
+}
+
+/** X-Forwarded-Host는 Vercel처럼 플랫폼이 덮어쓰는 환경에서만 믿는다. 그 밖에서는 클라이언트가 지어낼 수 있다. */
+function requestHostOf(headers: Headers) {
+  const forwarded = process.env.VERCEL ? headers.get('x-forwarded-host') : null;
+  return forwarded ?? headers.get('host');
 }
 
 const CLIENT_IP_HEADER = 'x-mediprice-client-ip';

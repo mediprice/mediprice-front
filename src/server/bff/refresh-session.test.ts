@@ -3,9 +3,11 @@ import { describe, expect, it } from 'vitest';
 
 import { API, server } from '@/test/server';
 
-import { ACCESS_COOKIE, REFRESH_COOKIE } from './cookies';
+import { sessionCookieNames } from './cookies';
 import { refreshResponse, refreshSession } from './refresh-session';
 import { errorResponse } from './responses';
+
+const { access: ACCESS_COOKIE, refresh: REFRESH_COOKIE } = sessionCookieNames();
 
 const newTokens = {
   accessToken: 'new-access',

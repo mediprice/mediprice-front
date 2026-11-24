@@ -4,11 +4,13 @@ import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 
 import { SESSION_PROBE_HEADER, SESSION_PROBE_VERSION } from '@/lib/api/paths';
-import { ACCESS_COOKIE, REFRESH_COOKIE } from '@/server/bff/cookies';
+import { sessionCookieNames } from '@/server/bff/cookies';
 import { bffRequest } from '@/test/request';
 import { API, server } from '@/test/server';
 
 import { DELETE, GET, POST } from './route';
+
+const { access: ACCESS_COOKIE, refresh: REFRESH_COOKIE } = sessionCookieNames();
 
 const tokens = { accessToken: 'a1', refreshToken: 'r1', expiresIn: 3600 };
 

@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server';
 
 import { cacheControlFor } from '@/server/bff/cache-policy';
 import { readTokens } from '@/server/bff/cookies';
+import { relayedContentType } from '@/server/bff/relay-headers';
 import { errorResponse, forbidden } from '@/server/bff/responses';
 import {
   callBackend,
@@ -16,7 +17,7 @@ const METHODS_WITHOUT_BODY = new Set(['GET', 'HEAD']);
 /** Node의 fetch가 스트림 본문에 요구하는 옵션이라 TS 기본 타입에 없다. */
 type StreamingInit = RequestInit & { duplex: 'half' };
 
-/** 백엔드 응답은 상태·본문·Content-Type만 돌려주고(Set-Cookie 등 제외), 401도 가공하지 않는다. */
+/** 백엔드 응답은 상태·본문·허용한 Content-Type만 돌려주고(Set-Cookie 등 제외), 401도 가공하지 않는다. */
 async function relay(
   request: NextRequest,
   context: RouteContext<'/bff/api/[...path]'>,
@@ -46,7 +47,7 @@ async function relay(
     status: upstream.status,
   });
   const headers = new Headers({ 'Cache-Control': cacheControl });
-  const contentType = upstream.headers.get('content-type');
+  const contentType = relayedContentType(upstream.headers.get('content-type'));
   if (contentType) headers.set('Content-Type', contentType);
   return new Response(upstream.body, { status: upstream.status, headers });
 }
