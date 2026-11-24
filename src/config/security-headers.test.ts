@@ -73,14 +73,16 @@ describe('contentSecurityPolicy', () => {
     expect(directives.get('frame-src')).toEqual(["'none'"]);
   });
 
-  it('브라우저는 BFF와 네이버 지도에만 연결한다', () => {
+  it('브라우저는 BFF, 네이버 지도, Cloudflare 웹 분석에만 연결한다', () => {
     const directives = directivesOf(contentSecurityPolicy(production));
 
     expect(directives.get('connect-src')).toEqual([
       "'self'",
       'oapi.map.naver.com',
       '*.map.naver.net',
+      'nrbe.pstatic.net',
       '*.nelo.navercorp.com',
+      'cloudflareinsights.com',
     ]);
   });
 
