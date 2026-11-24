@@ -6,10 +6,10 @@ import { LegalSection } from '@/features/legal/components/legal-section';
 import { LegalTable } from '@/features/legal/components/legal-table';
 import { PendingFact } from '@/features/legal/components/pending-fact';
 
-/** 쿠키 이름은 server/bff/cookies.ts의 ACCESS_COOKIE·REFRESH_COOKIE와 같아야 한다. */
+/** 쿠키 이름은 server/bff/cookies.ts의 sessionCookieNames()가 운영에서 쓰는 이름과 같아야 한다. */
 const COOKIES = [
-  { name: 'mp_access', key: 'access' },
-  { name: 'mp_refresh', key: 'refresh' },
+  { name: '__Secure-mp_access', key: 'access' },
+  { name: '__Secure-mp_refresh', key: 'refresh' },
 ] as const;
 
 /** 13~15항: 쿠키, 위치정보, AI 찾기 입력. */

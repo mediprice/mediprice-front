@@ -1,11 +1,13 @@
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
-import { ACCESS_COOKIE } from '@/server/bff/cookies';
+import { sessionCookieNames } from '@/server/bff/cookies';
 import { bffRequest } from '@/test/request';
 import { API, server } from '@/test/server';
 
 import { DELETE, GET, PATCH, POST, PUT } from './route';
+
+const { access: ACCESS_COOKIE } = sessionCookieNames();
 
 const ctx = (...path: string[]) => ({ params: Promise.resolve({ path }) });
 const withAccess = { [ACCESS_COOKIE]: 'a1' };
