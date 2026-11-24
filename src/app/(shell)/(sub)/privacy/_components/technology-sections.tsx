@@ -12,6 +12,12 @@ const COOKIES = [
   { name: '__Secure-mp_refresh', key: 'refresh' },
 ] as const;
 
+/** 로그인하는 동안만 쓰는 쿠키. 이름은 server/bff/login-state.ts와 같아야 한다. */
+const LOGIN_STATE_COOKIE = {
+  name: 'mp_login_state',
+  key: 'loginState',
+} as const;
+
 /** 13~15항: 쿠키, 위치정보, AI 찾기 입력. */
 export function TechnologySections() {
   const t = useTranslations('legal.privacy');
@@ -27,7 +33,7 @@ export function TechnologySections() {
             t('cookies.colPurpose'),
             t('cookies.colPeriod'),
           ]}
-          rows={COOKIES.map((cookie) => [
+          rows={[...COOKIES, LOGIN_STATE_COOKIE].map((cookie) => [
             <code key="name" className="font-mono">
               {cookie.name}
             </code>,

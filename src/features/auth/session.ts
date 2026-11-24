@@ -22,7 +22,7 @@ function clearLocationFragment() {
   );
 }
 
-/** 콜백의 토큰을 BFF에 한 번 넘겨 쿠키로 바꾸고 쿼리 캐시를 비운다. 성공·실패와 관계없이 먼저 주소창의 fragment를 지운다. */
+/** 콜백의 토큰과 로그인 요청 확인 값을 BFF에 한 번 넘겨 쿠키로 바꾸고 쿼리 캐시를 비운다. 성공·실패와 관계없이 먼저 주소창의 fragment를 지운다. */
 export async function completeOAuthCallback(
   hash: string,
   {
@@ -45,7 +45,10 @@ export async function completeOAuthCallback(
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(parsed.tokens),
+      body: JSON.stringify({
+        ...parsed.tokens,
+        loginState: parsed.loginState,
+      }),
     });
   } catch {
     return { ok: false, code: 'NETWORK_ERROR', returnTo };

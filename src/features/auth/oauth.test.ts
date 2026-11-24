@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { loginUrl, parseOAuthCallbackHash } from './oauth';
+import { loginStartHref, loginUrl, parseOAuthCallbackHash } from './oauth';
 
 describe('loginUrl', () => {
   it('백엔드의 구글 로그인 시작 주소다', () => {
@@ -24,6 +24,14 @@ describe('loginUrl', () => {
     expect(url.searchParams.get('return_to')).toBe('/items/A?region=seoul');
   });
 
+  it('로그인 요청 확인 값을 login_state로 넘긴다', () => {
+    const url = new URL(
+      loginUrl({ origin: 'http://localhost:3000', loginState: 'state-1' }),
+    );
+
+    expect(url.searchParams.get('login_state')).toBe('state-1');
+  });
+
   it.each([
     'https://evil.example/x',
     '//evil.example',
@@ -39,22 +47,38 @@ describe('loginUrl', () => {
   });
 });
 
+describe('loginStartHref', () => {
+  it('BFF의 로그인 시작 경로로 돌아올 경로를 넘긴다', () => {
+    expect(loginStartHref('/items/A?region=seoul')).toBe(
+      '/bff/session/login?return_to=%2Fitems%2FA%3Fregion%3Dseoul',
+    );
+  });
+
+  it('안전하지 않거나 없는 경로는 넘기지 않는다', () => {
+    expect(loginStartHref('//evil.example')).toBe('/bff/session/login');
+    expect(loginStartHref(null)).toBe('/bff/session/login');
+  });
+});
+
 describe('parseOAuthCallbackHash', () => {
   it('토큰을 읽는다', () => {
     expect(
       parseOAuthCallbackHash(
-        '#accessToken=a.b.c&refreshToken=r%2B1&expiresIn=3600',
+        '#accessToken=a.b.c&refreshToken=r%2B1&expiresIn=3600&loginState=s-1',
       ),
     ).toEqual({
       ok: true,
       tokens: { accessToken: 'a.b.c', refreshToken: 'r+1', expiresIn: 3600 },
+      loginState: 's-1',
       returnTo: null,
     });
   });
 
   it('# 없이도 읽는다', () => {
     expect(
-      parseOAuthCallbackHash('accessToken=a&refreshToken=r&expiresIn=60'),
+      parseOAuthCallbackHash(
+        'accessToken=a&refreshToken=r&expiresIn=60&loginState=s',
+      ),
     ).toMatchObject({ ok: true });
   });
 
@@ -80,6 +104,12 @@ describe('parseOAuthCallbackHash', () => {
     });
   });
 
+  it('로그인 요청 확인 값이 없으면 MISSING_LOGIN_STATE다', () => {
+    expect(
+      parseOAuthCallbackHash('#accessToken=a&refreshToken=r&expiresIn=60'),
+    ).toEqual({ ok: false, code: 'MISSING_LOGIN_STATE', returnTo: null });
+  });
+
   it.each(['', 'abc', '-1', '0', '1.5'])(
     '수명이 "%s"이면 INVALID_EXPIRES_IN이다',
     (expiresIn) => {
@@ -96,7 +126,7 @@ describe('parseOAuthCallbackHash', () => {
 
     expect(
       parseOAuthCallbackHash(
-        `#accessToken=a&refreshToken=r&expiresIn=60&returnTo=${returnTo}`,
+        `#accessToken=a&refreshToken=r&expiresIn=60&loginState=s&returnTo=${returnTo}`,
       ),
     ).toMatchObject({ ok: true, returnTo: '/items/A?region=seoul' });
     expect(
@@ -116,7 +146,7 @@ describe('parseOAuthCallbackHash', () => {
   ])('안전하지 않은 돌아올 경로(%s)는 버린다', (returnTo) => {
     expect(
       parseOAuthCallbackHash(
-        `#accessToken=a&refreshToken=r&expiresIn=60&returnTo=${returnTo}`,
+        `#accessToken=a&refreshToken=r&expiresIn=60&loginState=s&returnTo=${returnTo}`,
       ),
     ).toMatchObject({ ok: true, returnTo: null });
   });
