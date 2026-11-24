@@ -1,11 +1,11 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 const KEY = 'mediprice:pending-location';
 /** 로그인 창을 닫고 한참 뒤 돌아왔을 때 위치를 잘못 읽지 않게, 짧은 시간 안에 돌아왔을 때만 이어서 한다. */
 const MAX_AGE_MS = 15 * 60 * 1000;
 
 const pendingSchema = z.object({
-  path: z.string().startsWith('/').max(2000),
+  path: z.string().check(z.startsWith('/'), z.maxLength(2000)),
   savedAt: z.number(),
 });
 

@@ -1,5 +1,5 @@
 {
-  "brand": "MediPrice",
+  "brand": "Mediprice",
   "actions": {
     "close": "닫기",
     "cancel": "취소",
@@ -12,22 +12,19 @@
   },
   "price": {
     "won": "{amount, number}원",
-    "range": "{min, number}~{max, number}원",
     "none": "가격 정보 없음",
     "rangeParts": "<amount>{min, number}</amount>~<amount>{max, number}원</amount>",
     "average": "평균 {amount, number}원",
-    "minMax": "최저 {min, number}원 · 최고 {max, number}원",
     "hospitals": "병원 {count, number}곳",
     "averageParts": "평균 <nb>{amount, number}원</nb>",
     "minimum": "최저 {amount, number}원",
     "maximum": "최고 {amount, number}원",
-    "spreadParts": "<nb>최저 {min, number}원</nb> ~ <nb>최고 {max, number}원</nb> <note>(세부 항목별 가격)</note>",
-    "compactRange": "{min, number, ::compact-short}~{max, number, ::compact-short}원"
+    "spreadParts": "<nb>최저 {min, number}원</nb> ~ <nb>최고 {max, number}원</nb> <note>(세부 항목별 가격)</note>"
   },
   "footer": {
     "source": "데이터 출처: 건강보험심사평가원 비급여 진료비 공개 자료",
     "notice": "공개 가격은 병원이 신고한 기준 가격이며, 실제 진료비와 다를 수 있어요.",
-    "copyright": "© MediPrice",
+    "copyright": "© Mediprice",
     "policies": "약관 및 정책",
     "terms": "이용약관",
     "privacy": "개인정보 처리방침",

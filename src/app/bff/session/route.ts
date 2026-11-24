@@ -1,14 +1,17 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { SESSION_PROBE_HEADER, SESSION_PROBE_VERSION } from '@/lib/api/paths';
 import {
   clearSessionCookies,
   readTokens,
   setSessionCookies,
 } from '@/server/bff/cookies';
-import { refreshResponse, refreshSession } from '@/server/bff/refresh-session';
+import { refreshSessionOnce } from '@/server/bff/refresh-coalescer';
+import { refreshResponse } from '@/server/bff/refresh-session';
 import { errorResponse, forbidden, jsonNoStore } from '@/server/bff/responses';
 import { revokeSession } from '@/server/bff/revoke-session';
+import { readSessionUser } from '@/server/bff/session-user';
 import { isSameOrigin } from '@/server/bff/upstream';
 
 const signInSchema = z.object({
@@ -31,13 +34,25 @@ export async function POST(request: NextRequest) {
   return response;
 }
 
-/** Access가 만료돼도 Refresh가 있으면 재발급해서 로그인을 이어 간다. */
+/**
+ * 재발급은 브라우저가 POST /bff/session/refresh 한 곳으로만 하게 해, API 401의 재발급과 겹쳐 같은 Refresh를 두 번 쓰지 않게 한다.
+ * Access가 있으면 내 정보까지 읽어 함께 돌려준다. 읽지 못하면 user 없이 답하고 브라우저가 따로 읽는다.
+ */
 export async function GET(request: NextRequest) {
   const { accessToken, refreshToken } = readTokens(request);
-  if (accessToken) return jsonNoStore({ authenticated: true });
+  if (accessToken) {
+    const user = await readSessionUser(accessToken, request.headers);
+    return jsonNoStore(
+      user ? { authenticated: true, user } : { authenticated: true },
+    );
+  }
   if (!refreshToken) return jsonNoStore({ authenticated: false });
+  if (request.headers.get(SESSION_PROBE_HEADER) === SESSION_PROBE_VERSION) {
+    return jsonNoStore({ authenticated: false, refreshable: true });
+  }
 
-  const result = await refreshSession(refreshToken, request.headers);
+  /** 배포 전 JS를 띄워 둔 탭 호환. 이 PR이 운영에 나간 다음 릴리스에서 이 분기와 표시 헤더 검사를 지운다. */
+  const result = await refreshSessionOnce(refreshToken, request.headers);
   return refreshResponse(result, () => jsonNoStore({ authenticated: false }));
 }
 

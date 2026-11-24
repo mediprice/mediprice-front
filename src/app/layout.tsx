@@ -3,10 +3,11 @@ import './globals.css';
 
 import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 
 import { env } from '@/env';
+import { CLIENT_NAMESPACES, pickMessages } from '@/i18n/message-scope';
 
 import { BRAND_COLORS } from './_components/brand-tile';
 import { Providers } from './providers';
@@ -36,11 +37,13 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  const locale = await getLocale();
+  const [locale, messages] = await Promise.all([getLocale(), getMessages()]);
   return (
     <html lang={locale}>
       <body>
-        <NextIntlClientProvider>
+        <NextIntlClientProvider
+          messages={pickMessages(messages, CLIENT_NAMESPACES)}
+        >
           <Providers>{children}</Providers>
         </NextIntlClientProvider>
       </body>

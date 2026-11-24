@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 import facts from './legal-facts.json';
 
@@ -42,25 +42,25 @@ const PROCESSOR_TASKS = [
   'llmModel',
 ] as const;
 
-const text = z.string().trim().min(1);
+const text = z.string().check(z.trim(), z.minLength(1));
 /** false는 "해당 없음"(표시하지 않음), null은 아직 정하지 않은 값이다. */
-const optionalText = z.union([text, z.literal(false)]).nullable();
-const date = z.iso.date().nullable();
-const count = z.number().int().min(0).nullable();
+const optionalText = z.nullable(z.union([text, z.literal(false)]));
+const date = z.nullable(z.iso.date());
+const count = z.nullable(z.int().check(z.minimum(0)));
 
 const legalFactsSchema = z.object({
   operator: z.object({
-    name: text.nullable(),
+    name: z.nullable(text),
     representative: optionalText,
     businessRegistrationNumber: optionalText,
-    address: text.nullable(),
-    email: z.email().nullable(),
+    address: z.nullable(text),
+    email: z.nullable(z.email()),
     phone: optionalText,
   }),
   privacyOfficer: z.object({
-    name: text.nullable(),
+    name: z.nullable(text),
     position: optionalText,
-    email: z.email().nullable(),
+    email: z.nullable(z.email()),
     phone: optionalText,
   }),
   effectiveDates: z.object({
@@ -69,29 +69,31 @@ const legalFactsSchema = z.object({
     LOCATION: date,
     REVIEW_POLICY: date,
   }),
-  locationService: z.object({ reportNumber: text.nullable() }),
-  minimumAge: z.number().int().min(14).nullable(),
+  locationService: z.object({ reportNumber: z.nullable(text) }),
+  minimumAge: z.nullable(z.int().check(z.minimum(14))),
   retention: z.object({
     accessLogMonths: count,
     backupDays: count,
-    reviewOnWithdrawal: z.enum(['anonymize', 'delete']).nullable(),
+    reviewOnWithdrawal: z.nullable(z.enum(['anonymize', 'delete'])),
     /** 처리를 마친 권리침해 신고(신청인 이름·이메일 포함)를 지우기까지의 일수. 백엔드 RETENTION_REVIEW_CLAIM_DAYS와 같은 값이다. */
     rightsClaimDays: count,
     /** 위치 이용 기록(좌표 없음)을 지우기까지의 일수. 백엔드 RETENTION_LOCATION_USAGE_DAYS와 같은 값이다. */
-    locationUsageDays: z.number().int().positive().nullable(),
+    locationUsageDays: z.nullable(z.int().check(z.positive())),
   }),
   ai: z.object({
-    providerTrainingUse: z.boolean().nullable(),
-    medicalProfileSentToProvider: z.boolean().nullable(),
+    providerTrainingUse: z.nullable(z.boolean()),
+    medicalProfileSentToProvider: z.nullable(z.boolean()),
   }),
-  security: z.object({ internalPlanAdopted: z.boolean().nullable() }),
+  security: z.object({ internalPlanAdopted: z.nullable(z.boolean()) }),
   processors: z.array(
     z.object({
       task: z.enum(PROCESSOR_TASKS),
-      company: text.nullable(),
-      contact: text.nullable(),
-      countries: z.array(z.enum(COUNTRY_CODES)).min(1).nullable(),
-      retention: text.nullable(),
+      company: z.nullable(text),
+      contact: z.nullable(text),
+      countries: z.nullable(
+        z.array(z.enum(COUNTRY_CODES)).check(z.minLength(1)),
+      ),
+      retention: z.nullable(text),
     }),
   ),
   thirdParties: z.array(

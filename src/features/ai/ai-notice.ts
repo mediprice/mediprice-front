@@ -1,4 +1,5 @@
 import { LEGAL_FACTS } from '@/config/legal';
+import { safeStorage } from '@/lib/safe-storage';
 
 /** 안내 문구나 legal-facts.json의 AI 값(제공사·학습 이용)이 바뀌면 올린다. 저장된 값과 다르면 안내를 다시 보인다. */
 export const AI_NOTICE_VERSION = '2026-11-19';
@@ -16,17 +17,9 @@ type NoticeStorage = Pick<Storage, 'getItem' | 'setItem'>;
 /** 저장소를 쓸 수 없는 브라우저(사생활 보호 모드 등)에서도 같은 화면에서 두 번 묻지 않게 메모리에 둔다. */
 const acknowledgedInMemory = new Set<AiNoticeKind>();
 
-function browserStorage(): NoticeStorage | null {
-  try {
-    return typeof window === 'undefined' ? null : window.localStorage;
-  } catch {
-    return null;
-  }
-}
-
 export function hasAcknowledgedNotice(
   kind: AiNoticeKind,
-  storage: NoticeStorage | null = browserStorage(),
+  storage: NoticeStorage | null = safeStorage('local'),
 ) {
   if (acknowledgedInMemory.has(kind)) return true;
   try {
@@ -38,7 +31,7 @@ export function hasAcknowledgedNotice(
 
 export function acknowledgeNotice(
   kind: AiNoticeKind,
-  storage: NoticeStorage | null = browserStorage(),
+  storage: NoticeStorage | null = safeStorage('local'),
 ) {
   acknowledgedInMemory.add(kind);
   try {

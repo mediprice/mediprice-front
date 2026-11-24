@@ -1,3 +1,5 @@
+import { readItem, removeItem, writeItem } from '@/lib/safe-storage';
+
 const STORAGE_KEY = 'mp:returnTo';
 const CALLBACK_PATH = '/oauth/callback';
 const PLACEHOLDER_ORIGIN = 'http://return.invalid';
@@ -21,37 +23,19 @@ export function sanitizeReturnPath(value: unknown): string | null {
   return url.pathname + url.search;
 }
 
-function sessionStore() {
-  try {
-    return typeof window === 'undefined' ? null : window.sessionStorage;
-  } catch {
-    return null;
-  }
-}
-
 /** 안전하지 않은 경로(콜백 화면에서 다시 시도할 때의 현재 경로 등)는 무시해 먼저 저장한 경로를 지킨다. */
 export function saveReturnPath(path: string) {
   const safe = sanitizeReturnPath(path);
-  const store = sessionStore();
-  if (!safe || !store) return;
-  try {
-    store.setItem(STORAGE_KEY, safe);
-  } catch {}
+  if (safe) writeItem('session', STORAGE_KEY, safe);
 }
 
 export function readReturnPath(): string | null {
-  try {
-    return sanitizeReturnPath(sessionStore()?.getItem(STORAGE_KEY));
-  } catch {
-    return null;
-  }
+  return sanitizeReturnPath(readItem('session', STORAGE_KEY));
 }
 
 /** 저장한 경로를 읽고 지운다. 없거나 안전하지 않으면 `null`이다. */
 export function consumeReturnPath(): string | null {
   const value = readReturnPath();
-  try {
-    sessionStore()?.removeItem(STORAGE_KEY);
-  } catch {}
+  removeItem('session', STORAGE_KEY);
   return value;
 }

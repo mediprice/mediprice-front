@@ -67,4 +67,60 @@ describe('createRefresher', () => {
 
     expect(calls).toBe(2);
   });
+
+  it('제한 시간 안에 답이 없으면 unavailable이고 기다리던 로그아웃도 이어진다', async () => {
+    server.use(
+      http.post(URL_, async () => {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        return HttpResponse.json({ authenticated: true });
+      }),
+    );
+    const refresh = createRefresher(BASE, { timeoutMs: 20 });
+
+    const outcome = refresh();
+    const afterRefresh = await refresh.pausedDuring(() =>
+      Promise.resolve('signed-out'),
+    );
+
+    expect(await outcome).toBe('unavailable');
+    expect(afterRefresh).toBe('signed-out');
+  });
+
+  it('일시 중지 동안에는 요청 없이 unavailable이고, 끝나면 다시 요청한다', async () => {
+    let calls = 0;
+    server.use(
+      http.post(URL_, () => {
+        calls += 1;
+        return HttpResponse.json({ authenticated: true });
+      }),
+    );
+    const refresh = createRefresher(BASE);
+
+    const during = await refresh.pausedDuring(() => refresh());
+
+    expect(during).toBe('unavailable');
+    expect(calls).toBe(0);
+    expect(await refresh()).toBe('ok');
+    expect(calls).toBe(1);
+  });
+
+  it('AbortSignal.timeout이 없는 브라우저(Safari 15 이하)에서도 재발급한다', async () => {
+    server.use(
+      http.post(URL_, () => HttpResponse.json({ authenticated: true })),
+    );
+    const original = AbortSignal.timeout;
+    Object.defineProperty(AbortSignal, 'timeout', {
+      value: undefined,
+      configurable: true,
+    });
+
+    try {
+      expect(await createRefresher(BASE)()).toBe('ok');
+    } finally {
+      Object.defineProperty(AbortSignal, 'timeout', {
+        value: original,
+        configurable: true,
+      });
+    }
+  });
 });

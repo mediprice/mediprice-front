@@ -1,6 +1,6 @@
 'use client';
 
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { usePrefetchInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { Building2, CircleAlert } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -86,8 +86,8 @@ export function HospitalDetail({
   useRecordView(hospitalQueries.detail(ykiho));
   /** 선택 항목의 상세도 서버가 채우므로, 로그인했으면 항목도 최근 본 기록에 남긴다(서버 렌더 전과 같은 동작). */
   useRecordView(npayQueries.detail(item ?? ''), item != null);
-  /** 카드가 채워지는 동안 가격 목록이 아직 그려지지 않아도 첫 페이지를 함께 받아 둔다(PriceList의 첫 조건과 같은 키). */
-  useInfiniteQuery(hospitalQueries.priceList(ykiho, {}));
+  /** 카드가 채워지는 동안 가격 목록이 아직 그려지지 않아도 첫 페이지를 함께 받아 둔다(PriceList의 첫 조건과 같은 키). 구독하지 않아 이 화면이 그 상태 변화로 다시 그려지지 않는다. */
+  usePrefetchInfiniteQuery(hospitalQueries.priceList(ykiho, {}));
   const prices = useItemPrices(ykiho, item);
   const activeRow = prices.rows
     ? pickVariantRow(prices.rows, variant)

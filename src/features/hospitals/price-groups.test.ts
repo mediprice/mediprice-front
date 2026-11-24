@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   groupPriceRows,
-  lastSegment,
   pickVariantRow,
   priceRowName,
   sortVariantRows,
@@ -22,16 +21,6 @@ const row = (
   hospitalItemName,
   price,
   startDate: '2026-09-03',
-});
-
-describe('lastSegment', () => {
-  it('분류 경로의 마지막 조각만 남긴다', () => {
-    expect(lastSegment('예방접종료/대상포진/스카이조스터주')).toBe(
-      '스카이조스터주',
-    );
-    expect(lastSegment('도수치료')).toBe('도수치료');
-    expect(lastSegment('이학요법료/도수치료/ ')).toBe('도수치료');
-  });
 });
 
 describe('priceRowName', () => {

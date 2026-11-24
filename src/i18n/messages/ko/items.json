@@ -21,7 +21,6 @@
     "search": "다른 항목 찾기"
   },
   "summary": {
-    "label": "공개 가격",
     "regionWithSggu": "{region} {sggu}",
     "scopeWithInstitution": "{scope} · {institution}",
     "scope": "{scope} 기준",

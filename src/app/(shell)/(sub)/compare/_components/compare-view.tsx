@@ -20,20 +20,18 @@ import {
   buildCompareHref,
   MAX_COMPARE,
 } from '@/features/comparison/compare-params';
-import {
-  formatComparisonItemName,
-  latestDate,
-  orderHospitals,
-} from '@/features/comparison/compare-rows';
+import { latestDate, orderHospitals } from '@/features/comparison/compare-rows';
 import { useCompareStore } from '@/features/comparison/compare-store';
 import { comparisonQueries } from '@/features/comparison/queries';
 import { priceRowName } from '@/features/hospitals/price-groups';
 import { hospitalQueries } from '@/features/hospitals/queries';
 import { comparableBand } from '@/features/npay/average-verdict';
+import { formatItemPath } from '@/features/npay/item-name';
 import { npayQueries } from '@/features/npay/queries';
 import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
 import { errorMessageKey } from '@/lib/api/error-message';
 import { ApiError } from '@/lib/api/errors';
+import { timeoutSignal } from '@/lib/timeout-signal';
 import { cn } from '@/lib/utils';
 
 import { BasketSyncNotice } from './basket-sync-notice';
@@ -49,18 +47,6 @@ const INITIAL_COMMON_ITEMS = 8;
 
 /** 적용일은 보조 정보라 응답이 늦어도 표가 계속 불러오는 중으로 보이지 않게 이 시간 뒤에는 "–"로 둔다. */
 const DATE_TIMEOUT_MS = 8000;
-
-function withTimeout<T>(run: () => Promise<T>, ms: number) {
-  return new Promise<T>((resolve, reject) => {
-    const timer = window.setTimeout(
-      () => reject(new Error('Applied date request timed out')),
-      ms,
-    );
-    run()
-      .then(resolve, reject)
-      .finally(() => window.clearTimeout(timer));
-  });
-}
 
 const hasCode = (error: unknown, code: string) =>
   error instanceof ApiError && error.code === code;
@@ -150,7 +136,9 @@ export function CompareView({
     ((activeItem &&
       selected.data?.items.find((row) => row.npayCode === activeItem)) ||
       null);
-  const itemName = itemRow ? formatComparisonItemName(itemRow) : null;
+  const itemName = itemRow
+    ? formatItemPath(itemRow.itemName, itemRow.categoryName)
+    : null;
 
   /** 병원별 세부 항목. 적용일과, 같은 세부 항목끼리 견줄 수 있는지 보는 데 쓴다. */
   const variantQueries = useQueries({
@@ -162,13 +150,21 @@ export function CompareView({
       );
       return {
         ...options,
-        queryFn: (
+        queryFn: async (
           context: Parameters<NonNullable<typeof options.queryFn>>[0],
-        ) =>
-          withTimeout(
-            async () => options.queryFn?.(context) ?? [],
-            DATE_TIMEOUT_MS,
-          ),
+        ) => {
+          const timeout = timeoutSignal(DATE_TIMEOUT_MS, context.signal);
+          try {
+            return (
+              (await options.queryFn?.({
+                ...context,
+                signal: timeout.signal,
+              })) ?? []
+            );
+          } finally {
+            timeout.clear();
+          }
+        },
         enabled: itemRow != null,
         /** 보조 정보라 실패하면 다시 기다리게 하지 않고 바로 "–"로 둔다. */
         retry: false,

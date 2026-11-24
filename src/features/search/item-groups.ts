@@ -1,3 +1,4 @@
+import { formatItemPath } from '@/features/npay/item-name';
 import type { components } from '@/lib/api/schema';
 
 type NpayItem = components['schemas']['NpayItemResponse'];
@@ -11,16 +12,6 @@ export type ItemGroup<T extends NpayItem> = {
   minor: CategoryRef | null;
   items: T[];
 };
-
-/** 공식 이름 "이학요법료/도수치료"에서 묶음 머리에 이미 보이는 대분류를 빼고 단계를 " · "로 잇는다. */
-export function formatItemName({ name, mdivName }: NpayItem) {
-  const parts = name.split('/').map((part) => part.trim());
-  const rest =
-    mdivName && parts.length > 1 && parts[0] === mdivName.trim()
-      ? parts.slice(1)
-      : parts;
-  return rest.filter(Boolean).join(' · ');
-}
 
 function toRef(code: string | null, name: string | null) {
   const trimmed = name?.trim();
@@ -88,7 +79,11 @@ export function groupHeadingParts<T extends NpayItem>(
     if (!isShared) return { major: group.major, minor: group.minor };
     const [only, ...rest] = group.items;
     const label = group.minor?.name ?? group.major?.name;
-    if (only && rest.length === 0 && formatItemName(only) === label) {
+    if (
+      only &&
+      rest.length === 0 &&
+      formatItemPath(only.name, only.mdivName) === label
+    ) {
       return null;
     }
     return { major: group.minor ? null : group.major, minor: group.minor };

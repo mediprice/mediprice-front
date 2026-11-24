@@ -8,7 +8,11 @@ import {
   KOREA_BOUNDS,
   type LatLng,
 } from '@/features/map/map-geo';
-import { loadNaverMaps, onNaverAuthFailure } from '@/features/map/naver-sdk';
+import {
+  loadNaverMaps,
+  onNaverAuthFailure,
+  runCleanup,
+} from '@/features/map/naver-sdk';
 import type { NaverMap, NaverMapsApi } from '@/features/map/naver-types';
 
 export type NaverHandle = { api: NaverMapsApi; map: NaverMap };
@@ -75,7 +79,7 @@ export function useNaverMap(
       isActive = false;
       unsubscribe();
       logoObserver?.disconnect();
-      created?.destroy();
+      runCleanup(() => created?.destroy());
       setHandle(null);
     };
   }, [clientId, container, initial]);

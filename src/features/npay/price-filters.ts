@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 import {
   DEFAULT_REGION,
@@ -7,6 +7,7 @@ import {
   type ServiceRegion,
   sidoCodesOf,
 } from '@/features/regions/service-region';
+import { firstParam } from '@/lib/search-params';
 
 import type { PriceBand } from './average-verdict';
 import type { NpayPriceCondition } from './queries';
@@ -28,27 +29,16 @@ export type PriceFilters = {
   prices?: 'all';
 };
 
-const first = (value: unknown) => (Array.isArray(value) ? value[0] : value);
+const firstOf = <T extends z.core.$ZodType>(schema: T) =>
+  z.pipe(z.transform(firstParam), schema);
+const optionalCode = (pattern: RegExp) =>
+  firstOf(z.catch(z.optional(z.string().check(z.regex(pattern))), undefined));
 
 const searchSchema = z.object({
-  sggu: z.preprocess(
-    first,
-    z
-      .string()
-      .regex(/^\d{6}$/)
-      .optional()
-      .catch(undefined),
-  ),
-  institution: z.preprocess(
-    first,
-    z
-      .string()
-      .regex(/^[0-9A-Z]{2}$/)
-      .optional()
-      .catch(undefined),
-  ),
-  sort: z.preprocess(first, z.enum(SORTS).catch('price_asc')),
-  prices: z.preprocess(first, z.literal('all').optional().catch(undefined)),
+  sggu: optionalCode(/^\d{6}$/),
+  institution: optionalCode(/^[0-9A-Z]{2}$/),
+  sort: firstOf(z.catch(z.enum(SORTS), 'price_asc')),
+  prices: firstOf(z.catch(z.optional(z.literal('all')), undefined)),
 });
 
 /** 시군구는 서울·경기 하나를 골랐을 때만 쓴다. 시군구 코드 앞 두 자리가 시도 코드와 같다. */

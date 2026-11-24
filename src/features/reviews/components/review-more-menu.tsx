@@ -21,7 +21,7 @@ import {
 } from '@/features/reviews/write-href';
 
 import { DeleteReviewDialog } from './delete-review-dialog';
-import { ReportDialog } from './report-dialog';
+import { preloadReportForm, ReportDialog } from './report-dialog';
 
 type Action = 'edit' | 'delete' | 'report' | 'claim';
 
@@ -125,7 +125,10 @@ export function ReviewMoreMenu({
         size="icon"
         aria-label={t('openFor', { name: subject })}
         aria-haspopup="dialog"
-        onClick={() => setIsMenuOpen(true)}
+        onClick={() => {
+          if (!review.mine) preloadReportForm();
+          setIsMenuOpen(true);
+        }}
         className="-my-2 -mr-3 text-text-secondary lg:hidden"
       >
         <Ellipsis aria-hidden="true" />
@@ -152,6 +155,10 @@ export function ReviewMoreMenu({
               size="sm"
               aria-label={labels[action].label}
               onClick={() => run(action)}
+              onPointerEnter={
+                action === 'report' ? preloadReportForm : undefined
+              }
+              onFocus={action === 'report' ? preloadReportForm : undefined}
               className={
                 action === 'edit'
                   ? undefined

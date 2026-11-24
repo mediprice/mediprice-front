@@ -17,12 +17,6 @@ const PRICE_FETCH_SIZE = 30;
 const NEW_HOSPITALS_PER_PAGE = 10;
 const MAX_ROWS_PER_PAGE = 150;
 
-export type NpayItemSearchParams = NonNullable<
-  paths['/api/npay-items']['get']['parameters']['query']
->;
-export type NpayPriceParams = NonNullable<
-  paths['/api/npay-items/{npayCode}/prices']['get']['parameters']['query']
->;
 export type NpayPriceCondition = NonNullable<
   paths['/api/npay-items/{npayCode}/price-summary']['get']['parameters']['query']
 >['condition'] &
@@ -36,18 +30,11 @@ export type NpayPriceListParams = {
 export const npayKeys = {
   all: ['npay'] as const,
   categories: () => [...npayKeys.all, 'categories'] as const,
-  lists: () => [...npayKeys.all, 'list'] as const,
-  list: (params: NpayItemSearchParams) =>
-    [...npayKeys.lists(), params] as const,
   detail: (code: string) => [...npayKeys.all, 'detail', code] as const,
-  summary: (code: string, condition: NpayPriceCondition) =>
-    [...npayKeys.detail(code), 'summary', condition] as const,
   summaryIn: (code: string, sidoCodes: readonly string[]) =>
     [...npayKeys.detail(code), 'summaryIn', sidoCodes] as const,
   summaryOf: (code: string, conditions: readonly NpayPriceCondition[]) =>
     [...npayKeys.detail(code), 'summaryOf', conditions] as const,
-  prices: (code: string, params: NpayPriceParams) =>
-    [...npayKeys.detail(code), 'prices', params] as const,
   priceList: (code: string, params: NpayPriceListParams) =>
     [...npayKeys.detail(code), 'priceList', params] as const,
 };
@@ -58,13 +45,6 @@ export const npayQueries = {
       queryKey: npayKeys.categories(),
       queryFn: () => unwrap(apiClient.GET('/api/npay-items/categories')),
       staleTime: ONE_HOUR,
-    }),
-
-  search: (params: NpayItemSearchParams) =>
-    queryOptions({
-      queryKey: npayKeys.list(params),
-      queryFn: () =>
-        unwrap(apiClient.GET('/api/npay-items', { params: { query: params } })),
     }),
 
   detail: (code: string, client: ApiClient = apiClient) =>
@@ -124,28 +104,6 @@ export const npayQueries = {
               ),
             ),
           ),
-        ),
-    }),
-
-  summary: (code: string, condition: NpayPriceCondition = {}) =>
-    queryOptions({
-      queryKey: npayKeys.summary(code, condition),
-      queryFn: () =>
-        unwrap(
-          apiClient.GET('/api/npay-items/{npayCode}/price-summary', {
-            params: { path: { npayCode: code }, query: { condition } },
-          }),
-        ),
-    }),
-
-  prices: (code: string, params: NpayPriceParams) =>
-    queryOptions({
-      queryKey: npayKeys.prices(code, params),
-      queryFn: () =>
-        unwrap(
-          apiClient.GET('/api/npay-items/{npayCode}/prices', {
-            params: { path: { npayCode: code }, query: params },
-          }),
         ),
     }),
 

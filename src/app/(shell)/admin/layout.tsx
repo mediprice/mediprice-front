@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
 import { AdminGate } from '@/features/admin/components/admin-gate';
+import { ClientMessages } from '@/i18n/client-messages';
 
 import { AdminShell } from './_components/admin-shell';
 
@@ -10,16 +11,18 @@ export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col">
-      <main
-        id="main"
-        tabIndex={-1}
-        className="flex flex-1 flex-col outline-none"
-      >
-        <AdminGate>
-          <AdminShell>{children}</AdminShell>
-        </AdminGate>
-      </main>
-    </div>
+    <ClientMessages namespaces={['admin']}>
+      <div className="flex min-h-dvh flex-col">
+        <main
+          id="main"
+          tabIndex={-1}
+          className="flex flex-1 flex-col outline-none"
+        >
+          <AdminGate>
+            <AdminShell>{children}</AdminShell>
+          </AdminGate>
+        </main>
+      </div>
+    </ClientMessages>
   );
 }

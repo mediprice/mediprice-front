@@ -9,13 +9,12 @@ import {
   OgHighlight,
 } from '@/app/_components/og-image';
 import { parseItemParam } from '@/features/hospitals/detail-links';
+import { formatItemPath } from '@/features/npay/item-name';
 import { npayQueries } from '@/features/npay/queries';
 import { DEFAULT_REGION, sidoCodesOf } from '@/features/regions/service-region';
 import metadata from '@/i18n/messages/ko/metadata.json';
 import { fetchSiteStats } from '@/server/api/home-data';
 import { publicApi } from '@/server/api/public-client';
-
-import { formatItemTitle } from './_components/item-title';
 
 export const alt = createTranslator({
   locale: 'ko',
@@ -62,7 +61,9 @@ export default async function ItemOpengraphImage({
       siteName={t('title')}
       hasFont={fonts !== undefined}
       eyebrow={t('ogImage.item.eyebrow')}
-      title={item ? formatItemTitle(item) : t('ogImage.headline')}
+      title={
+        item ? formatItemPath(item.name, item.mdivName) : t('ogImage.headline')
+      }
       footer={
         date ? t('ogImage.footerWithDate', { date }) : t('ogImage.caption')
       }

@@ -6,7 +6,7 @@ import { type ReactNode, useState } from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import type { LatLng } from '@/features/map/map-geo';
-import { useReducedMotion } from '@/features/map/use-reduced-motion';
+import { useReducedMotion } from '@/lib/motion/use-reduced-motion';
 
 import type { MapMarker } from './marker-icon';
 import { type MapSearchArea, useNaverMap } from './use-naver-map';

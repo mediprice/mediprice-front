@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { ApiError } from '@/lib/api/errors';
+import { ApiError, isUnsupportedEndpoint } from '@/lib/api/errors';
 import { BFF_BASE } from '@/lib/api/paths';
 import { emitSessionExpired } from '@/lib/api/session-events';
 import { createUntypedRequest } from '@/lib/api/untyped-request';
@@ -37,15 +37,6 @@ export type MedicalProfileRequest = {
   consentVersion: string;
 };
 
-/** 경로 자체가 없는(아직 배포 전) 백엔드의 404. MEDICAL_PROFILE_NOT_FOUND 같은 업무 404와 구분한다. */
-function isMissingEndpoint(error: unknown) {
-  return (
-    error instanceof ApiError &&
-    error.status === 404 &&
-    (error.code === 'RESOURCE_NOT_FOUND' || error.code === 'NOT_FOUND')
-  );
-}
-
 function createMedicalProfileApi(
   request = createUntypedRequest({
     baseUrl: BFF_BASE,
@@ -78,7 +69,7 @@ function createMedicalProfileApi(
       try {
         await request.empty(CONSENT_PATH, { method: 'DELETE' });
       } catch (error) {
-        if (!isMissingEndpoint(error)) throw error;
+        if (!isUnsupportedEndpoint(error)) throw error;
         await request
           .empty(PROFILE_PATH, { method: 'DELETE' })
           .catch((fallbackError: unknown) => {

@@ -8,10 +8,9 @@ import { Tag } from '@/components/ui/tag';
 import { POPULAR_ITEMS } from '@/features/npay/catalog';
 import { PopularItemPrice } from '@/features/npay/components/popular-item-card';
 
-type RankedItem = { code: string; name: string };
+import { POPULAR_ROW_COUNT } from './popular-prices';
 
-/** 실제 순위가 이만큼 모여야 순위로 보여 준다. 모자라면 고른 목록(POPULAR_ITEMS)을 순위 없이 보여 준다. */
-const ROW_COUNT = 6;
+type RankedItem = { code: string; name: string };
 
 /** ranked는 최근 30일 로그인 이용자가 많이 본 항목(서버가 읽어 넘긴다). 모바일은 3개, md 4개, xl부터 6개를 보여 준다. */
 export function PopularItems({
@@ -20,9 +19,9 @@ export function PopularItems({
   ranked?: readonly RankedItem[];
 }) {
   const t = useTranslations('home');
-  const isRanked = ranked.length >= ROW_COUNT;
+  const isRanked = ranked.length >= POPULAR_ROW_COUNT;
   const rows = isRanked
-    ? ranked.slice(0, ROW_COUNT).map(({ code, name }) => {
+    ? ranked.slice(0, POPULAR_ROW_COUNT).map(({ code, name }) => {
         const curated = POPULAR_ITEMS.find((item) => item.code === code);
         return {
           code,

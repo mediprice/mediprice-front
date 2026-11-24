@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { PageContainer } from '@/components/layout/page-container';
 import { SubTopBar } from '@/components/layout/sub-top-bar';
 import { parsePriceFilters } from '@/features/npay/price-filters';
+import { ClientMessages } from '@/i18n/client-messages';
 import { fetchSiteStats } from '@/server/api/home-data';
 
 import { FilterColumn } from './_components/filter-column';
@@ -55,7 +56,7 @@ export default async function ItemPricePage({
   ]);
 
   return (
-    <>
+    <ClientMessages namespaces={['items', 'map.entry']}>
       <SubTopBar title={t('topBar.title')} backHref="/" />
       <HydrationBoundary state={state}>
         <ItemGate code={code}>
@@ -89,6 +90,6 @@ export default async function ItemPricePage({
           </div>
         </ItemGate>
       </HydrationBoundary>
-    </>
+    </ClientMessages>
   );
 }

@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { decodeYkiho } from '@/features/hospitals/detail-links';
 import { parseReviewId } from '@/features/reviews/write-href';
+import { ClientMessages } from '@/i18n/client-messages';
 
 import { ClaimView } from './_components/claim-view';
 
@@ -19,5 +20,9 @@ export default async function ReviewClaimPage({
   const { ykiho, reviewId } = await params;
   const id = parseReviewId(reviewId);
   if (id === null) notFound();
-  return <ClaimView ykiho={decodeYkiho(ykiho)} reviewId={id} />;
+  return (
+    <ClientMessages namespaces={['claims', 'legal.document']}>
+      <ClaimView ykiho={decodeYkiho(ykiho)} reviewId={id} />
+    </ClientMessages>
+  );
 }

@@ -4,36 +4,13 @@ import type { Route } from 'next';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-/** 새 탭·다운로드·다른 출처·같은 화면 안 이동은 막지 않는다. */
+import { appLinkTarget } from './app-link';
+
+/** 다른 핸들러가 이미 막은 클릭은 그대로 둔다. */
 function interceptedHref(event: MouseEvent) {
-  if (
-    event.defaultPrevented ||
-    event.button !== 0 ||
-    event.metaKey ||
-    event.ctrlKey ||
-    event.shiftKey ||
-    event.altKey ||
-    !(event.target instanceof Element)
-  ) {
-    return null;
-  }
-  const anchor = event.target.closest('a[href]');
-  if (!(anchor instanceof HTMLAnchorElement)) return null;
-  if (
-    (anchor.target && anchor.target !== '_self') ||
-    anchor.hasAttribute('download')
-  ) {
-    return null;
-  }
-  const url = new URL(anchor.href);
-  if (url.origin !== window.location.origin) return null;
-  if (
-    url.pathname === window.location.pathname &&
-    url.search === window.location.search
-  ) {
-    return null;
-  }
-  return `${url.pathname}${url.search}${url.hash}`;
+  if (event.defaultPrevented) return null;
+  const url = appLinkTarget(event);
+  return url ? `${url.pathname}${url.search}${url.hash}` : null;
 }
 
 /**

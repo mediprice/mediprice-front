@@ -1,4 +1,4 @@
-# MediPrice Frontend
+# Mediprice Frontend
 
 의료비(비급여) 가격 비교 서비스의 웹 프론트엔드. Next.js 16 · React 19 · TanStack Query.
 
@@ -40,6 +40,8 @@ pnpm dev
 - 로그인 토큰은 **httpOnly 쿠키**에만 있다. 브라우저의 JavaScript는 토큰을 읽을 수 없고, 컴포넌트와 쿼리에서 토큰을 다룰 일이 없다.
 - 브라우저는 같은 출처의 `/bff/**`만 호출한다(백엔드 CORS 설정 불필요).
 - Access가 만료되면(401) API 클라이언트가 `/bff/session/refresh`를 한 번만 호출하고 원래 요청을 다시 보낸다. Refresh까지 거부되면 `subscribeSessionExpired`로 알린다.
+- 재발급은 `POST /bff/session/refresh` 한 곳에서만 한다. 브라우저의 모든 클라이언트와 `getSession`이 refresher 하나(`sharedRefresher`)를 함께 쓰고, `GET /bff/session`은 재발급하지 않고 `refreshable`만 알린다. BFF는 같은 Refresh로 동시에 온 재발급을 인스턴스 안에서 합치고, 회전 직후 3초 동안 이전 Refresh로 늦게 온 요청에는 새 토큰 없이 쿠키를 건드리지 않는 200을 돌려준다(늦게 온 요청이 새 쿠키를 지우지 않게). 로그아웃은 진행 중인 재발급이 끝난 뒤 보내고, 그동안 새 재발급은 요청 없이 실패시킨다. 브라우저 재발급 요청은 40초가 지나면 끊는다.
+- `GET /bff/session`은 Access가 있으면 서버에서 `/api/users/me`까지 읽어 `{ authenticated: true, user }`로 답한다. 로그인 확인이 왕복 한 번으로 끝난다. 내 정보를 읽지 못하면(401·장애) `user` 없이 답하고, 브라우저가 `/bff/api/users/me`로 따로 읽는다(401이면 거기서 재발급).
 
 ```
 src/
@@ -56,13 +58,8 @@ src/
 화면에서는 쿼리 옵션만 쓴다.
 
 ```tsx
-const { data } = useQuery(regionQueries.sido());
-const { data: hospitals } = useQuery(
-  hospitalQueries.search({
-    condition: { keyword: '삼성' },
-    pageQuery: { size: 20 },
-  }),
-);
+const { data: districts } = useQuery(regionQueries.sggu('110000'));
+const { data: hospital } = useQuery(hospitalQueries.detail(ykiho));
 ```
 
 - 응답 타입은 백엔드 스펙에서 생성된다. null이 될 수 있는 필드는 `string | null`이다.

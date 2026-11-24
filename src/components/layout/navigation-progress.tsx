@@ -3,31 +3,10 @@
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { appLinkTarget } from '@/lib/navigation/app-link';
+
 /** 응답이 끝내 오지 않아도 막대가 남지 않게 한다. */
 const GIVE_UP_MS = 15_000;
-
-/** 앱 안 다른 화면으로 가는 링크인지. 새 탭·다른 출처·같은 화면의 #앵커·다운로드는 브라우저가 처리한다. */
-function isAppNavigation(event: MouseEvent) {
-  if (
-    event.button !== 0 ||
-    event.metaKey ||
-    event.ctrlKey ||
-    event.shiftKey ||
-    event.altKey
-  )
-    return false;
-  const anchor =
-    event.target instanceof Element ? event.target.closest('a[href]') : null;
-  if (!(anchor instanceof HTMLAnchorElement)) return false;
-  if (anchor.target && anchor.target !== '_self') return false;
-  if (anchor.hasAttribute('download')) return false;
-  const next = new URL(anchor.href, window.location.href);
-  if (next.origin !== window.location.origin) return false;
-  return (
-    next.pathname !== window.location.pathname ||
-    next.search !== window.location.search
-  );
-}
 
 /**
  * 링크를 누른 뒤 다음 화면이 그려질 때까지 화면 맨 위에 얇은 막대를 보여 준다. 항목·병원 화면은 서버에서 가격을 읽은 뒤
@@ -41,7 +20,7 @@ export function NavigationProgress() {
 
   useEffect(() => {
     function onClick(event: MouseEvent) {
-      if (isAppNavigation(event)) setPendingFrom(current);
+      if (appLinkTarget(event)) setPendingFrom(current);
     }
     /** Link가 자기 처리에서 기본 동작을 막기 전에 보려고 캡처 단계에서 듣는다. */
     document.addEventListener('click', onClick, true);

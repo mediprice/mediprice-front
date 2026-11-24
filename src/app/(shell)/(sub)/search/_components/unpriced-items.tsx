@@ -5,12 +5,12 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
+import { formatItemPath } from '@/features/npay/item-name';
 import { useCategoryLabel } from '@/features/npay/use-category-label';
 import {
   regionQuery,
   type ServiceRegion,
 } from '@/features/regions/service-region';
-import { formatItemName } from '@/features/search/item-groups';
 import type { ItemResult } from '@/features/search/queries';
 
 import { KeepPhrase } from './keep-phrase';
@@ -61,7 +61,7 @@ export function UnpricedItems({
               className="-mx-4 flex min-h-11 flex-col justify-center px-4 py-2 hover:bg-surface lg:-mx-6 lg:px-6"
             >
               <span className="text-label text-text-secondary">
-                {formatItemName(item)}
+                {formatItemPath(item.name, item.mdivName)}
               </span>
               {item.mdivName && (
                 <span className="text-caption text-text-tertiary">

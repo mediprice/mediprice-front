@@ -1,10 +1,10 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 const VIEW_KEY = 'mpMapView';
 
 const savedViewSchema = z.object({
   view: z.enum(['list', 'map']),
-  selectedId: z.string().nullable().catch(null),
+  selectedId: z.catch(z.nullable(z.string()), null),
 });
 
 export type SavedView = z.infer<typeof savedViewSchema>;

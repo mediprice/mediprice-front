@@ -1,13 +1,11 @@
 import { useTranslations } from 'next-intl';
 
-import {
-  formatComparisonItemName,
-  groupComparisonItems,
-} from '@/features/comparison/compare-rows';
+import { groupComparisonItems } from '@/features/comparison/compare-rows';
 import type {
   ComparisonHospital,
   ComparisonItem,
 } from '@/features/comparison/queries';
+import { formatItemPath } from '@/features/npay/item-name';
 
 import { PriceRow } from './price-row';
 
@@ -70,7 +68,7 @@ export function CommonItemRows({
               key={item.npayCode}
               hospitals={hospitals}
               row={item}
-              label={formatComparisonItemName(item)}
+              label={formatItemPath(item.itemName, item.categoryName)}
               trailing={slotCells}
             />
           ))}

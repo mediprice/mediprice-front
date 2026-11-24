@@ -3,6 +3,7 @@
 import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 
 import { findCollapsedLabels } from '@/features/map/marker-layout';
+import { runCleanup } from '@/features/map/naver-sdk';
 import type { NaverListener, NaverMarker } from '@/features/map/naver-types';
 
 import {
@@ -42,7 +43,7 @@ export function useNaverMarkers(
       api.Event.addListener(map, 'zoom_changed', update),
       api.Event.addListener(map, 'idle', update),
     ];
-    return () => api.Event.removeListener(listeners);
+    return () => runCleanup(() => api.Event.removeListener(listeners));
   }, [handle]);
 
   const collapsed = useMemo(() => {
@@ -68,8 +69,8 @@ export function useNaverMarkers(
     const ids = new Set(markers.map((marker) => marker.id));
     for (const [id, entry] of current) {
       if (ids.has(id)) continue;
-      api.Event.removeListener(entry.listeners);
-      entry.marker.setMap(null);
+      runCleanup(() => api.Event.removeListener(entry.listeners));
+      runCleanup(() => entry.marker.setMap(null));
       current.delete(id);
     }
     for (const marker of markers) {
@@ -120,8 +121,8 @@ export function useNaverMarkers(
     const current = entries.current;
     return () => {
       for (const entry of current.values()) {
-        handle.api.Event.removeListener(entry.listeners);
-        entry.marker.setMap(null);
+        runCleanup(() => handle.api.Event.removeListener(entry.listeners));
+        runCleanup(() => entry.marker.setMap(null));
       }
       current.clear();
     };

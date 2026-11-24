@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 import { BFF_BASE } from '@/lib/api/paths';
 import { emitSessionExpired } from '@/lib/api/session-events';
@@ -10,9 +10,9 @@ const consentStateSchema = z.object({
   required: z.boolean(),
   currentVersion: z.string(),
   agreed: z.boolean(),
-  agreedVersion: z.string().nullable(),
-  agreedAt: z.string().nullable(),
-  withdrawnAt: z.string().nullable(),
+  agreedVersion: z.nullable(z.string()),
+  agreedAt: z.nullable(z.string()),
+  withdrawnAt: z.nullable(z.string()),
   reconsentRequired: z.boolean(),
 });
 
