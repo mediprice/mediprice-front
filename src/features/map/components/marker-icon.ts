@@ -2,7 +2,7 @@ import type { LatLng } from '@/features/map/map-geo';
 import { cn } from '@/lib/utils';
 
 /** place는 병원이 아니라 사용자가 말한 장소(기준점)다. 늘 이름 알약으로 보이고 고를 수 없다. */
-export type MapMarkerKind = 'price' | 'noPrice' | 'plain' | 'place';
+type MapMarkerKind = 'price' | 'noPrice' | 'plain' | 'place';
 
 export type MapMarker = {
   id: string;
@@ -17,23 +17,29 @@ export type MapMarker = {
 /** label: 글자 알약(항목이 없으면 점), dot: 겹쳐서 점으로 줄임, hover: 마우스를 올림, selected: 목록과 함께 고른 것. */
 export type MarkerDisplay = 'label' | 'dot' | 'hover' | 'selected';
 
-/** 가격 핀: 점 바로 위에 뜬 알약과 아래 꼬리. 꼬리 끝이 병원 위치다. */
-const PIN = [
-  'absolute top-0 left-0 inline-flex min-h-8 -translate-x-1/2 -translate-y-[calc(100%+0.375rem)] cursor-pointer items-center rounded-full border px-3 text-caption-bold whitespace-nowrap tabular-nums shadow-card',
-  'after:absolute after:top-full after:left-1/2 after:size-2.5 after:-translate-x-1/2 after:-translate-y-[0.3125rem] after:rotate-45 after:border-r after:border-b',
-].join(' ');
+/** 점의 가운데가 병원 위치다. 글자 알약 상태에서도 점은 그대로 두고 알약을 위에 띄운다. */
 const DOT =
-  'absolute top-0 left-0 block size-4 -translate-1/2 rounded-full border-2 border-bg shadow-card cursor-pointer';
+  'absolute top-0 left-0 block size-4 -translate-1/2 cursor-pointer rounded-full border-2 border-bg shadow-card';
+
+/**
+ * 알약과 꼬리는 점 요소의 ::before·::after로 그린다. 마우스를 올려 알약이 생겨도 포인터 아래의 요소가 바뀌지 않아,
+ * 같은 자리의 마커끼리 mouseover·mouseout이 번갈아 일어나지 않는다.
+ */
+const PIN = [
+  'text-caption-bold whitespace-nowrap tabular-nums',
+  'before:absolute before:bottom-[calc(100%+0.5rem)] before:left-1/2 before:inline-flex before:min-h-8 before:-translate-x-1/2 before:items-center before:rounded-full before:border before:px-3 before:shadow-card before:content-[attr(data-label)]',
+  'after:absolute after:bottom-[calc(100%+0.1875rem)] after:left-1/2 after:size-2.5 after:-translate-x-1/2 after:rotate-45 after:border-r after:border-b',
+].join(' ');
 
 const PIN_KIND: Record<MapMarkerKind, string> = {
   price:
-    'border-border bg-bg text-text-primary after:border-border after:bg-bg',
+    'text-text-primary before:border-border before:bg-bg after:border-border after:bg-bg',
   noPrice:
-    'border-dashed border-border-strong bg-bg text-text-secondary after:border-border-strong after:bg-bg',
+    'text-text-secondary before:border-dashed before:border-border-strong before:bg-bg after:border-border-strong after:bg-bg',
   plain:
-    'border-border bg-bg text-text-primary after:border-border after:bg-bg',
+    'text-text-primary before:border-border before:bg-bg after:border-border after:bg-bg',
   place:
-    'cursor-default border-text-primary bg-text-primary text-bg after:border-text-primary after:bg-text-primary',
+    'cursor-default text-bg before:border-text-primary before:bg-text-primary after:border-text-primary after:bg-text-primary',
 };
 const DOT_KIND: Record<MapMarkerKind, string> = {
   price: 'bg-primary',
@@ -44,51 +50,63 @@ const DOT_KIND: Record<MapMarkerKind, string> = {
 
 /** 고른 핀은 색과 함께 크기·테두리 고리로도 구분한다(색만으로 구분하지 않음). */
 const SELECTED =
-  'min-h-9 border-primary bg-primary px-3.5 text-label-bold text-on-primary shadow-float ring-2 ring-primary ring-offset-2 ring-offset-bg after:size-3 after:-translate-y-1.5 after:border-primary after:bg-primary';
+  'text-label-bold text-on-primary before:min-h-9 before:border-primary before:bg-primary before:px-3.5 before:shadow-float before:ring-2 before:ring-primary before:ring-offset-2 before:ring-offset-bg after:bottom-[calc(100%+0.125rem)] after:size-3 after:border-primary after:bg-primary';
 const HOVER =
-  'border-primary text-primary-text shadow-float after:border-primary';
+  'text-primary-text before:border-primary before:shadow-float after:border-primary';
 
-/**
- * 마커는 지도 SDK의 HTML 마커 내용으로 쓸 DOM이다. 기준점(0,0)에 두고 스스로 가운데로 옮긴다. 같은 내용이 목록에 있어
- * 스크린 리더에서는 숨긴다. 문구는 textContent로 넣어 HTML로 해석되지 않는다.
- */
 const BADGE =
   'absolute top-0 left-0 flex size-6 -translate-1/2 cursor-pointer items-center justify-center rounded-full border-2 border-bg bg-primary text-caption-bold text-on-primary tabular-nums shadow-float';
 
-export function createMarkerContent({
-  kind,
-  label,
-  badge,
-  display,
-}: {
+type MarkerContentInput = {
   kind: MapMarkerKind;
   label: string;
   badge?: string;
   display: MarkerDisplay;
-}) {
-  const element = document.createElement('span');
-  element.setAttribute('aria-hidden', 'true');
-  element.dataset.display = display;
-  if (kind === 'place') {
-    element.className = cn(PIN, PIN_KIND.place);
-    element.textContent = label;
-    return element;
-  }
+};
+
+/** 마커 요소의 클래스와 문구. label은 알약(data-label), text는 요소 안 글자(배지 숫자)다. */
+export function markerContentOf({
+  kind,
+  label,
+  badge,
+  display,
+}: MarkerContentInput): { className: string; label?: string; text?: string } {
   if (badge && kind === 'plain' && display !== 'selected') {
-    element.className = cn(BADGE, display === 'hover' && 'ring-2 ring-primary');
-    element.textContent = badge;
-    return element;
+    return {
+      className: cn(BADGE, display === 'hover' && 'ring-2 ring-primary'),
+      text: badge,
+    };
   }
-  if (display === 'dot' || (kind === 'plain' && display === 'label')) {
-    element.className = cn(DOT, DOT_KIND[kind]);
-  } else {
-    element.className = cn(
+  if (
+    kind !== 'place' &&
+    (display === 'dot' || (kind === 'plain' && display === 'label'))
+  ) {
+    return { className: cn(DOT, DOT_KIND[kind]) };
+  }
+  return {
+    className: cn(
+      DOT,
+      DOT_KIND[kind],
       PIN,
       PIN_KIND[kind],
-      display === 'hover' && HOVER,
-      display === 'selected' && SELECTED,
-    );
-    element.textContent = label;
-  }
+      kind !== 'place' && display === 'hover' && HOVER,
+      kind !== 'place' && display === 'selected' && SELECTED,
+    ),
+    label,
+  };
+}
+
+/**
+ * 마커는 지도 SDK의 HTML 마커 내용으로 쓸 DOM이다. 기준점(0,0)에 두고 스스로 가운데로 옮긴다. 같은 내용이 목록에 있어
+ * 스크린 리더에서는 숨긴다. 문구는 속성·textContent로 넣어 HTML로 해석되지 않는다.
+ */
+export function createMarkerContent(input: MarkerContentInput) {
+  const { className, label, text } = markerContentOf(input);
+  const element = document.createElement('span');
+  element.setAttribute('aria-hidden', 'true');
+  element.dataset.display = input.display;
+  element.className = className;
+  if (label !== undefined) element.dataset.label = label;
+  if (text !== undefined) element.textContent = text;
   return element;
 }

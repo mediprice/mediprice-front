@@ -30,7 +30,8 @@
     "zoomIn": "지도 확대",
     "zoomOut": "지도 축소",
     "unavailableTitle": "지도를 불러오지 못했어요",
-    "unavailableDescription": "병원 목록은 그대로 볼 수 있어요."
+    "unavailableDescription": "병원 목록은 그대로 볼 수 있어요.",
+    "groupLabel": "{label} 외 {count, number}곳"
   },
   "actions": {
     "searchHere": "이 지역에서 다시 찾기",

@@ -52,3 +52,57 @@ export function findCollapsedLabels(
   }
   return collapsed;
 }
+
+type PositionedMarker = {
+  id: string;
+  position: { lat: number; lng: number };
+  kind: string;
+};
+
+export type MarkerGroup<T extends PositionedMarker> = {
+  key: string;
+  members: [T, ...T[]];
+};
+
+/** 소수 다섯째 자리(약 1m)까지 같으면 같은 자리로 본다. */
+const positionKey = ({ lat, lng }: PositionedMarker['position']) =>
+  `${lat.toFixed(5)},${lng.toFixed(5)}`;
+
+/**
+ * 같은 자리의 병원 마커를 하나로 묶는다. 겹친 마커끼리 hover가 번갈아 바뀌지 않게 한다.
+ * 묶음과 그 안의 순서는 목록 순서(가까운 순·가격 순)를 따르고, 기준 장소(place)는 묶지 않는다.
+ */
+export function groupByPosition<T extends PositionedMarker>(
+  markers: readonly T[],
+) {
+  const groups = new Map<string, MarkerGroup<T>>();
+  for (const marker of markers) {
+    const key =
+      marker.kind === 'place'
+        ? `place:${marker.id}`
+        : positionKey(marker.position);
+    const group = groups.get(key);
+    if (group) group.members.push(marker);
+    else groups.set(key, { key, members: [marker] });
+  }
+  return [...groups.values()];
+}
+
+/** 묶음을 누를 때 고를 병원. 지금 병원이 묶음 밖이면 첫 병원, 안이면 다음 병원(끝이면 처음)이다. */
+export function nextMemberId(
+  members: readonly [{ id: string }, ...{ id: string }[]],
+  currentId: string | null,
+) {
+  const index = members.findIndex((member) => member.id === currentId);
+  return (members[(index + 1) % members.length] ?? members[0]).id;
+}
+
+/** 묶음 마커에 보일 병원. 고른 병원이 묶음 안에 있으면 그 병원, 아니면 목록에서 앞선 병원이다. */
+export function representativeOf<T extends PositionedMarker>(
+  group: MarkerGroup<T>,
+  selectedId: string | null,
+) {
+  return (
+    group.members.find((member) => member.id === selectedId) ?? group.members[0]
+  );
+}
