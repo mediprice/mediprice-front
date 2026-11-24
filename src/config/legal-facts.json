@@ -28,7 +28,7 @@
     "backupDays": null,
     "reviewOnWithdrawal": null,
     "rightsClaimDays": null,
-    "locationUsageDays": null
+    "locationUsageDays": 180
   },
   "ai": {
     "providerTrainingUse": null,
