@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { z } from 'zod';
+import { z } from 'zod/mini';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -45,12 +45,12 @@ const storedSchema = z.object({
   hospitals: z
     .array(
       z.object({
-        ykiho: z.string().refine(isYkiho),
-        name: z.string().trim().min(1).max(200),
-        itemCode: z.string().refine(isNpayCode).nullable(),
+        ykiho: z.string().check(z.refine(isYkiho)),
+        name: z.string().check(z.trim(), z.minLength(1), z.maxLength(200)),
+        itemCode: z.nullable(z.string().check(z.refine(isNpayCode))),
       }),
     )
-    .max(MAX_COMPARE),
+    .check(z.maxLength(MAX_COMPARE)),
 });
 
 export const useCompareStore = create<CompareState>()(

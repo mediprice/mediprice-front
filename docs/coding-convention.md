@@ -89,6 +89,8 @@ src/
   i18n/                   next-intl 설정과 화면 문구. 코드에는 키만 둔다(12장)
     request.ts            locale·시간대·포맷 설정
     formats.ts            날짜 포맷 이름
+    message-scope.ts      브라우저에 넘기는 공용 문구 목록(CLIENT_NAMESPACES)
+    client-messages.tsx   화면 전용 문구를 그 화면에만 더하는 ClientMessages
     messages/ko/*.json    화면 문구 (네임스페이스마다 파일 하나, messages/ko.ts가 합친다)
   app/                    라우팅 전용. 페이지는 features의 컴포넌트를 조립만 한다
     layout.tsx            html·폰트·NextIntlClientProvider·viewport·metadata
@@ -238,6 +240,8 @@ const body = sessionSchema.parse(await response.json());
 ### 5.3 외부 입력은 zod로 검증 (MUST)
 
 서버 응답, 쿠키, URL 파라미터, 폼 값처럼 코드 밖에서 들어오는 값은 zod로 검증한 뒤 쓴다. 백엔드 API 응답은 생성된 타입(`schema.d.ts`)을 믿고, 스펙에 없는 에러 본문 같은 것만 zod로 검증한다.
+
+셸·공개 화면(홈·검색·항목·병원·지도·비교·관심·법률 문서 등)의 첫 로드에 들어가는 스키마는 `zod/mini`로 쓴다(`z.string().check(z.regex(...))`, `z.nullable(...)`). classic(`zod`)을 하나라도 import하면 그 화면 첫 번들에 classic 전체(약 12KB gz)가 더 들어간다. 첫 화면에 폼이 있는 라우트(AI, 운영자, 후기 작성, 내 정보 편집 등)의 폼 스키마는 classic을 쓴다. `app/client-zod.test.ts`가 이 경계를 검사한다.
 
 ### 5.4 타입 선언
 
@@ -532,6 +536,8 @@ const t = await getTranslations('metadata');
 ```
 
 - `queries.ts`, `lib`, zod 스키마는 번역하지 않고 키나 코드만 돌려준다. zod 메시지는 `validation.*` 키로 쓰고, 폼 필드가 `t()`로 바꾼다.
+- 브라우저에는 필요한 문구만 넘긴다. 루트 provider는 셸과 여러 화면이 함께 쓰는 `CLIENT_NAMESPACES`(`i18n/message-scope.ts`)만 넘기고, 화면 전용 문구는 그 화면의 page·layout이 `<ClientMessages namespaces={['items', 'map.entry']}>`로 더한다(`legal.document`처럼 하위 묶음만 고를 수 있다). 클라이언트 컴포넌트에서 새 네임스페이스를 쓰면 둘 중 하나에 더한다. `i18n/client-namespaces.test.ts`가 클라이언트 컴포넌트의 `useTranslations` 키를 모아 빠진 것을 찾는다. 그래서 네임스페이스와 키는 문자열 리터럴(또는 `` `reason.${x}` ``처럼 앞부분이 고정된 템플릿)로 쓴다. `ClientMessages`는 page·layout이 돌려주는 최상위 요소로만 쓴다(테스트가 그 파일 전체를 감싼다고 본다).
+- `useTranslations`는 다른 이름으로 가져오지 않는다(`import { useTranslations as useT }` 금지). 이름이 다르면 키 대조 테스트가 찾지 못한다.
 - 문자열을 이어 붙이지 않는다. 변수는 ICU 자리표시자(`"{name}님"`), 강조는 `t.rich`를 쓴다.
 - 개수는 숫자 형식으로 넣는다. 한국어는 단수·복수 구분이 없어 `"{count, number}곳"`과 `"{count, plural, other {#곳}}"`가 같은 결과라 둘 다 쓰인다. 값에 따라 문장이 바뀔 때(`=0 {보관하지 않음}`)만 plural이 필요하다. 문구 형식은 언어마다 따로라, 영어를 추가할 때 영어 파일에서만 plural(`one`·`other`)로 쓰면 된다(12.5).
 

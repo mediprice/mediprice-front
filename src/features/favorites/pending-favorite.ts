@@ -1,14 +1,14 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 const KEY = 'mediprice:pending-favorite';
 /** 로그인 창을 닫고 한참 뒤 다른 길로 로그인했을 때 엉뚱하게 추가되지 않게, 짧은 시간 안에 돌아왔을 때만 이어서 한다. */
 const MAX_AGE_MS = 15 * 60 * 1000;
 
 const pendingSchema = z.object({
-  ykiho: z.string().min(1).max(200),
-  name: z.string().max(200).nullable(),
-  path: z.string().startsWith('/').max(2000),
-  scrollY: z.number().min(0),
+  ykiho: z.string().check(z.minLength(1), z.maxLength(200)),
+  name: z.nullable(z.string().check(z.maxLength(200))),
+  path: z.string().check(z.startsWith('/'), z.maxLength(2000)),
+  scrollY: z.number().check(z.minimum(0)),
   savedAt: z.number(),
 });
 

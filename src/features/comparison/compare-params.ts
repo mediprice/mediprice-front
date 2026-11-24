@@ -1,10 +1,10 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 /** 백엔드는 5곳까지 받지만 화면 폭(360px)에서 읽을 수 있는 열은 3개다. */
 export const MAX_COMPARE = 3;
 
-const ykihoSchema = z.string().regex(/^[A-Za-z0-9+/=_-]{1,200}$/);
-const npayCodeSchema = z.string().regex(/^[A-Za-z0-9]{1,20}$/);
+const ykihoSchema = z.string().check(z.regex(/^[A-Za-z0-9+/=_-]{1,200}$/));
+const npayCodeSchema = z.string().check(z.regex(/^[A-Za-z0-9]{1,20}$/));
 
 export function isYkiho(value: unknown): value is string {
   return ykihoSchema.safeParse(value).success;

@@ -1,6 +1,6 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
-const price = z.number().nullable();
+const price = z.nullable(z.number());
 
 const liveFeeItemSchema = z.object({
   code: z.string(),
@@ -9,7 +9,7 @@ const liveFeeItemSchema = z.object({
   dbMaxPrice: price,
   webMinPrice: price,
   webMaxPrice: price,
-  webPublishedMonth: z.string().nullable(),
+  webPublishedMonth: z.nullable(z.string()),
   changed: z.boolean(),
 });
 

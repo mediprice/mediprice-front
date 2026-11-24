@@ -3,7 +3,7 @@ import {
   type QueryClient,
   queryOptions,
 } from '@tanstack/react-query';
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 import { apiClient } from '@/lib/api/client';
 import { ApiError } from '@/lib/api/errors';
@@ -24,43 +24,57 @@ export type CurrentUser = components['schemas']['UserResponse'];
 
 const sessionSchema = z.object({
   authenticated: z.boolean(),
-  refreshable: z.boolean().optional(),
+  refreshable: z.optional(z.boolean()),
+  /** BFF가 백엔드 응답을 그대로 담는다. 백엔드 응답은 생성 타입을 믿는다(5.3). */
+  user: z.optional(
+    z.custom<CurrentUser>(
+      (value) => typeof value === 'object' && value !== null,
+    ),
+  ),
 });
 
 export type SessionState = 'authenticated' | 'anonymous' | 'unavailable';
 
+type SessionCheck = { state: SessionState; user?: CurrentUser };
+
 /** 쿠키만 보고 답하는 BFF 세션 확인. Refresh만 남았으면 API 401과 같은 재발급을 함께 기다리고, 세션 만료 이벤트는 내지 않는다. */
-export async function getSession(baseUrl = BFF_BASE): Promise<SessionState> {
+async function checkSession(baseUrl: string): Promise<SessionCheck> {
   let session: z.infer<typeof sessionSchema>;
   try {
     const response = await fetch(`${baseUrl}/session`, {
       credentials: 'same-origin',
       headers: { [SESSION_PROBE_HEADER]: SESSION_PROBE_VERSION },
     });
-    if (!response.ok) return 'unavailable';
+    if (!response.ok) return { state: 'unavailable' };
     const parsed = sessionSchema.safeParse(await response.json());
-    if (!parsed.success) return 'unavailable';
+    if (!parsed.success) return { state: 'unavailable' };
     session = parsed.data;
   } catch {
-    return 'unavailable';
+    return { state: 'unavailable' };
   }
-  if (session.authenticated) return 'authenticated';
-  if (!session.refreshable) return 'anonymous';
+  if (session.authenticated)
+    return { state: 'authenticated', user: session.user };
+  if (!session.refreshable) return { state: 'anonymous' };
 
   const outcome = await sharedRefresher(baseUrl)();
-  if (outcome === 'ok') return 'authenticated';
-  return outcome === 'unauthenticated' ? 'anonymous' : 'unavailable';
+  if (outcome === 'ok') return { state: 'authenticated' };
+  return { state: outcome === 'unauthenticated' ? 'anonymous' : 'unavailable' };
 }
 
-/** 로그인하지 않았거나 토큰이 거부되면(401) 에러가 아니라 `null`이다. */
+export async function getSession(baseUrl = BFF_BASE): Promise<SessionState> {
+  return (await checkSession(baseUrl)).state;
+}
+
+/** 로그인하지 않았거나 토큰이 거부되면(401) 에러가 아니라 `null`이다. 세션 확인이 내 정보까지 담아 오면 다시 묻지 않는다. */
 export async function fetchCurrentUser(
   baseUrl = BFF_BASE,
 ): Promise<CurrentUser | null> {
-  const session = await getSession(baseUrl);
-  if (session === 'anonymous') return null;
-  if (session === 'unavailable') {
+  const { state, user } = await checkSession(baseUrl);
+  if (state === 'anonymous') return null;
+  if (state === 'unavailable') {
     throw new ApiError(503, 'UPSTREAM_UNAVAILABLE', 'Session unavailable');
   }
+  if (user) return user;
   try {
     return await unwrap(apiClient.GET('/api/users/me'));
   } catch (error) {

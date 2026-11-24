@@ -13,6 +13,7 @@ import {
   DEFAULT_REGION,
   parseServiceRegion,
 } from '@/features/regions/service-region';
+import { ClientMessages } from '@/i18n/client-messages';
 
 import {
   loadHospital,
@@ -64,7 +65,16 @@ export default async function HospitalDetailPage({
   ]);
 
   return (
-    <>
+    <ClientMessages
+      namespaces={[
+        'hospitals.detail',
+        'reviews',
+        'claims.entry',
+        'liveFee',
+        'map.card',
+        'map.mapControls',
+      ]}
+    >
       <SubTopBar title={t('topBarTitle')} backHref={backHref} />
       <HydrationBoundary state={state}>
         <HospitalDetail
@@ -74,6 +84,6 @@ export default async function HospitalDetailPage({
           back={backQuery}
         />
       </HydrationBoundary>
-    </>
+    </ClientMessages>
   );
 }

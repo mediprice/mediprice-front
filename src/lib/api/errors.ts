@@ -1,12 +1,13 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 /** OpenAPI 스펙에 없는 형식이라 런타임에 검증한다. */
 const errorResponseSchema = z.object({
   code: z.string(),
   message: z.string(),
-  errors: z
-    .array(z.object({ field: z.string(), reason: z.string() }))
-    .default([]),
+  errors: z._default(
+    z.array(z.object({ field: z.string(), reason: z.string() })),
+    [],
+  ),
 });
 
 export type FieldError = { field: string; reason: string };

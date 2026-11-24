@@ -1,9 +1,23 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
+import { ClientMessages } from '@/i18n/client-messages';
+
 /** AI 대화는 개인 화면이라 검색에 노출하지 않는다. */
 export const metadata: Metadata = { robots: { index: false } };
 
 export default function AiLayout({ children }: { children: ReactNode }) {
-  return children;
+  return (
+    <ClientMessages
+      namespaces={[
+        'ai',
+        'legal.countries',
+        'legal.document',
+        'map.card',
+        'map.mapControls',
+      ]}
+    >
+      {children}
+    </ClientMessages>
+  );
 }

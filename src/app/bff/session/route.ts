@@ -11,6 +11,7 @@ import { refreshSessionOnce } from '@/server/bff/refresh-coalescer';
 import { refreshResponse } from '@/server/bff/refresh-session';
 import { errorResponse, forbidden, jsonNoStore } from '@/server/bff/responses';
 import { revokeSession } from '@/server/bff/revoke-session';
+import { readSessionUser } from '@/server/bff/session-user';
 import { isSameOrigin } from '@/server/bff/upstream';
 
 const signInSchema = z.object({
@@ -33,10 +34,18 @@ export async function POST(request: NextRequest) {
   return response;
 }
 
-/** 재발급은 브라우저가 POST /bff/session/refresh 한 곳으로만 하게 해, API 401의 재발급과 겹쳐 같은 Refresh를 두 번 쓰지 않게 한다. */
+/**
+ * 재발급은 브라우저가 POST /bff/session/refresh 한 곳으로만 하게 해, API 401의 재발급과 겹쳐 같은 Refresh를 두 번 쓰지 않게 한다.
+ * Access가 있으면 내 정보까지 읽어 함께 돌려준다. 읽지 못하면 user 없이 답하고 브라우저가 따로 읽는다.
+ */
 export async function GET(request: NextRequest) {
   const { accessToken, refreshToken } = readTokens(request);
-  if (accessToken) return jsonNoStore({ authenticated: true });
+  if (accessToken) {
+    const user = await readSessionUser(accessToken, request.headers);
+    return jsonNoStore(
+      user ? { authenticated: true, user } : { authenticated: true },
+    );
+  }
   if (!refreshToken) return jsonNoStore({ authenticated: false });
   if (request.headers.get(SESSION_PROBE_HEADER) === SESSION_PROBE_VERSION) {
     return jsonNoStore({ authenticated: false, refreshable: true });

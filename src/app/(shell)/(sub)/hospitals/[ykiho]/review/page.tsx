@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { decodeYkiho } from '@/features/hospitals/detail-links';
 import { parseFromParam, parseReviewId } from '@/features/reviews/write-href';
+import { ClientMessages } from '@/i18n/client-messages';
 
 import { ReviewWriteView } from './_components/review-write-view';
 
@@ -25,10 +26,19 @@ export default async function ReviewWritePage({
   const [{ ykiho }, { edit, from }] = await Promise.all([params, searchParams]);
   const editId = parseReviewId(edit);
   return (
-    <ReviewWriteView
-      ykiho={decodeYkiho(ykiho)}
-      editId={editId}
-      from={editId ? parseFromParam(from) : 'hospital'}
-    />
+    <ClientMessages
+      namespaces={[
+        'reviews.write',
+        'reviews.form',
+        'reviews.leave',
+        'mypage.menu',
+      ]}
+    >
+      <ReviewWriteView
+        ykiho={decodeYkiho(ykiho)}
+        editId={editId}
+        from={editId ? parseFromParam(from) : 'hospital'}
+      />
+    </ClientMessages>
   );
 }

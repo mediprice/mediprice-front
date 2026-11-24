@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 
 import {
   buildPriceFiltersQuery,
@@ -31,15 +31,16 @@ export type MapParams = {
 };
 
 const first = (value: unknown) => (Array.isArray(value) ? value[0] : value);
-const itemSchema = z.preprocess(first, z.string().regex(/^[A-Za-z0-9]{1,20}$/));
-const coordinate = z.preprocess(first, z.coerce.number().finite());
-const radiusSchema = z.preprocess(
-  first,
-  z.coerce
-    .number()
-    .refine((value): value is RadiusOption =>
-      (RADIUS_OPTIONS as readonly number[]).includes(value),
-    ),
+const itemSchema = z.pipe(
+  z.transform(first),
+  z.string().check(z.regex(/^[A-Za-z0-9]{1,20}$/)),
+);
+const coordinate = z.pipe(z.transform(first), z.coerce.number());
+const radiusSchema = z.pipe(
+  coordinate,
+  z.custom<RadiusOption>((value) =>
+    (RADIUS_OPTIONS as readonly unknown[]).includes(value),
+  ),
 );
 
 /** 검증하지 못한 값은 버린다. 범위(한국) 밖 좌표는 중심이 없는 것으로 본다. */

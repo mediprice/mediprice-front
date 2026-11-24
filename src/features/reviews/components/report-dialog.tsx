@@ -1,6 +1,7 @@
 'use client';
 
 import { CircleCheck, Info } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
@@ -9,9 +10,21 @@ import {
   ResponsiveDialog,
   ResponsiveDialogContent,
 } from '@/components/ui/responsive-dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { Review } from '@/features/reviews/queries';
 
-import { ReportForm, type ReportOutcome } from './report-form';
+import type { ReportOutcome } from './report-form';
+
+/** 폼(react-hook-form·zod 스키마)은 신고할 때만 필요해 병원 화면 첫 번들에서 빼고 다이얼로그를 열 때 불러온다. */
+const ReportForm = dynamic(
+  () => import('./report-form').then((module) => module.ReportForm),
+  { loading: () => <Skeleton className="h-80 w-full" /> },
+);
+
+/** 신고로 이어질 수 있는 메뉴를 열면 폼을 미리 받아 다이얼로그에서 뼈대가 보이는 시간을 줄인다. */
+export function preloadReportForm() {
+  void import('./report-form');
+}
 
 /** S-20 후기 신고. 모바일은 바텀시트, 데스크톱은 가운데 모달이다. 이미 신고한 후기(409)는 실패가 아니라 결과로 보여 준다. */
 export function ReportDialog({

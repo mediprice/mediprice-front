@@ -134,7 +134,20 @@ describe('getSession', () => {
 });
 
 describe('fetchCurrentUser', () => {
-  it('로그인했으면 내 정보를 돌려준다', async () => {
+  it('세션 응답에 내 정보가 있으면 다시 묻지 않는다', async () => {
+    const me = vi.fn(() => HttpResponse.json(user));
+    server.use(
+      http.get(`${BASE}/session`, () =>
+        HttpResponse.json({ authenticated: true, user }),
+      ),
+      http.get(`${BASE}/api/users/me`, me),
+    );
+
+    expect(await fetchCurrentUser(BASE)).toEqual(user);
+    expect(me).not.toHaveBeenCalled();
+  });
+
+  it('세션 응답에 내 정보가 없으면 따로 읽는다', async () => {
     server.use(
       sessionIs(true),
       http.get(`${BASE}/api/users/me`, () => HttpResponse.json(user)),
