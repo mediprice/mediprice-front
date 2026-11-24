@@ -16,13 +16,18 @@ const tokenResponseSchema = z.object({
   expiresIn: z.number().int().positive(),
 });
 
+const errorCodeSchema = z.object({ code: z.string() });
+
+/** 다른 탭·다른 서버 인스턴스가 같은 Refresh로 방금(백엔드 유예 시간 안) 회전에 성공했다는 백엔드 응답. 그 회원의 토큰은 폐기되지 않았다. */
+const ALREADY_ROTATED_CODE = 'REFRESH_TOKEN_ALREADY_ROTATED';
+
 export type RefreshResult =
   | { status: 'ok'; tokens: Tokens }
   /** Refresh가 없거나 백엔드가 거부했다. 다시 로그인해야 한다. */
   | { status: 'unauthenticated' }
   /** 백엔드 장애나 연결 실패. 토큰이 유효한지 알 수 없으므로 쿠키를 지우면 안 된다. */
   | { status: 'unavailable' }
-  /** 같은 Refresh로 방금 다른 요청이 재발급했다. 새 쿠키는 그 응답이 심으므로 쿠키를 건드리지 않는다. */
+  /** 같은 Refresh로 방금 다른 요청(이 인스턴스, 다른 탭, 다른 인스턴스)이 재발급했다. 새 쿠키는 그 응답이 심으므로 쿠키를 건드리지 않는다. */
   | { status: 'rotated' };
 
 /**
@@ -45,7 +50,9 @@ export async function refreshSession(
   );
 
   if (response.status >= 400 && response.status < 500) {
-    return { status: 'unauthenticated' };
+    return (await isAlreadyRotated(response))
+      ? { status: 'rotated' }
+      : { status: 'unauthenticated' };
   }
   if (!response.ok) return { status: 'unavailable' };
 
@@ -55,6 +62,13 @@ export async function refreshSession(
   return parsed.success
     ? { status: 'ok', tokens: parsed.data }
     : { status: 'unavailable' };
+}
+
+async function isAlreadyRotated(response: Response) {
+  const parsed = errorCodeSchema.safeParse(
+    await response.json().catch(() => null),
+  );
+  return parsed.success && parsed.data.code === ALREADY_ROTATED_CODE;
 }
 
 /** 브라우저 요청의 사용자 IP·User-Agent를 유지한 채 본문 형식만 JSON으로 정한다. */
