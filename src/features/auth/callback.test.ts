@@ -145,6 +145,8 @@ describe('describeCallbackError', () => {
     ['OAUTH2_EMAIL_ALREADY_REGISTERED', 'oauthEmailAlreadyRegistered'],
     ['OAUTH2_LOGIN_FAILED', 'loginFailed'],
     ['MISSING_TOKENS', 'loginFailed'],
+    ['MISSING_LOGIN_STATE', 'loginFailed'],
+    ['LOGIN_STATE_MISMATCH', 'loginFailed'],
     ['NETWORK_ERROR', 'network'],
     ['SESSION_REJECTED', 'loginFailed'],
     ['UPSTREAM_UNAVAILABLE', 'serverUnavailable'],

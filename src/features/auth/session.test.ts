@@ -9,7 +9,7 @@ import { sessionKeys } from './queries';
 import { completeOAuthCallback, signOut } from './session';
 
 const BASE = 'http://app.test/bff';
-const hash = '#accessToken=a1&refreshToken=r1&expiresIn=3600';
+const hash = '#accessToken=a1&refreshToken=r1&expiresIn=3600&loginState=s1';
 
 describe('completeOAuthCallback', () => {
   it('토큰을 BFF에 한 번 넘기고 주소창의 fragment를 지운다', async () => {
@@ -32,6 +32,7 @@ describe('completeOAuthCallback', () => {
       accessToken: 'a1',
       refreshToken: 'r1',
       expiresIn: 3600,
+      loginState: 's1',
     });
     expect(clearFragment).toHaveBeenCalledOnce();
   });

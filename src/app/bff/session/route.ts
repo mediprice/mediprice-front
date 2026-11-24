@@ -7,6 +7,10 @@ import {
   readTokens,
   setSessionCookies,
 } from '@/server/bff/cookies';
+import {
+  clearLoginStateCookie,
+  matchesLoginState,
+} from '@/server/bff/login-state';
 import { refreshSessionOnce } from '@/server/bff/refresh-coalescer';
 import { refreshResponse } from '@/server/bff/refresh-session';
 import { errorResponse, forbidden, jsonNoStore } from '@/server/bff/responses';
@@ -18,19 +22,35 @@ const signInSchema = z.object({
   accessToken: z.string().min(1),
   refreshToken: z.string().min(1),
   expiresIn: z.number().int().positive(),
+  loginState: z.string().min(1).max(256),
 });
 
-/** 로그인 직후 콜백 페이지가 넘긴 토큰을 httpOnly 쿠키로 바꿔 저장한다. */
+/** 로그인 직후 콜백 페이지가 넘긴 토큰을 httpOnly 쿠키로 바꿔 저장한다. 로그인 요청 확인 값 쿠키는 결과와 관계없이 지운다. */
 export async function POST(request: NextRequest) {
   if (!isSameOrigin(request)) return forbidden();
 
+  const response = await signIn(request);
+  clearLoginStateCookie(response);
+  return response;
+}
+
+/** 이 브라우저가 시작한 로그인(확인 값 일치)일 때만 세션을 만든다. */
+async function signIn(request: NextRequest) {
   const parsed = signInSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return errorResponse(400, 'INVALID_INPUT', '잘못된 요청입니다.');
   }
+  const { loginState, ...tokens } = parsed.data;
+  if (!matchesLoginState(request, loginState)) {
+    return errorResponse(
+      403,
+      'LOGIN_STATE_MISMATCH',
+      '로그인 요청을 확인할 수 없습니다.',
+    );
+  }
 
   const response = jsonNoStore({ authenticated: true });
-  setSessionCookies(response, parsed.data);
+  setSessionCookies(response, tokens);
   return response;
 }
 

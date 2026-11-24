@@ -11,16 +11,37 @@ import { API, server } from '@/test/server';
 import { DELETE, GET, POST } from './route';
 
 const tokens = { accessToken: 'a1', refreshToken: 'r1', expiresIn: 3600 };
+const LOGIN_STATE = 'mp_login_state';
+const state = 'Zm9vYmFyYmF6cXV4MTIzNDU2Nzg5MGFiY2RlZmdoaWpr';
+const signIn = { ...tokens, loginState: state };
 
 function setCookies(response: Response) {
   return response.headers.getSetCookie();
 }
 
+function sessionCookiesOf(response: Response) {
+  return setCookies(response).filter(
+    (c) =>
+      c.startsWith(`${ACCESS_COOKIE}=`) || c.startsWith(`${REFRESH_COOKIE}=`),
+  );
+}
+
+function expectLoginStateCleared(response: Response) {
+  expect(
+    setCookies(response).find((c) => c.startsWith(`${LOGIN_STATE}=`)),
+  ).toMatch(/Max-Age=0/i);
+}
+
+function postSession(
+  body: unknown,
+  cookies: Record<string, string> = { [LOGIN_STATE]: state },
+) {
+  return POST(bffRequest('/bff/session', { method: 'POST', body, cookies }));
+}
+
 describe('POST /bff/session', () => {
-  it('두 토큰을 httpOnly 쿠키로 설정한다', async () => {
-    const response = await POST(
-      bffRequest('/bff/session', { method: 'POST', body: tokens }),
-    );
+  it('로그인 요청 확인 값이 쿠키와 같으면 두 토큰을 httpOnly 쿠키로 설정한다', async () => {
+    const response = await postSession(signIn);
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ authenticated: true });
@@ -32,29 +53,49 @@ describe('POST /bff/session', () => {
       /Path=\/bff\/session/,
     );
     expect(response.headers.get('cache-control')).toBe('no-store');
+    expectLoginStateCleared(response);
   });
 
   it.each([
+    ['다른 값', { [LOGIN_STATE]: `${state}x` }],
+    ['쿠키 없음', {}],
+  ])(
+    '로그인 요청 확인 값이 쿠키와 다르면(%s) 403이고 세션을 만들지 않는다',
+    async (_name, cookies) => {
+      const response = await postSession(signIn, cookies);
+
+      expect(response.status).toBe(403);
+      expect(await response.json()).toMatchObject({
+        code: 'LOGIN_STATE_MISMATCH',
+      });
+      expect(sessionCookiesOf(response)).toEqual([]);
+      expectLoginStateCleared(response);
+    },
+  );
+
+  it.each([
     ['빈 본문', undefined],
-    ['토큰 누락', { accessToken: 'a1' }],
-    ['빈 토큰', { ...tokens, refreshToken: '' }],
-    ['음수 수명', { ...tokens, expiresIn: -1 }],
-    ['문자열 수명', { ...tokens, expiresIn: '3600' }],
-  ])('%s이면 400이고 쿠키를 설정하지 않는다', async (_name, body) => {
-    const response = await POST(
-      bffRequest('/bff/session', { method: 'POST', body }),
-    );
+    ['토큰 누락', { accessToken: 'a1', loginState: state }],
+    ['빈 토큰', { ...signIn, refreshToken: '' }],
+    ['음수 수명', { ...signIn, expiresIn: -1 }],
+    ['문자열 수명', { ...signIn, expiresIn: '3600' }],
+    ['확인 값 누락', tokens],
+    ['빈 확인 값', { ...tokens, loginState: '' }],
+  ])('%s이면 400이고 세션 쿠키를 설정하지 않는다', async (_name, body) => {
+    const response = await postSession(body);
 
     expect(response.status).toBe(400);
     expect(await response.json()).toMatchObject({ code: 'INVALID_INPUT' });
-    expect(setCookies(response)).toEqual([]);
+    expect(sessionCookiesOf(response)).toEqual([]);
+    expectLoginStateCleared(response);
   });
 
   it('다른 출처에서 온 요청은 403이다', async () => {
     const response = await POST(
       bffRequest('/bff/session', {
         method: 'POST',
-        body: tokens,
+        body: signIn,
+        cookies: { [LOGIN_STATE]: state },
         origin: 'https://evil.example',
       }),
     );
