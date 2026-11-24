@@ -5,13 +5,24 @@ export type Deployment = {
 };
 
 /** 네이버 지도 SDK(naver-sdk.ts)가 불러오는 출처. SDK가 페이지 scheme을 따라 http/https를 고르므로 scheme 없이 쓴다(https 페이지에서는 https만 허용된다). 인증·스타일은 JSONP 스크립트, 오류 수집은 nelo로 간다. */
-const NAVER_MAP_SCRIPT = ['oapi.map.naver.com', '*.map.naver.net'];
+const NAVER_MAP_SCRIPT = [
+  'oapi.map.naver.com',
+  '*.map.naver.net',
+  'nrbe.pstatic.net',
+];
 const NAVER_MAP_IMG = ['*.map.naver.net', 'static.naver.net', '*.pstatic.net'];
 const NAVER_MAP_CONNECT = [
   'oapi.map.naver.com',
   '*.map.naver.net',
+  'nrbe.pstatic.net',
   '*.nelo.navercorp.com',
 ];
+
+/** 도메인 앞단의 Cloudflare가 페이지에 넣는 웹 분석 스크립트와 그 전송 주소. */
+const CLOUDFLARE_INSIGHTS = {
+  script: ['static.cloudflareinsights.com'],
+  connect: ['cloudflareinsights.com'],
+};
 
 /** Vercel 미리보기 툴바(댓글)가 쓰는 출처. 운영 배포에는 넣지 않는다. */
 const VERCEL_TOOLBAR = {
@@ -37,6 +48,7 @@ export function contentSecurityPolicy({ nodeEnv, vercelEnv }: Deployment) {
       ["'self'", "'unsafe-inline'"],
       isDev ? ["'unsafe-eval'"] : [],
       NAVER_MAP_SCRIPT,
+      CLOUDFLARE_INSIGHTS.script,
       toolbar?.script,
     ),
     directive('style-src', ["'self'", "'unsafe-inline'"], toolbar?.style),
@@ -51,6 +63,7 @@ export function contentSecurityPolicy({ nodeEnv, vercelEnv }: Deployment) {
       'connect-src',
       ["'self'"],
       NAVER_MAP_CONNECT,
+      CLOUDFLARE_INSIGHTS.connect,
       isDev ? ['ws:'] : [],
       toolbar?.connect,
     ),
