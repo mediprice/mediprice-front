@@ -115,6 +115,43 @@ describe('GET /bff/api/**', () => {
     expect(response.headers.getSetCookie()).toEqual([]);
   });
 
+  it.each([
+    ['application/json', 'application/json'],
+    ['application/json;charset=UTF-8', 'application/json;charset=UTF-8'],
+    ['application/problem+json', 'application/problem+json'],
+    ['text/plain; charset=utf-8', 'text/plain; charset=utf-8'],
+    ['text/html; charset=utf-8', 'application/octet-stream'],
+    ['image/svg+xml', 'application/octet-stream'],
+    ['application/xml', 'application/octet-stream'],
+  ])(
+    '백엔드 Content-Type %s는 %s로 돌려준다',
+    async (upstreamType, relayedType) => {
+      server.use(
+        http.get(
+          `${API}/api/x`,
+          () =>
+            new HttpResponse('{}', {
+              headers: { 'Content-Type': upstreamType },
+            }),
+        ),
+      );
+
+      const response = await GET(bffRequest('/bff/api/x'), ctx('x'));
+
+      expect(response.headers.get('content-type')).toBe(relayedType);
+    },
+  );
+
+  it('중계한 응답은 문서로 열려도 아무것도 실행하지 않는다', async () => {
+    server.use(http.get(`${API}/api/x`, () => HttpResponse.json({})));
+
+    const response = await GET(bffRequest('/bff/api/x'), ctx('x'));
+
+    expect(response.headers.get('content-security-policy')).toBe(
+      "default-src 'none'; frame-ancestors 'none'; sandbox",
+    );
+  });
+
   it('로그인하지 않은 공개 조회는 CDN 캐시를 허용한다', async () => {
     server.use(
       http.get(`${API}/api/regions/sido`, () => HttpResponse.json([])),
