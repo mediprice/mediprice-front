@@ -9,7 +9,10 @@ import {
   resolveBackendUrl,
 } from './upstream';
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllEnvs();
+});
 
 describe('resolveBackendUrl', () => {
   it('/api 아래 경로를 백엔드 주소로 만든다', () => {
@@ -62,7 +65,9 @@ describe('isSameOrigin', () => {
     ).toBe(true);
   });
 
-  it('프록시가 알려준 원래 호스트와 비교한다', () => {
+  it('Vercel에서는 플랫폼이 알려준 원래 호스트와 비교한다', () => {
+    vi.stubEnv('VERCEL', '1');
+
     expect(
       isSameOrigin(
         request('POST', {
@@ -72,6 +77,18 @@ describe('isSameOrigin', () => {
         }),
       ),
     ).toBe(true);
+  });
+
+  it('Vercel 밖에서는 X-Forwarded-Host를 믿지 않는다', () => {
+    expect(
+      isSameOrigin(
+        request('POST', {
+          host: 'localhost:3000',
+          'x-forwarded-host': 'evil.example',
+          origin: 'https://evil.example',
+        }),
+      ),
+    ).toBe(false);
   });
 
   it.each([
