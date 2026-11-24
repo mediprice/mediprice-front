@@ -1,0 +1,107 @@
+{
+  "metadata": {
+    "title": "지도에서 찾기",
+    "description": "내 주변 병원과 비급여 진료비를 지도에서 찾아보세요."
+  },
+  "entry": {
+    "openMap": "지도에서 보기"
+  },
+  "topBar": {
+    "title": "지도에서 찾기"
+  },
+  "header": {
+    "title": "내 주변 병원",
+    "itemTitle": "{item} 주변 병원",
+    "itemLoading": "항목 이름을 불러오는 중",
+    "backToList": "목록"
+  },
+  "view": {
+    "label": "보기 방식",
+    "list": "목록",
+    "map": "지도",
+    "showList": "목록으로 보기"
+  },
+  "radius": {
+    "label": "검색 반경",
+    "option": "{km, number}km"
+  },
+  "mapControls": {
+    "label": "병원 위치 지도. 같은 병원을 목록에서도 볼 수 있어요.",
+    "zoomIn": "지도 확대",
+    "zoomOut": "지도 축소",
+    "unavailableTitle": "지도를 불러오지 못했어요",
+    "unavailableDescription": "병원 목록은 그대로 볼 수 있어요."
+  },
+  "actions": {
+    "searchHere": "이 지역에서 다시 찾기",
+    "myLocation": "내 위치로 이동",
+    "locating": "내 위치를 찾는 중"
+  },
+  "list": {
+    "title": "병원 {count, number}곳",
+    "titleLoading": "병원을 찾는 중",
+    "sortNote": "가까운 순 · 반경 약 {km, number}km",
+    "priceNote": "가격은 병원마다 공개한 세부 항목 중 평균과 견줄 수 있는(평균의 1/3~3배) 가장 낮은 값이고, 평균은 {region} 공개 가격 기준이에요.",
+    "progress": "{total, number}곳 중 {shown, number}곳",
+    "noPosition": "위치 정보가 없는 {count, number}곳은 지도에 없고 목록에만 있어요.",
+    "loadMoreError": "더 불러오지 못했어요.",
+    "emptyTitle": "이 근처에서 병원을 찾지 못했어요",
+    "emptyItemTitle": "이 근처에 이 항목 가격을 공개한 병원이 없어요",
+    "emptyDescription": "반경을 넓히거나 지도를 옮긴 뒤 다시 찾아보세요.",
+    "widen": "반경 {km, number}km로 넓히기",
+    "emptyMaxDescription": "가장 넓은 반경({km, number}km)에서도 찾지 못했어요. 지도를 옮긴 뒤 \"이 지역에서 다시 찾기\"를 눌러 보세요.",
+    "emptyMaxItemDescription": "가장 넓은 반경({km, number}km)에서도 찾지 못했어요. 가격 목록에서 지역 전체의 병원을 볼 수 있어요.",
+    "openPriceList": "가격 목록으로 보기",
+    "results": "병원 {count, number}곳을 찾았어요."
+  },
+  "card": {
+    "distance": "직선 {distance}",
+    "classAndDistance": "{className} · 직선 {distance}",
+    "meters": "{value, number}m",
+    "kilometers": "{value, number, ::.#}km",
+    "showOnMap": "지도에서 보기",
+    "showOnMapLabel": "{name} 지도에서 보기",
+    "noPosition": "지도 위치 정보 없음",
+    "selected": "지도에서 선택됨",
+    "selectedHeading": "선택한 병원",
+    "clearSelection": "선택 해제",
+    "priceLabel": "가장 낮은 가격"
+  },
+  "location": {
+    "deniedTitle": "위치를 사용할 수 없어요",
+    "deniedDescription": "{place} 기준으로 보여 드려요. 주소창 왼쪽의 자물쇠(사이트 설정)를 눌러 위치를 '허용'으로 바꾼 뒤 이 화면을 새로 고치면 내 주변을 볼 수 있어요.",
+    "deferredTitle": "{place} 기준으로 보여 드려요",
+    "deferredDescription": "현재 위치를 쓰면 내 주변 병원을 가까운 순으로 볼 수 있어요.",
+    "useLocation": "내 위치 사용",
+    "unavailableTitle": "현재 위치를 찾지 못했어요",
+    "unavailableDescription": "{place} 기준으로 보여 드려요. 잠시 뒤 다시 시도해 주세요.",
+    "outsideTitle": "현재 위치가 서비스 지역 밖이에요",
+    "outsideDescription": "{place} 기준으로 보여 드려요. 지도를 옮겨 원하는 지역을 찾아보세요.",
+    "retry": "다시 시도",
+    "backToList": "가격 목록으로 보기",
+    "dismiss": "안내 닫기",
+    "place": {
+      "seoul": "서울시청",
+      "gyeonggi": "경기도청"
+    }
+  },
+  "locationConsent": {
+    "title": "위치정보 이용 동의",
+    "description": "가까운 병원을 찾을 때만 현재 위치를 써요.",
+    "purposeLabel": "이용 목적",
+    "purpose": "주변 병원 찾기와 병원까지의 거리 표시",
+    "itemsLabel": "이용 항목",
+    "itemsPosition": "현재 위치(서버에는 약 1km 단위로 흐려서 보내요)",
+    "itemsLog": "위치를 쓴 날짜·시각과 동의한 약관 버전(좌표 없이)",
+    "periodLabel": "보유 기간",
+    "periodPosition": "좌표는 저장하지 않아요.",
+    "periodLog": "이용 기록은 위치를 쓴 시각부터 {days, number}일 동안 보관한 뒤 지워요. 회원 탈퇴와 관계없이 이 기간 동안 남아요.",
+    "periodLogPending": "위치 이용 기록 보관 기간",
+    "refuseLabel": "거부할 권리",
+    "refuse": "동의하지 않아도 돼요. 동의하지 않으면 현재 위치는 쓸 수 없지만, 지역을 고르거나 지도를 옮겨 병원을 찾을 수 있어요.",
+    "termsLink": "위치기반서비스 이용약관 보기",
+    "agree": "위치정보 이용에 동의해요",
+    "agreeHint": "동의는 내 정보 › 계정에서 언제든 철회할 수 있어요.",
+    "confirm": "동의하고 위치 찾기"
+  }
+}

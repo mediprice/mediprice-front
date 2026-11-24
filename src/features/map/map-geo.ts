@@ -1,0 +1,119 @@
+import type { ServiceRegion } from '@/features/regions/service-region';
+
+export type LatLng = { lat: number; lng: number };
+
+/** 주변 병원 API가 받는 범위다. 밖이면 400이다. */
+export const KOREA_BOUNDS = {
+  south: 33,
+  north: 39,
+  west: 124,
+  east: 132,
+} as const;
+
+export const SEOUL_CITY_HALL: LatLng = { lat: 37.5665, lng: 126.978 };
+const GYEONGGI_PROVINCIAL_OFFICE: LatLng = { lat: 37.2893, lng: 127.0535 };
+
+/** 반경 선택지(m). 백엔드는 100m~10km만 받는다. */
+export const RADIUS_OPTIONS = [1000, 3000, 5000, 10000] as const;
+export type RadiusOption = (typeof RADIUS_OPTIONS)[number];
+const MIN_RADIUS = 100;
+const MAX_RADIUS = 10000;
+
+export function defaultRadius(hasItem: boolean): RadiusOption {
+  return hasItem ? 3000 : 1000;
+}
+
+export function isInKorea({ lat, lng }: LatLng) {
+  return (
+    lat >= KOREA_BOUNDS.south &&
+    lat <= KOREA_BOUNDS.north &&
+    lng >= KOREA_BOUNDS.west &&
+    lng <= KOREA_BOUNDS.east
+  );
+}
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, value));
+
+/** 지도 중심이 범위 밖으로 나가도 API가 400을 내지 않게 가장 가까운 경계로 붙인다. */
+export function clampToKorea({ lat, lng }: LatLng): LatLng {
+  return {
+    lat: clamp(lat, KOREA_BOUNDS.south, KOREA_BOUNDS.north),
+    lng: clamp(lng, KOREA_BOUNDS.west, KOREA_BOUNDS.east),
+  };
+}
+
+export function clampRadius(meters: number) {
+  return Math.round(clamp(meters, MIN_RADIUS, MAX_RADIUS));
+}
+
+/** 소수 다섯째 자리(약 1m)로 맞춰 쿼리 키와 URL이 미세한 이동마다 바뀌지 않게 한다. */
+export function roundLatLng({ lat, lng }: LatLng): LatLng {
+  const round = (value: number) => Math.round(value * 1e5) / 1e5;
+  return { lat: round(lat), lng: round(lng) };
+}
+
+/** 서버로 보내는 좌표의 소수 자릿수. 둘째 자리는 위도 약 1.1km, 서울 경도 약 0.9km 간격이다. */
+const COARSE_DECIMALS = 2;
+
+/**
+ * 서버로 보낼 좌표를 약 1km 격자로 흐린다(소수 둘째 자리). 정확한 현재 위치는 브라우저에만 두고 서버에는 이 값만 보내
+ * 위치정보법의 개인위치정보(특정 개인의 위치를 알 수 있는 정보)를 서버가 받지 않게 한다(docs 13.5).
+ */
+export function coarsenLatLng({ lat, lng }: LatLng): LatLng {
+  const factor = 10 ** COARSE_DECIMALS;
+  const round = (value: number) => Math.round(value * factor) / factor;
+  return { lat: round(lat), lng: round(lng) };
+}
+
+/** 위치를 쓸 수 없을 때 보여 줄 지역 중심. 서울·경기와 전국은 서울시청이다. */
+export function regionCenter(region: ServiceRegion): LatLng {
+  return region === 'gyeonggi' ? GYEONGGI_PROVINCIAL_OFFICE : SEOUL_CITY_HALL;
+}
+
+const EARTH_RADIUS = 6371000;
+const toRadians = (degree: number) => (degree * Math.PI) / 180;
+
+/** 두 지점 사이의 직선 거리(m, 하버사인). */
+export function distanceBetween(a: LatLng, b: LatLng) {
+  const dLat = toRadians(b.lat - a.lat);
+  const dLng = toRadians(b.lng - a.lng);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRadians(a.lat)) *
+      Math.cos(toRadians(b.lat)) *
+      Math.sin(dLng / 2) ** 2;
+  return 2 * EARTH_RADIUS * Math.asin(Math.sqrt(h));
+}
+
+/** 반경의 1/4 넘게 옮기면 결과가 달라질 만하다고 보고 "이 지역에서 다시 찾기"를 띄운다. */
+export function hasMovedAway(from: LatLng, to: LatLng, radius: number) {
+  return distanceBetween(from, to) > radius / 4;
+}
+
+const METERS_PER_DEGREE_LAT = 111320;
+
+/** 중심에서 반경만큼 떨어진 사각형(원을 감싸는 영역). 지도가 검색 원 전체를 보이게 맞출 때 쓴다. */
+export function boundsAround({ lat, lng }: LatLng, radius: number) {
+  const dLat = radius / METERS_PER_DEGREE_LAT;
+  const dLng = radius / (METERS_PER_DEGREE_LAT * Math.cos(toRadians(lat)));
+  return {
+    south: lat - dLat,
+    west: lng - dLng,
+    north: lat + dLat,
+    east: lng + dLng,
+  };
+}
+
+/** 화면 좌표(px)의 점이 지도 가장자리에서 padding 안쪽에 있는지. 밖이면 그쪽으로 옮겨야 한다. */
+export function isWithinView(
+  point: { x: number; y: number },
+  center: { x: number; y: number },
+  size: { width: number; height: number },
+  padding: number,
+) {
+  return (
+    Math.abs(point.x - center.x) <= size.width / 2 - padding &&
+    Math.abs(point.y - center.y) <= size.height / 2 - padding
+  );
+}

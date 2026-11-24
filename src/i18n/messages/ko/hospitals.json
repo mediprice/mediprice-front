@@ -1,0 +1,146 @@
+{
+  "detail": {
+    "metaTitle": "병원 상세",
+    "topBarTitle": "병원 상세",
+    "notFound": {
+      "description": "주소가 바뀌었거나 더 이상 공개되지 않는 병원일 수 있어요.",
+      "home": "홈으로 가기"
+    },
+    "header": {
+      "call": "전화 {phone}",
+      "homepage": "홈페이지",
+      "doctors": "의사 {count, plural, other {#명}}",
+      "newWindow": "새 창"
+    },
+    "nav": {
+      "label": "병원 정보 구역",
+      "prices": "가격",
+      "hours": "운영시간",
+      "location": "위치",
+      "reviews": "후기"
+    },
+    "selected": {
+      "label": "선택 항목 · {name}",
+      "valueLabel": "이 병원",
+      "variants": "세부 항목 {count, plural, other {#개}}",
+      "singleMeta": "{name} · {date} 적용",
+      "notOffered": "이 병원은 이 항목의 가격을 공개하지 않았어요.",
+      "compare": "다른 병원 가격 비교",
+      "clear": "선택 해제",
+      "appliedOn": "{date} 적용",
+      "comparison": "{direction, select, below {{region} 평균보다 <em>{percent, number}% 저렴해요</em>} above {{region} 평균보다 <em>{percent, number}% 비싸요</em>} other {{region} 평균과 <em>비슷해요</em>}}",
+      "noRegionPrice": "{region}에는 비교할 공개 가격이 아직 없어요.",
+      "basis": "{region} 병원 {count, plural, other {#곳}}의 세부 항목별 공개 가격 기준",
+      "incomparable": "이 세부 항목은 단위·구성이 달라 {region} 평균과 비교하기 어려워요",
+      "incomparableNote": "평균({average, number}원)의 1/3보다 낮거나 3배보다 높은 가격은 시간·횟수 같은 구성이 다른 항목일 수 있어 % 차이를 쓰지 않아요.",
+      "showAll": "세부 항목 {count, plural, other {#개}} 모두 보기",
+      "showLess": "세부 항목 접기",
+      "comparableBasis": "{region} 병원 {count, plural, other {#곳}}의 평균과 견줄 수 있는 세부 항목별 공개 가격 기준",
+      "backToList": "목록으로 돌아가기",
+      "missingLabel": "선택 항목",
+      "missing": "더 이상 공개되지 않는 항목이에요. 아래 공개 가격 목록에서 다시 골라 주세요."
+    },
+    "trend": {
+      "label": "가격 추이",
+      "title": "최근 {count, plural, other {#개월}}",
+      "expand": "가격 추이 펼치기",
+      "collapse": "가격 추이 접기",
+      "changed": "{month}부터 {price, number}원 · 이전 {previous, number}원",
+      "unchanged": "기간 동안 {price, number}원으로 같아요",
+      "chartLabel": "{name} 월별 가격 추이. {from}부터 {to}까지 최저 {min, number}원, 최고 {max, number}원",
+      "tableCaption": "월별 가격",
+      "month": "월",
+      "price": "가격",
+      "pointPrice": "{price, number}원",
+      "onlyMonth": "{month} 기준 가격만 있어서 추이를 그릴 수 없어요",
+      "none": "가격 추이 기록이 아직 없어요",
+      "up": "가격이 올랐어요",
+      "down": "가격이 내렸어요",
+      "same": "가격 변동 없음"
+    },
+    "prices": {
+      "title": "공개 가격",
+      "count": "이 병원의 공개 항목 {count, plural, other {#개}}",
+      "filteredCount": "찾은 항목 {count, plural, other {#개}}",
+      "search": "병원 안 항목 검색",
+      "searchPlaceholder": "항목 이름으로 검색",
+      "category": "분류",
+      "categoryAll": "전체 분류",
+      "appliedOn": "{date} 적용",
+      "source": "심평원 공개 가격 · 적용일은 병원이 신고한 날짜예요",
+      "emptyTitle": "공개된 비급여 가격이 없어요",
+      "noResultTitle": "조건에 맞는 항목이 없어요",
+      "noResultDescription": "다른 이름으로 검색하거나 분류를 바꿔 보세요.",
+      "more": "더 보기 ({shown, number}/{total, number})",
+      "hint": "항목을 고르면 세부 가격과 가격 추이를 볼 수 있어요.",
+      "otherCategory": "기타"
+    },
+    "hours": {
+      "title": "운영시간",
+      "empty": "운영시간 정보가 공개되지 않았어요. 방문 전 병원에 확인하세요.",
+      "range": "{start} – {end}",
+      "days": {
+        "MON": "월",
+        "TUE": "화",
+        "WED": "수",
+        "THU": "목",
+        "FRI": "금",
+        "SAT": "토",
+        "SUN": "일"
+      },
+      "dayRange": "{from}–{to}",
+      "sunday": "일요일",
+      "holiday": "공휴일",
+      "notice": "등록된 정보 기준이에요. 방문 전 병원에 확인하세요."
+    },
+    "info": {
+      "title": "병원 정보",
+      "lunch": "점심시간",
+      "reception": "접수",
+      "weekday": "평일 {value}",
+      "saturday": "토요일 {value}",
+      "parking": "주차",
+      "parkingCount": "{count, plural, other {#대}}",
+      "parkingPaid": "유료",
+      "parkingFree": "무료",
+      "emergency": "응급실",
+      "emergencyDay": "주간 운영",
+      "emergencyNight": "야간 운영",
+      "opened": "개원일"
+    },
+    "location": {
+      "title": "위치",
+      "postNo": "우편번호 {postNo}",
+      "openMap": "지도에서 보기",
+      "newWindow": "새 창",
+      "noAddress": "주소 정보가 없어요."
+    },
+    "areaMap": {
+      "legend": "파란 점: 같은 항목 가격을 공개한 주변 병원",
+      "markerLabel": "{name} · 가장 낮은 가격 {amount, number}원",
+      "lowestPrice": "가장 낮은 가격 {amount, number}원",
+      "distance": "이 병원에서 직선 {distance}",
+      "priceAndDistance": "가장 낮은 가격 {amount, number}원 · 이 병원에서 직선 {distance}",
+      "open": "상세 보기"
+    },
+    "reviews": {
+      "title": "후기",
+      "loginNote": "후기 작성과 신고는 로그인 후 이용할 수 있어요.",
+      "anonymous": "익명",
+      "mine": "내 후기",
+      "rating": "별점 5점 중 {rating}점",
+      "visited": "방문 {date}",
+      "paid": "결제 {amount, number}원",
+      "hidden": "운영 정책에 따라 숨김 처리된 후기예요.",
+      "emptyTitle": "아직 후기가 없어요",
+      "emptyDescription": "이 병원을 이용한 분들의 후기가 여기에 모여요.",
+      "more": "후기 더 보기"
+    },
+    "metadata": {
+      "title": "{name} 비급여 진료비",
+      "titleWithLocation": "{name}({location}) 비급여 진료비",
+      "description": "{name}의 비급여 진료비 공개 가격과 진료 시간, 위치를 확인해요. 건강보험심사평가원 공개 자료 기준이에요.",
+      "descriptionWithLocation": "{location}에 있는 {name}의 비급여 진료비 공개 가격과 진료 시간, 위치를 확인해요. 건강보험심사평가원 공개 자료 기준이에요."
+    }
+  }
+}

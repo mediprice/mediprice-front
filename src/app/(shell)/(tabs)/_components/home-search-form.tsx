@@ -1,0 +1,103 @@
+import { ChevronDown, Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+
+import { Button } from '@/components/ui/button';
+import {
+  DEFAULT_REGION,
+  SERVICE_REGIONS,
+} from '@/features/regions/service-region';
+
+/** JS 없이 동작하는 GET 폼. /search가 type·q·region 파라미터를 읽는다. */
+export function HomeSearchForm() {
+  const t = useTranslations('home.search');
+  const tRegion = useTranslations('common.region');
+  return (
+    <form
+      action="/search"
+      role="search"
+      aria-label={t('label')}
+      className="flex w-full min-w-0 flex-col gap-4 md:max-w-3xl md:flex-row md:items-center md:gap-2 md:rounded-xl md:bg-bg md:p-2 md:shadow-card"
+    >
+      <div className="flex min-w-0 flex-col rounded-xl bg-bg shadow-card md:flex-1 md:flex-row md:items-center md:rounded-none md:shadow-none">
+        <fieldset className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-4 py-3 md:border-b-0 md:p-0">
+          <legend className="sr-only">{t('target')}</legend>
+          <span
+            aria-hidden="true"
+            className="text-caption-strong text-text-tertiary md:hidden"
+          >
+            {t('target')}
+          </span>
+          <div className="flex max-w-full min-w-0 rounded-md bg-surface-strong p-1">
+            {(['item', 'hospital'] as const).map((type) => (
+              <label
+                key={type}
+                className="touch-target min-w-0 flex-1 cursor-pointer"
+              >
+                <input
+                  type="radio"
+                  name="type"
+                  value={type}
+                  defaultChecked={type === 'item'}
+                  className="peer sr-only"
+                />
+                <span className="flex min-h-10 items-center justify-center rounded-md px-3 text-label text-text-secondary peer-checked:bg-primary peer-checked:text-label-bold peer-checked:text-on-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus-ring md:px-4">
+                  {type === 'item' ? t('targetItem') : t('targetHospital')}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <label className="flex flex-col gap-1 border-b border-hairline px-4 py-3 md:flex-1 md:border-b-0 md:py-0">
+          <span className="text-caption-strong text-text-tertiary md:sr-only">
+            {t('keyword')}
+          </span>
+          <span className="flex items-center gap-2.5">
+            <Search
+              aria-hidden="true"
+              className="size-5 shrink-0 text-text-tertiary"
+              strokeWidth={1.75}
+            />
+            <input
+              name="q"
+              type="search"
+              required
+              enterKeyHint="search"
+              autoComplete="off"
+              placeholder={t('keywordPlaceholder')}
+              className="min-h-11 w-full min-w-0 rounded-md bg-transparent text-field text-text-primary -outline-offset-2 placeholder:text-text-tertiary"
+            />
+          </span>
+        </label>
+
+        <label className="flex flex-col gap-1 px-4 py-3 md:w-44 md:border-l md:border-hairline md:py-0">
+          <span className="text-caption-strong text-text-tertiary md:sr-only">
+            {t('region')}
+          </span>
+          <span className="relative flex items-center">
+            <select
+              name="region"
+              defaultValue={DEFAULT_REGION}
+              className="min-h-11 w-full appearance-none rounded-md bg-transparent pr-8 text-field text-text-primary -outline-offset-2"
+            >
+              {SERVICE_REGIONS.map((value) => (
+                <option key={value} value={value}>
+                  {tRegion(value)}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              aria-hidden="true"
+              className="pointer-events-none absolute right-0 size-5 text-text-tertiary"
+              strokeWidth={1.75}
+            />
+          </span>
+        </label>
+      </div>
+
+      <Button type="submit" elevated className="w-full md:w-auto md:px-8">
+        {t('submit')}
+      </Button>
+    </form>
+  );
+}

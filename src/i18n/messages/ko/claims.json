@@ -1,0 +1,130 @@
+{
+  "entry": {
+    "short": "권리침해 신고",
+    "long": "권리침해 신고하기",
+    "labelFor": "{name} 후기 권리침해 신고"
+  },
+  "page": {
+    "metaTitle": "후기 권리침해 신고",
+    "title": "후기 권리침해 신고",
+    "intro": "후기 때문에 명예훼손이나 사생활 침해 같은 권리 침해를 당했다면 로그인하지 않아도 신고할 수 있어요. 접수하면 후기를 바로 임시로 가리고 운영자가 검토해요.",
+    "memberReport": "광고나 욕설처럼 운영정책에 어긋나는 후기라면 후기 메뉴의 ‘신고’를 이용해 주세요.",
+    "policyLink": "후기 운영정책 보기",
+    "newTab": "새 탭에서 열려요",
+    "target": "신고할 후기",
+    "targetNumber": "후기 #{id, number}",
+    "targetHint": "후기 내용은 병원 화면의 후기 목록에서 확인할 수 있어요.",
+    "anonymous": "익명",
+    "rating": "별점 5점 중 {rating}점",
+    "openHospital": "병원 화면에서 보기"
+  },
+  "status": {
+    "checking": "신고 접수 상태를 확인하고 있어요",
+    "loadError": "신고 접수 상태를 확인하지 못했어요",
+    "closedTitle": "지금은 온라인 접수를 받을 수 없어요",
+    "closedDescription": "온라인 권리침해 신고 접수가 잠시 멈춰 있어요. 아래 양식은 입력할 수 없어요.",
+    "policyLink": "후기 운영정책에서 신고 방법 보기"
+  },
+  "form": {
+    "reason": "어떤 권리가 침해됐나요?",
+    "reasons": {
+      "DEFAMATION": "명예훼손",
+      "PRIVACY": "사생활 침해·개인정보 노출",
+      "FALSE_FACT": "사실이 아닌 내용",
+      "COPYRIGHT": "저작권 침해",
+      "OTHER": "그 밖의 권리 침해"
+    },
+    "description": "침해 내용",
+    "descriptionHint": "후기의 어느 부분이 어떤 권리를 어떻게 침해하는지 적어 주세요. 근거가 있으면 함께 적어 주세요.",
+    "count": "{count, number} / {max, number}",
+    "role": "신청하는 분",
+    "roles": {
+      "SELF": "본인",
+      "HOSPITAL": "병원 관계자",
+      "AGENT": "대리인"
+    },
+    "roleDescriptions": {
+      "SELF": "후기 때문에 권리를 침해당한 사람",
+      "HOSPITAL": "후기에 나온 병원의 대표자나 직원",
+      "AGENT": "본인이나 병원의 위임을 받아 대신 신청하는 사람"
+    },
+    "applicant": "신청인 정보",
+    "name": "이름",
+    "nameHint": "병원이면 병원 이름과 담당자 이름을 함께 적어 주세요.",
+    "email": "이메일",
+    "emailHint": "처리 결과를 이 이메일로 알려 드려요.",
+    "afterTitle": "접수하면 이렇게 처리돼요",
+    "after": {
+      "hidden": "후기를 바로 가려요. 접수한 날부터 30일까지 임시조치로 가려 두고, 그동안 운영자가 검토해요.",
+      "author": "작성자에게는 후기가 가려진 사실과 신고 사유만 보이고, 신청하는 분의 이름과 이메일은 보이지 않아요.",
+      "decision": "작성자는 재게시를 요청할 수 있어요. 운영자는 양쪽 내용을 보고 다시 공개, 계속 숨김, 삭제 중 하나로 정해요."
+    },
+    "submit": "권리침해 신고 접수",
+    "reviewGone": "후기를 찾을 수 없어요. 이미 삭제됐거나 숨김 처리된 후기예요."
+  },
+  "notice": {
+    "title": "개인정보 수집·이용 안내",
+    "description": "권리침해 신고를 처리하려고 아래와 같이 개인정보를 모아요.",
+    "purposeLabel": "목적",
+    "purpose": "권리침해 신고 처리와 처리 결과 안내",
+    "itemsLabel": "항목",
+    "items": "이름, 이메일 주소. 로그인한 상태로 신고하면 회원 번호도 함께 기록해요.",
+    "periodLabel": "보유 기간",
+    "period": "{days, plural, =0 {처리를 마치면 바로 지워요.} other {처리를 마친 날부터 #일 동안 보관한 뒤 지워요.}}",
+    "periodPending": "권리침해 신고 보관 기간",
+    "refuseLabel": "동의하지 않을 권리",
+    "refuse": "동의하지 않을 수 있어요. 다만 동의하지 않으면 온라인으로 신고를 접수할 수 없어요.",
+    "privacyLink": "개인정보 처리방침 보기",
+    "agree": "개인정보 수집·이용에 동의해요 (필수)"
+  },
+  "done": {
+    "title": "권리침해 신고를 접수했어요",
+    "number": "접수 번호 #{id, number}",
+    "numberHint": "문의할 때 접수 번호를 알려 주세요.",
+    "hidden": "후기를 바로 가렸어요. {date}까지 임시조치로 가려 두고 운영자가 검토해요.",
+    "reviewing": "검토가 끝나기 전에는 이 기한이 지나도 다시 공개하지 않아요.",
+    "email": "처리 결과는 입력한 이메일({email})로 알려 드려요.",
+    "back": "병원으로 돌아가기"
+  },
+  "errors": {
+    "reasonRequired": "침해된 권리를 골라 주세요.",
+    "descriptionRequired": "침해 내용을 적어 주세요.",
+    "descriptionTooLong": "2,000자 이내로 줄여 주세요.",
+    "roleRequired": "신청하는 분을 골라 주세요.",
+    "nameRequired": "이름을 적어 주세요.",
+    "nameTooLong": "50자 이내로 적어 주세요.",
+    "emailRequired": "이메일을 적어 주세요.",
+    "emailTooLong": "254자 이내로 적어 주세요.",
+    "emailInvalid": "이메일 주소 형식을 확인해 주세요.",
+    "agreementRequired": "개인정보 수집·이용에 동의해야 접수할 수 있어요.",
+    "contentRequired": "다시 공개해야 하는 이유를 적어 주세요.",
+    "contentTooLong": "2,000자 이내로 줄여 주세요.",
+    "invalid": "입력한 내용을 다시 확인해 주세요."
+  },
+  "measure": {
+    "chip": "임시조치",
+    "deletedChip": "삭제 처리",
+    "hiddenUntil": "권리침해 신고로 임시로 가렸어요 · {date}까지",
+    "reviewing": "권리침해 신고로 임시로 가렸어요 · 검토 중",
+    "reasons": "신고 사유: {reasons}",
+    "note": "운영자가 검토해 다시 공개할지 정해요. 그동안 이 후기는 병원 화면에 보이지 않고, 고치거나 지울 수 없어요.",
+    "objectionSent": "재게시 요청을 보냈어요. 운영자가 검토할 때 함께 봐요.",
+    "deletedNote": "권리침해 신고를 검토해 삭제 처리했어요. 병원 화면에 다시 공개되지 않고, 고치거나 지울 수 없어요."
+  },
+  "objection": {
+    "open": "재게시 요청",
+    "openFor": "{name} 후기 재게시 요청",
+    "title": "재게시를 요청할까요?",
+    "description": "이 후기를 다시 공개해야 하는 이유를 적어 주세요. 운영자가 신고 내용과 함께 검토해요. 요청은 한 번만 보낼 수 있어요.",
+    "content": "요청 내용",
+    "placeholder": "다시 공개해야 하는 이유를 적어 주세요.",
+    "count": "{count, number} / {max, number}",
+    "submit": "재게시 요청 보내기",
+    "doneTitle": "재게시 요청을 보냈어요",
+    "doneDescription": "운영자가 신고 내용과 함께 검토해 다시 공개할지 정해요.",
+    "alreadyTitle": "이미 재게시를 요청했어요",
+    "alreadyDescription": "운영자가 보낸 요청을 검토하고 있어요.",
+    "closedTitle": "처리 중인 신고가 없어요",
+    "closedDescription": "이미 처리가 끝났을 수 있어요. 내 후기 목록을 새로 불러왔어요."
+  }
+}

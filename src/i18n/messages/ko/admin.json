@@ -1,0 +1,306 @@
+{
+  "gate": {
+    "checking": "확인하고 있어요",
+    "errorTitle": "계정 정보를 확인하지 못했어요",
+    "errorDescription": "잠시 후 다시 시도해 주세요."
+  },
+  "access": {
+    "forbiddenTitle": "운영자 권한이 아직 적용되지 않았어요",
+    "forbiddenDescription": "권한이 바뀐 뒤에는 다시 로그인해야 적용돼요. 로그아웃한 뒤 다시 로그인해 주세요."
+  },
+  "nav": {
+    "label": "운영 메뉴",
+    "overview": "개요",
+    "reports": "후기 신고",
+    "claims": "권리침해 신고"
+  },
+  "header": {
+    "label": "운영"
+  },
+  "overview": {
+    "heading": "운영 현황",
+    "description": "처리할 신고와 데이터 동기화 상태를 한눈에 봐요.",
+    "queues": "처리할 일",
+    "reportsTitle": "후기 신고",
+    "pendingCount": "대기 {count, plural, other {#건}}",
+    "pendingNone": "대기 중인 신고가 없어요",
+    "openReports": "신고 처리하기",
+    "countError": "신고 수를 불러오지 못했어요",
+    "claimsTitle": "권리침해 신고",
+    "claimsPending": "대기 {count, plural, other {#건}}",
+    "claimsOverdue": "기한 지남 {count, plural, other {#건}}",
+    "claimsNone": "대기 중인 신고가 없어요",
+    "claimsUnsupported": "아직 서버에서 지원하지 않아요",
+    "openClaims": "권리침해 신고 처리하기"
+  },
+  "batch": {
+    "title": "데이터 동기화",
+    "description": "작업마다 가장 최근 실행 결과예요. 시각은 배치 서버에 기록된 그대로예요.",
+    "refresh": "새로 고침",
+    "loadError": "동기화 상태를 불러오지 못했어요",
+    "unavailableTitle": "동기화 기록이 없어요",
+    "unavailableDescription": "이 데이터베이스에서 배치를 한 번도 실행하지 않았어요.",
+    "emptyTitle": "실행한 작업이 없어요",
+    "execution": "실행 #{id, number}",
+    "started": "시작",
+    "ended": "종료",
+    "notEnded": "아직 끝나지 않았어요",
+    "duration": "걸린 시간",
+    "durationMinutes": "{minutes, number}분 {seconds, number}초",
+    "durationSeconds": "{seconds, number}초",
+    "steps": "단계",
+    "stepCounts": "읽음 {read, number} · 저장 {write, number} · 건너뜀 {skip, number}",
+    "exitCode": "종료 코드",
+    "exitMessage": "종료 메시지 원문",
+    "status": {
+      "COMPLETED": "완료",
+      "STARTING": "시작 중",
+      "STARTED": "실행 중",
+      "STOPPING": "멈추는 중",
+      "STOPPED": "멈춤",
+      "FAILED": "실패",
+      "ABANDONED": "중단",
+      "UNKNOWN": "알 수 없음",
+      "none": "상태 없음"
+    }
+  },
+  "queue": {
+    "count": "{count, plural, other {#건}}",
+    "pagination": "페이지 이동",
+    "pageStatus": "{page, number} / {total, number} 페이지",
+    "prev": "이전",
+    "next": "다음",
+    "firstPage": "첫 페이지로",
+    "pageOutOfRangeTitle": "이 페이지에는 항목이 없어요",
+    "pageOutOfRangeDescription": "처리된 항목이 빠지면서 페이지 수가 줄었어요."
+  },
+  "reports": {
+    "heading": "후기 신고 처리",
+    "description": "먼저 들어온 신고부터 보여요. 후기를 숨기면 같은 후기에 들어온 다른 대기 중 신고도 함께 처리돼요.",
+    "filterLabel": "처리 상태",
+    "filter": {
+      "pending": "대기 중",
+      "resolved": "처리됨",
+      "all": "전체"
+    },
+    "listLabel": "신고 목록",
+    "loadError": "신고 목록을 불러오지 못했어요",
+    "empty": {
+      "pending": "대기 중인 신고가 없어요",
+      "resolved": "처리한 신고가 없어요",
+      "all": "들어온 신고가 없어요"
+    },
+    "reason": {
+      "PRIVACY": "개인정보 노출",
+      "SPAM": "광고·도배",
+      "ABUSE": "욕설·비방",
+      "FALSE_INFO": "허위 정보",
+      "ETC": "기타",
+      "unknown": "분류 없음"
+    },
+    "outcome": {
+      "pending": "대기",
+      "hidden": "후기 숨김",
+      "dismissed": "기각",
+      "resolved": "처리됨"
+    },
+    "reviewStatus": {
+      "ACTIVE": "공개 중",
+      "HIDDEN": "숨김",
+      "TEMPORARILY_HIDDEN": "임시조치 중",
+      "DELETED": "삭제 처리",
+      "unknown": "상태 없음"
+    },
+    "number": "신고 #{id, number}",
+    "reportedAt": "{date}에 신고",
+    "reviewDeleted": "후기가 삭제됐어요",
+    "rating": "5점 중 {rating}점",
+    "review": "신고된 후기",
+    "noDetail": "신고자가 설명을 남기지 않았어요",
+    "open": "검토",
+    "openFor": "신고 #{id, number} 검토",
+    "detail": {
+      "title": "신고 #{id, number}",
+      "report": "신고",
+      "reason": "사유",
+      "detail": "설명",
+      "reportedAt": "신고 시각",
+      "reporter": "신고자",
+      "memberId": "회원 #{id, number}",
+      "status": "처리 상태",
+      "resolvedAt": "처리 시각",
+      "resolvedBy": "처리자",
+      "review": "신고된 후기",
+      "reviewId": "후기 번호",
+      "reviewNumber": "#{id, number}",
+      "author": "작성자",
+      "authorWithdrawn": "탈퇴한 회원",
+      "writtenAt": "작성 시각",
+      "reviewStatus": "후기 상태",
+      "hospital": "병원 화면 열기",
+      "hospitalHint": "새 탭에서 열려요",
+      "actions": "처리"
+    },
+    "resolve": {
+      "hide": "후기 숨기기",
+      "dismiss": "신고 기각",
+      "hideTitle": "이 후기를 숨길까요?",
+      "hideDescription": "후기가 병원 화면에서 사라지고, 같은 후기에 들어온 다른 대기 중 신고도 함께 처리돼요.",
+      "hideConfirm": "숨기기",
+      "dismissTitle": "이 신고를 기각할까요?",
+      "dismissDescription": "후기는 그대로 공개되고 이 신고만 처리돼요.",
+      "dismissConfirm": "기각",
+      "cancel": "취소",
+      "done": {
+        "HIDE_REVIEW": "신고 #{id, number}의 후기를 숨겼어요.",
+        "DISMISS": "신고 #{id, number}를 기각했어요."
+      }
+    }
+  },
+  "claims": {
+    "heading": "권리침해 신고 처리",
+    "description": "먼저 들어온 신고부터 보여요. 신고가 들어온 후기는 바로 임시로 가려져 있고, 처리하면 같은 후기에 들어온 다른 대기 중 신고도 같은 결과로 처리돼요.",
+    "filterLabel": "처리 상태",
+    "filter": {
+      "pending": "대기 중",
+      "expired": "기한 지남",
+      "resolved": "처리됨"
+    },
+    "overdueNotice": "임시조치 기한이 지난 신고가 {count, plural, other {#건}} 있어요. 처리할 때까지 후기는 계속 가려져 있어요.",
+    "overdueShow": "기한 지난 신고 보기",
+    "listLabel": "권리침해 신고 목록",
+    "loadError": "권리침해 신고 목록을 불러오지 못했어요",
+    "unsupportedTitle": "권리침해 신고 기능이 아직 서버에 없어요",
+    "unsupportedDescription": "백엔드에 권리침해 신고 API가 배포되면 여기에 목록이 보여요.",
+    "empty": {
+      "pending": "대기 중인 권리침해 신고가 없어요",
+      "expired": "기한이 지난 신고가 없어요",
+      "resolved": "처리한 권리침해 신고가 없어요"
+    },
+    "reason": {
+      "DEFAMATION": "명예훼손",
+      "PRIVACY": "사생활 침해·개인정보 노출",
+      "FALSE_FACT": "사실이 아닌 내용",
+      "COPYRIGHT": "저작권 침해",
+      "OTHER": "그 밖의 권리 침해",
+      "unknown": "분류 없음"
+    },
+    "role": {
+      "SELF": "본인",
+      "HOSPITAL": "병원 관계자",
+      "AGENT": "대리인",
+      "unknown": "구분 없음"
+    },
+    "outcome": {
+      "pending": "대기",
+      "overdue": "기한 지남",
+      "restored": "다시 공개",
+      "keptHidden": "계속 숨김",
+      "deleted": "삭제 처리"
+    },
+    "reviewStatus": {
+      "ACTIVE": "공개 중",
+      "HIDDEN": "숨김",
+      "TEMPORARILY_HIDDEN": "임시조치 중",
+      "DELETED": "삭제 처리",
+      "unknown": "상태 없음"
+    },
+    "number": "권리침해 #{id, number}",
+    "receivedAt": "{date}에 접수",
+    "deadline": "{date}까지 임시조치",
+    "deadlinePassed": "임시조치 기한 {date} 지남",
+    "hasObjection": "재게시 요청 있음",
+    "review": "신고된 후기",
+    "reviewDeleted": "후기가 삭제됐어요",
+    "rating": "5점 중 {rating}점",
+    "open": "검토",
+    "openFor": "권리침해 신고 #{id, number} 검토",
+    "detail": {
+      "title": "권리침해 신고 #{id, number}",
+      "claim": "신고 내용",
+      "reason": "사유",
+      "description": "침해 내용",
+      "receivedAt": "접수 시각",
+      "deadline": "임시조치 기한",
+      "status": "처리 상태",
+      "claimant": "신청인",
+      "claimantHint": "개인정보예요. 결과를 알리는 데만 쓰고 다른 곳에 옮기지 마세요.",
+      "name": "이름",
+      "email": "이메일",
+      "role": "구분",
+      "member": "회원",
+      "memberId": "회원 #{id, number}",
+      "guest": "로그인하지 않고 신고",
+      "noticeVersion": "동의한 안내문 버전",
+      "review": "신고된 후기",
+      "reviewId": "후기 번호",
+      "reviewNumber": "#{id, number}",
+      "author": "작성자",
+      "authorWithdrawn": "탈퇴한 회원",
+      "writtenAt": "작성 시각",
+      "reviewStatus": "후기 상태",
+      "hospital": "병원 화면 열기",
+      "hospitalHint": "새 탭에서 열려요",
+      "objection": "재게시 요청",
+      "objectionNone": "작성자가 재게시를 요청하지 않았어요",
+      "objectedAt": "요청 시각",
+      "resolution": "처리 결과",
+      "action": "결과",
+      "note": "사유",
+      "resolvedBy": "처리자",
+      "resolvedAt": "처리 시각",
+      "stale": "최신 내용을 불러오지 못해 목록에서 받은 내용을 보여 주고 있어요."
+    },
+    "resolve": {
+      "title": "처리",
+      "action": "처리 방법",
+      "actions": {
+        "RESTORE": "다시 공개",
+        "KEEP_HIDDEN": "계속 숨김",
+        "DELETE_REVIEW": "삭제 처리"
+      },
+      "actionDescriptions": {
+        "RESTORE": "후기를 병원 화면에 다시 보여요.",
+        "KEEP_HIDDEN": "후기를 숨긴 채로 둬요. 작성자의 내 후기에는 숨김으로 보여요.",
+        "DELETE_REVIEW": "후기를 삭제 처리해요. 다시 공개되지 않아요."
+      },
+      "note": "처리 사유",
+      "noteHint": "신청인과 작성자에게 결과를 알릴 때 쓸 수 있게 판단 근거를 적어 주세요.",
+      "noteCount": "{count, number} / {max, number}",
+      "notified": "결과를 알린 대상",
+      "notifiedHint": "메일 발송 기능이 없어 직접 알린 뒤 체크해요. 체크하면 지금 시각으로 기록되고 지울 수 없어요.",
+      "claimantNotified": "신청인에게 결과를 알렸어요",
+      "authorNotified": "작성자에게 결과를 알렸어요",
+      "submit": "처리하기",
+      "errors": {
+        "actionRequired": "처리 방법을 골라 주세요.",
+        "noteRequired": "처리 사유를 적어 주세요.",
+        "noteTooLong": "1,000자 이내로 줄여 주세요.",
+        "invalid": "입력한 내용을 다시 확인해 주세요."
+      },
+      "confirmTitle": {
+        "RESTORE": "후기를 다시 공개할까요?",
+        "KEEP_HIDDEN": "후기를 계속 숨길까요?",
+        "DELETE_REVIEW": "후기를 삭제 처리할까요?"
+      },
+      "confirmDescription": "같은 후기에 들어온 다른 대기 중 신고도 같은 결과로 처리돼요. 처리한 뒤에는 바꿀 수 없어요.",
+      "confirm": "처리",
+      "cancel": "취소",
+      "done": "권리침해 신고 #{id, number}를 처리했어요({action})."
+    },
+    "notify": {
+      "title": "결과 안내 기록",
+      "description": "메일 발송 기능이 없어 운영자가 직접 알린 뒤 기록해요. 기록한 시각은 바꾸거나 지울 수 없어요.",
+      "claimant": "신청인",
+      "author": "작성자",
+      "notifiedAt": "{date}에 알림",
+      "notYet": "아직 기록 없음",
+      "record": "알렸다고 기록",
+      "recordFor": "{target}에게 알렸다고 기록",
+      "confirmTitle": "{target}에게 알렸다고 기록할까요?",
+      "confirmDescription": "지금 시각으로 기록되고, 기록한 뒤에는 바꾸거나 지울 수 없어요.",
+      "confirm": "기록",
+      "cancel": "취소"
+    }
+  }
+}

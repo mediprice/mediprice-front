@@ -1,0 +1,121 @@
+{
+  "metadata": {
+    "title": "검색",
+    "titleWithQuery": "''{query}'' 검색 결과",
+    "category": "분류"
+  },
+  "topBar": {
+    "search": "검색",
+    "results": "검색 결과",
+    "category": "분류"
+  },
+  "form": {
+    "label": "진료비 검색",
+    "target": "검색 대상",
+    "targetItem": "항목",
+    "targetHospital": "병원",
+    "keyword": "검색어",
+    "keywordPlaceholder": "진료 항목이나 병원 이름",
+    "region": "지역",
+    "submit": "검색"
+  },
+  "header": {
+    "itemTitle": "''{query}'' 항목 결과",
+    "itemTitleWithCount": "''{query}'' 항목 결과 <em>{count, plural, other {#건}}</em>",
+    "hospitalTitle": "''{query}'' 병원 결과",
+    "hospitalTitleWithCount": "''{query}'' 병원 결과 <em>{count, plural, other {#곳}}</em>",
+    "itemDescription": "항목을 고르면 병원별 공개 가격을 비교할 수 있어요.",
+    "itemStatus": "항목 {count, plural, other {#건}}을 찾았어요.",
+    "hospitalStatus": "병원 {count, plural, other {#곳}}을 찾았어요."
+  },
+  "item": {
+    "viewPrices": "병원별 가격 보기",
+    "priceError": "가격을 불러오지 못했어요",
+    "unpricedTitle": "가격 정보 없는 항목 {count, plural, other {#개}}",
+    "unpricedHint": "<nb>{region}</nb>에 공개된 가격이 아직 없는 항목이에요."
+  },
+  "hospital": {
+    "notice": "병원 결과에는 가격이 없어요. 병원을 열고 항목을 고르면 가격을 볼 수 있어요.",
+    "viewDetail": "병원 상세 보기",
+    "duplicateNotice": "같은 이름의 병원이 있어요. 주소와 종별로 구분해 주세요."
+  },
+  "loadMore": {
+    "error": "결과를 더 불러오지 못했어요. 지금까지 본 결과는 그대로 두었어요."
+  },
+  "empty": {
+    "itemTitle": "''{query}''에 맞는 항목이 없어요",
+    "hospitalTitle": "''{query}''에 맞는 병원이 없어요",
+    "description": "검색어를 바꾸거나 다른 방법으로 찾아보세요.",
+    "categoryTitle": "이 분류에는 항목이 없어요",
+    "categoryDescription": "다른 분류를 골라 보세요."
+  },
+  "error": {
+    "title": "결과를 불러오지 못했어요",
+    "home": "홈으로"
+  },
+  "prompt": {
+    "title": "무엇을 찾고 계세요?",
+    "itemDescription": "진료 항목 이름을 입력하거나 분류에서 찾아보세요.",
+    "hospitalDescription": "찾는 병원 이름을 입력해 주세요."
+  },
+  "suggestions": {
+    "title": "원하는 항목이 없나요?",
+    "hospitalTitle": "원하는 병원이 없나요?",
+    "category": {
+      "title": "분류에서 찾기",
+      "description": "공식 분류를 하나씩 좁혀 보세요"
+    },
+    "allCategories": {
+      "title": "전체 분류 보기",
+      "description": "다른 분류부터 다시 고를 수 있어요"
+    },
+    "hospital": {
+      "title": "병원 이름으로 검색",
+      "description": "가고 싶은 병원이 정해져 있다면"
+    },
+    "item": {
+      "title": "항목 이름으로 검색",
+      "description": "찾는 진료 항목이 정해져 있다면"
+    },
+    "ai": {
+      "title": "AI로 찾아보기",
+      "description": "상황을 설명하면 관련 비급여 항목을 찾아 드려요"
+    },
+    "notice": "공개 가격은 병원이 신고한 기준 가격이라 실제 진료비와 다를 수 있어요."
+  },
+  "category": {
+    "root": "전체 분류",
+    "rootDescription": "자주 찾는 분야부터 골라 보세요. 그 밖의 항목은 건강보험심사평가원의 공식 분류로 찾을 수 있어요.",
+    "description": "하위 분류를 골라 범위를 좁혀 보세요.",
+    "subCategories": "하위 분류",
+    "popular": "자주 찾는 분야",
+    "all": "전체",
+    "itemCount": "항목 {count, plural, other {#건}}",
+    "notFound": "분류를 찾을 수 없어요",
+    "notFoundDescription": "주소가 바뀌었거나 없어진 분류예요. 전체 분류에서 다시 골라 주세요.",
+    "home": {
+      "physio": "물리치료·재활",
+      "dental": "치과",
+      "eye": "안과·시력교정",
+      "vaccine": "예방접종",
+      "imaging": "MRI·초음파"
+    },
+    "official": "공식 분류 · {names}",
+    "others": "그 밖의 분류",
+    "othersCount": "{count, plural, other {#개}}",
+    "breadcrumb": "현재 분류 경로",
+    "itemsTitle": "이 분류의 항목"
+  },
+  "breadcrumb": {
+    "home": "홈",
+    "results": "검색 결과",
+    "search": "검색"
+  },
+  "zeroHints": {
+    "hospitals": "병원 이름으로 {count, number}곳 찾았어요",
+    "category": "{name} 분야 보기"
+  },
+  "relaxed": {
+    "notice": "''{query}''에 맞는 항목이 없어 ''{relaxed}''(으)로 찾은 결과예요."
+  }
+}
