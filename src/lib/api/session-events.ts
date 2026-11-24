@@ -11,3 +11,17 @@ export function subscribeSessionExpired(listener: () => void) {
 export function emitSessionExpired() {
   for (const listener of listeners) listener();
 }
+
+const consentListeners = new Set<() => void>();
+
+/** 필수 동의가 없어 쓰기 요청이 거부됐을 때(403 REQUIRED_CONSENTS_MISSING) 알림을 받는다. 동의 화면 이동은 구독한 쪽이 한다. */
+export function subscribeRequiredConsentsMissing(listener: () => void) {
+  consentListeners.add(listener);
+  return () => {
+    consentListeners.delete(listener);
+  };
+}
+
+export function emitRequiredConsentsMissing() {
+  for (const listener of consentListeners) listener();
+}

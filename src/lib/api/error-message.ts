@@ -33,6 +33,7 @@ const MESSAGE_KEY_BY_CODE = {
   MEDICAL_PROFILE_CONSENT_REQUIRED: 'medicalProfileConsentRequired',
   LOCATION_CONSENT_REQUIRED: 'locationConsentRequired',
   CONSENT_VERSION_OUTDATED: 'consentVersionOutdated',
+  REQUIRED_CONSENTS_MISSING: 'requiredConsentsMissing',
   CONSENT_WITHDRAWAL_NOT_ALLOWED: 'consentWithdrawalNotAllowed',
   HOSPITAL_NOT_FOUND: 'hospitalNotFound',
   NPAY_ITEM_NOT_FOUND: 'npayItemNotFound',

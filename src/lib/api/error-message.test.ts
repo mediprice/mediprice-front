@@ -20,6 +20,7 @@ describe('errorMessageKey', () => {
     ['RATE_LIMITED', 429, 'tooManyRequests'],
     ['CONSENT_VERSION_OUTDATED', 409, 'consentVersionOutdated'],
     ['CONSENT_WITHDRAWAL_NOT_ALLOWED', 400, 'consentWithdrawalNotAllowed'],
+    ['REQUIRED_CONSENTS_MISSING', 403, 'requiredConsentsMissing'],
     ['MEDICAL_PROFILE_CONSENT_REQUIRED', 409, 'medicalProfileConsentRequired'],
     ['LOCATION_CONSENT_REQUIRED', 403, 'locationConsentRequired'],
     ['CLAIM_UNAVAILABLE', 503, 'claimUnavailable'],
